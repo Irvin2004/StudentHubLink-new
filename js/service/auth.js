@@ -1,4 +1,4 @@
-import { app } from "./firebase_config.js";
+import { app } from "../services/firebase_config.js";
 
 import {
     getAuth,
