@@ -3,46 +3,169 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StudentHub</title>
-    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-    <link rel="stylesheet" href="css/style.css/styles.css">
+    <title>StudentHub | Learn Smarter</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="css/theme.css">
+    <link rel="stylesheet" href="css/landing.css">
 </head>
 <body>
-    
-    <nav class="navbar">
-    <div class="logo">
-        <h2>StudentHub</h2>
-    </div>
-<!--
-    <ul class="nav-links">
-        <li><a href="dashboard.html">Dashboard</a></li>
-        <li><a href="pages/resources.html">Resources</a></li>
-        <li><a href="pages/documents.html">Documents</a></li>
-        <li><a href="pages/upload.html">Upload</a></li>
-        <li><a href="pages/profile.html">Profile</a></li>
-    </ul>
-    -->
-</nav>
 
-    <header>
-        <h1>StudentHub</h1>
-        <nav>
+<header class="landing-header">
+    <nav class="landing-nav">
+        <a href="index.html" class="brand">StudentHub</a>
+
+        <div class="nav-links">
+            <a href="#features">Features</a>
+            <a href="#how">How it works</a>
             <a href="login.html">Login</a>
-            <a href="register.html">Register</a>
-        </nav>
-    </header>
+            <a href="register.html" class="btn btn-primary">Get Started</a>
+        </div>
+    </nav>
+</header>
+
+<main>
 
     <section class="hero">
-        <h2>One Platform For Student Success</h2>
-        <p>
-            Access study resources and get help with important
-            documents all in one place.
-        </p>
+        <div class="hero-text">
+            <span class="badge">Built for modern students</span>
 
-        <a href="register.html" class="btn">
-            Get Started
-        </a>
+            <h1>
+                Learn smarter. Share resources.
+                Simplify student life.
+            </h1>
+
+            <p>
+                StudentHub helps students access trusted study resources,
+                upload notes, earn from their knowledge, and get support
+                with important document processes.
+            </p>
+
+            <div class="hero-actions">
+                <a href="register.html" class="btn btn-primary">Create Free Account</a>
+                <a href="login.html" class="btn btn-secondary">Login</a>
+            </div>
+        </div>
+
+        <div class="hero-preview">
+            <div class="app-card">
+                <div class="app-sidebar">
+                    <h3>StudentHub</h3>
+                    <p class="active">Overview</p>
+                    <p>Resources</p>
+                    <p>Uploads</p>
+                    <p>Profile</p>
+                </div>
+
+                <div class="app-content">
+                    <h3>Welcome back 👋</h3>
+                    <p class="muted">Here’s your student progress.</p>
+
+                    <div class="mini-grid">
+                        <div>
+                            <span>Resources</span>
+                            <strong>128</strong>
+                        </div>
+
+                        <div>
+                            <span>Earnings</span>
+                            <strong>R850</strong>
+                        </div>
+
+                        <div>
+                            <span>Downloads</span>
+                            <strong>42</strong>
+                        </div>
+                    </div>
+
+                    <div class="chart-box">
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </section>
+
+    <section class="features" id="features">
+        <div class="section-heading">
+            <span class="badge">Core Features</span>
+            <h2>Everything students need in one platform</h2>
+        </div>
+
+        <div class="feature-grid">
+            <div class="card">
+                <h3>Study Resources</h3>
+                <p>Access approved notes, PDFs, images, guides, and ZIP resource packs.</p>
+            </div>
+
+            <div class="card">
+                <h3>Upload & Earn</h3>
+                <p>Students can upload quality resources and earn through paid downloads.</p>
+            </div>
+
+            <div class="card">
+                <h3>Document Assistant</h3>
+                <p>Get guidance for important documents and student-related processes.</p>
+            </div>
+
+            <div class="card">
+                <h3>Admin Approval</h3>
+                <p>Uploaded resources are reviewed before being published.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="how" id="how">
+        <div class="section-heading">
+            <span class="badge">How It Works</span>
+            <h2>Simple, fast, and student-friendly</h2>
+        </div>
+
+        <div class="steps">
+            <div class="step">
+                <span>1</span>
+                <h3>Create account</h3>
+                <p>Sign up and access your personal dashboard.</p>
+            </div>
+
+            <div class="step">
+                <span>2</span>
+                <h3>Find resources</h3>
+                <p>Browse notes, guides, images, PDFs, and ZIP packs.</p>
+            </div>
+
+            <div class="step">
+                <span>3</span>
+                <h3>Upload notes</h3>
+                <p>Share your own study materials with other students.</p>
+            </div>
+
+            <div class="step">
+                <span>4</span>
+                <h3>Earn & learn</h3>
+                <p>Earn from paid resources while helping others succeed.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="cta">
+        <h2>Ready to join StudentHub?</h2>
+        <p>Start building a smarter student community today.</p>
+        <a href="register.html" class="btn btn-primary">Get Started</a>
+    </section>
+
+</main>
+
+<footer>
+    <p>© 2026 StudentHub. Built to empower students.</p>
+</footer>
 
 </body>
 </html>
