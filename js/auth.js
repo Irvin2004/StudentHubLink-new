@@ -156,9 +156,8 @@ function setButtonLoading(button, isLoading, loadingText) {
     button.textContent =
     isLoading ? loadingText : button.dataset.defaultText;
 }
-
 function redirectToDashboard() {
-    window.location.assign(`${pagePrefix}dashboard.html`);
+    window.location.href = "dashboard.html";
 }
 
 async function loadUserStats(user, userData) {
@@ -297,6 +296,14 @@ registerForm.addEventListener("submit", async (event) => {
                 updatedAt: serverTimestamp(),
                 lastLoginAt: serverTimestamp()
             });
+            setMessage(
+            "registerMessage",
+            "Account created successfully. Opening dashboard...",
+            "success"
+            );
+
+            window.location.href = "dashboard.html";
+                     
         } catch (error) {
             console.warn("Account was created, but the profile could not be saved:", error);
         }
@@ -344,11 +351,11 @@ loginForm.addEventListener("submit", async (event) => {
             password
         );
 
-        await updateLastLogin(userCredential.user);
-
         setMessage("loginMessage", "Login successful. Opening dashboard...", "success");
 
-        redirectToDashboard();
+        window.location.href = "dashboard.html";
+
+        updateLastLogin(userCredential.user);
 
     } catch(error) {
 
