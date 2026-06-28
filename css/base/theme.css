@@ -1,0 +1,43 @@
+:root {
+    --navy: #0F172A;
+    --blue: #3B82F6;
+    --blue-dark: #2563EB;
+    --white: #FFFFFF;
+    --bg: #F8FAFC;
+    --surface: #FFFFFF;
+    --text-main: #0F172A;
+    --text-muted: #64748B;
+    --border: #E2E8F0;
+    --success: #22C55E;
+    --warning: #F59E0B;
+    --danger: #EF4444;
+    --shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+}
+
+body {
+    font-family: "Inter", Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text-main);
+}
+
+a {
+    text-decoration: none;
+}
+
+input,
+select,
+textarea {
+    width: 100%;
+    padding: 13px 15px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    outline: none;
+    font-size: 15px;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    border-color: var(--blue);
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+}
