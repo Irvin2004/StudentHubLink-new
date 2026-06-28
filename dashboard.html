@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudentHub Dashboard</title>
+     <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+     <link rel="stylesheet" href="css/style.css/styles_dashboard.css">
+</head>
+<body>
+
+    <div class="navbar">
+        <h2>StudentHub</h2>
+        <a href="login.html" id="logoutBtn">Logout</a>
+    </div>
+
+    <div class="container">
+
+        <div class="welcome">
+            <h1>Welcome, <span id="userName">Student</span></h1>
+            <p id="userEmail"></p>
+            <p>Access resources, manage documents, and grow your academic success.</p>
+        </div>
+
+        <div class="card-container">
+
+            <div class="card">
+                <h3>Study Resources</h3>
+                <p>
+                    Browse, upload, and download study notes,
+                    past papers, and guides.
+                </p>
+                <a href="pages/resources.html" class="btn">
+                    Open Resources
+                </a>
+            </div>
+
+            <div class="card">
+                <h3>Document Assistant</h3>
+                <p>
+                    Get help with IDs, passports,
+                    applications, and important documents.
+                </p>
+                <a href="pages/documents.html" class="btn">
+                    Open Assistant
+                </a>
+            </div>
+
+            <div class="card">
+                <h3>My Profile</h3>
+                <p>
+                    View your uploads, downloads,
+                    earnings, and account details.
+                </p>
+                <a href="pages/profile.html" class="btn">
+                    View Profile
+                </a>
+            </div>
+
+        </div>
+
+        <div class="stats">
+
+            <div class="stat-box">
+                <h2 id="dashboardDownloads">0</h2>
+                <p>Downloads</p>
+            </div>
+
+            <div class="stat-box">
+                <h2 id="dashboardUploads">0</h2>
+                <p>Uploaded Notes</p>
+            </div>
+
+            <div class="stat-box">
+                <h2 id="dashboardEarnings">R0</h2>
+                <p>Earnings</p>
+            </div>
+
+        </div>
+
+    </div>
+
+<script type="module" src="js/auth.js"></script>
+</body>
+</html>

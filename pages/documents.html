@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StudentHub - Document Assistant</title>
+ <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+ <link rel="stylesheet" href="../css/style.css/styles_documents.css">
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="logo">
+        <h2>StudentHub</h2>
+    </div>
+
+    <ul class="nav-links">
+        <li><a href="../dashboard.html">Dashboard</a></li>
+        <li><a href="resources.html">Resources</a></li>
+        <li><a href="documents.html">Documents</a></li>
+        <li><a href="upload.html">Upload</a></li>
+        <li><a href="profile.html">Profile</a></li>
+    </ul>
+</nav>
+
+<div class="container">
+
+    <div class="header">
+        <h1>Document Assistant</h1>
+        <p>
+            Get help with important document-related processes.
+        </p>
+    </div>
+
+    <div class="services">
+
+        <div class="card">
+            <h3>Lost ID</h3>
+            <p>
+                Step-by-step guidance on replacing a lost identity document.
+            </p>
+            <button class="btn" type="button">Learn More</button>
+        </div>
+
+        <div class="card">
+            <h3>New ID Application</h3>
+            <p>
+                Learn the requirements and process for obtaining an ID.
+            </p>
+            <button class="btn" type="button">View Guide</button>
+        </div>
+
+        <div class="card">
+            <h3>Passport Application</h3>
+            <p>
+                Find out what documents are needed and how to apply.
+            </p>
+            <button class="btn" type="button">View Guide</button>
+        </div>
+
+        <div class="card">
+            <h3>Other Documents</h3>
+            <p>
+                Birth certificates, permits, and additional services.
+            </p>
+            <button class="btn" type="button">Explore</button>
+        </div>
+
+    </div>
+
+    <div class="upload-section">
+
+        <h2>Upload Supporting Documents</h2>
+
+        <p>
+            Upload documents that may be required for assistance.
+        </p>
+
+        <input type="file">
+
+        <br>
+
+        <button class="upload-btn">
+            Upload Document
+        </button>
+
+    </div>
+
+    <div class="chat-section">
+
+        <h2>StudentHub Assistant</h2>
+
+        <div class="chat-box">
+
+            <div class="bot-message">
+                Hello. How can I help you today?
+            </div>
+
+        </div>
+
+        <div class="chat-input">
+            <input
+                type="text"
+                placeholder="Ask a question about IDs, passports, applications..."
+            >
+
+            <button class="send-btn">
+                Send
+            </button>
+        </div>
+
+    </div>
+
+</div>
+
+<script type="module" src="../js/auth.js"></script>
+</body>
+</html>

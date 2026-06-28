@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StudentHub Resources</title>
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../css/style.css/styles_register.css">
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="logo">
+        <h2>StudentHub</h2>
+    </div>
+
+    <ul class="nav-links">
+        <li><a href="../dashboard.html">Dashboard</a></li>
+        <li><a href="resources.html">Resources</a></li>
+        <li><a href="documents.html">Documents</a></li>
+        <li><a href="upload.html">Upload</a></li>
+        <li><a href="profile.html">Profile</a></li>
+    </ul>
+</nav>
+
+<div class="container">
+
+    <div class="page-title">
+        <h1>Study Resources</h1>
+        <p>Browse and share quality study materials.</p>
+    </div>
+
+    <div class="search-box">
+        <input id="resourceSearch" type="text" placeholder="Search for notes, past papers, guides...">
+    </div>
+
+    <div class="categories">
+        <div class="category active">All</div>
+        <div class="category">Mathematics</div>
+        <div class="category">Engineering</div>
+        <div class="category">Programming</div>
+        <div class="category">Business Studies</div>
+        <div class="category">Life Skills</div>
+    </div>
+
+    <div class="upload-section">
+        <a class="upload-btn" href="upload.html">Upload Notes</a>
+    </div>
+
+    <div class="resources-grid" id="resourcesGrid"></div>
+
+</div>
+
+<script type="module" src="../js/auth.js"></script>
+<script type="module" src="../js/resources.js"></script>
+</body>
+</html>

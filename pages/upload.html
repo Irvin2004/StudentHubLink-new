@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Upload Notes</title>
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/style.css/styles_upload.css">
+</head>
+<body>
+
+    <nav class="navbar">
+    <div class="logo">
+        <h2>StudentHub</h2>
+    </div>
+
+    <ul class="nav-links">
+        <li><a href="../dashboard.html">Dashboard</a></li>
+        <li><a href="resources.html">Resources</a></li>
+        <li><a href="documents.html">Documents</a></li>
+        <li><a href="upload.html">Upload</a></li>
+        <li><a href="profile.html">Profile</a></li>
+    </ul>
+</nav>
+
+<div class="container">
+
+<h1>Upload Study Notes</h1>
+
+<form id="resourceUploadForm">
+<label>Title</label>
+<input id="resourceTitle" type="text" placeholder="Engineering Graphics Notes" required>
+
+<label>Description</label>
+<textarea id="resourceDescription" rows="5" required></textarea>
+
+<label>Category</label>
+
+<select id="resourceCategory" required>
+<option>Mathematics</option>
+<option>Engineering</option>
+<option>Programming</option>
+<option>Business Studies</option>
+<option>Life Skills</option>
+</select>
+
+<label>Price</label>
+<input id="resourcePrice" type="number" min="0" step="1" placeholder="0 for free">
+
+<label>Upload</label>
+<input
+    type="file"
+    id="resourceFile"
+    accept=".pdf,.jpg,.jpeg,.png,.zip"
+/>
+
+<button id="uploadResourceBtn" type="submit">Upload Notes</button>
+<p id="uploadMessage" class="form-message"></p>
+</form>
+
+</div>
+
+<script type="module" src="../js/auth.js"></script>
+<script type="module" src="../js/resources.js"></script>
+</body>
+</html>

@@ -1,0 +1,41 @@
+
+body{
+font-family:Arial,sans-serif;
+background:#f4f6f9;
+}
+
+.navbar{
+background:#003366;
+color:white;
+padding:15px 30px;
+}
+
+.container{
+padding:30px;
+}
+
+.profile-card{
+background:white;
+padding:25px;
+border-radius:10px;
+box-shadow:0 2px 8px rgba(0,0,0,0.1);
+margin-bottom:20px;
+}
+
+.stats{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+gap:20px;
+}
+
+.stat{
+background:white;
+padding:20px;
+border-radius:10px;
+text-align:center;
+box-shadow:0 2px 8px rgba(0,0,0,0.1);
+}
+
+h1,h2{
+color:#003366;
+}

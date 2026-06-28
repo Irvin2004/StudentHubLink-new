@@ -1,0 +1,48 @@
+
+body{
+font-family:Arial,sans-serif;
+background:#f4f6f9;
+}
+
+.container{
+max-width:700px;
+margin:50px auto;
+background:white;
+padding:30px;
+border-radius:10px;
+box-shadow:0 2px 10px rgba(0,0,0,0.1);
+}
+
+h1{
+color:#003366;
+margin-bottom:20px;
+}
+
+input, textarea, select{
+width:100%;
+padding:12px;
+margin-top:10px;
+margin-bottom:15px;
+border:1px solid #ccc;
+border-radius:5px;
+}
+
+button{
+background:#28a745;
+color:white;
+border:none;
+padding:12px 20px;
+border-radius:5px;
+cursor:pointer;
+}
+
+button:disabled{
+background:#8fbf9a;
+cursor:not-allowed;
+}
+
+.form-message{
+margin-top:15px;
+color:#003366;
+font-weight:bold;
+}

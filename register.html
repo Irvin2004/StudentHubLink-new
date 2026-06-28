@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StudentHub - Register</title>
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="css/style.css/styles2.css">
+</head>
+<body>
+<!--
+<nav class="navbar">
+    <div class="logo">
+        <h2>StudentHub</h2>
+    </div>
+
+    <ul class="nav-links">
+        <li><a href="dashboard.html">Dashboard</a></li>
+        <li><a href="pages/resources.html">Resources</a></li>
+        <li><a href="pages/documents.html">Documents</a></li>
+        <li><a href="pages/upload.html">Upload</a></li>
+        <li><a href="pages/profile.html">Profile</a></li>
+    </ul>
+</nav>
+  -->
+<div class="login-container">
+    <h1>Create Account</h1>
+    <p>Register for StudentHub</p>
+
+    <form id="registerForm">
+        <div class="input-group">
+            <label>Full Name</label>
+            <input id="fullName" type="text" placeholder="Full Name" required>
+        </div>
+
+        <div class="input-group">
+            <label>Email</label>
+           <input id="email" type="email" placeholder="Email Address" required>
+        </div>
+
+        <div class="input-group">
+            <label>Password</label>
+            <input id="password" type="password" placeholder="Password" required>
+        </div>
+
+        <button type="submit" class="btn" id="registerBtn">
+            Create Account
+        </button>
+        <p id="registerMessage" class="form-message" aria-live="polite"></p>
+    </form>
+
+    <div class="register-link">
+        <p>
+            Already have an account?
+            <a href="login.html">Login</a>
+        </p>
+    </div>
+</div>
+<script type="module" src="js/auth.js"></script>
+</body>
+</html>

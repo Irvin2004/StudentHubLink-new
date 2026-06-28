@@ -1,0 +1,163 @@
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial,sans-serif;
+}
+
+body{
+    background:#f4f6f9;
+}
+
+.navbar{
+    background:#003366;
+    color:white;
+    padding:15px 30px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.navbar a{
+    color:white;
+    text-decoration:none;
+}
+
+.container{
+    padding:30px;
+}
+
+.page-title{
+    margin-bottom:20px;
+}
+
+.page-title h1{
+    color:#003366;
+}
+
+.search-box{
+    margin-bottom:25px;
+}
+
+.search-box input{
+    width:100%;
+    padding:12px;
+    border:1px solid #ccc;
+    border-radius:6px;
+    font-size:16px;
+}
+
+.categories{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-bottom:30px;
+}
+
+.category{
+    background:white;
+    padding:10px 15px;
+    border-radius:20px;
+    box-shadow:0 2px 5px rgba(0,0,0,0.1);
+    cursor:pointer;
+}
+
+.category.active{
+    background:#003366;
+    color:white;
+}
+
+.upload-section{
+    margin-bottom:30px;
+}
+
+.upload-btn{
+    background:#28a745;
+    color:white;
+    border:none;
+    padding:12px 20px;
+    border-radius:5px;
+    cursor:pointer;
+}
+
+.resources-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+    gap:20px;
+}
+
+.resource-card{
+    background:white;
+    border-radius:10px;
+    padding:20px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.1);
+}
+
+.resource-card h3{
+    color:#003366;
+    margin-bottom:10px;
+}
+
+.resource-card p{
+    color:#555;
+    margin-bottom:10px;
+}
+
+.price{
+    font-weight:bold;
+    color:#28a745;
+    margin-bottom:15px;
+}
+
+.actions{
+    display:flex;
+    gap:10px;
+}
+
+.download-btn{
+    background:#003366;
+    color:white;
+    text-decoration:none;
+    padding:10px 15px;
+    border-radius:5px;
+    border:none;
+    cursor:pointer;
+}
+
+.buy-btn{
+    background:#ff9800;
+    color:white;
+    text-decoration:none;
+    padding:10px 15px;
+    border-radius:5px;
+    border:none;
+    cursor:pointer;
+}
+
+.resource-detail{
+    background:white;
+    padding:25px;
+    border-radius:10px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.1);
+    max-width:760px;
+}
+
+.resource-detail h1{
+    color:#003366;
+    margin-bottom:12px;
+}
+
+.detail-list{
+    margin:20px 0;
+}
+
+.detail-list p{
+    margin-bottom:10px;
+    color:#333;
+}
+
+button:disabled{
+    opacity:0.65;
+    cursor:not-allowed;
+}
