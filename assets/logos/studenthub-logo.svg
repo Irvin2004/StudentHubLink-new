@@ -1,0 +1,6 @@
+<svg width="180" height="48" viewBox="0 0 180 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="48" height="48" rx="14" fill="#3B82F6"/>
+  <path d="M14 18L24 12L34 18L24 24L14 18Z" fill="white"/>
+  <path d="M18 22V29C18 31 21 33 24 33C27 33 30 31 30 29V22L24 26L18 22Z" fill="white"/>
+  <text x="60" y="31" font-family="Inter, Arial, sans-serif" font-size="22" font-weight="800" fill="#0F172A">StudentHub</text>
+</svg>

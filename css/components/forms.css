@@ -1,0 +1,76 @@
+.form-card {
+    width: 100%;
+    max-width: 430px;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 36px;
+    box-shadow: var(--shadow);
+}
+
+.form-title {
+    color: var(--navy);
+    font-size: 36px;
+    font-weight: 800;
+    margin-bottom: 8px;
+    text-align: center;
+}
+
+.form-subtitle {
+    color: var(--text-muted);
+    text-align: center;
+    margin-bottom: 28px;
+}
+
+.form-group {
+    margin-bottom: 18px;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 8px;
+}
+
+.form-control {
+    width: 100%;
+    padding: 14px 16px;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    font-size: 15px;
+    background: var(--white);
+    color: var(--text-main);
+    transition: 0.25s ease;
+}
+
+.form-control:focus {
+    border-color: var(--blue);
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+    outline: none;
+}
+
+.form-message {
+    margin-top: 16px;
+    text-align: center;
+    font-weight: 600;
+}
+
+.form-message.success {
+    color: var(--success);
+}
+
+.form-message.error {
+    color: var(--danger);
+}
+
+.form-footer {
+    text-align: center;
+    margin-top: 22px;
+    color: var(--text-muted);
+}
+
+.form-footer a {
+    color: var(--blue);
+    font-weight: 800;
+}

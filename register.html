@@ -12,56 +12,64 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/components/forms.css">
+<link rel="stylesheet" href="css/pages/register.css">
 </head>
 <body>
-<!--
-<nav class="navbar">
-    <div class="logo">
-        <h2>StudentHub</h2>
-    </div>
+<div class="auth-page">
 
-    <ul class="nav-links">
-        <li><a href="dashboard.html">Dashboard</a></li>
-        <li><a href="pages/resources.html">Resources</a></li>
-        <li><a href="pages/documents.html">Documents</a></li>
-        <li><a href="pages/upload.html">Upload</a></li>
-        <li><a href="pages/profile.html">Profile</a></li>
-    </ul>
-</nav>
-  -->
-<div class="login-container">
-    <h1>Create Account</h1>
-    <p>Register for StudentHub</p>
+    <section class="auth-left">
+        <div class="auth-brand">StudentHub</div>
 
-    <form id="registerForm">
-        <div class="input-group">
-            <label>Full Name</label>
-            <input id="fullName" type="text" placeholder="Full Name" required>
-        </div>
+        <h1>Start learning smarter today.</h1>
 
-        <div class="input-group">
-            <label>Email</label>
-           <input id="email" type="email" placeholder="Email Address" required>
-        </div>
-
-        <div class="input-group">
-            <label>Password</label>
-            <input id="password" type="password" placeholder="Password" required>
-        </div>
-
-        <button type="submit" class="btn" id="registerBtn">
-            Create Account
-        </button>
-        <p id="registerMessage" class="form-message" aria-live="polite"></p>
-    </form>
-
-    <div class="register-link">
         <p>
-            Already have an account?
-            <a href="login.html">Login</a>
+            Create your StudentHub account to access trusted resources,
+            upload your own notes, and earn from your knowledge.
         </p>
-    </div>
+
+        <div class="auth-features">
+            <div>✓ Upload PDFs, images, and ZIP resource packs</div>
+            <div>✓ Earn 80% from paid resource sales</div>
+            <div>✓ Access approved study materials anytime</div>
+        </div>
+    </section>
+
+    <section class="auth-right">
+        <form class="auth-card" id="registerForm">
+            <h2>Create Account</h2>
+            <p class="subtitle">Join StudentHub and start your learning journey.</p>
+
+            <div class="form-group">
+                <label>Full Name</label>
+                <input type="text" id="fullName" placeholder="Enter your full name" required>
+            </div>
+
+            <div class="form-group">
+                <label>Email Address</label>
+                <input type="email" id="registerEmail" placeholder="you@example.com" required>
+            </div>
+
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="registerPassword" placeholder="Create a password" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary" id="registerBtn">
+                Create Account
+            </button>
+
+            <p id="registerMessage" class="form-message"></p>
+
+            <p class="auth-switch">
+                Already have an account?
+                <a href="login.html">Login</a>
+            </p>
+        </form>
+    </section>
+
 </div>
+
 <script type="module" src="js/auth.js"></script>
 </body>
 </html>

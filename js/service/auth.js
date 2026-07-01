@@ -1,4 +1,4 @@
-import { app } from "../services/firebase_config.js";
+import { app } from "./firebase_config.js";
 
 import {
     getAuth,
@@ -255,10 +255,10 @@ registerForm.addEventListener("submit", async (event) => {
     document.getElementById("fullName").value.trim();
 
     const email =
-    document.getElementById("email").value.trim();
+    document.getElementById("registerEmail").value.trim();
 
     const password =
-    document.getElementById("password").value;
+    document.getElementById("registerPassword").value;
 
     try {
 

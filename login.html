@@ -12,36 +12,58 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/components/forms.css">
+    <link rel="stylesheet" href="css/pages/login.css">
 </head>
 <body>
-    <div class="login-container">
-        <h1>StudentHub</h1>
-        <p>Login to your account</p>
+<div class="auth-page">
 
-        <form id="loginForm">
-            <div class="input-group">
-                <label>Email</label>
-                <input id="loginEmail" type="email" placeholder="Enter your email" required>
+    <section class="auth-left">
+        <div class="auth-brand">StudentHub</div>
+
+        <h1>Welcome back to smarter learning.</h1>
+
+        <p>
+            Access trusted resources, manage uploads, track earnings,
+            and continue building your academic journey.
+        </p>
+
+        <div class="auth-features">
+            <div>✓ Admin-approved study resources</div>
+            <div>✓ Student marketplace with 80/20 earnings</div>
+            <div>✓ Document assistance for student needs</div>
+        </div>
+    </section>
+
+    <section class="auth-right">
+        <form class="auth-card" id="loginForm">
+            <h2>Login</h2>
+            <p class="subtitle">Enter your details to access your dashboard.</p>
+
+            <div class="form-group">
+                <label>Email Address</label>
+                <input type="email" id="loginEmail" placeholder="you@example.com" required>
             </div>
 
-            <div class="input-group">
+            <div class="form-group">
                 <label>Password</label>
-                <input id="loginPassword" type="password" placeholder="Enter your password" required>
+                <input type="password" id="loginPassword" placeholder="Enter your password" required>
             </div>
 
-            <button type="submit" class="btn" id="loginBtn">
+            <button type="submit" class="btn btn-primary" id="loginBtn">
                 Login
             </button>
-            <p id="loginMessage" class="form-message" aria-live="polite"></p>
-        </form>
 
-        <div class="register-link">
-            <p>
+            <p id="loginMessage" class="form-message"></p>
+
+            <p class="auth-switch">
                 Don't have an account?
-                <a href="register.html">Register</a>
+                <a href="register.html">Create one</a>
             </p>
-        </div>
-    </div>
+        </form>
+    </section>
+
+</div>
 
 <script type="module" src="js/auth.js"></script>
 </body>

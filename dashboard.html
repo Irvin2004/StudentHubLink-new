@@ -14,79 +14,90 @@
      <link rel="preconnect" href="https://fonts.googleapis.com">
      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
      <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-</head>
+    <link rel="stylesheet" href="css/pages/dashboard.css">
+    </head>
 <body>
+<div class="dashboard-page">
 
-    <div class="navbar">
-        <h2>StudentHub</h2>
-        <a href="login.html" id="logoutBtn">Logout</a>
-    </div>
+    <aside class="sidebar">
+        <div class="sidebar-logo">StudentHub</div>
 
-    <div class="container">
+        <nav class="sidebar-menu">
+            <a href="dashboard.html" class="active">🏠 Home</a>
+            <a href="pages/resources.html">📚 Resources</a>
+            <a href="pages/upload.html">📤 Upload</a>
+            <a href="pages/documents.html">📄 Documents</a>
+            <a href="pages/profile.html">👤 Profile</a>
+        </nav>
+    </aside>
 
-        <div class="welcome">
-            <h1>Welcome, <span id="userName">Student</span></h1>
-            <p id="userEmail"></p>
-            <p>Access resources, manage documents, and grow your academic success.</p>
+    <main class="dashboard-main">
+
+        <div class="dashboard-header">
+            <div>
+                <h1 id="greeting">Welcome back 👋</h1>
+                <p id="userEmail">Continue your student journey with StudentHub.</p>
+            </div>
+
+            <button id="logoutBtn" class="logout-btn">Logout</button>
         </div>
 
-        <div class="card-container">
-
-            <div class="card">
-                <h3>Study Resources</h3>
-                <p>
-                    Browse, upload, and download study notes,
-                    past papers, and guides.
-                </p>
-                <a href="pages/resources.html" class="btn">
-                    Open Resources
-                </a>
-            </div>
-
-            <div class="card">
-                <h3>Document Assistant</h3>
-                <p>
-                    Get help with IDs, passports,
-                    applications, and important documents.
-                </p>
-                <a href="pages/documents.html" class="btn">
-                    Open Assistant
-                </a>
-            </div>
-
-            <div class="card">
-                <h3>My Profile</h3>
-                <p>
-                    View your uploads, downloads,
-                    earnings, and account details.
-                </p>
-                <a href="pages/profile.html" class="btn">
-                    View Profile
-                </a>
-            </div>
-
-        </div>
-
-        <div class="stats">
-
+        <section class="stats-grid">
             <div class="stat-box">
-                <h2 id="dashboardDownloads">0</h2>
-                <p>Downloads</p>
+                <span>📚</span>
+                <p>Uploaded Resources</p>
+                <h2 id="totalUploads">0</h2>
             </div>
 
             <div class="stat-box">
-                <h2 id="dashboardUploads">0</h2>
-                <p>Uploaded Notes</p>
+                <span>⬇️</span>
+                <p>Total Downloads</p>
+                <h2 id="totalDownloads">0</h2>
             </div>
 
             <div class="stat-box">
-                <h2 id="dashboardEarnings">R0</h2>
-                <p>Earnings</p>
+                <span>💰</span>
+                <p>Total Earnings</p>
+                <h2 id="totalEarnings">R0</h2>
             </div>
 
-        </div>
+            <div class="stat-box">
+                <span>⭐</span>
+                <p>Rating</p>
+                <h2>4.8</h2>
+            </div>
+        </section>
 
-    </div>
+        <section class="dashboard-grid">
+
+            <div class="panel">
+                <h3>Performance Overview</h3>
+
+                <div class="chart-preview">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h3>Quick Actions</h3>
+
+                <div class="quick-actions">
+                    <a href="pages/upload.html">📤 Upload Resource</a>
+                    <a href="pages/resources.html">📚 Browse Resources</a>
+                    <a href="pages/profile.html">👤 View Profile</a>
+                    <a href="pages/documents.html">📄 Document Assistant</a>
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
 
 <script type="module" src="js/auth.js"></script>
 </body>

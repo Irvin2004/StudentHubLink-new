@@ -1,24 +1,44 @@
-.btn {
-    display: inline-block;
+.btn,
+.btn-primary,
+.btn-outline,
+.btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     padding: 12px 20px;
-    border-radius: 12px;
+    border-radius: 14px;
     font-weight: 700;
     border: none;
     cursor: pointer;
+    transition: 0.25s ease;
+    text-decoration: none;
+    font-size: 15px;
+    border-radius: var(--radius-md);
 }
 
 .btn-primary {
     background: var(--blue);
-    color: var(--white);
+    color: white !important;
+    box-shadow: 0 10px 20px rgba(59, 130, 246, 0.25);
 }
 
 .btn-primary:hover {
     background: var(--blue-dark);
+    transform: translateY(-2px);
 }
 
+.btn-outline,
 .btn-secondary {
-    background: var(--white);
+    background: white;
     color: var(--navy);
     border: 1px solid var(--border);
 }
+
+.btn-outline:hover,
+.btn-secondary:hover {
+    border-color: var(--blue);
+    color: var(--blue);
+    transform: translateY(-2px);
+}
+
 
