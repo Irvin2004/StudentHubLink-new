@@ -2,14 +2,32 @@ import {
     addDoc,
     collection,
     getDocs,
-    limit,
-    orderBy,
     query,
     serverTimestamp,
     where
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
 import { db } from "../firebase.js";
+
+const ACTIVITY_COLLECTION = "activity";
+const LEGACY_ACTIVITY_COLLECTION = "activities";
+
+function normalizeActivityInput(activityOrUserId, type, title, description, icon = "info") {
+    if (typeof activityOrUserId === "object" && activityOrUserId !== null) {
+        return {
+            icon: "info",
+            ...activityOrUserId
+        };
+    }
+
+    return {
+        userId: activityOrUserId,
+        type,
+        title,
+        description,
+        icon
+    };
+}
 
 export async function addActivity({
     userId,
@@ -18,8 +36,13 @@ export async function addActivity({
     description,
     icon = "info"
 }) {
+    if (!userId) {
+        console.warn("Activity skipped: missing userId.");
+        return null;
+    }
+
     try {
-        await addDoc(collection(db, "activities"), {
+        const activityRef = await addDoc(collection(db, ACTIVITY_COLLECTION), {
             userId,
             type,
             title,
@@ -28,23 +51,65 @@ export async function addActivity({
             read: false,
             createdAt: serverTimestamp()
         });
+
+        return activityRef.id;
     } catch (error) {
         console.error("Activity error:", error);
+        return null;
     }
 }
 
+export async function createActivity(activityOrUserId, type, title, description, icon) {
+    return addActivity(
+        normalizeActivityInput(activityOrUserId, type, title, description, icon)
+    );
+}
+
 export async function getRecentActivities(userId, activityLimit = 5) {
-    const q = query(
-        collection(db, "activities"),
-        where("userId", "==", userId),
-        orderBy("createdAt", "desc"),
-        limit(activityLimit)
+    if (!userId) {
+        return [];
+    }
+
+    const activityCollections = [
+        ACTIVITY_COLLECTION,
+        LEGACY_ACTIVITY_COLLECTION
+    ];
+
+    const activityResults = await Promise.all(
+        activityCollections.map(async (collectionName) => {
+            try {
+                const activityQuery = query(
+                    collection(db, collectionName),
+                    where("userId", "==", userId)
+                );
+
+                const snapshot = await getDocs(activityQuery);
+
+                return snapshot.docs.map((doc) => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
+            } catch (error) {
+                console.warn(`Could not load ${collectionName}:`, error);
+                return [];
+            }
+        })
     );
 
-    const snapshot = await getDocs(q);
+    return activityResults
+        .flat()
+        .sort((first, second) => {
+            const firstTime =
+                typeof first.createdAt?.toMillis === "function" ?
+                first.createdAt.toMillis() :
+                new Date(first.createdAt || 0).getTime();
 
-    return snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data()
-    }));
+            const secondTime =
+                typeof second.createdAt?.toMillis === "function" ?
+                second.createdAt.toMillis() :
+                new Date(second.createdAt || 0).getTime();
+
+            return secondTime - firstTime;
+        })
+        .slice(0, activityLimit);
 }

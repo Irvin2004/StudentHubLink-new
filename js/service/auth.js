@@ -1,6 +1,8 @@
 import { app } from "../firebase.js";
-import { getRecentActivities } from "./activity.js";
-import { db } from "./firebase-config.js";
+import {
+    addActivity,
+    getRecentActivities
+} from "./activity.js";
 
 import {
     getAuth,
