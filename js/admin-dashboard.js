@@ -1,1 +1,1 @@
-import "./service/admin-dashboard.js";
+import "./service/admin.js";

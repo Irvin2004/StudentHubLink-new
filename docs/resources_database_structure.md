@@ -1,70 +1,80 @@
-# Resources Database Structure
+# Firestore Database Structure
 
-Use a top-level `resources` collection for study material. Each resource is one Firestore document.
+Use top-level collections for users, resources, transactions, notifications, and activity.
 
-## Collection
+## Users
 
-`resources/{resourceId}`
-
-## Fields
-
-| Field | Type | Required | Example | Notes |
-| --- | --- | --- | --- | --- |
-| `title` | string | yes | `Mathematics Exam Prep` | Display title and search text. |
-| `description` | string | yes | `Past papers and worked solutions.` | Short summary shown on resource cards. |
-| `category` | string | yes | `Mathematics` | Use consistent category labels. |
-| `price` | number | yes | `25` | Use `0` for free resources. |
-| `currency` | string | yes | `ZAR` | Keeps pricing explicit. |
-| `fileUrl` | string | yes | `https://...` | Firebase Storage download URL. |
-| `filePath` | string | yes | `resources/userId/file.pdf` | Firebase Storage path for admin actions. |
-| `fileName` | string | yes | `math-prep.pdf` | Original or sanitized file name. |
-| `fileType` | string | yes | `application/pdf` | Helps validate downloads/previews. |
-| `ownerId` | string | yes | `firebaseUserUid` | Matches `users/{uid}`. |
-| `ownerName` | string | yes | `Amo Student` | Snapshot for faster listing. |
-| `ownerEmail` | string | no | `student@example.com` | Useful for admin review. |
-| `status` | string | yes | `pending` | Suggested values: `pending`, `approved`, `rejected`, `archived`. |
-| `downloadCount` | number | yes | `0` | Increment when downloaded. |
-| `purchaseCount` | number | yes | `0` | Increment after paid purchases. |
-| `averageRating` | number | no | `4.5` | Optional future rating support. |
-| `createdAt` | timestamp | yes | server timestamp | Set on upload. |
-| `updatedAt` | timestamp | yes | server timestamp | Update on edits/review actions. |
-| `reviewedAt` | timestamp | no | server timestamp | Set by admin approval/rejection. |
-| `reviewedBy` | string | no | `adminUid` | Admin user id. |
-| `rejectionReason` | string | no | `Blurry scan` | Only for rejected resources. |
-
-## Suggested Queries
-
-- Student uploads: `resources where ownerId == currentUser.uid`
-- Public listing: `resources where status == "approved"`
-- Admin review queue: `resources where status == "pending"`
-- Category pages: `resources where status == "approved" and category == selectedCategory`
-
-## Related Collections
-
-`users/{uid}` should keep these counters for fast dashboard/profile display:
+`users/{uid}`
 
 | Field | Type | Notes |
 | --- | --- | --- |
-| `totalUploads` | number | Can mirror the count of resources owned by the user. |
-| `totalDownloads` | number | Sum of downloads across the user's resources or user activity. |
-| `totalEarnings` | number | Sum of completed paid purchases for this user's resources. |
+| `name` | string | User's display name. |
+| `email` | string | User's email address. |
+| `role` | string | Suggested values: `student`, `admin`. |
+| `joinedAt` | timestamp | Set when the account is created. |
+| `totalUploads` | number | Number of resources uploaded by the user. |
+| `totalDownloads` | number | Number of resources downloaded by the user. |
+| `totalEarnings` | number | Seller earnings from paid resources. |
 
-## Transactions Collection
+## Resources
 
-Use a top-level `transactions` collection for download and purchase records. Do not store buyer lists directly inside `resources/{resourceId}`.
+`resources/{resourceId}`
+
+| Field | Type | Notes |
+| --- | --- | --- |
+| `title` | string | Resource title. |
+| `description` | string | Short summary shown in listings. |
+| `category` | string | Study category. |
+| `ownerId` | string | Matches `users/{uid}`. |
+| `price` | number | Use `0` for free resources. |
+| `approved` | boolean | `false` until an admin approves the resource. |
+| `downloadCount` | number | Incremented when downloaded or purchased. |
+| `createdAt` | timestamp | Set when uploaded. |
+
+The app also stores file metadata such as `fileUrl`, `filePath`, `fileName`, and `fileType` so Firebase Storage downloads work. It keeps `status`, `reviewedAt`, and `reviewedBy` for the admin review workflow.
+
+## Transactions
 
 `transactions/{transactionId}`
 
-| Field | Type | Required | Example | Notes |
-| --- | --- | --- | --- | --- |
-| `resourceId` | string | yes | `abc123` | Purchased or downloaded resource. |
-| `resourceTitle` | string | yes | `Mathematics Exam Prep` | Snapshot for reports. |
-| `buyerId` | string | yes | `studentUid` | Current user. |
-| `buyerEmail` | string | yes | `student@example.com` | Snapshot for admin. |
-| `sellerId` | string | yes | `ownerUid` | Resource owner. |
-| `sellerEmail` | string | no | `owner@example.com` | Snapshot for admin. |
-| `type` | string | yes | `purchase` | Suggested values: `download`, `purchase`. |
-| `amount` | number | yes | `25` | `0` for free downloads. |
-| `currency` | string | yes | `ZAR` | Pricing currency. |
-| `status` | string | yes | `completed` | Later payment gateways can add `pending`, `failed`, `refunded`. |
-| `createdAt` | timestamp | yes | server timestamp | Transaction time. |
+| Field | Type | Notes |
+| --- | --- | --- |
+| `buyerId` | string | User who downloaded or purchased the resource. |
+| `sellerId` | string | Owner of the resource. |
+| `resourceId` | string | Downloaded or purchased resource. |
+| `amount` | number | `0` for free downloads. |
+| `createdAt` | timestamp | Set when the transaction is created. |
+
+The app also stores reporting fields such as `resourceTitle`, `buyerEmail`, `sellerEmail`, `type`, `currency`, `status`, `sellerAmount`, and `platformCommission`.
+
+## Activity
+
+`activity/{activityId}`
+
+| Field | Type | Notes |
+| --- | --- | --- |
+| `userId` | string | User the activity belongs to. |
+| `type` | string | Suggested values: `upload`, `download`, `purchase`, `sale`, `approval`, `rejection`. |
+| `title` | string | Short activity title. |
+| `description` | string | Activity details for the dashboard feed. |
+| `createdAt` | timestamp | Set when the activity is created. |
+
+## Notifications
+
+`notifications/{notificationId}`
+
+| Field | Type | Notes |
+| --- | --- | --- |
+| `userId` | string | User who should receive the notification. |
+| `title` | string | Short notification title. |
+| `message` | string | Notification body. |
+| `read` | boolean | Defaults to `false`. |
+| `createdAt` | timestamp | Set when the notification is created. |
+
+## Main Queries
+
+- Public resources: `resources where approved == true`
+- Admin review queue: `resources where status == "pending"`
+- User uploads: `resources where ownerId == currentUser.uid`
+- User notifications: `notifications where userId == currentUser.uid`
+- User activity: `activity where userId == currentUser.uid`

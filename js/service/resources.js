@@ -1,4 +1,6 @@
-import { app } from "./firebase_config.js";
+import { app } from "../firebase.js";
+import { createActivity } from "./activity.js";
+import { createNotification } from "./notifications.js";
 
 import {
     getAuth,
@@ -70,6 +72,7 @@ async function getUserProfile(user) {
 
     if (!snapshot.exists()) {
         return {
+            name: user.displayName || "Student",
             fullName: user.displayName || "Student",
             email: user.email,
             role: "student"
@@ -185,17 +188,18 @@ const MAX_SIZE = 20 * 1024 * 1024;
             title,
             description,
             category,
+            ownerId: user.uid,
             price,
+            approved: false,
+            downloadCount: 0,
             currency: "ZAR",
             fileType: file.type,
             fileUrl,
             filePath,
             fileName: file.name,
-            ownerId: user.uid,
-            ownerName: userProfile.fullName || user.displayName || "Student",
+            ownerName: userProfile.name || userProfile.fullName || user.displayName || "Student",
             ownerEmail: user.email,
             status: "pending",
-            downloadCount: 0,
             purchaseCount: 0,
             createdAt: serverTimestamp(),
             updatedAt: serverTimestamp()
@@ -205,6 +209,13 @@ const MAX_SIZE = 20 * 1024 * 1024;
             totalUploads: increment(1),
             updatedAt: serverTimestamp()
         });
+
+        await createActivity(
+            user.uid,
+            "upload",
+            "Resource uploaded",
+            `${title} was uploaded for admin approval.`
+        );
 
         message.textContent = "Resource uploaded for admin approval.";
         document.getElementById("resourceUploadForm").reset();
@@ -227,7 +238,7 @@ async function loadResourcesPage() {
 
     try {
         const resourcesQuery =
-        query(collection(db, "resources"), where("status", "==", "approved"));
+        query(collection(db, "resources"), where("approved", "==", true));
 
         const snapshot =
         await getDocs(resourcesQuery);
@@ -314,21 +325,21 @@ async function createTransaction(user, resource, type) {
     calculateCommission(amount);
 
     await addDoc(collection(db, "transactions"), {
-        resourceId: resource.id,
-        resourceTitle: resource.title,
         buyerId: user.uid,
-        buyerEmail: user.email,
         sellerId: resource.ownerId,
+        resourceId: resource.id,
+        amount,
+        createdAt: serverTimestamp(),
+        resourceTitle: resource.title,
+        buyerEmail: user.email,
         sellerEmail: resource.ownerEmail || "",
         type,
-        amountPaid: amount,
         sellerAmount:
         commission.sellerAmount,
         platformCommission:
         commission.platformCommission,
         currency: "ZAR",
-        status: "completed",
-        createdAt: serverTimestamp()
+        status: "completed"
     });
 
     await updateDoc(doc(db, "resources", resource.id), {
@@ -342,11 +353,31 @@ async function createTransaction(user, resource, type) {
         updatedAt: serverTimestamp()
     });
 
+    await createActivity(
+        user.uid,
+        type,
+        type === "purchase" ? "Resource purchased" : "Resource downloaded",
+        `${resource.title} was ${type === "purchase" ? "purchased" : "downloaded"}.`
+    );
+
     if (type === "purchase" && resource.ownerId) {
         await updateDoc(doc(db, "users", resource.ownerId), {
             totalEarnings: increment(commission.sellerAmount),
             updatedAt: serverTimestamp()
         });
+
+        await createActivity(
+            resource.ownerId,
+            "sale",
+            "Resource sold",
+            `${resource.title} earned ${formatCurrency(commission.sellerAmount)}.`
+        );
+
+        await createNotification(
+            resource.ownerId,
+            "Resource purchased",
+            `${user.email} purchased ${resource.title}.`
+        );
 
     await setDoc(doc(db, "platform", "financials"), {
         totalRevenue: increment( commission.platformCommission ),
@@ -384,7 +415,7 @@ async function loadResourceDetails(user) {
         ...snapshot.data()
     };
 
-    if (resource.status !== "approved" && resource.ownerId !== user.uid) {
+    if (resource.approved !== true && resource.ownerId !== user.uid) {
         details.innerHTML = "<p>This resource is not available.</p>";
         return;
     }
@@ -395,12 +426,12 @@ async function loadResourceDetails(user) {
     setText("detailUploader", resource.ownerName || "Student");
     setText("detailPrice", formatCurrency(resource.price));
     setText("detailDownloads", Number(resource.downloadCount || 0));
-    setText("detailStatus", resource.status);
+    setText("detailStatus", resource.approved ? "approved" : (resource.status || "pending"));
 
     const actionBtn =
     document.getElementById("resourceActionBtn");
 
-    if (resource.status !== "approved") {
+    if (resource.approved !== true) {
         actionBtn.textContent = "Awaiting Approval";
         actionBtn.disabled = true;
         return;
@@ -504,14 +535,38 @@ async function loadPendingResources(user) {
         const status =
         button.dataset.action === "approve" ? "approved" : "rejected";
 
+        const approved =
+        button.dataset.action === "approve";
+
         button.disabled = true;
 
         await updateDoc(doc(db, "resources", button.dataset.id), {
+            approved,
             status,
             reviewedBy: user.uid,
             reviewedAt: serverTimestamp(),
             updatedAt: serverTimestamp()
         });
+
+        const reviewedResource =
+        resources.find((resource) => resource.id === button.dataset.id);
+
+        await createNotification(
+            reviewedResource?.ownerId,
+            approved ? "Resource approved" : "Resource rejected",
+            approved ?
+            `${reviewedResource?.title || "Your resource"} is now available.` :
+            `${reviewedResource?.title || "Your resource"} was not approved.`
+        );
+
+        await createActivity(
+            reviewedResource?.ownerId,
+            approved ? "approval" : "rejection",
+            approved ? "Resource approved" : "Resource rejected",
+            approved ?
+            `${reviewedResource?.title || "Your resource"} is now available.` :
+            `${reviewedResource?.title || "Your resource"} was not approved.`
+        );
 
         await loadPendingResources(user);
     };

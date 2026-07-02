@@ -1,1 +1,1 @@
-import "./service/admin-auth.js";
+import "./service/admin.js";

@@ -1,4 +1,6 @@
-import { app } from "./firebase_config.js";
+import { app } from "../firebase.js";
+import { getRecentActivities } from "./activity.js";
+import { db } from "./firebase-config.js";
 
 import {
     getAuth,
@@ -67,6 +69,28 @@ const formatDate = (value) => {
     });
 };
 
+const escapeHtml = (value) =>
+String(value || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+
+function getGreeting(name) {
+    const hour = new Date().getHours();
+
+    if (hour < 12) {
+        return `Good Morning, ${name} 👋`;
+    }
+
+    if (hour < 18) {
+        return `Good Afternoon, ${name} 👋`;
+    }
+
+    return `Good Evening, ${name} 👋`;
+}
+
 async function getUserDocument(user) {
     const userRef =
     doc(db, "users", user.uid);
@@ -83,6 +107,7 @@ async function getUserDocument(user) {
 
     const fallbackProfile = {
         uid: user.uid,
+        name: user.displayName || "Student",
         fullName: user.displayName || "Student",
         email: user.email,
         role: "student",
@@ -93,6 +118,7 @@ async function getUserDocument(user) {
         totalUploads: 0,
         totalDownloads: 0,
         totalEarnings: 0,
+        joinedAt: serverTimestamp(),
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
     };
@@ -183,24 +209,61 @@ async function loadUserStats(user, userData) {
     const earnings =
     Number(userData.totalEarnings || 0);
 
-    setText("dashboardDownloads", downloads);
-    setText("dashboardUploads", uploadCount);
-    setText("dashboardEarnings", formatCurrency(earnings));
+    setText("totalDownloads", downloads);
+    setText("totalUploads", uploadCount);
+    setText("totalEarnings", formatCurrency(earnings));
 
     setText("profileDownloads", downloads);
     setText("profileUploads", uploadCount);
     setText("profileEarnings", formatCurrency(earnings));
 }
 
+function renderRecentActivity(userData) {
+    const activityList = document.getElementById("recentActivityList");
+
+    if (!activityList) return;
+
+    {
+        const activities =
+        userData.activities || [];
+
+        if (activities.length === 0) {
+            activityList.innerHTML =
+            `<p class="empty-state">No recent activity yet.</p>`;
+            return;
+        }
+
+        activityList.innerHTML = activities.map((activity) => `
+            <div class="activity-item">
+                <div class="activity-icon">${escapeHtml(activity.type || "activity")}</div>
+                <div class="activity-content">
+                    <h4>${escapeHtml(activity.title)}</h4>
+                    <p>${escapeHtml(activity.description)}</p>
+                </div>
+            </div>
+        `).join("");
+        return;
+    }
+
+}
+
 function renderUserProfile(userData) {
-    setText("userName", userData.fullName || "Student");
+    const displayName =
+    userData.name || userData.fullName || "Student";
+
+    setText("greeting", getGreeting(displayName));
+    setText("userName", userData.name || userData.fullName || "Student");
     setText("userEmail", userData.email || "");
-    setText("profileMemberSince", `Member since ${formatDate(userData.createdAt)}`);
+    setText("profileMemberSince", `Member since ${formatDate(userData.joinedAt || userData.createdAt)}`);
     setText("profileRole", userData.role || "student");
     setText("profileInstitution", userData.institution || "Not added yet");
     setText("profileCourse", userData.course || "Not added yet");
     setText("profileYear", userData.yearOfStudy || "Not added yet");
     setText("profileBio", userData.bio || "No bio added yet.");
+}
+
+async function loadRecentActivity(user) {
+    return getRecentActivities(user.uid);
 }
 
 async function loadAdminStats() {
@@ -228,7 +291,7 @@ async function loadAdminStats() {
         const data =
         transaction.data();
 
-        revenue += Number(data.amountPaid || data.amount || 0);
+        revenue += Number(data.amount || data.amountPaid || 0);
     });
 
     setText("adminTotalUsers", usersSnapshot.data().count);
@@ -278,6 +341,7 @@ registerForm.addEventListener("submit", async (event) => {
         try {
             await setDoc(doc(db, "users", userCredential.user.uid), {
                 uid: userCredential.user.uid,
+                name: fullName,
                 fullName: fullName,
                 displayName: fullName,
                 email: userCredential.user.email,
@@ -292,10 +356,20 @@ registerForm.addEventListener("submit", async (event) => {
                 totalDownloads: 0,
                 totalEarnings: 0,
                 
+                joinedAt: serverTimestamp(),
                 createdAt: serverTimestamp(),
                 updatedAt: serverTimestamp(),
                 lastLoginAt: serverTimestamp()
             });
+
+            await addActivity({
+                userId: userCredential.user.uid,
+                type: "register",
+                title: "Welcome to StudentHub",
+                description: "Your account was created successfully.",
+                icon: "user-plus"
+            });   
+            
             setMessage(
             "registerMessage",
             "Account created successfully. Opening dashboard...",
@@ -406,6 +480,7 @@ onAuthStateChanged(auth, async (user) => {
         console.error("Could not load user profile:", error);
 
         userData = {
+            name: user.displayName || "Student",
             fullName: user.displayName || "Student",
             email: user.email,
             role: "student",
@@ -422,7 +497,11 @@ onAuthStateChanged(auth, async (user) => {
         return;
     }
 
+    userData.activities =
+    await loadRecentActivity(user);
+
     renderUserProfile(userData);
+    renderRecentActivity(userData);
     await loadUserStats(user, userData);
 
     if (isAdminPage) {
