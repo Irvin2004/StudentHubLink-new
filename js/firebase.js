@@ -11,7 +11,7 @@ const firebaseConfig = {
     apiKey: "AIzaSyBZ--2QeQ55_n2T0DMm0b41tvTxdQAsqcg",
     authDomain: "studenthub-c9bc0.firebaseapp.com",
     projectId: "studenthub-c9bc0",
-    storageBucket: "studenthub-c9bc0.firebasestorage.app",
+    storageBucket: "studenthub-c9bc0.appspot.com",
     messagingSenderId: "987746786207",
     appId: "1:987746786207:web:7aa71c660dc0c7380c3baa",
     measurementId: "G-23ZJ18WFWG"

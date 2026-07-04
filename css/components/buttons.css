@@ -6,14 +6,13 @@
     align-items: center;
     justify-content: center;
     padding: 12px 20px;
-    border-radius: 14px;
+    border-radius: var(--radius-md);
     font-weight: 700;
     border: none;
     cursor: pointer;
     transition: 0.25s ease;
     text-decoration: none;
     font-size: 15px;
-    border-radius: var(--radius-md);
 }
 
 .btn-primary {
@@ -40,5 +39,4 @@
     color: var(--blue);
     transform: translateY(-2px);
 }
-
 

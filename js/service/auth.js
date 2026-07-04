@@ -83,14 +83,14 @@ function getGreeting(name) {
     const hour = new Date().getHours();
 
     if (hour < 12) {
-        return `Good Morning, ${name} 👋`;
+        return `Good morning, ${name}`;
     }
 
     if (hour < 18) {
-        return `Good Afternoon, ${name} 👋`;
+        return `Good afternoon, ${name}`;
     }
 
-    return `Good Evening, ${name} 👋`;
+    return `Good evening, ${name}`;
 }
 
 async function getUserDocument(user) {
@@ -220,33 +220,50 @@ async function loadUserStats(user, userData) {
     setText("profileEarnings", formatCurrency(earnings));
 }
 
-function renderRecentActivity(userData) {
-    const activityList = document.getElementById("recentActivityList");
+async function renderRecentActivity(userId) {
+    const activityList =
+    document.getElementById("recentActivityList");
 
     if (!activityList) return;
 
-    {
-        const activities =
-        userData.activities || [];
+    activityList.innerHTML =
+    `<p class="empty-state">Loading recent activity...</p>`;
 
-        if (activities.length === 0) {
-            activityList.innerHTML =
-            `<p class="empty-state">No recent activity yet.</p>`;
-            return;
-        }
+    const activities =
+    await getRecentActivities(userId);
 
-        activityList.innerHTML = activities.map((activity) => `
-            <div class="activity-item">
-                <div class="activity-icon">${escapeHtml(activity.type || "activity")}</div>
-                <div class="activity-content">
-                    <h4>${escapeHtml(activity.title)}</h4>
-                    <p>${escapeHtml(activity.description)}</p>
-                </div>
-            </div>
-        `).join("");
+    if (!activities.length) {
+        activityList.innerHTML =
+        `<p class="empty-state">No recent activity yet.</p>`;
         return;
     }
 
+    activityList.innerHTML =
+    activities.map(activity => `
+        <div class="activity-item">
+            <div class="activity-icon">
+                ${getActivityIcon(activity.icon)}
+            </div>
+
+            <div class="activity-content">
+                <h4>${escapeHtml(activity.title)}</h4>
+                <p>${escapeHtml(activity.description)}</p>
+            </div>
+        </div>
+    `).join("");
+}
+
+function getActivityIcon(icon) {
+    const icons = {
+        "user-plus": "+",
+        "upload": "UP",
+        "approval": "OK",
+        "sale": "R",
+        "download": "DL",
+        "info": "i"
+    };
+
+    return icons[icon] || "i";
 }
 
 function renderUserProfile(userData) {
@@ -262,10 +279,6 @@ function renderUserProfile(userData) {
     setText("profileCourse", userData.course || "Not added yet");
     setText("profileYear", userData.yearOfStudy || "Not added yet");
     setText("profileBio", userData.bio || "No bio added yet.");
-}
-
-async function loadRecentActivity(user) {
-    return getRecentActivities(user.uid);
 }
 
 async function loadAdminStats() {
@@ -378,8 +391,6 @@ registerForm.addEventListener("submit", async (event) => {
             "success"
             );
 
-            window.location.href = "dashboard.html";
-                     
         } catch (error) {
             console.warn("Account was created, but the profile could not be saved:", error);
         }
@@ -499,11 +510,8 @@ onAuthStateChanged(auth, async (user) => {
         return;
     }
 
-    userData.activities =
-    await loadRecentActivity(user);
-
     renderUserProfile(userData);
-    renderRecentActivity(userData);
+    await renderRecentActivity(user.uid);
     await loadUserStats(user, userData);
 
     if (isAdminPage) {

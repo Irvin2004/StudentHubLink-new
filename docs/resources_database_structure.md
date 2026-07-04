@@ -1,6 +1,6 @@
 # Firestore Database Structure
 
-Use top-level collections for users, resources, transactions, notifications, and activity.
+Use top-level collections for users, resources, transactions, notifications, and activities.
 
 ## Users
 
@@ -49,7 +49,7 @@ The app also stores reporting fields such as `resourceTitle`, `buyerEmail`, `sel
 
 ## Activity
 
-`activity/{activityId}`
+`activities/{activityId}`
 
 | Field | Type | Notes |
 | --- | --- | --- |
@@ -77,4 +77,4 @@ The app also stores reporting fields such as `resourceTitle`, `buyerEmail`, `sel
 - Admin review queue: `resources where status == "pending"`
 - User uploads: `resources where ownerId == currentUser.uid`
 - User notifications: `notifications where userId == currentUser.uid`
-- User activity: `activity where userId == currentUser.uid`
+- User activity: `activities where userId == currentUser.uid`

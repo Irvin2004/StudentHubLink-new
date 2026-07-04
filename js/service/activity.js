@@ -9,8 +9,8 @@ import {
 
 import { db } from "../firebase.js";
 
-const ACTIVITY_COLLECTION = "activity";
-const LEGACY_ACTIVITY_COLLECTION = "activities";
+const ACTIVITY_COLLECTION = "activities";
+const LEGACY_ACTIVITY_COLLECTION = "activity";
 
 function normalizeActivityInput(activityOrUserId, type, title, description, icon = "info") {
     if (typeof activityOrUserId === "object" && activityOrUserId !== null) {

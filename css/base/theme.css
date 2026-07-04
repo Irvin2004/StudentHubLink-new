@@ -3,6 +3,7 @@
     --blue: #3B82F6;
     --blue-dark: #2563EB;
     --white: #FFFFFF;
+    --surface: #FFFFFF;
     --bg: #F8FAFC;
     --text-main: #0F172A;
     --text-muted: #64748B;
@@ -13,9 +14,15 @@
     --shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
 
     --radius-sm: 10px;
-    --radius-md: 14px;
-    --radius-lg: 20px;
+    --radius-md: 16px;
+    --radius-lg: 24px;
     --radius-xl: 28px;
+    --space-xs: 8px;
+    --space-sm: 12px;
+    --space-md: 16px;
+    --space-lg: 24px;
+    --space-xl: 32px;
+    --space-2xl: 48px;
 }
 
 body {

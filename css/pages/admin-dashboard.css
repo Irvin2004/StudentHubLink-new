@@ -1,21 +1,11 @@
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:Arial,sans-serif;
-}
-
 body{
     display:flex;
-    background:#f4f6f9;
 }
-
-/* Sidebar */
 
 .sidebar{
     width:250px;
     height:100vh;
-    background:#003366;
+    background:var(--navy);
     color:white;
     padding:20px;
 }
@@ -37,8 +27,6 @@ body{
     text-decoration:none;
 }
 
-/* Main Content */
-
 .main{
     flex:1;
     padding:30px;
@@ -49,10 +37,8 @@ body{
 }
 
 .header h1{
-    color:#003366;
+    color:var(--navy);
 }
-
-/* Statistics */
 
 .stats{
     display:grid;
@@ -61,7 +47,8 @@ body{
     margin-bottom:30px;
 }
 
-.card{
+.admin-card,
+.stat-card{
     background:white;
     padding:20px;
     border-radius:10px;
@@ -69,11 +56,10 @@ body{
     text-align:center;
 }
 
-.card h2{
-    color:#003366;
+.admin-card h2,
+.stat-card h3{
+    color:var(--navy);
 }
-
-/* Table */
 
 .table-container{
     background:white;
@@ -94,7 +80,7 @@ th, td{
 }
 
 th{
-    background:#003366;
+    background:var(--navy);
     color:white;
 }
 

@@ -4,75 +4,94 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>StudentHub Dashboard</title>
-     <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-     <link rel="stylesheet" href="css/base/reset.css">
-     <link rel="stylesheet" href="css/base/theme.css">
-     <link rel="stylesheet" href="css/components/navbar.css">
-     <link rel="stylesheet" href="css/components/buttons.css">
-     <link rel="stylesheet" href="css/components/cards.css">
-     <link rel="stylesheet" href="css/pages/dashboard.css">
-     <link rel="preconnect" href="https://fonts.googleapis.com">
-     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    </head>
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="css/base/reset.css">
+    <link rel="stylesheet" href="css/base/theme.css">
+    <link rel="stylesheet" href="css/components/buttons.css">
+    <link rel="stylesheet" href="css/components/cards.css">
+    <link rel="stylesheet" href="css/pages/dashboard.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
 <body>
 <div class="dashboard-page">
-
     <aside class="sidebar">
         <div class="sidebar-logo">StudentHub</div>
 
         <nav class="sidebar-menu">
-            <a href="dashboard.html" class="active">🏠 Home</a>
-            <a href="pages/resources.html">📚 Resources</a>
-            <a href="pages/upload.html">📤 Upload</a>
-            <a href="pages/documents.html">📄 Documents</a>
-            <a href="pages/profile.html">👤 Profile</a>
+            <a href="dashboard.html" class="active">Home</a>
+            <a href="pages/resources.html">Resources</a>
+            <a href="pages/upload.html">Upload</a>
+            <a href="pages/documents.html">Documents</a>
+            <a href="pages/profile.html">Profile</a>
         </nav>
     </aside>
 
     <main class="dashboard-main">
-
         <div class="dashboard-header">
-            <div>
-                <h1 id="greeting">Welcome back 👋</h1>
-                <p id="userEmail">Continue your student journey with StudentHub.</p>
+            <div class="header-left">
+                <h1 id="greeting">Good morning</h1>
+                <p>Ready to continue your learning journey?</p>
             </div>
 
-            <button id="logoutBtn" class="logout-btn">Logout</button>
+            <div class="header-right">
+                <div class="search-box">
+                    <input type="text" id="dashboardSearch" placeholder="Search resources...">
+                </div>
+
+                <button class="notification-btn" id="notificationBtn" aria-label="Notifications">
+                    N
+                    <span id="notificationCount">0</span>
+                </button>
+
+                <div class="profile-menu">
+                    <button id="profileButton" aria-label="Open profile menu">
+                        <div class="avatar">A</div>
+                        <span id="userName">Student</span>
+                        <span aria-hidden="true">v</span>
+                    </button>
+
+                    <div class="profile-dropdown" id="profileDropdown">
+                        <a href="pages/profile.html">My Profile</a>
+                        <a href="#">Settings</a>
+                        <button id="logoutBtn">Logout</button>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <section class="stats-grid">
             <div class="stat-box">
-                <span>📚</span>
+                <span>RES</span>
                 <p>Uploaded Resources</p>
                 <h2 id="totalUploads">0</h2>
             </div>
 
             <div class="stat-box">
-                <span>⬇️</span>
+                <span>DL</span>
                 <p>Total Downloads</p>
                 <h2 id="totalDownloads">0</h2>
             </div>
 
             <div class="stat-box">
-                <span>💰</span>
+                <span>R</span>
                 <p>Total Earnings</p>
                 <h2 id="totalEarnings">R0</h2>
             </div>
 
             <div class="stat-box">
-                <span>⭐</span>
+                <span>4.8</span>
                 <p>Rating</p>
                 <h2>4.8</h2>
             </div>
         </section>
 
         <section class="dashboard-grid">
-
             <div class="panel">
                 <h3>Performance Overview</h3>
 
-                <div class="chart-preview">
+                <div class="chart-preview" aria-hidden="true">
                     <span></span>
                     <span></span>
                     <span></span>
@@ -81,30 +100,31 @@
                 </div>
             </div>
 
-            <div class="panel">
-                <h3>Quick Actions</h3>
+            <div>
+                <div class="panel">
+                    <h3>Quick Actions</h3>
 
-                <div class="quick-actions">
-                    <a href="pages/upload.html">📤 Upload Resource</a>
-                    <a href="pages/resources.html">📚 Browse Resources</a>
-                    <a href="pages/profile.html">👤 View Profile</a>
-                    <a href="pages/documents.html">📄 Document Assistant</a>
+                    <div class="quick-actions">
+                        <a href="pages/upload.html">Upload Resource</a>
+                        <a href="pages/resources.html">Browse Resources</a>
+                        <a href="pages/profile.html">View Profile</a>
+                        <a href="pages/documents.html">Document Assistant</a>
+                    </div>
                 </div>
+
                 <div class="panel recent-activity-panel">
                     <h3>Recent Activity</h3>
 
                     <div id="recentActivityList" class="recent-activity-list">
-                         <p class="empty-state">No recent activity yet.</p>
+                        <p class="empty-state">No recent activity yet.</p>
                     </div>
-                </div>    
+                </div>
             </div>
-
         </section>
-
     </main>
-
 </div>
 
 <script type="module" src="js/auth.js"></script>
+<script type="module" src="js/service/dashboard.js"></script>
 </body>
 </html>

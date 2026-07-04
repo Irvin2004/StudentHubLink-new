@@ -15,7 +15,6 @@ async function loadFinancials() {
         await getDoc(doc(db, "platform", "financials"));
 
         if (!financialDoc.exists()) {
-            console.log("No financial data found.");
             return;
         }
 

@@ -138,22 +138,39 @@ async function uploadResource(user) {
     fileInput.files[0];
 
     const allowedTypes = [
-    "application/pdf",
-    "image/jpeg",
-    "image/jpg",
-    "image/png",
-    "application/zip",
-    "application/x-zip-compressed"
-];
+        "application/pdf",
+        "image/jpeg",
+        "image/jpg",
+        "image/png",
+        "application/zip",
+        "application/x-zip-compressed"
+    ];
 
-if(!allowedTypes.includes(file.type)){
-    message.textContent =
-    "Only PDF, JPG, PNG and ZIP files are allowed.";
+    const allowedExtensions = [
+        ".pdf",
+        ".jpg",
+        ".jpeg",
+        ".png",
+        ".zip"
+    ];
 
-    return;
-}
+    const fileName =
+    file.name.toLowerCase();
 
-const MAX_SIZE = 20 * 1024 * 1024;
+    const hasAllowedType =
+    allowedTypes.includes(file.type);
+
+    const hasAllowedExtension =
+    allowedExtensions.some((extension) => fileName.endsWith(extension));
+
+    if (!hasAllowedType && !hasAllowedExtension) {
+        message.textContent =
+        "Only PDF, JPG, PNG and ZIP files are allowed.";
+
+        return;
+    }
+
+    const MAX_SIZE = 20 * 1024 * 1024;
 
     if (file.size > MAX_SIZE) {
         message.textContent = "File size exceeds the 20MB limit.";
@@ -193,7 +210,7 @@ const MAX_SIZE = 20 * 1024 * 1024;
             approved: false,
             downloadCount: 0,
             currency: "ZAR",
-            fileType: file.type,
+            fileType: file.type || "application/octet-stream",
             fileUrl,
             filePath,
             fileName: file.name,
@@ -205,17 +222,26 @@ const MAX_SIZE = 20 * 1024 * 1024;
             updatedAt: serverTimestamp()
         });
 
-        await updateDoc(doc(db, "users", user.uid), {
+        await setDoc(doc(db, "users", user.uid), {
+            uid: user.uid,
+            email: user.email,
             totalUploads: increment(1),
             updatedAt: serverTimestamp()
+        }, {
+            merge: true
         });
 
-        await createActivity(
-            user.uid,
-            "upload",
-            "Resource uploaded",
-            `${title} was uploaded for admin approval.`
-        );
+        try {
+            await createActivity(
+                user.uid,
+                "upload",
+                "Resource uploaded",
+                `${title} was uploaded for admin approval.`,
+                "upload"
+            );
+        } catch (error) {
+            console.error("Upload activity failed:", error);
+        }
 
         message.textContent = "Resource uploaded for admin approval.";
         document.getElementById("resourceUploadForm").reset();
