@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>StudentHub Resources</title>
+
+<title>StudentHub Marketplace</title>
 <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../css/base/reset.css">
 <link rel="stylesheet" href="../css/base/theme.css">
 <link rel="stylesheet" href="../css/components/navbar.css">
 <link rel="stylesheet" href="../css/components/buttons.css">
-<link rel="stylesheet" href="../css/components/cards.css">
 <link rel="stylesheet" href="../css/pages/resources.css">
 </head>
 <body>
@@ -21,42 +21,95 @@
 
     <ul class="nav-links">
         <li><a href="../dashboard.html">Dashboard</a></li>
-        <li><a href="resources.html">Resources</a></li>
-        <li><a href="documents.html">Documents</a></li>
+        <li><a href="resources.html">Marketplace</a></li>
+        <li><a href="library.html">My Library</a></li>
         <li><a href="upload.html">Upload</a></li>
+        <li><a href="documents.html">Documents</a></li>
         <li><a href="profile.html">Profile</a></li>
     </ul>
 </nav>
 
-<div class="container">
+<main class="marketplace-page">
+    <section class="marketplace-header">
+        <div>
+            <p class="eyebrow">Student resources</p>
+            <h1>Marketplace</h1>
+            <p>
+                Discover, buy and share quality study resources made for
+                focused student learning.
+            </p>
+        </div>
+    </section>
 
-    <div class="page-title">
-        <h1>Study Resources</h1>
-        <p>Browse and share quality study materials.</p>
+    <div class="marketplace-controls">
+        <input
+            id="resourceSearch"
+            type="search"
+            placeholder="Search by title, category, or author..."
+            autocomplete="off"
+        >
+
+        <select id="sortResources" aria-label="Sort resources">
+            <option value="newest">Newest</option>
+            <option value="oldest">Oldest</option>
+            <option value="free">Free First</option>
+            <option value="paid">Paid First</option>
+            <option value="downloads">Most Downloaded</option>
+        </select>
     </div>
 
-    <div class="search-box">
-        <input id="resourceSearch" type="text" placeholder="Search for notes, past papers, guides...">
+    <section class="marketplace-toolbar" aria-label="Marketplace categories">
+        <button class="filter-btn active" type="button" data-category="All">
+            All
+        </button>
+
+        <button class="filter-btn" type="button" data-category="Programming">
+            Programming
+        </button>
+
+        <button class="filter-btn" type="button" data-category="Engineering">
+            Engineering
+        </button>
+
+        <button class="filter-btn" type="button" data-category="Robotics">
+            Robotics
+        </button>
+
+        <button class="filter-btn" type="button" data-category="Business">
+            Business
+        </button>
+
+        <button class="filter-btn" type="button" data-category="Science">
+            Science
+        </button>
+    </section>
+
+    <section id="resourceGrid" class="resource-grid" aria-label="Marketplace resources"></section>
+</main>
+
+<div class="modal-overlay" id="resourceModal">
+    <div class="modal-card">
+        <button class="modal-close" id="closeResourceModal" type="button">&times;</button>
+
+        <span class="resource-category" id="modalCategory">Category</span>
+
+        <h2 id="modalTitle">Resource title</h2>
+
+        <p id="modalDescription">Description</p>
+
+        <div class="modal-meta">
+            <p><strong>Author:</strong> <span id="modalOwner">Unknown</span></p>
+            <p><strong>Price:</strong> <span id="modalPrice">FREE</span></p>
+            <p><strong>Downloads:</strong> <span id="modalDownloads">0</span></p>
+        </div>
+
+        <div class="modal-actions">
+            <button class="btn-secondary" id="modalCancel" type="button">Close</button>
+            <button class="btn-primary" id="modalAction" type="button">Download</button>
+        </div>
     </div>
-
-    <div class="categories">
-        <div class="category active">All</div>
-        <div class="category">Mathematics</div>
-        <div class="category">Engineering</div>
-        <div class="category">Programming</div>
-        <div class="category">Business Studies</div>
-        <div class="category">Life Skills</div>
-    </div>
-
-    <div class="upload-section">
-        <a class="upload-btn" href="upload.html">Upload Notes</a>
-    </div>
-
-    <div class="resources-grid" id="resourcesGrid"></div>
-
 </div>
 
-<script type="module" src="../js/auth.js"></script>
-<script type="module" src="../js/resources.js"></script>
+<script type="module" src="../js/service/marketplace.js"></script>
 </body>
 </html>

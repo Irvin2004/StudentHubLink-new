@@ -1,0 +1,119 @@
+.library-page {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 34px 24px 72px;
+}
+
+.library-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 24px;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+}
+
+.library-header > div:first-child {
+    max-width: 620px;
+}
+
+.library-header h1 {
+    color: #003366;
+    font-size: 48px;
+    line-height: 1;
+    margin-bottom: 14px;
+}
+
+.library-header p:last-child {
+    color: var(--text-muted);
+    font-size: 18px;
+    line-height: 1.6;
+}
+
+.library-controls {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 18px;
+}
+
+.library-controls input,
+.library-controls select {
+    padding: 12px 16px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    background: white;
+    box-shadow: var(--shadow);
+}
+
+.library-controls input {
+    min-width: min(320px, 100%);
+}
+
+.library-filters {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 28px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+}
+
+.library-filter {
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: white;
+    color: var(--text);
+    cursor: pointer;
+    font-weight: 700;
+    padding: 10px 18px;
+    white-space: nowrap;
+    box-shadow: var(--shadow);
+}
+
+.library-filter.active,
+.library-filter:hover {
+    background: #003366;
+    border-color: #003366;
+    color: white;
+}
+
+.library-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+}
+
+.library-grid:empty {
+    display: none;
+}
+
+.library-grid:not(:empty) + .empty-state {
+    display: none;
+}
+
+.library-date {
+    color: var(--text-muted);
+    margin-bottom: 18px;
+}
+
+#libraryEmpty h2 {
+    color: #003366;
+    font-size: 22px;
+    margin-bottom: 8px;
+}
+
+@media (max-width: 760px) {
+    .library-header {
+        align-items: stretch;
+    }
+
+    .library-header h1 {
+        font-size: 38px;
+    }
+
+    .library-controls,
+    .library-controls input,
+    .library-controls select {
+        width: 100%;
+    }
+}

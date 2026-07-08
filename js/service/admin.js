@@ -1,4 +1,5 @@
 import { auth, db } from "../firebase.js";
+import { formatCurrency } from "../utils/formatPrice.js";
 
 import {
     onAuthStateChanged
@@ -22,7 +23,10 @@ async function loadFinancials() {
         financialDoc.data();
 
         document.getElementById("platformRevenue").textContent =
-        `R${Number(data.totalRevenue || 0).toFixed(2)}`;
+        formatCurrency(data.totalRevenue, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
 
         document.getElementById("totalTransactions").textContent =
         data.totalTransactions || 0;

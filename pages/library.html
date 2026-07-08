@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>StudentHub Library</title>
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../css/base/reset.css">
+<link rel="stylesheet" href="../css/base/theme.css">
+<link rel="stylesheet" href="../css/components/navbar.css">
+<link rel="stylesheet" href="../css/components/buttons.css">
+<link rel="stylesheet" href="../css/pages/resources.css">
+<link rel="stylesheet" href="../css/pages/library.css">
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="logo">
+        <h2>StudentHub</h2>
+    </div>
+
+    <ul class="nav-links">
+        <li><a href="../dashboard.html">Dashboard</a></li>
+        <li><a href="resources.html">Marketplace</a></li>
+        <li><a href="library.html">My Library</a></li>
+        <li><a href="upload.html">Upload</a></li>
+        <li><a href="documents.html">Documents</a></li>
+        <li><a href="profile.html">Profile</a></li>
+    </ul>
+</nav>
+
+<main class="library-page">
+    <section class="library-header">
+
+    <div>
+
+        <h1>📚 My Library</h1>
+
+        <p>
+
+            All your downloaded and purchased study resources.
+
+        </p>
+
+    </div>
+
+    <div class="library-summary">
+
+        <div class="summary-card">
+
+            <span id="libraryCount">
+
+                0
+
+            </span>
+
+            <small>
+
+                Resources
+
+            </small>
+
+        </div>
+
+    </div>
+
+    </section>
+
+    <div class="library-controls">
+        <input
+            id="librarySearch"
+            type="search"
+            placeholder="Search my library..."
+            autocomplete="off"
+        >
+
+        <select id="librarySort" aria-label="Sort library">
+            <option value="recent">Recently Added</option>
+            <option value="oldest">Oldest</option>
+            <option value="title">Title</option>
+        </select>
+    </div>
+
+    <section class="library-filters" aria-label="Library categories">
+        <button
+            class="library-filter active"
+            type="button"
+            data-category="All">
+            All
+        </button>
+
+        <button
+            class="library-filter"
+            type="button"
+            data-category="Programming">
+            Programming
+        </button>
+
+        <button
+            class="library-filter"
+            type="button"
+            data-category="Engineering">
+            Engineering
+        </button>
+
+        <button
+            class="library-filter"
+            type="button"
+            data-category="Robotics">
+            Robotics
+        </button>
+    </section>
+
+    <section id="libraryGrid" class="library-grid"></section>
+
+    <div id="libraryEmpty" class="empty-state">
+        <h2>Your library is empty</h2>
+        <p>
+            Resources you download or purchase
+            will appear here.
+        </p>
+    </div>
+</main>
+
+<script type="module" src="../js/auth.js"></script>
+<script type="module" src="../js/service/library.js"></script>
+</body>
+</html>

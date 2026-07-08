@@ -1,14 +1,15 @@
 import { app } from "../firebase.js";
 import {
-    addActivity,
-    getRecentActivities
+    addActivity
 } from "./activity.js";
+import { RESOURCE_STATUS, TRANSACTION_STATUS } from "../utils/constants.js";
+import { formatLongDate } from "../utils/formatDate.js";
+import { formatCurrency } from "../utils/formatPrice.js";
 
 import {
     getAuth,
     createUserWithEmailAndPassword,
     signInWithEmailAndPassword,
-    signOut,
     updateProfile,
     onAuthStateChanged
 }
@@ -50,50 +51,13 @@ window.location.pathname;
 const isPublicPage =
 publicPages.some((page) => currentPath.endsWith(page));
 
+const isDashboardPage =
+currentPath.endsWith("/dashboard.html");
+
 const isAdminPage =
 currentPath.includes("/Admin/");
 
-const formatCurrency = (value) =>
-`R${Number(value || 0).toLocaleString("en-ZA")}`;
-
-const formatDate = (value) => {
-    if (!value) {
-        return "Not available";
-    }
-
-    const date =
-    typeof value.toDate === "function" ? value.toDate() : new Date(value);
-
-    return date.toLocaleDateString("en-ZA", {
-        year: "numeric",
-        month: "long",
-        day: "numeric"
-    });
-};
-
-const escapeHtml = (value) =>
-String(value || "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-
-function getGreeting(name) {
-    const hour = new Date().getHours();
-
-    if (hour < 12) {
-        return `Good morning, ${name}`;
-    }
-
-    if (hour < 18) {
-        return `Good afternoon, ${name}`;
-    }
-
-    return `Good evening, ${name}`;
-}
-
-async function getUserDocument(user) {
+export async function getUserDocument(user) {
     const userRef =
     doc(db, "users", user.uid);
 
@@ -188,7 +152,7 @@ function redirectToDashboard() {
     window.location.href = "dashboard.html";
 }
 
-async function loadUserStats(user, userData) {
+async function loadProfileStats(user, userData) {
     let uploadCount =
     Number(userData.totalUploads || 0);
 
@@ -211,69 +175,18 @@ async function loadUserStats(user, userData) {
     const earnings =
     Number(userData.totalEarnings || 0);
 
-    setText("totalDownloads", downloads);
-    setText("totalUploads", uploadCount);
-    setText("totalEarnings", formatCurrency(earnings));
-
     setText("profileDownloads", downloads);
     setText("profileUploads", uploadCount);
     setText("profileEarnings", formatCurrency(earnings));
-}
-
-async function renderRecentActivity(userId) {
-    const activityList =
-    document.getElementById("recentActivityList");
-
-    if (!activityList) return;
-
-    activityList.innerHTML =
-    `<p class="empty-state">Loading recent activity...</p>`;
-
-    const activities =
-    await getRecentActivities(userId);
-
-    if (!activities.length) {
-        activityList.innerHTML =
-        `<p class="empty-state">No recent activity yet.</p>`;
-        return;
-    }
-
-    activityList.innerHTML =
-    activities.map(activity => `
-        <div class="activity-item">
-            <div class="activity-icon">
-                ${getActivityIcon(activity.icon)}
-            </div>
-
-            <div class="activity-content">
-                <h4>${escapeHtml(activity.title)}</h4>
-                <p>${escapeHtml(activity.description)}</p>
-            </div>
-        </div>
-    `).join("");
-}
-
-function getActivityIcon(icon) {
-    const icons = {
-        "user-plus": "+",
-        "upload": "UP",
-        "approval": "OK",
-        "sale": "R",
-        "download": "DL",
-        "info": "i"
-    };
-
-    return icons[icon] || "i";
 }
 
 function renderUserProfile(userData) {
     const displayName =
     userData.name || userData.fullName || "Student";
 
-    setText("greeting", getGreeting(displayName));
-    setText("userName", userData.name || userData.fullName || "Student");
+    setText("userName", displayName);
     setText("userEmail", userData.email || "");
-    setText("profileMemberSince", `Member since ${formatDate(userData.joinedAt || userData.createdAt)}`);
+    setText("profileMemberSince", `Member since ${formatLongDate(userData.joinedAt || userData.createdAt)}`);
     setText("profileRole", userData.role || "student");
     setText("profileInstitution", userData.institution || "Not added yet");
     setText("profileCourse", userData.course || "Not added yet");
@@ -289,13 +202,13 @@ async function loadAdminStats() {
     await getCountFromServer(collection(db, "resources"));
 
     const pendingQuery =
-    query(collection(db, "resources"), where("status", "==", "pending"));
+    query(collection(db, "resources"), where("status", "==", RESOURCE_STATUS.PENDING));
 
     const pendingSnapshot =
     await getCountFromServer(pendingQuery);
 
     const transactionsQuery =
-    query(collection(db, "transactions"), where("status", "==", "completed"));
+    query(collection(db, "transactions"), where("status", "==", TRANSACTION_STATUS.COMPLETED));
 
     const completedTransactions =
     await getDocs(transactionsQuery);
@@ -454,22 +367,6 @@ loginForm.addEventListener("submit", async (event) => {
 });
 }
 
-const logoutBtn =
-document.getElementById("logoutBtn");
-
-if (logoutBtn) {
-logoutBtn.addEventListener("click", async (event) => {
-
-    event.preventDefault();
-
-    await signOut(auth);
-
-    window.location.href =
-    pagePrefix + "login.html";
-
-});
-}
-
 onAuthStateChanged(auth, async (user) => {
 
     if (!user) {
@@ -481,6 +378,10 @@ onAuthStateChanged(auth, async (user) => {
     }
 
     if (isPublicPage) {
+        return;
+    }
+
+    if (isDashboardPage) {
         return;
     }
 
@@ -511,8 +412,7 @@ onAuthStateChanged(auth, async (user) => {
     }
 
     renderUserProfile(userData);
-    await renderRecentActivity(user.uid);
-    await loadUserStats(user, userData);
+    await loadProfileStats(user, userData);
 
     if (isAdminPage) {
         await loadAdminStats();

@@ -1,30 +1,474 @@
-const profileButton =
-document.getElementById("profileButton");
+import { getMonthlyUploads } from "./analytics.js";
 
-const profileDropdown =
-document.getElementById("profileDropdown");
+import {
+    getAuth,
+    onAuthStateChanged,
+    signOut
+}
+from
+"https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 
-if (profileButton && profileDropdown) {
+import {
+    collection,
+    getCountFromServer,
+    query,
+    where
+}
+from
+"https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
-    profileButton.addEventListener("click", () => {
+import { app, db } from "../firebase.js";
+import { getRecentActivities } from "./activity.js";
+import { getUserDocument } from "./auth.js";
+import { formatDate } from "../utils/formatDate.js";
+import { formatCurrency } from "../utils/formatPrice.js";
+import {
+    getNotifications,
+    markAsRead
+} from "./notifications.js";
 
-        profileDropdown.classList.toggle("show");
+const auth =
+getAuth(app);
 
-    });
+const escapeHtml = (value) =>
+String(value || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 
+function setText(id, value) {
+    const element =
+    document.getElementById(id);
+
+    if (element) {
+        element.textContent = value;
+    }
 }
 
-window.addEventListener("click", (event) => {
+function getGreeting(name) {
+    const hour =
+    new Date().getHours();
 
-    if(
-        profileButton &&
-        profileDropdown &&
-        !profileButton.contains(event.target) &&
-        !profileDropdown.contains(event.target)
-    ){
-
-        profileDropdown.classList.remove("show");
-
+    if (hour < 12) {
+        return `Good morning, ${name}`;
     }
 
+    if (hour < 18) {
+        return `Good afternoon, ${name}`;
+    }
+
+    return `Good evening, ${name}`;
+}
+
+function getActivityIcon(icon) {
+    const icons = {
+        "user-plus": "+",
+        "upload": "UP",
+        "approval": "OK",
+        "sale": "R",
+        "download": "DL",
+        "info": "i"
+    };
+
+    return icons[icon] || "i";
+}
+
+function setupProfileMenu() {
+    const profileButton =
+    document.getElementById("profileButton");
+
+    const profileDropdown =
+    document.getElementById("profileDropdown");
+
+    if (profileButton && profileDropdown) {
+        profileButton.addEventListener("click", (event) => {
+            event.stopPropagation();
+            profileDropdown.classList.toggle("show");
+        });
+    }
+
+    window.addEventListener("click", (event) => {
+        if (
+            profileButton &&
+            profileDropdown &&
+            !profileButton.contains(event.target) &&
+            !profileDropdown.contains(event.target)
+        ) {
+            profileDropdown.classList.remove("show");
+        }
+    });
+}
+
+function setupNotificationMenu() {
+    const notificationButton =
+    document.getElementById("notificationBtn");
+
+    const notificationDropdown =
+    document.getElementById("notificationDropdown");
+
+    if (notificationButton && notificationDropdown) {
+        notificationButton.addEventListener("click", async (event) => {
+            event.stopPropagation();
+            notificationDropdown.classList.toggle("show");
+
+            if (notificationDropdown.classList.contains("show")) {
+                await markVisibleNotificationsAsRead();
+            }
+        });
+    }
+
+    window.addEventListener("click", (event) => {
+        if (
+            notificationButton &&
+            notificationDropdown &&
+            !notificationButton.contains(event.target) &&
+            !notificationDropdown.contains(event.target)
+        ) {
+            notificationDropdown.classList.remove("show");
+        }
+    });
+}
+
+function setupLogout() {
+    const logoutBtn =
+    document.getElementById("logoutBtn");
+
+    if (!logoutBtn) {
+        return;
+    }
+
+    logoutBtn.addEventListener("click", async (event) => {
+        event.preventDefault();
+
+        await signOut(auth);
+
+        window.location.href =
+        "login.html";
+    });
+}
+
+async function loadDashboard(user) {
+    const userData =
+    await loadUserProfile(user);
+
+    renderDashboard({
+        userData,
+        stats: null,
+        activities: null,
+        chart: null
+    });
+
+    const stats =
+    await loadStats(user, userData);
+
+    const activities =
+    await loadActivities(user);
+
+    const chart =
+    await loadChart(user);
+
+    const notifications =
+    await loadNotifications(user);
+
+    renderDashboard({
+        userData,
+        stats,
+        activities,
+        chart,
+        notifications
+    });
+}
+
+async function loadStats(user, userData) {
+    let uploadCount =
+    Number(userData.totalUploads || 0);
+
+    try {
+        const uploadQuery =
+        query(collection(db, "resources"), where("ownerId", "==", user.uid));
+
+        const uploadSnapshot =
+        await getCountFromServer(uploadQuery);
+
+        uploadCount =
+        uploadSnapshot.data().count;
+    } catch (error) {
+        console.warn("Could not load dashboard upload count:", error);
+    }
+
+    return {
+        uploads: uploadCount,
+        downloads: Number(userData.totalDownloads || 0),
+        earnings: Number(userData.totalEarnings || 0)
+    };
+}
+
+async function loadUserProfile(user) {
+    try {
+        return await getUserDocument(user);
+    } catch (error) {
+        console.error("Could not load dashboard profile:", error);
+
+        return {
+            name: user.displayName || "Student",
+            fullName: user.displayName || "Student",
+            email: user.email,
+            totalUploads: 0,
+            totalDownloads: 0,
+            totalEarnings: 0
+        };
+    }
+}
+
+async function loadActivities(user) {
+    const activityList =
+    document.getElementById("recentActivityList");
+
+    if (activityList) {
+        activityList.innerHTML =
+        `<p class="empty-state">Loading recent activity...</p>`;
+    }
+
+    return getRecentActivities(user.uid);
+}
+
+async function loadNotifications(user) {
+    const notificationList =
+    document.getElementById("notificationList");
+
+    if (notificationList) {
+        notificationList.innerHTML =
+        `<p class="empty-state">Loading notifications...</p>`;
+    }
+
+    try {
+        return await getNotifications(user.uid);
+    } catch (error) {
+        console.warn("Could not load notifications:", error);
+        return [];
+    }
+}
+
+async function loadChart(user) {
+    try {
+        return await getMonthlyUploads(user.uid);
+    } catch (error) {
+        console.error("Failed to load analytics:", error);
+
+        return {
+            labels: [
+                "Jan","Feb","Mar","Apr","May","Jun",
+                "Jul","Aug","Sep","Oct","Nov","Dec"
+            ],
+            values: new Array(12).fill(0)
+        };
+    }
+}
+
+function renderDashboard({
+    userData,
+    stats,
+    activities,
+    chart,
+    notifications
+}) {
+    const displayName =
+    userData.name || userData.fullName || userData.displayName || "Student";
+
+    setText("greeting", getGreeting(displayName));
+    setText("userName", displayName);
+
+    if (stats) {
+        setText("totalUploads", stats.uploads);
+        setText("totalDownloads", stats.downloads);
+        setText("totalEarnings", formatCurrency(stats.earnings));
+    }
+
+    if (activities) {
+        renderActivities(activities);
+    }
+
+    if (chart) {
+        renderChart(chart);
+    }
+
+    if (notifications) {
+        renderNotifications(notifications);
+    }
+}
+
+function renderActivities(activities) {
+    const activityList =
+    document.getElementById("recentActivityList");
+
+    if (!activityList) {
+        return;
+    }
+
+    if (!activities.length) {
+        activityList.innerHTML =
+        `<p class="empty-state">No recent activity yet.</p>`;
+        return;
+    }
+
+    activityList.innerHTML =
+    activities.map((activity) => `
+        <div class="activity-item">
+            <div class="activity-icon">
+                ${getActivityIcon(activity.icon)}
+            </div>
+
+            <div class="activity-content">
+                <h4>${escapeHtml(activity.title)}</h4>
+                <p>${escapeHtml(activity.description)}</p>
+            </div>
+        </div>
+    `).join("");
+}
+
+function renderNotifications(notifications) {
+    const notificationList =
+    document.getElementById("notificationList");
+
+    const notificationCount =
+    document.getElementById("notificationCount");
+
+    if (!notificationList) {
+        return;
+    }
+
+    const unreadCount =
+    notifications.filter((notification) => !notification.read).length;
+
+    if (notificationCount) {
+        notificationCount.textContent =
+        unreadCount;
+
+        notificationCount.hidden =
+        unreadCount === 0;
+    }
+
+    if (!notifications.length) {
+        notificationList.innerHTML =
+        `<p class="empty-state">No notifications yet.</p>`;
+        return;
+    }
+
+    notificationList.innerHTML =
+    notifications.map((notification) => `
+        <article
+            class="notification-item ${notification.read ? "" : "unread"}"
+            data-notification-id="${escapeHtml(notification.id)}"
+            data-unread="${notification.read ? "false" : "true"}"
+        >
+            <h4>${escapeHtml(notification.title || "Notification")}</h4>
+            <p>${escapeHtml(notification.message || "")}</p>
+            <span class="notification-time">${escapeHtml(formatDate(notification.createdAt, { fallback: "" }))}</span>
+        </article>
+    `).join("");
+}
+
+async function markVisibleNotificationsAsRead() {
+    const unreadNotifications =
+    Array.from(document.querySelectorAll(".notification-item[data-unread='true']"));
+
+    if (!unreadNotifications.length) {
+        return;
+    }
+
+    const notificationCount =
+    document.getElementById("notificationCount");
+
+    unreadNotifications.forEach((notification) => {
+        notification.classList.remove("unread");
+        notification.dataset.unread = "false";
+    });
+
+    if (notificationCount) {
+        notificationCount.textContent = "0";
+        notificationCount.hidden = true;
+    }
+
+    await Promise.all(
+        unreadNotifications.map((notification) =>
+            markAsRead(notification.dataset.notificationId)
+                .catch((error) => {
+                    console.warn("Could not mark notification as read:", error);
+                })
+        )
+    );
+}
+
+let analyticsChartInstance = null;
+
+function renderChart(chart) {
+    const analyticsChart =
+    document.getElementById("analyticsChart");
+
+    if (!analyticsChart) {
+        return;
+    }
+
+    if (!window.Chart) {
+        analyticsChart.dataset.values =
+        JSON.stringify(chart);
+
+        console.warn("Chart.js is not available yet.");
+        return;
+    }
+
+    if (analyticsChartInstance) {
+        analyticsChartInstance.destroy();
+    }
+
+    analyticsChartInstance = new window.Chart(analyticsChart, {
+        type: "bar",
+
+        data: {
+            labels: chart.labels,
+
+            datasets: [
+                {
+                    label: "Uploads",
+                    data: chart.values,
+                    backgroundColor: "#3B82F6",
+                    borderRadius: 10
+                }
+            ]
+        },
+
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        precision: 0
+                    }
+                }
+            }
+        }
+    });
+}
+
+setupProfileMenu();
+setupNotificationMenu();
+setupLogout();
+
+onAuthStateChanged(auth, (user) => {
+    if (!user) {
+        return;
+    }
+
+    loadDashboard(user);
 });

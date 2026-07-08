@@ -21,7 +21,8 @@
 
         <nav class="sidebar-menu">
             <a href="dashboard.html" class="active">Home</a>
-            <a href="pages/resources.html">Resources</a>
+            <a href="pages/resources.html">Marketplace</a>
+            <a href="pages/library.html">My Library</a>
             <a href="pages/upload.html">Upload</a>
             <a href="pages/documents.html">Documents</a>
             <a href="pages/profile.html">Profile</a>
@@ -40,10 +41,22 @@
                     <input type="text" id="dashboardSearch" placeholder="Search resources...">
                 </div>
 
-                <button class="notification-btn" id="notificationBtn" aria-label="Notifications">
-                    N
-                    <span id="notificationCount">0</span>
-                </button>
+                <div class="notification-menu">
+                    <button class="notification-btn" id="notificationBtn" aria-label="Notifications" type="button">
+                        N
+                        <span id="notificationCount">0</span>
+                    </button>
+
+                    <div class="notification-dropdown" id="notificationDropdown">
+                        <div class="notification-header">
+                            <h3>Notifications</h3>
+                        </div>
+
+                        <div id="notificationList" class="notification-list">
+                            <p class="empty-state">No notifications yet.</p>
+                        </div>
+                    </div>
+                </div>
 
                 <div class="profile-menu">
                     <button id="profileButton" aria-label="Open profile menu">
@@ -89,14 +102,10 @@
 
         <section class="dashboard-grid">
             <div class="panel">
-                <h3>Performance Overview</h3>
+                <h3>Analytics</h3>
 
-                <div class="chart-preview" aria-hidden="true">
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                    <span></span>
+                <div class="chart-preview">
+                    <canvas id="analyticsChart"></canvas>
                 </div>
             </div>
 
@@ -106,7 +115,8 @@
 
                     <div class="quick-actions">
                         <a href="pages/upload.html">Upload Resource</a>
-                        <a href="pages/resources.html">Browse Resources</a>
+                        <a href="pages/resources.html">Marketplace</a>
+                        <a href="pages/library.html">My Library</a>
                         <a href="pages/profile.html">View Profile</a>
                         <a href="pages/documents.html">Document Assistant</a>
                     </div>
@@ -125,6 +135,7 @@
 </div>
 
 <script type="module" src="js/auth.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script type="module" src="js/service/dashboard.js"></script>
 </body>
 </html>

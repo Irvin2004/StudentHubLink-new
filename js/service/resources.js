@@ -1,6 +1,16 @@
 import { app } from "../firebase.js";
 import { createActivity } from "./activity.js";
 import { createNotification } from "./notifications.js";
+import {
+    getResourceAction,
+    getResourceActionPastTense,
+    getReviewStatus,
+    RESOURCE_ACTION,
+    RESOURCE_STATUS,
+    REVIEW_ACTION,
+    TRANSACTION_STATUS
+} from "../utils/constants.js";
+import { formatPrice } from "../utils/formatPrice.js";
 
 import {
     getAuth,
@@ -42,13 +52,6 @@ const storage = getStorage(app);
 const resourceId =
 new URLSearchParams(window.location.search).get("id");
 
-const formatCurrency = (value) => {
-    const amount =
-    Number(value || 0);
-
-    return amount === 0 ? "FREE" : `R${amount.toLocaleString("en-ZA")}`;
-};
-
 const setText = (id, value) => {
     const element =
     document.getElementById(id);
@@ -83,18 +86,21 @@ async function getUserProfile(user) {
 }
 
 function resourceCard(resource) {
+    const action =
+    getResourceAction(resource);
+
     const priceClass =
-    Number(resource.price || 0) > 0 ? "buy-btn" : "download-btn";
+    action === RESOURCE_ACTION.PURCHASE ? "buy-btn" : "download-btn";
 
     const actionText =
-    Number(resource.price || 0) > 0 ? "View Purchase" : "View Download";
+    action === RESOURCE_ACTION.PURCHASE ? "View Purchase" : "View Download";
 
     return `
         <div class="resource-card">
             <h3>${escapeHtml(resource.title)}</h3>
             <p>${escapeHtml(resource.description)}</p>
             <p>${escapeHtml(resource.category)}</p>
-            <div class="price">${formatCurrency(resource.price)}</div>
+            <div class="price">${formatPrice(resource.price)}</div>
 
             <div class="actions">
                 <a class="${priceClass}" href="resource_details.html?id=${resource.id}">
@@ -216,7 +222,7 @@ async function uploadResource(user) {
             fileName: file.name,
             ownerName: userProfile.name || userProfile.fullName || user.displayName || "Student",
             ownerEmail: user.email,
-            status: "pending",
+            status: RESOURCE_STATUS.PENDING,
             purchaseCount: 0,
             createdAt: serverTimestamp(),
             updatedAt: serverTimestamp()
@@ -346,7 +352,7 @@ function calculateCommission(amount) {
 
 async function createTransaction(user, resource, type) {
     const amount =
-    type === "purchase" ? Number(resource.price || 0) : 0;
+    type === RESOURCE_ACTION.PURCHASE ? Number(resource.price || 0) : 0;
     const commission =
     calculateCommission(amount);
 
@@ -365,12 +371,12 @@ async function createTransaction(user, resource, type) {
         platformCommission:
         commission.platformCommission,
         currency: "ZAR",
-        status: "completed"
+        status: TRANSACTION_STATUS.COMPLETED
     });
 
     await updateDoc(doc(db, "resources", resource.id), {
         downloadCount: increment(1),
-        purchaseCount: type === "purchase" ? increment(1) : increment(0),
+        purchaseCount: type === RESOURCE_ACTION.PURCHASE ? increment(1) : increment(0),
         updatedAt: serverTimestamp()
     });
 
@@ -382,11 +388,11 @@ async function createTransaction(user, resource, type) {
     await createActivity(
         user.uid,
         type,
-        type === "purchase" ? "Resource purchased" : "Resource downloaded",
-        `${resource.title} was ${type === "purchase" ? "purchased" : "downloaded"}.`
+        type === RESOURCE_ACTION.PURCHASE ? "Resource purchased" : "Resource downloaded",
+        `${resource.title} was ${getResourceActionPastTense(type)}.`
     );
 
-    if (type === "purchase" && resource.ownerId) {
+    if (type === RESOURCE_ACTION.PURCHASE && resource.ownerId) {
         await updateDoc(doc(db, "users", resource.ownerId), {
             totalEarnings: increment(commission.sellerAmount),
             updatedAt: serverTimestamp()
@@ -396,7 +402,7 @@ async function createTransaction(user, resource, type) {
             resource.ownerId,
             "sale",
             "Resource sold",
-            `${resource.title} earned ${formatCurrency(commission.sellerAmount)}.`
+            `${resource.title} earned ${formatPrice(commission.sellerAmount)}.`
         );
 
         await createNotification(
@@ -450,9 +456,9 @@ async function loadResourceDetails(user) {
     setText("detailDescription", resource.description);
     setText("detailCategory", resource.category);
     setText("detailUploader", resource.ownerName || "Student");
-    setText("detailPrice", formatCurrency(resource.price));
+    setText("detailPrice", formatPrice(resource.price));
     setText("detailDownloads", Number(resource.downloadCount || 0));
-    setText("detailStatus", resource.approved ? "approved" : (resource.status || "pending"));
+    setText("detailStatus", resource.approved ? RESOURCE_STATUS.APPROVED : (resource.status || RESOURCE_STATUS.PENDING));
 
     const actionBtn =
     document.getElementById("resourceActionBtn");
@@ -468,11 +474,11 @@ async function loadResourceDetails(user) {
 
     actionBtn.addEventListener("click", async () => {
         const type =
-        Number(resource.price || 0) > 0 ? "purchase" : "download";
+        getResourceAction(resource);
 
-        if (type === "purchase") {
+        if (type === RESOURCE_ACTION.PURCHASE) {
             const confirmed =
-            window.confirm(`Confirm purchase for ${formatCurrency(resource.price)}?`);
+            window.confirm(`Confirm purchase for ${formatPrice(resource.price)}?`);
 
             if (!confirmed) {
                 return;
@@ -498,7 +504,7 @@ function pendingResourceRow(resource) {
             <td>${escapeHtml(resource.title)}</td>
             <td>${escapeHtml(resource.ownerName || resource.ownerEmail || "Student")}</td>
             <td>${escapeHtml(resource.category)}</td>
-            <td>${formatCurrency(resource.price)}</td>
+            <td>${formatPrice(resource.price)}</td>
             <td>
                 <button class="approve" data-action="approve" data-id="${resource.id}">
                     Approve
@@ -527,7 +533,7 @@ async function loadPendingResources(user) {
     `;
 
     const pendingQuery =
-    query(collection(db, "resources"), where("status", "==", "pending"));
+    query(collection(db, "resources"), where("status", "==", RESOURCE_STATUS.PENDING));
 
     const snapshot =
     await getDocs(pendingQuery);
@@ -559,10 +565,10 @@ async function loadPendingResources(user) {
         }
 
         const status =
-        button.dataset.action === "approve" ? "approved" : "rejected";
+        getReviewStatus(button.dataset.action);
 
         const approved =
-        button.dataset.action === "approve";
+        button.dataset.action === REVIEW_ACTION.APPROVE;
 
         button.disabled = true;
 

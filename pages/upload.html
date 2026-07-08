@@ -4,65 +4,101 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Upload Notes</title>
-  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="../css/base/reset.css">
-  <link rel="stylesheet" href="../css/base/theme.css">
-  <link rel="stylesheet" href="../css/components/buttons.css">
-  <link rel="stylesheet" href="../css/pages/upload.css">
+<title>Upload Resource</title>
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../css/base/reset.css">
+<link rel="stylesheet" href="../css/base/theme.css">
+<link rel="stylesheet" href="../css/components/navbar.css">
+<link rel="stylesheet" href="../css/components/buttons.css">
+<link rel="stylesheet" href="../css/pages/upload.css">
 </head>
 <body>
 
-    <nav class="navbar">
+<nav class="navbar">
     <div class="logo">
         <h2>StudentHub</h2>
     </div>
 
     <ul class="nav-links">
         <li><a href="../dashboard.html">Dashboard</a></li>
-        <li><a href="resources.html">Resources</a></li>
-        <li><a href="documents.html">Documents</a></li>
+        <li><a href="resources.html">Marketplace</a></li>
+        <li><a href="library.html">My Library</a></li>
         <li><a href="upload.html">Upload</a></li>
+        <li><a href="documents.html">Documents</a></li>
         <li><a href="profile.html">Profile</a></li>
     </ul>
 </nav>
 
-<div class="container">
+<main class="upload-page">
+    <section class="upload-header">
+        <p class="eyebrow">Share knowledge</p>
+        <h1>Upload Resource</h1>
+        <p>
+            Add notes, guides, images, or ZIP packs for review. Approved
+            resources will appear in the Marketplace.
+        </p>
+    </section>
 
-<h1>Upload Study Notes</h1>
+    <section class="upload-card">
+        <form id="resourceUploadForm">
+            <label for="resourceTitle">Resource title</label>
+            <input
+                id="resourceTitle"
+                type="text"
+                placeholder="Example: Python beginner notes"
+                required
+            >
 
-<form id="resourceUploadForm">
-<label>Title</label>
-<input id="resourceTitle" type="text" placeholder="Engineering Graphics Notes" required>
+            <label for="resourceDescription">Description</label>
+            <textarea
+                id="resourceDescription"
+                rows="5"
+                placeholder="Briefly describe what students will learn"
+                required
+            ></textarea>
 
-<label>Description</label>
-<textarea id="resourceDescription" rows="5" required></textarea>
+            <label for="resourceCategory">Category</label>
+            <select id="resourceCategory" required>
+                <option value="">Select a category</option>
+                <option value="Programming">Programming</option>
+                <option value="Engineering">Engineering</option>
+                <option value="Robotics">Robotics</option>
+                <option value="Business">Business</option>
+                <option value="Science">Science</option>
+                <option value="Mathematics">Mathematics</option>
+                <option value="Life Skills">Life Skills</option>
+            </select>
 
-<label>Category</label>
+            <label for="resourcePrice">Price in rand</label>
+            <input
+                id="resourcePrice"
+                type="number"
+                min="0"
+                step="1"
+                value="0"
+                required
+            >
 
-<select id="resourceCategory" required>
-<option>Mathematics</option>
-<option>Engineering</option>
-<option>Programming</option>
-<option>Business Studies</option>
-<option>Life Skills</option>
-</select>
+            <label for="resourceFile">Resource file</label>
+            <input
+                id="resourceFile"
+                type="file"
+                accept=".pdf,.jpg,.jpeg,.png,.zip,application/pdf,image/jpeg,image/png,application/zip"
+                required
+            >
 
-<label>Price</label>
-<input id="resourcePrice" type="number" min="0" step="1" placeholder="0 for free">
+            <p class="upload-help">
+                Accepted files: PDF, JPG, PNG, and ZIP. Maximum size: 20MB.
+            </p>
 
-<label>Upload</label>
-<input
-    type="file"
-    id="resourceFile"
-    accept=".pdf,.jpg,.jpeg,.png,.zip"
-/>
+            <button id="uploadResourceBtn" class="btn-primary" type="submit">
+                Upload Resource
+            </button>
 
-<button id="uploadResourceBtn" type="submit">Upload Notes</button>
-<p id="uploadMessage" class="form-message"></p>
-</form>
-
-</div>
+            <p id="uploadMessage" class="form-message" role="status"></p>
+        </form>
+    </section>
+</main>
 
 <script type="module" src="../js/auth.js"></script>
 <script type="module" src="../js/resources.js"></script>
