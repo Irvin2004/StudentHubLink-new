@@ -1,13 +1,17 @@
-import { app } from "../firebase.js";
+import { auth, db } from "../firebase.js";
 import {
     addActivity
 } from "./activity.js";
 import { RESOURCE_STATUS, TRANSACTION_STATUS } from "../utils/constants.js";
+import {
+    setButtonLoading,
+    setMessage,
+    setText
+} from "../utils/dom.js";
 import { formatLongDate } from "../utils/formatDate.js";
 import { formatCurrency } from "../utils/formatPrice.js";
 
 import {
-    getAuth,
     createUserWithEmailAndPassword,
     signInWithEmailAndPassword,
     updateProfile,
@@ -17,7 +21,6 @@ from
 "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 
 import {
-    getFirestore,
     doc,
     setDoc,
     getDoc,
@@ -30,9 +33,6 @@ import {
 }
 from
 "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
-
-const auth = getAuth(app);
-const db = getFirestore(app);
 
 const pagePrefix =
 window.location.pathname.includes("/pages/") ||
@@ -109,45 +109,6 @@ async function updateLastLogin(user) {
     }
 }
 
-function setText(id, value) {
-    const element =
-    document.getElementById(id);
-
-    if (element) {
-        element.textContent = value;
-    }
-}
-
-function setMessage(id, value, type = "") {
-    const element =
-    document.getElementById(id);
-
-    if (!element) {
-        return;
-    }
-
-    element.textContent = value;
-    element.classList.remove("error", "success");
-
-    if (type) {
-        element.classList.add(type);
-    }
-}
-
-function setButtonLoading(button, isLoading, loadingText) {
-    if (!button) {
-        return;
-    }
-
-    if (!button.dataset.defaultText) {
-        button.dataset.defaultText =
-        button.textContent.trim();
-    }
-
-    button.disabled = isLoading;
-    button.textContent =
-    isLoading ? loadingText : button.dataset.defaultText;
-}
 function redirectToDashboard() {
     window.location.href = "dashboard.html";
 }

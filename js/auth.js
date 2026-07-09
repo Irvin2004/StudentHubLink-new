@@ -1,1 +1,0 @@
-import "./service/auth.js";

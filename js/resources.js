@@ -1,1 +1,0 @@
-import "./service/resources.js";

@@ -1,29 +1,26 @@
 import {
+    addDoc,
     collection,
-    doc,
     getDocs,
+    limit,
     query,
     serverTimestamp,
-    setDoc,
     where
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
 import {
-    getAuth,
     onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 
-import { app, db } from "../firebase.js";
+import { auth, db } from "../firebase.js";
 import {
     getResourceActionLabel,
     RESOURCE_ACTION
 } from "../utils/constants.js";
+import { escapeHtml } from "../utils/dom.js";
 import { getTimestampMillis } from "../utils/formatDate.js";
 
 const LIBRARY_COLLECTION = "libraries";
-
-const auth =
-getAuth(app);
 
 const libraryState = {
     resources: [],
@@ -31,14 +28,6 @@ const libraryState = {
     category: "All",
     sort: "recent"
 };
-
-const escapeHtml = (value) =>
-String(value || "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
 
 export async function addToLibrary(resource, user, action) {
     if (!resource || !user) {
@@ -53,19 +42,30 @@ export async function addToLibrary(resource, user, action) {
         return null;
     }
 
-    const libraryItemId =
-    `${user.uid}_${resourceId}`;
+    const existingLibraryItemQuery =
+    query(
+        collection(db, LIBRARY_COLLECTION),
+        where("userId", "==", user.uid),
+        where("resourceId", "==", resourceId),
+        limit(1)
+    );
+
+    const existingLibraryItem =
+    await getDocs(existingLibraryItemQuery);
+
+    if (!existingLibraryItem.empty) {
+        return null;
+    }
 
     const libraryItemRef =
-    doc(db, LIBRARY_COLLECTION, libraryItemId);
-
-    await setDoc(libraryItemRef, {
+    await addDoc(collection(db, LIBRARY_COLLECTION), {
         userId: user.uid,
         resourceId,
         resourceTitle: resource.title || "Untitled Resource",
         title: resource.title || "Untitled Resource",
         description: resource.description || "",
         category: resource.category || "Uncategorized",
+        ownerId: resource.ownerId || "",
         ownerName: resource.ownerName || "Unknown Author",
         price: Number(resource.price) || 0,
         action,
@@ -75,11 +75,9 @@ export async function addToLibrary(resource, user, action) {
         createdAt: resource.createdAt || null,
         addedAt: serverTimestamp(),
         updatedAt: serverTimestamp()
-    }, {
-        merge: true
     });
 
-    return libraryItemId;
+    return libraryItemRef.id;
 }
 
 async function getUserLibrary(userId) {
@@ -111,6 +109,14 @@ function createLibraryCard(resource) {
     const action =
     resource.type || resource.action || RESOURCE_ACTION.DOWNLOAD;
 
+    const ownerId =
+    encodeURIComponent(resource.ownerId || "");
+
+    const ownerLink =
+    resource.ownerId ?
+    `<a href="user-profile.html?id=${ownerId}">${escapeHtml(resource.ownerName || "Unknown Author")}</a>` :
+    escapeHtml(resource.ownerName || "Unknown Author");
+
     return `
         <article class="resource-card">
             <div class="resource-body">
@@ -124,6 +130,10 @@ function createLibraryCard(resource) {
 
                 <p class="library-date">
                     ${escapeHtml(getResourceActionLabel(action))}
+                </p>
+
+                <p class="resource-owner">
+                    Uploaded by ${ownerLink}
                 </p>
 
                 <div class="resource-actions">

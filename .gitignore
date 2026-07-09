@@ -1,0 +1,28 @@
+# OS and editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Logs and temporary files
+*.log
+*.tmp
+*.temp
+
+# Dependency and package-manager folders
+node_modules/
+.pnpm-store/
+
+# Build and cache output
+dist/
+build/
+.cache/
+
+# Environment files
+.env
+.env.*
+
+# Local test artifacts
+coverage/
+playwright-report/
+test-results/

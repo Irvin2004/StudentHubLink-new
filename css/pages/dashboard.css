@@ -283,12 +283,12 @@
     display: block;
 }
 
-.quick-actions {
+.recently-added-list {
     display: grid;
     gap: 14px;
 }
 
-.quick-actions a {
+.recent-resource-item {
     background: var(--bg);
     border: 1px solid var(--border);
     border-radius: 16px;
@@ -296,12 +296,24 @@
     color: var(--navy);
     font-weight: 700;
     transition: 0.25s;
+    display: grid;
+    gap: 6px;
 }
 
-.quick-actions a:hover {
+.recent-resource-item small {
+    color: var(--text-muted);
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.recent-resource-item:hover {
     background: var(--blue);
     color: white;
     transform: translateY(-3px);
+}
+
+.recent-resource-item:hover small {
+    color: white;
 }
 
 .logout-btn {
@@ -348,6 +360,20 @@
     color: var(--navy);
     font-size: 15px;
     margin-bottom: 4px;
+}
+
+.activity-content h4 a {
+    color: inherit;
+    font-weight: 800;
+}
+
+.activity-content h4 span {
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+.activity-content h4 span a {
+    color: var(--blue);
 }
 
 .activity-content p {

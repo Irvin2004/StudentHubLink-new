@@ -34,7 +34,10 @@ export async function addActivity({
     type,
     title,
     description,
-    icon = "info"
+    icon = "info",
+    resourceId = "",
+    ownerId = "",
+    ownerName = ""
 }) {
     if (!userId) {
         console.warn("Activity skipped: missing userId.");
@@ -48,6 +51,9 @@ export async function addActivity({
             title,
             description,
             icon,
+            resourceId,
+            ownerId,
+            ownerName,
             read: false,
             createdAt: serverTimestamp()
         });

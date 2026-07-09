@@ -251,12 +251,35 @@ body {
 
 .resource-actions {
     display: flex;
+    flex-wrap: wrap;
     gap: 12px;
     margin-top: 24px;
 }
 
+.resource-actions a,
 .resource-actions button {
     border-radius: 8px;
+}
+
+.resource-actions .secondary-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 20px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: white;
+    color: var(--navy);
+    font-size: 15px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: 0.25s ease;
+}
+
+.resource-actions .secondary-btn:hover {
+    border-color: var(--blue);
+    color: var(--blue);
+    transform: translateY(-2px);
 }
 
 .container {

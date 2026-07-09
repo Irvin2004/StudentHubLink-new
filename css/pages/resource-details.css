@@ -1,0 +1,56 @@
+.resource-details-page {
+    min-height: 100vh;
+    background: var(--bg);
+    padding: 40px;
+}
+
+.resource-details-card {
+    max-width: 850px;
+    margin: auto;
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow);
+    padding: 36px;
+}
+
+.back-link {
+    display: inline-block;
+    margin-bottom: 24px;
+    color: var(--blue);
+    font-weight: 700;
+}
+
+.resource-details-card h1 {
+    margin: 18px 0;
+    color: var(--navy);
+}
+
+.resource-details-card p {
+    color: var(--text-muted);
+}
+
+.resource-details-meta {
+    margin: 28px 0;
+    display: grid;
+    gap: 12px;
+}
+
+.resource-details-meta a {
+    color: var(--blue);
+    font-weight: 800;
+}
+
+.resource-details-actions {
+    display: flex;
+    gap: 14px;
+}
+
+.related-section {
+    max-width: 1180px;
+    margin: 32px auto 0;
+}
+
+.related-section h2 {
+    color: var(--navy);
+    margin-bottom: 18px;
+}

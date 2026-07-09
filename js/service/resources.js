@@ -1,26 +1,24 @@
-import { app } from "../firebase.js";
+import { app, auth, db } from "../firebase.js";
 import { createActivity } from "./activity.js";
 import { createNotification } from "./notifications.js";
+import { handleResourceAction } from "./marketplace-actions.js";
 import {
     getResourceAction,
-    getResourceActionPastTense,
     getReviewStatus,
     RESOURCE_ACTION,
     RESOURCE_STATUS,
-    REVIEW_ACTION,
-    TRANSACTION_STATUS
+    REVIEW_ACTION
 } from "../utils/constants.js";
+import { escapeHtml, setText } from "../utils/dom.js";
 import { formatPrice } from "../utils/formatPrice.js";
 
 import {
-    getAuth,
     onAuthStateChanged
 }
 from
 "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 
 import {
-    getFirestore,
     addDoc,
     collection,
     doc,
@@ -45,29 +43,10 @@ import {
 from
 "https://www.gstatic.com/firebasejs/10.13.0/firebase-storage.js";
 
-const auth = getAuth(app);
-const db = getFirestore(app);
 const storage = getStorage(app);
 
 const resourceId =
 new URLSearchParams(window.location.search).get("id");
-
-const setText = (id, value) => {
-    const element =
-    document.getElementById(id);
-
-    if (element) {
-        element.textContent = value;
-    }
-};
-
-const escapeHtml = (value) =>
-String(value || "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
 
 async function getUserProfile(user) {
     const snapshot =
@@ -83,32 +62,6 @@ async function getUserProfile(user) {
     }
 
     return snapshot.data();
-}
-
-function resourceCard(resource) {
-    const action =
-    getResourceAction(resource);
-
-    const priceClass =
-    action === RESOURCE_ACTION.PURCHASE ? "buy-btn" : "download-btn";
-
-    const actionText =
-    action === RESOURCE_ACTION.PURCHASE ? "View Purchase" : "View Download";
-
-    return `
-        <div class="resource-card">
-            <h3>${escapeHtml(resource.title)}</h3>
-            <p>${escapeHtml(resource.description)}</p>
-            <p>${escapeHtml(resource.category)}</p>
-            <div class="price">${formatPrice(resource.price)}</div>
-
-            <div class="actions">
-                <a class="${priceClass}" href="resource_details.html?id=${resource.id}">
-                    ${actionText}
-                </a>
-            </div>
-        </div>
-    `;
 }
 
 async function uploadResource(user) {
@@ -207,6 +160,10 @@ async function uploadResource(user) {
         const fileUrl =
         await getDownloadURL(storageRef);
 
+        const ownerName =
+        userProfile.name || userProfile.fullName || user.displayName || "Student";
+
+        const resourceRef =
         await addDoc(collection(db, "resources"), {
             title,
             description,
@@ -220,7 +177,7 @@ async function uploadResource(user) {
             fileUrl,
             filePath,
             fileName: file.name,
-            ownerName: userProfile.name || userProfile.fullName || user.displayName || "Student",
+            ownerName,
             ownerEmail: user.email,
             status: RESOURCE_STATUS.PENDING,
             purchaseCount: 0,
@@ -238,13 +195,16 @@ async function uploadResource(user) {
         });
 
         try {
-            await createActivity(
-                user.uid,
-                "upload",
-                "Resource uploaded",
-                `${title} was uploaded for admin approval.`,
-                "upload"
-            );
+            await createActivity({
+                userId: user.uid,
+                type: "upload",
+                title: "Resource uploaded",
+                description: `${title} was uploaded for admin approval.`,
+                icon: "upload",
+                resourceId: resourceRef.id,
+                ownerId: user.uid,
+                ownerName
+            });
         } catch (error) {
             console.error("Upload activity failed:", error);
         }
@@ -255,169 +215,6 @@ async function uploadResource(user) {
         message.textContent = error.message;
     } finally {
         uploadBtn.disabled = false;
-    }
-}
-
-async function loadResourcesPage() {
-    const grid =
-    document.getElementById("resourcesGrid");
-
-    if (!grid) {
-        return;
-    }
-
-    grid.innerHTML = "<p>Loading resources...</p>";
-
-    try {
-        const resourcesQuery =
-        query(collection(db, "resources"), where("approved", "==", true));
-
-        const snapshot =
-        await getDocs(resourcesQuery);
-
-        const resources = [];
-
-        snapshot.forEach((item) => {
-            resources.push({
-                id: item.id,
-                ...item.data()
-            });
-        });
-
-        const searchInput =
-        document.getElementById("resourceSearch");
-
-        const categoryButtons =
-        document.querySelectorAll(".category");
-
-        let selectedCategory = "All";
-
-        const render = () => {
-            const search =
-            searchInput.value.trim().toLowerCase();
-
-            const filteredResources =
-            resources.filter((resource) => {
-                const searchText =
-                `${resource.title} ${resource.description} ${resource.category}`.toLowerCase();
-
-                const matchesSearch =
-                searchText.includes(search);
-
-                const matchesCategory =
-                selectedCategory === "All" || resource.category === selectedCategory;
-
-                return matchesSearch && matchesCategory;
-            });
-
-            grid.innerHTML =
-            filteredResources.length > 0 ?
-            filteredResources.map(resourceCard).join("") :
-            "<p>No approved resources found.</p>";
-        };
-
-        searchInput.addEventListener("input", render);
-
-        categoryButtons.forEach((button) => {
-            button.addEventListener("click", () => {
-                selectedCategory =
-                button.textContent.trim();
-
-                categoryButtons.forEach((item) => {
-                    item.classList.remove("active");
-                });
-
-                button.classList.add("active");
-                render();
-            });
-        });
-
-        render();
-    } catch (error) {
-        grid.innerHTML = `<p>${error.message}</p>`;
-    }
-}
-
-function calculateCommission(amount) {
-
-    return {
-
-        sellerAmount: amount * 0.80,
-
-        platformCommission: amount * 0.20
-
-    };
-
-}
-
-async function createTransaction(user, resource, type) {
-    const amount =
-    type === RESOURCE_ACTION.PURCHASE ? Number(resource.price || 0) : 0;
-    const commission =
-    calculateCommission(amount);
-
-    await addDoc(collection(db, "transactions"), {
-        buyerId: user.uid,
-        sellerId: resource.ownerId,
-        resourceId: resource.id,
-        amount,
-        createdAt: serverTimestamp(),
-        resourceTitle: resource.title,
-        buyerEmail: user.email,
-        sellerEmail: resource.ownerEmail || "",
-        type,
-        sellerAmount:
-        commission.sellerAmount,
-        platformCommission:
-        commission.platformCommission,
-        currency: "ZAR",
-        status: TRANSACTION_STATUS.COMPLETED
-    });
-
-    await updateDoc(doc(db, "resources", resource.id), {
-        downloadCount: increment(1),
-        purchaseCount: type === RESOURCE_ACTION.PURCHASE ? increment(1) : increment(0),
-        updatedAt: serverTimestamp()
-    });
-
-    await updateDoc(doc(db, "users", user.uid), {
-        totalDownloads: increment(1),
-        updatedAt: serverTimestamp()
-    });
-
-    await createActivity(
-        user.uid,
-        type,
-        type === RESOURCE_ACTION.PURCHASE ? "Resource purchased" : "Resource downloaded",
-        `${resource.title} was ${getResourceActionPastTense(type)}.`
-    );
-
-    if (type === RESOURCE_ACTION.PURCHASE && resource.ownerId) {
-        await updateDoc(doc(db, "users", resource.ownerId), {
-            totalEarnings: increment(commission.sellerAmount),
-            updatedAt: serverTimestamp()
-        });
-
-        await createActivity(
-            resource.ownerId,
-            "sale",
-            "Resource sold",
-            `${resource.title} earned ${formatPrice(commission.sellerAmount)}.`
-        );
-
-        await createNotification(
-            resource.ownerId,
-            "Resource purchased",
-            `${user.email} purchased ${resource.title}.`
-        );
-
-    await setDoc(doc(db, "platform", "financials"), {
-        totalRevenue: increment( commission.platformCommission ),
-        totalTransactions: increment(1),
-        updatedAt: serverTimestamp()
-    },
-    { merge: true }
-);
     }
 }
 
@@ -456,6 +253,15 @@ async function loadResourceDetails(user) {
     setText("detailDescription", resource.description);
     setText("detailCategory", resource.category);
     setText("detailUploader", resource.ownerName || "Student");
+
+    const detailUploader =
+    document.getElementById("detailUploader");
+
+    if (detailUploader && resource.ownerId) {
+        detailUploader.href =
+        `user-profile.html?id=${encodeURIComponent(resource.ownerId)}`;
+    }
+
     setText("detailPrice", formatPrice(resource.price));
     setText("detailDownloads", Number(resource.downloadCount || 0));
     setText("detailStatus", resource.approved ? RESOURCE_STATUS.APPROVED : (resource.status || RESOURCE_STATUS.PENDING));
@@ -488,7 +294,7 @@ async function loadResourceDetails(user) {
         actionBtn.disabled = true;
 
         try {
-            await createTransaction(user, resource, type);
+            await handleResourceAction(resource, user);
             window.open(resource.fileUrl, "_blank");
             actionBtn.textContent = "Downloaded";
         } catch (error) {
@@ -591,14 +397,18 @@ async function loadPendingResources(user) {
             `${reviewedResource?.title || "Your resource"} was not approved.`
         );
 
-        await createActivity(
-            reviewedResource?.ownerId,
-            approved ? "approval" : "rejection",
-            approved ? "Resource approved" : "Resource rejected",
-            approved ?
+        await createActivity({
+            userId: reviewedResource?.ownerId,
+            type: approved ? "approval" : "rejection",
+            title: approved ? "Resource approved" : "Resource rejected",
+            description: approved ?
             `${reviewedResource?.title || "Your resource"} is now available.` :
-            `${reviewedResource?.title || "Your resource"} was not approved.`
-        );
+            `${reviewedResource?.title || "Your resource"} was not approved.`,
+            icon: approved ? "approval" : "info",
+            resourceId: reviewedResource?.id,
+            ownerId: reviewedResource?.ownerId,
+            ownerName: reviewedResource?.ownerName
+        });
 
         await loadPendingResources(user);
     };
@@ -633,6 +443,5 @@ onAuthStateChanged(auth, async (user) => {
         });
     }
 
-    await loadResourcesPage();
     await loadResourceDetails(user);
 });

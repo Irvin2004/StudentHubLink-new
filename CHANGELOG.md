@@ -1,105 +1,64 @@
-# StudentHub Changelog
+# Changelog
 
 All notable changes to StudentHub will be documented in this file.
 
----
+The format follows a lightweight version of [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project uses semantic versioning while it matures.
 
-# Version 2.0.0
-## Dashboard Foundation Complete
+## [Unreleased]
 
-Release Date:
-03 July 2026
+### Added
 
----
+- Added formal project documentation files:
+  - `CONTRIBUTING.md`
+  - `LICENSE`
+  - `.gitignore`
+  - `docs/architecture.md`
+  - `docs/firestore-schema.md`
+  - `docs/roadmap.md`
 
-## Added
+### Changed
 
-### Authentication
-- Firebase Authentication
-- Login page
-- Registration page
-- Automatic dashboard redirect
-- Role-based authentication
-- Admin role support
+- Updated the README into a project overview with setup, structure, and documentation links.
+- Consolidated Firestore documentation into `docs/firestore-schema.md`.
+- Removed dead JavaScript wrapper files and direct pages to service modules.
+- Centralized shared DOM helpers in `js/utils/dom.js`.
+- Centralized resource action bookkeeping for downloads and purchases.
 
-### Database
-- Firestore integration
-- User profiles
-- Resources collection
-- Transactions collection
-- Activities collection
+### Removed
 
-### Dashboard
-- Complete dashboard redesign
-- Sidebar navigation
-- Dynamic greeting
-- Statistics cards
-- Recent Activity panel
-- Quick Actions
-- Responsive layout
+- Removed unused `css/pages/register.css`.
+- Removed legacy `js/auth.js`, `js/resources.js`, and `js/admin-dashboard.js` wrapper files.
 
-### Landing Page
-- New branding
-- Hero section
-- Features section
-- Responsive navigation
-- Updated footer
+## [2.0.0] - 2026-07-03
 
-### UI Components
-- Shared theme
-- Shared buttons
-- Shared forms
-- Shared cards
-- Shared alerts
-- Shared badges
+### Added
 
-### Activity Engine
-- Activity service
-- Register activity logging
-- Dashboard activity feed
+- Firebase Authentication.
+- Login and registration pages.
+- Automatic dashboard redirects.
+- Role-based authentication and admin role support.
+- Firestore integration for users, resources, transactions, and activities.
+- Dashboard redesign with sidebar navigation, dynamic greeting, statistics cards, recent activity, quick actions, and responsive layout.
+- Landing page branding, hero section, features section, responsive navigation, and footer.
+- Shared theme, button, form, card, alert, and badge styling.
+- Activity service and dashboard activity feed.
 
----
+### Changed
 
-## Improved
+- Improved folder structure.
+- Improved CSS organization.
+- Improved JavaScript modularization.
+- Improved dashboard layout, navigation, and branding consistency.
 
-- Folder structure
-- CSS organization
-- JavaScript modularization
-- Dashboard layout
-- Navigation
-- Branding consistency
+### Fixed
 
----
+- Registration redirect flow.
+- Dashboard greeting.
+- Firestore role handling.
+- Statistics rendering.
+- Authentication flow.
 
-## Fixed
-
-- Registration redirect
-- Dashboard greeting
-- Firestore role handling
-- Statistics rendering
-- Authentication flow
-
----
-
-## Known Issues
+### Known Issues
 
 - Firebase Storage must be configured before uploads can complete.
-- Notification system not yet connected.
-- Dashboard chart is still placeholder.
-
----
-
-## Next Version
-
-Version 2.1
-
-Planned features
-
-- Notification Center
-- Profile Dropdown
-- Dashboard Search
-- Chart.js Analytics
-- Marketplace Redesign
-- Upload Improvements
-
----
+- Some workflows still need broader automated test coverage.

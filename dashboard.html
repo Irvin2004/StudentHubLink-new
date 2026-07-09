@@ -111,14 +111,10 @@
 
             <div>
                 <div class="panel">
-                    <h3>Quick Actions</h3>
+                    <h3>Recently Added</h3>
 
-                    <div class="quick-actions">
-                        <a href="pages/upload.html">Upload Resource</a>
-                        <a href="pages/resources.html">Marketplace</a>
-                        <a href="pages/library.html">My Library</a>
-                        <a href="pages/profile.html">View Profile</a>
-                        <a href="pages/documents.html">Document Assistant</a>
+                    <div id="recentlyAddedList" class="recently-added-list">
+                        <p class="empty-state">Loading recently added resources...</p>
                     </div>
                 </div>
 
@@ -134,7 +130,7 @@
     </main>
 </div>
 
-<script type="module" src="js/auth.js"></script>
+<script type="module" src="js/service/auth.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script type="module" src="js/service/dashboard.js"></script>
 </body>

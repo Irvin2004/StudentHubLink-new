@@ -1,10 +1,11 @@
-import { app, db } from "../firebase.js";
+import { auth, db } from "../firebase.js";
 import { handleResourceAction } from "./marketplace-actions.js";
 import {
     RESOURCE_ACTION,
     RESOURCE_STATUS,
     getResourceAction
 } from "../utils/constants.js";
+import { escapeHtml, setText } from "../utils/dom.js";
 import { formatDate } from "../utils/formatDate.js";
 import { formatPrice } from "../utils/formatPrice.js";
 
@@ -18,15 +19,6 @@ import {
 from
 "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
-import {
-    getAuth
-}
-from
-"https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
-
-const auth =
-getAuth(app);
-
 const resourceGrid =
 document.getElementById("resourceGrid");
 
@@ -36,14 +28,6 @@ const marketplaceState = {
     category: "All",
     sort: "newest"
 };
-
-const escapeHtml = (value) =>
-String(value || "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
 
 async function getApprovedResources() {
     const approvedResourcesQuery =
@@ -89,9 +73,15 @@ async function getApprovedResources() {
         });
 }
 
-function createResourceCard(resource) {
+export function createResourceCard(resource) {
     const ownerName =
     resource.ownerName || "Unknown Author";
+
+    const ownerId =
+    encodeURIComponent(resource.ownerId || "");
+
+    const resourceId =
+    encodeURIComponent(resource.id || "");
 
     const priceLabel =
     formatPrice(resource.price);
@@ -116,7 +106,10 @@ function createResourceCard(resource) {
             </p>
 
             <p class="resource-owner">
-                Uploaded by ${escapeHtml(ownerName)}
+                Uploaded by
+                <a href="user-profile.html?id=${ownerId}">
+                    ${escapeHtml(ownerName)}
+                </a>
             </p>
 
             <p class="resource-date">
@@ -129,8 +122,13 @@ function createResourceCard(resource) {
             </div>
 
             <div class="resource-actions">
-                <button class="btn-secondary" type="button" data-preview-id="${resource.id}">Preview</button>
-                <button class="btn-primary" type="button">${escapeHtml(primaryAction)}</button>
+                <a class="secondary-btn" href="resource-details.html?id=${resourceId}">
+                    View Details
+                </a>
+                <button class="btn-secondary" type="button" data-preview-id="${escapeHtml(resource.id)}">Preview</button>
+                <button class="btn-primary" type="button" data-preview-id="${escapeHtml(resource.id)}">
+                    ${escapeHtml(primaryAction)}
+                </button>
             </div>
         </div>
     </article>
@@ -276,51 +274,6 @@ async function loadMarketplace() {
     }
 }
 
-const searchInput =
-document.getElementById("resourceSearch");
-
-const sortSelect =
-document.getElementById("sortResources");
-
-if (searchInput) {
-    searchInput.addEventListener("input", (event) => {
-        marketplaceState.search =
-        event.target.value;
-
-        updateMarketplace();
-    });
-}
-
-if (sortSelect) {
-    sortSelect.addEventListener("change", (event) => {
-        marketplaceState.sort =
-        event.target.value;
-
-        updateMarketplace();
-    });
-}
-
-document
-    .querySelectorAll(".filter-btn")
-    .forEach((button) => {
-        button.addEventListener("click", () => {
-            document
-                .querySelectorAll(".filter-btn")
-                .forEach((filterButton) => {
-                    filterButton.classList.remove("active");
-                });
-
-            button.classList.add("active");
-
-            marketplaceState.category =
-            button.dataset.category;
-
-            updateMarketplace();
-        });
-    });
-
-loadMarketplace();
-
 let selectedResource = null;
 
 function openResourceModal(resourceId) {
@@ -329,28 +282,24 @@ function openResourceModal(resourceId) {
 
     if (!selectedResource) return;
 
-    document.getElementById("modalCategory").textContent =
-        selectedResource.category || "General";
+    setText("modalCategory", selectedResource.category || "General");
 
-    document.getElementById("modalTitle").textContent =
-        selectedResource.title || "Untitled resource";
+    setText("modalTitle", selectedResource.title || "Untitled resource");
 
-    document.getElementById("modalDescription").textContent =
-        selectedResource.description || "No description available.";
+    setText("modalDescription", selectedResource.description || "No description available.");
 
-    document.getElementById("modalOwner").textContent =
-        selectedResource.ownerName || "Unknown Author";
+    setText("modalOwner", selectedResource.ownerName || "Unknown Author");
 
-    document.getElementById("modalPrice").textContent =
-        formatPrice(selectedResource.price);
+    setText("modalPrice", formatPrice(selectedResource.price));
 
-    document.getElementById("modalDownloads").textContent =
-        selectedResource.downloadCount || 0;
+    setText("modalDownloads", selectedResource.downloadCount || 0);
 
-    document.getElementById("modalAction").textContent =
+    setText(
+        "modalAction",
         getResourceAction(selectedResource) === RESOURCE_ACTION.PURCHASE ?
         "Buy Resource" :
-        "Download";
+        "Download"
+    );
 
     document.getElementById("resourceModal").classList.add("show");
 }
@@ -392,3 +341,53 @@ document.getElementById("modalAction")?.addEventListener("click", async () => {
 
     closeResourceModal();
 });
+
+function bindMarketplaceControls() {
+    const searchInput =
+    document.getElementById("resourceSearch");
+
+    const sortSelect =
+    document.getElementById("sortResources");
+
+    if (searchInput) {
+        searchInput.addEventListener("input", (event) => {
+            marketplaceState.search =
+            event.target.value;
+
+            updateMarketplace();
+        });
+    }
+
+    if (sortSelect) {
+        sortSelect.addEventListener("change", (event) => {
+            marketplaceState.sort =
+            event.target.value;
+
+            updateMarketplace();
+        });
+    }
+
+    document
+        .querySelectorAll(".filter-btn")
+        .forEach((button) => {
+            button.addEventListener("click", () => {
+                document
+                    .querySelectorAll(".filter-btn")
+                    .forEach((filterButton) => {
+                        filterButton.classList.remove("active");
+                    });
+
+                button.classList.add("active");
+
+                marketplaceState.category =
+                button.dataset.category;
+
+                updateMarketplace();
+            });
+        });
+}
+
+if (resourceGrid) {
+    bindMarketplaceControls();
+    loadMarketplace();
+}

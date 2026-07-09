@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudentHub Author Profile</title>
+    <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="../css/base/reset.css">
+    <link rel="stylesheet" href="../css/base/theme.css">
+    <link rel="stylesheet" href="../css/components/buttons.css">
+    <link rel="stylesheet" href="../css/pages/resources.css">
+    <link rel="stylesheet" href="../css/pages/use-profile.css">
+</head>
+<body>
+<main class="profile-page">
+
+    <section class="public-profile-header">
+        <div class="profile-avatar" id="profileAvatar">S</div>
+
+        <div>
+            <h1 id="profileName">Student</h1>
+            <p id="profileBio">No bio yet.</p>
+            <p id="profileMeta">Member of StudentHub</p>
+        </div>
+    </section>
+
+    <section class="profile-stats">
+        <div class="stat-box">
+            <p>Resources</p>
+            <h2 id="profileResourceCount">0</h2>
+        </div>
+
+        <div class="stat-box">
+            <p>Downloads</p>
+            <h2 id="profileDownloadCount">0</h2>
+        </div>
+
+        <div class="stat-box">
+            <p>Earnings</p>
+            <h2 id="profileEarnings">R0</h2>
+        </div>
+    </section>
+
+    <section>
+        <h2>Uploaded Resources</h2>
+        <div id="profileResources" class="resource-grid"></div>
+    </section>
+
+</main>
+
+<script type="module" src="../js/service/user-profile.js"></script>
+</body>
+</html>

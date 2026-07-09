@@ -1,7 +1,6 @@
 import { getMonthlyUploads } from "./analytics.js";
 
 import {
-    getAuth,
     onAuthStateChanged,
     signOut
 }
@@ -11,41 +10,25 @@ from
 import {
     collection,
     getCountFromServer,
+    getDocs,
+    limit,
+    orderBy,
     query,
     where
 }
 from
 "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
-import { app, db } from "../firebase.js";
+import { auth, db } from "../firebase.js";
 import { getRecentActivities } from "./activity.js";
 import { getUserDocument } from "./auth.js";
-import { formatDate } from "../utils/formatDate.js";
+import { escapeHtml, setText } from "../utils/dom.js";
+import { formatDate, getTimestampMillis } from "../utils/formatDate.js";
 import { formatCurrency } from "../utils/formatPrice.js";
 import {
     getNotifications,
     markAsRead
 } from "./notifications.js";
-
-const auth =
-getAuth(app);
-
-const escapeHtml = (value) =>
-String(value || "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-
-function setText(id, value) {
-    const element =
-    document.getElementById(id);
-
-    if (element) {
-        element.textContent = value;
-    }
-}
 
 function getGreeting(name) {
     const hour =
@@ -157,6 +140,7 @@ async function loadDashboard(user) {
         userData,
         stats: null,
         activities: null,
+        recentlyAdded: null,
         chart: null
     });
 
@@ -165,6 +149,9 @@ async function loadDashboard(user) {
 
     const activities =
     await loadActivities(user);
+
+    const recentlyAdded =
+    await loadRecentlyAdded();
 
     const chart =
     await loadChart(user);
@@ -176,6 +163,7 @@ async function loadDashboard(user) {
         userData,
         stats,
         activities,
+        recentlyAdded,
         chart,
         notifications
     });
@@ -251,6 +239,56 @@ async function loadNotifications(user) {
     }
 }
 
+async function loadRecentlyAdded() {
+    const recentlyAddedList =
+    document.getElementById("recentlyAddedList");
+
+    if (recentlyAddedList) {
+        recentlyAddedList.innerHTML =
+        `<p class="empty-state">Loading recently added resources...</p>`;
+    }
+
+    const approvedResourcesQuery =
+    query(
+        collection(db, "resources"),
+        where("status", "==", "approved"),
+        orderBy("createdAt", "desc"),
+        limit(3)
+    );
+
+    try {
+        const snapshot =
+        await getDocs(approvedResourcesQuery);
+
+        return snapshot.docs.map((resourceDoc) => ({
+            id: resourceDoc.id,
+            ...resourceDoc.data()
+        }));
+    } catch (error) {
+        console.warn("Ordered recently added query failed, retrying without orderBy:", error);
+    }
+
+    const fallbackQuery =
+    query(
+        collection(db, "resources"),
+        where("status", "==", "approved")
+    );
+
+    const snapshot =
+    await getDocs(fallbackQuery);
+
+    return snapshot.docs
+        .map((resourceDoc) => ({
+            id: resourceDoc.id,
+            ...resourceDoc.data()
+        }))
+        .sort((firstResource, secondResource) =>
+            getTimestampMillis(secondResource.createdAt) -
+            getTimestampMillis(firstResource.createdAt)
+        )
+        .slice(0, 3);
+}
+
 async function loadChart(user) {
     try {
         return await getMonthlyUploads(user.uid);
@@ -271,6 +309,7 @@ function renderDashboard({
     userData,
     stats,
     activities,
+    recentlyAdded,
     chart,
     notifications
 }) {
@@ -290,6 +329,10 @@ function renderDashboard({
         renderActivities(activities);
     }
 
+    if (recentlyAdded) {
+        renderRecentlyAdded(recentlyAdded);
+    }
+
     if (chart) {
         renderChart(chart);
     }
@@ -297,6 +340,66 @@ function renderDashboard({
     if (notifications) {
         renderNotifications(notifications);
     }
+}
+
+function formatRelativeDate(value) {
+    const timestamp =
+    getTimestampMillis(value);
+
+    if (!timestamp) {
+        return "Recently";
+    }
+
+    const elapsedMs =
+    Date.now() - timestamp;
+
+    const elapsedMinutes =
+    Math.max(1, Math.round(elapsedMs / 60000));
+
+    if (elapsedMinutes < 60) {
+        return `${elapsedMinutes} minute${elapsedMinutes === 1 ? "" : "s"} ago`;
+    }
+
+    const elapsedHours =
+    Math.round(elapsedMinutes / 60);
+
+    if (elapsedHours < 24) {
+        return `${elapsedHours} hour${elapsedHours === 1 ? "" : "s"} ago`;
+    }
+
+    if (elapsedHours < 48) {
+        return "Yesterday";
+    }
+
+    return formatDate(value, {
+        fallback: "Recently",
+        options: {
+            weekday: "long"
+        }
+    });
+}
+
+function renderRecentlyAdded(resources) {
+    const recentlyAddedList =
+    document.getElementById("recentlyAddedList");
+
+    if (!recentlyAddedList) {
+        return;
+    }
+
+    if (!resources.length) {
+        recentlyAddedList.innerHTML =
+        `<p class="empty-state">No approved resources yet.</p>`;
+        return;
+    }
+
+    recentlyAddedList.innerHTML =
+    resources.map((resource) => `
+        <a class="recent-resource-item" href="pages/resource-details.html?id=${encodeURIComponent(resource.id)}">
+            <span>${escapeHtml(resource.title || "Untitled Resource")}</span>
+            <small>${escapeHtml(formatRelativeDate(resource.createdAt))}</small>
+        </a>
+    `).join("");
 }
 
 function renderActivities(activities) {
@@ -314,18 +417,30 @@ function renderActivities(activities) {
     }
 
     activityList.innerHTML =
-    activities.map((activity) => `
+    activities.map((activity) => {
+        const title =
+        activity.resourceId ?
+        `<a href="pages/resource-details.html?id=${encodeURIComponent(activity.resourceId)}">${escapeHtml(activity.title)}</a>` :
+        escapeHtml(activity.title);
+
+        const author =
+        activity.ownerId ?
+        `<span> by <a href="pages/user-profile.html?id=${encodeURIComponent(activity.ownerId)}">${escapeHtml(activity.ownerName || "Unknown Author")}</a></span>` :
+        "";
+
+        return `
         <div class="activity-item">
             <div class="activity-icon">
                 ${getActivityIcon(activity.icon)}
             </div>
 
             <div class="activity-content">
-                <h4>${escapeHtml(activity.title)}</h4>
+                <h4>${title}${author}</h4>
                 <p>${escapeHtml(activity.description)}</p>
             </div>
         </div>
-    `).join("");
+    `;
+    }).join("");
 }
 
 function renderNotifications(notifications) {
