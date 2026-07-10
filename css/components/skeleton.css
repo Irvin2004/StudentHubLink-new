@@ -1,0 +1,40 @@
+.skeleton-card {
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow);
+    padding: 24px;
+}
+
+.skeleton-line {
+    height: 14px;
+    border-radius: 8px;
+    background: #E5E7EB;
+    margin-bottom: 14px;
+    animation: pulse 1.4s infinite;
+}
+
+.skeleton-line.short {
+    width: 45%;
+}
+
+.skeleton-line.medium {
+    width: 70%;
+}
+
+.skeleton-line.large {
+    width: 100%;
+}
+
+@keyframes pulse {
+    0% {
+        opacity: .45;
+    }
+
+    50% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: .45;
+    }
+}

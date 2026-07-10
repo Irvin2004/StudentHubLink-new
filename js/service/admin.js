@@ -1,5 +1,7 @@
 import { auth, db } from "../firebase.js";
 import { formatCurrency } from "../utils/formatPrice.js";
+import { error as logError } from "../utils/logger.js";
+import { showToast } from "../utils/toast.js";
 
 import {
     onAuthStateChanged
@@ -31,7 +33,7 @@ async function loadFinancials() {
         document.getElementById("totalTransactions").textContent =
         data.totalTransactions || 0;
     } catch (error) {
-        console.error("Financials Error:", error);
+        logError("FIRESTORE", "Financials Error:", error);
     }
 }
 
@@ -54,14 +56,14 @@ onAuthStateChanged(auth, async (user) => {
         userSnap.data();
 
         if (userData.role !== "admin") {
-            alert("Access denied.");
+            showToast("Access denied.", "warning");
             window.location.href = "../dashboard.html";
             return;
         }
 
         await loadFinancials();
     } catch (error) {
-        console.error(error);
+        logError("AUTH", error);
         window.location.href = "../dashboard.html";
     }
 });

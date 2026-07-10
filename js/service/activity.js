@@ -8,6 +8,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
 import { db } from "../firebase.js";
+import { error as logError, warn } from "../utils/logger.js";
 
 const ACTIVITY_COLLECTION = "activities";
 const LEGACY_ACTIVITY_COLLECTION = "activity";
@@ -40,7 +41,7 @@ export async function addActivity({
     ownerName = ""
 }) {
     if (!userId) {
-        console.warn("Activity skipped: missing userId.");
+        warn("FIRESTORE", "Activity skipped: missing userId.");
         return null;
     }
 
@@ -60,7 +61,7 @@ export async function addActivity({
 
         return activityRef.id;
     } catch (error) {
-        console.error("Activity error:", error);
+        logError("FIRESTORE", "Activity error:", error);
         return null;
     }
 }
@@ -96,7 +97,7 @@ export async function getRecentActivities(userId, activityLimit = 5) {
                     ...doc.data()
                 }));
             } catch (error) {
-                console.warn(`Could not load ${collectionName}:`, error);
+                warn("FIRESTORE", `Could not load ${collectionName}:`, error);
                 return [];
             }
         })

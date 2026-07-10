@@ -1,13 +1,16 @@
 import { auth, db } from "../firebase.js";
+import { createResourceCard } from "../components/resource-card.js";
 import { handleResourceAction } from "./marketplace-actions.js";
 import {
     RESOURCE_ACTION,
     RESOURCE_STATUS,
     getResourceAction
 } from "../utils/constants.js";
-import { escapeHtml, setText } from "../utils/dom.js";
-import { formatDate } from "../utils/formatDate.js";
+import { setText } from "../utils/dom.js";
 import { formatPrice } from "../utils/formatPrice.js";
+import { clearSkeleton, showSkeleton } from "../utils/loading.js";
+import { warn, error as logError } from "../utils/logger.js";
+import { showToast } from "../utils/toast.js";
 
 import {
     collection,
@@ -46,7 +49,7 @@ async function getApprovedResources() {
             ...resourceDoc.data()
         }));
     } catch (error) {
-        console.warn("Ordered marketplace query failed, retrying without orderBy:", error);
+        warn("FIRESTORE", "Ordered marketplace query failed, retrying without orderBy:", error);
     }
 
     const fallbackQuery =
@@ -73,68 +76,6 @@ async function getApprovedResources() {
         });
 }
 
-export function createResourceCard(resource) {
-    const ownerName =
-    resource.ownerName || "Unknown Author";
-
-    const ownerId =
-    encodeURIComponent(resource.ownerId || "");
-
-    const resourceId =
-    encodeURIComponent(resource.id || "");
-
-    const priceLabel =
-    formatPrice(resource.price);
-
-    const primaryAction =
-    getResourceAction(resource) === RESOURCE_ACTION.PURCHASE ? "Preview" : "Download";
-
-    return `
-    <article class="resource-card">
-        <div class="resource-body">
-            <div class="resource-card-top">
-                <span class="resource-icon" aria-hidden="true">&#128196;</span>
-                <span class="price-badge">
-                    ${escapeHtml(priceLabel)}
-                </span>
-            </div>
-
-            <h3>${escapeHtml(resource.title)}</h3>
-
-            <p class="resource-category">
-                ${escapeHtml(resource.category)}
-            </p>
-
-            <p class="resource-owner">
-                Uploaded by
-                <a href="user-profile.html?id=${ownerId}">
-                    ${escapeHtml(ownerName)}
-                </a>
-            </p>
-
-            <p class="resource-date">
-                Uploaded: ${escapeHtml(formatDate(resource.createdAt))}
-            </p>
-
-            <div class="resource-meta">
-                <span class="resource-rating">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
-                <span>Coming Soon</span>
-            </div>
-
-            <div class="resource-actions">
-                <a class="secondary-btn" href="resource-details.html?id=${resourceId}">
-                    View Details
-                </a>
-                <button class="btn-secondary" type="button" data-preview-id="${escapeHtml(resource.id)}">Preview</button>
-                <button class="btn-primary" type="button" data-preview-id="${escapeHtml(resource.id)}">
-                    ${escapeHtml(primaryAction)}
-                </button>
-            </div>
-        </div>
-    </article>
-    `;
-}
-
 function renderMarketplace(resources) {
     if (!resourceGrid) {
         return;
@@ -153,7 +94,15 @@ function renderMarketplace(resources) {
 
     resourceGrid.innerHTML =
     resources
-        .map(createResourceCard)
+        .map((resource) =>
+            createResourceCard(resource, {
+                actions: "marketplace",
+                showDate: true,
+                showDownloadCount: true,
+                showMeta: true,
+                showOwner: true
+            })
+        )
         .join("");
 }
 
@@ -251,19 +200,16 @@ async function loadMarketplace() {
         return;
     }
 
-    resourceGrid.innerHTML = `
-    <div class="loading-state">
-        Loading resources...
-    </div>
-    `;
+    showSkeleton("resourceGrid");
 
     try {
         marketplaceState.allResources =
         await getApprovedResources();
 
+        clearSkeleton("resourceGrid");
         updateMarketplace();
     } catch (error) {
-        console.error("Marketplace load failed:", error);
+        logError("FIRESTORE", "Marketplace load failed:", error);
 
         resourceGrid.innerHTML = `
         <div class="empty-state">
@@ -327,16 +273,17 @@ document.getElementById("modalAction")?.addEventListener("click", async () => {
     auth.currentUser;
 
     if (!user) {
-        alert("Please login first.");
+        showToast("Please login first.", "warning");
         return;
     }
 
     await handleResourceAction(selectedResource, user);
 
-    alert(
+    showToast(
         getResourceAction(selectedResource) === RESOURCE_ACTION.PURCHASE ?
         "Demo purchase complete." :
-        "Demo download recorded."
+        "Demo download recorded.",
+        "success"
     );
 
     closeResourceModal();

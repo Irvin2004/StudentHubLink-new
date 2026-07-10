@@ -10,6 +10,8 @@ import {
 } from "../utils/dom.js";
 import { formatLongDate } from "../utils/formatDate.js";
 import { formatCurrency } from "../utils/formatPrice.js";
+import { error as logError, warn } from "../utils/logger.js";
+import { showToast } from "../utils/toast.js";
 
 import {
     createUserWithEmailAndPassword,
@@ -105,7 +107,7 @@ async function updateLastLogin(user) {
             merge: true
         });
     } catch (error) {
-        console.warn("Could not update last login:", error);
+        warn("AUTH", "Could not update last login:", error);
     }
 }
 
@@ -127,7 +129,7 @@ async function loadProfileStats(user, userData) {
         uploadCount =
         uploadSnapshot.data().count;
     } catch (error) {
-        console.warn("Could not load upload count:", error);
+        warn("FIRESTORE", "Could not load upload count:", error);
     }
 
     const downloads =
@@ -266,7 +268,7 @@ registerForm.addEventListener("submit", async (event) => {
             );
 
         } catch (error) {
-            console.warn("Account was created, but the profile could not be saved:", error);
+            warn("FIRESTORE", "Account was created, but the profile could not be saved:", error);
         }
 
         setMessage("registerMessage", "Account created. Opening dashboard...", "success");
@@ -352,7 +354,7 @@ onAuthStateChanged(auth, async (user) => {
         userData =
         await getUserDocument(user);
     } catch (error) {
-        console.error("Could not load user profile:", error);
+        logError("AUTH", "Could not load user profile:", error);
 
         userData = {
             name: user.displayName || "Student",
@@ -366,7 +368,7 @@ onAuthStateChanged(auth, async (user) => {
     }
 
     if (isAdminPage && userData.role !== "admin") {
-        alert("Admin access only.");
+        showToast("Admin access only.", "warning");
         window.location.href =
         pagePrefix + "dashboard.html";
         return;

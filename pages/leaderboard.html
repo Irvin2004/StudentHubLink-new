@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudentHub Leaderboard</title>
+    <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="../css/base/reset.css">
+    <link rel="stylesheet" href="../css/base/theme.css">
+    <link rel="stylesheet" href="../css/components/toast.css">
+    <link rel="stylesheet" href="../css/components/skeleton.css">
+    <link rel="stylesheet" href="../css/pages/leaderboard.css">
+</head>
+<body>
+<main class="leaderboard-page">
+    <section class="page-header">
+        <h1>&#127942; Leaderboard</h1>
+        <p>Top contributors on StudentHub.</p>
+    </section>
+
+    <section class="leaderboard-grid">
+        <div class="leaderboard-card">
+            <h2>Top Contributors</h2>
+            <div id="topContributors"></div>
+        </div>
+
+        <div class="leaderboard-card">
+            <h2>Most Downloaded Resources</h2>
+            <div id="topResources"></div>
+        </div>
+    </section>
+</main>
+
+<script type="module" src="../js/service/leaderboard.js"></script>
+</body>
+</html>

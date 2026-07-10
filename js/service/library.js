@@ -13,12 +13,14 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 
 import { auth, db } from "../firebase.js";
+import { createResourceCard } from "../components/resource-card.js";
 import {
     getResourceActionLabel,
     RESOURCE_ACTION
 } from "../utils/constants.js";
-import { escapeHtml } from "../utils/dom.js";
 import { getTimestampMillis } from "../utils/formatDate.js";
+import { clearSkeleton, showSkeleton } from "../utils/loading.js";
+import { error as logError, warn } from "../utils/logger.js";
 
 const LIBRARY_COLLECTION = "libraries";
 
@@ -38,7 +40,7 @@ export async function addToLibrary(resource, user, action) {
     resource.id || resource.resourceId || resource.title;
 
     if (!resourceId) {
-        console.warn("Library item skipped: missing resource id.");
+        warn("FIRESTORE", "Library item skipped: missing resource id.");
         return null;
     }
 
@@ -105,51 +107,6 @@ async function getUserLibrary(userId) {
         );
 }
 
-function createLibraryCard(resource) {
-    const action =
-    resource.type || resource.action || RESOURCE_ACTION.DOWNLOAD;
-
-    const ownerId =
-    encodeURIComponent(resource.ownerId || "");
-
-    const ownerLink =
-    resource.ownerId ?
-    `<a href="user-profile.html?id=${ownerId}">${escapeHtml(resource.ownerName || "Unknown Author")}</a>` :
-    escapeHtml(resource.ownerName || "Unknown Author");
-
-    return `
-        <article class="resource-card">
-            <div class="resource-body">
-                <span class="resource-category">
-                    ${escapeHtml(resource.category || "Uncategorized")}
-                </span>
-
-                <h3>
-                    ${escapeHtml(resource.title || resource.resourceTitle || "Untitled Resource")}
-                </h3>
-
-                <p class="library-date">
-                    ${escapeHtml(getResourceActionLabel(action))}
-                </p>
-
-                <p class="resource-owner">
-                    Uploaded by ${ownerLink}
-                </p>
-
-                <div class="resource-actions">
-                    <button class="btn-secondary" type="button">
-                        Open
-                    </button>
-
-                    <button class="btn-primary" type="button">
-                        Download Again
-                    </button>
-                </div>
-            </div>
-        </article>
-    `;
-}
-
 function renderLibrary(resources) {
     const libraryGrid =
     document.getElementById("libraryGrid");
@@ -183,7 +140,20 @@ function renderLibrary(resources) {
 
     libraryGrid.innerHTML =
     resources
-        .map(createLibraryCard)
+        .map((resource) =>
+            createResourceCard(resource, {
+                actions: "library",
+                showDate: false,
+                showDetails: false,
+                showDownloadCount: false,
+                showMeta: false,
+                showOwner: true,
+                showPrice: false,
+                statusLabel: getResourceActionLabel(
+                    resource.type || resource.action || RESOURCE_ACTION.DOWNLOAD
+                )
+            })
+        )
         .join("");
 }
 
@@ -301,11 +271,7 @@ function loadLibraryPage() {
 
     bindLibraryControls();
 
-    libraryGrid.innerHTML = `
-        <div class="loading-state">
-            Loading your library...
-        </div>
-    `;
+    showSkeleton("libraryGrid");
 
     onAuthStateChanged(auth, async (user) => {
         if (!user) return;
@@ -314,9 +280,10 @@ function loadLibraryPage() {
             libraryState.resources =
             await getUserLibrary(user.uid);
 
+            clearSkeleton("libraryGrid");
             updateLibrary();
         } catch (error) {
-            console.error("Library load failed:", error);
+            logError("FIRESTORE", "Library load failed:", error);
 
             libraryGrid.innerHTML = `
                 <div class="empty-state">

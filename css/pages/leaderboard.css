@@ -1,0 +1,76 @@
+.leaderboard-page {
+    padding: 32px;
+    background: var(--bg);
+    min-height: 100vh;
+}
+
+.page-header {
+    max-width: 1180px;
+    margin: 0 auto 28px;
+}
+
+.page-header h1 {
+    color: var(--navy);
+    font-size: 42px;
+    margin-bottom: 10px;
+}
+
+.page-header p {
+    color: var(--text-muted);
+    font-size: 18px;
+}
+
+.leaderboard-grid {
+    max-width: 1180px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+}
+
+.leaderboard-card {
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow);
+    padding: 24px;
+}
+
+.leaderboard-card h2 {
+    color: var(--navy);
+    margin-bottom: 16px;
+}
+
+.leaderboard-item {
+    display: flex;
+    justify-content: space-between;
+    gap: 18px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.leaderboard-item:last-child {
+    border-bottom: none;
+}
+
+.leaderboard-item a,
+.leaderboard-item strong {
+    color: var(--navy);
+    font-weight: 800;
+}
+
+.leaderboard-item span {
+    color: var(--text-muted);
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.empty-state {
+    color: var(--text-muted);
+    padding: 16px 0;
+}
+
+@media (max-width: 800px) {
+    .leaderboard-grid {
+        grid-template-columns: 1fr;
+    }
+}

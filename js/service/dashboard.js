@@ -22,9 +22,13 @@ from
 import { auth, db } from "../firebase.js";
 import { getRecentActivities } from "./activity.js";
 import { getUserDocument } from "./auth.js";
+import { createEmptyState } from "../components/empty-state.js";
+import { createNotificationCard } from "../components/notification-card.js";
 import { escapeHtml, setText } from "../utils/dom.js";
 import { formatDate, getTimestampMillis } from "../utils/formatDate.js";
 import { formatCurrency } from "../utils/formatPrice.js";
+import { showSkeleton } from "../utils/loading.js";
+import { error as logError, warn } from "../utils/logger.js";
 import {
     getNotifications,
     markAsRead
@@ -144,6 +148,8 @@ async function loadDashboard(user) {
         chart: null
     });
 
+    showDashboardLoading();
+
     const stats =
     await loadStats(user, userData);
 
@@ -183,7 +189,7 @@ async function loadStats(user, userData) {
         uploadCount =
         uploadSnapshot.data().count;
     } catch (error) {
-        console.warn("Could not load dashboard upload count:", error);
+        warn("FIRESTORE", "Could not load dashboard upload count:", error);
     }
 
     return {
@@ -197,7 +203,7 @@ async function loadUserProfile(user) {
     try {
         return await getUserDocument(user);
     } catch (error) {
-        console.error("Could not load dashboard profile:", error);
+        logError("AUTH", "Could not load dashboard profile:", error);
 
         return {
             name: user.displayName || "Student",
@@ -211,13 +217,7 @@ async function loadUserProfile(user) {
 }
 
 async function loadActivities(user) {
-    const activityList =
-    document.getElementById("recentActivityList");
-
-    if (activityList) {
-        activityList.innerHTML =
-        `<p class="empty-state">Loading recent activity...</p>`;
-    }
+    showSkeleton("recentActivityList", 3);
 
     return getRecentActivities(user.uid);
 }
@@ -234,19 +234,13 @@ async function loadNotifications(user) {
     try {
         return await getNotifications(user.uid);
     } catch (error) {
-        console.warn("Could not load notifications:", error);
+        warn("NOTIFICATIONS", "Could not load notifications:", error);
         return [];
     }
 }
 
 async function loadRecentlyAdded() {
-    const recentlyAddedList =
-    document.getElementById("recentlyAddedList");
-
-    if (recentlyAddedList) {
-        recentlyAddedList.innerHTML =
-        `<p class="empty-state">Loading recently added resources...</p>`;
-    }
+    showSkeleton("recentlyAddedList", 3);
 
     const approvedResourcesQuery =
     query(
@@ -265,7 +259,7 @@ async function loadRecentlyAdded() {
             ...resourceDoc.data()
         }));
     } catch (error) {
-        console.warn("Ordered recently added query failed, retrying without orderBy:", error);
+        warn("FIRESTORE", "Ordered recently added query failed, retrying without orderBy:", error);
     }
 
     const fallbackQuery =
@@ -290,10 +284,12 @@ async function loadRecentlyAdded() {
 }
 
 async function loadChart(user) {
+    showChartSkeleton();
+
     try {
         return await getMonthlyUploads(user.uid);
     } catch (error) {
-        console.error("Failed to load analytics:", error);
+        logError("FIRESTORE", "Failed to load analytics:", error);
 
         return {
             labels: [
@@ -302,6 +298,68 @@ async function loadChart(user) {
             ],
             values: new Array(12).fill(0)
         };
+    }
+}
+
+function showDashboardLoading() {
+    showStatSkeleton("totalUploads");
+    showStatSkeleton("totalDownloads");
+    showStatSkeleton("totalEarnings");
+    showSkeleton("recentlyAddedList", 3);
+    showSkeleton("recentActivityList", 3);
+    showChartSkeleton();
+}
+
+function showStatSkeleton(elementId) {
+    const element =
+    document.getElementById(elementId);
+
+    if (!element) {
+        return;
+    }
+
+    element.innerHTML =
+    `<span class="skeleton-line medium stat-skeleton-line"></span>`;
+}
+
+function showChartSkeleton() {
+    const chartPreview =
+    document.querySelector(".chart-preview");
+
+    if (!chartPreview || document.getElementById("analyticsSkeleton")) {
+        return;
+    }
+
+    chartPreview.classList.add("chart-loading");
+
+    const skeleton =
+    document.createElement("div");
+
+    skeleton.id = "analyticsSkeleton";
+    skeleton.className = "chart-skeleton";
+    skeleton.innerHTML = `
+        <div class="skeleton-line large"></div>
+        <div class="skeleton-line medium"></div>
+        <div class="skeleton-line large"></div>
+        <div class="skeleton-line short"></div>
+    `;
+
+    chartPreview.appendChild(skeleton);
+}
+
+function clearChartSkeleton() {
+    const chartPreview =
+    document.querySelector(".chart-preview");
+
+    const skeleton =
+    document.getElementById("analyticsSkeleton");
+
+    if (skeleton) {
+        skeleton.remove();
+    }
+
+    if (chartPreview) {
+        chartPreview.classList.remove("chart-loading");
     }
 }
 
@@ -467,22 +525,16 @@ function renderNotifications(notifications) {
 
     if (!notifications.length) {
         notificationList.innerHTML =
-        `<p class="empty-state">No notifications yet.</p>`;
+        createEmptyState(
+            "No notifications yet",
+            "Updates and achievements will appear here.",
+            "&#128276;"
+        );
         return;
     }
 
     notificationList.innerHTML =
-    notifications.map((notification) => `
-        <article
-            class="notification-item ${notification.read ? "" : "unread"}"
-            data-notification-id="${escapeHtml(notification.id)}"
-            data-unread="${notification.read ? "false" : "true"}"
-        >
-            <h4>${escapeHtml(notification.title || "Notification")}</h4>
-            <p>${escapeHtml(notification.message || "")}</p>
-            <span class="notification-time">${escapeHtml(formatDate(notification.createdAt, { fallback: "" }))}</span>
-        </article>
-    `).join("");
+    notifications.map(createNotificationCard).join("");
 }
 
 async function markVisibleNotificationsAsRead() {
@@ -510,7 +562,7 @@ async function markVisibleNotificationsAsRead() {
         unreadNotifications.map((notification) =>
             markAsRead(notification.dataset.notificationId)
                 .catch((error) => {
-                    console.warn("Could not mark notification as read:", error);
+                    warn("NOTIFICATIONS", "Could not mark notification as read:", error);
                 })
         )
     );
@@ -526,11 +578,13 @@ function renderChart(chart) {
         return;
     }
 
+    clearChartSkeleton();
+
     if (!window.Chart) {
         analyticsChart.dataset.values =
         JSON.stringify(chart);
 
-        console.warn("Chart.js is not available yet.");
+        warn("ANALYTICS", "Chart.js is not available yet.");
         return;
     }
 

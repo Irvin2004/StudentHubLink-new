@@ -1,17 +1,18 @@
-import { db } from "../firebase.js";
-import { createResourceCard } from "./marketplace.js";
+import { auth, db } from "../firebase.js";
+import { createResourceCard } from "../components/resource-card.js";
+import { handleResourceAction } from "./marketplace-actions.js";
+import {
+    getRelatedResources
+} from "./recommendation-engine.js";
 import { RESOURCE_STATUS } from "../utils/constants.js";
 import { setText } from "../utils/dom.js";
 import { formatPrice } from "../utils/formatPrice.js";
+import { error as logError } from "../utils/logger.js";
+import { showToast } from "../utils/toast.js";
 
 import {
-    collection,
     doc,
-    getDoc,
-    getDocs,
-    limit,
-    query,
-    where
+    getDoc
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
 const params =
@@ -40,7 +41,18 @@ async function loadResourceDetails() {
     };
 
     renderResourceDetails(resource);
-    await loadRelatedResources(resource);
+
+    try {
+        const related =
+        await getRelatedResources(resource);
+
+        renderRelatedResources(related);
+    } catch (error) {
+        logError("FIRESTORE", "Related resources failed:", error);
+        renderRelatedResources([]);
+    }
+
+    bindResourceAction(resource);
 }
 
 function renderResourceDetails(resource) {
@@ -70,63 +82,67 @@ function renderResourceDetails(resource) {
     }
 }
 
-async function loadRelatedResources(resource) {
-    const relatedResources =
-    document.getElementById("relatedResources");
+function bindResourceAction(resource) {
+    const actionButton =
+    document.getElementById("resourceActionBtn");
 
-    if (!relatedResources || !resource.category) {
+    if (!actionButton) {
         return;
     }
 
-    relatedResources.innerHTML = `
-        <div class="loading-state">
-            Loading related resources...
-        </div>
-    `;
+    actionButton.addEventListener("click", async () => {
+        const user =
+        auth.currentUser;
 
-    try {
-        const relatedQuery =
-        query(
-            collection(db, "resources"),
-            where("category", "==", resource.category),
-            where("status", "==", RESOURCE_STATUS.APPROVED),
-            limit(6)
-        );
-
-        const snapshot =
-        await getDocs(relatedQuery);
-
-        const resources =
-        snapshot.docs
-            .map((resourceDoc) => ({
-                id: resourceDoc.id,
-                ...resourceDoc.data()
-            }))
-            .filter((relatedResource) => relatedResource.id !== resource.id)
-            .slice(0, 4);
-
-        if (!resources.length) {
-            relatedResources.innerHTML = `
-                <div class="empty-state">
-                    <h3>No related resources yet</h3>
-                    <p>Check back when more ${resource.category} resources are approved.</p>
-                </div>
-            `;
+        if (!user) {
+            showToast("Please login first.", "warning");
             return;
         }
 
-        relatedResources.innerHTML =
-        resources.map(createResourceCard).join("");
-    } catch (error) {
-        console.error("Related resources failed:", error);
+        actionButton.disabled = true;
 
-        relatedResources.innerHTML = `
-            <div class="empty-state">
-                <h3>Could not load related resources</h3>
-                <p>Please try again later.</p>
-            </div>
-        `;
+        try {
+            await handleResourceAction(resource, user);
+            actionButton.textContent =
+            Number(resource.price || 0) > 0 ? "Purchase Started" : "Downloaded";
+            showToast(
+                Number(resource.price || 0) > 0 ?
+                "Demo purchase complete." :
+                "Resource added to your library.",
+                "success"
+            );
+        } catch (error) {
+            showToast(error.message || "Something went wrong.", "error");
+            actionButton.disabled = false;
+        }
+    });
+}
+
+function renderRelatedResources(resources) {
+    const container =
+    document.getElementById("relatedResources");
+
+    if (!container) {
+        return;
     }
+
+    if (!resources.length) {
+        container.innerHTML =
+        "<p>No related resources found.</p>";
+        return;
+    }
+
+    container.innerHTML =
+    resources
+        .map((resource) =>
+            createResourceCard(resource, {
+                actions: "details",
+                showDate: false,
+                showMeta: false,
+                showOwner: true
+            })
+        )
+        .join("");
 }
 
 loadResourceDetails();

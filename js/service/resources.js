@@ -11,6 +11,8 @@ import {
 } from "../utils/constants.js";
 import { escapeHtml, setText } from "../utils/dom.js";
 import { formatPrice } from "../utils/formatPrice.js";
+import { error as logError } from "../utils/logger.js";
+import { showToast } from "../utils/toast.js";
 
 import {
     onAuthStateChanged
@@ -206,7 +208,7 @@ async function uploadResource(user) {
                 ownerName
             });
         } catch (error) {
-            console.error("Upload activity failed:", error);
+            logError("FIRESTORE", "Upload activity failed:", error);
         }
 
         message.textContent = "Resource uploaded for admin approval.";
@@ -298,7 +300,7 @@ async function loadResourceDetails(user) {
             window.open(resource.fileUrl, "_blank");
             actionBtn.textContent = "Downloaded";
         } catch (error) {
-            alert(error.message);
+            showToast(error.message || "Something went wrong.", "error");
             actionBtn.disabled = false;
         }
     });

@@ -1,5 +1,5 @@
 import { db } from "../firebase.js";
-import { createResourceCard } from "./marketplace.js";
+import { createResourceCard } from "../components/resource-card.js";
 import { RESOURCE_STATUS } from "../utils/constants.js";
 import { setText } from "../utils/dom.js";
 import { formatPrice } from "../utils/formatPrice.js";
@@ -92,7 +92,16 @@ function renderResources(resources) {
     }
 
     container.innerHTML =
-    resources.map(createResourceCard).join("");
+    resources
+        .map((resource) =>
+            createResourceCard(resource, {
+                actions: "details",
+                showDate: true,
+                showMeta: false,
+                showOwner: false
+            })
+        )
+        .join("");
 }
 
 loadUserProfile();

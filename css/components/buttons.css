@@ -1,5 +1,6 @@
 .btn,
 .btn-primary,
+.primary-btn,
 .btn-outline,
 .btn-secondary {
     display: inline-flex;
@@ -15,13 +16,15 @@
     font-size: 15px;
 }
 
-.btn-primary {
+.btn-primary,
+.primary-btn {
     background: var(--blue);
     color: white !important;
     box-shadow: 0 10px 20px rgba(59, 130, 246, 0.25);
 }
 
-.btn-primary:hover {
+.btn-primary:hover,
+.primary-btn:hover {
     background: var(--blue-dark);
     transform: translateY(-2px);
 }
@@ -39,4 +42,3 @@
     color: var(--blue);
     transform: translateY(-2px);
 }
-
