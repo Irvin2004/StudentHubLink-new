@@ -45,6 +45,44 @@
     gap: 14px;
 }
 
+.reviews-section,
+.comments-section {
+    max-width: 850px;
+    margin: 32px auto 0;
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow);
+    padding: 36px;
+}
+
+.reviews-section h2,
+.comments-section h2 {
+    color: var(--navy);
+}
+
+.review-form,
+.comment-form {
+    display: grid;
+    gap: 16px;
+    margin: 32px 0;
+}
+
+.review-form textarea,
+.comment-form textarea {
+    resize: vertical;
+    min-height: 140px;
+}
+
+.review-form select,
+.review-form textarea,
+.comment-form textarea {
+    padding: 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--white);
+    color: var(--text-main);
+}
+
 .related-section {
     max-width: 1180px;
     margin: 32px auto 0;

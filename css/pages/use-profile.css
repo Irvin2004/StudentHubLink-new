@@ -15,6 +15,17 @@
     margin-bottom: 24px;
 }
 
+.profile-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 18px;
+    flex-wrap: wrap;
+}
+
+.profile-actions .active {
+    background: var(--blue-dark);
+}
+
 .profile-avatar {
     width: 90px;
     height: 90px;

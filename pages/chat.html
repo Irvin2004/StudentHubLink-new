@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudentHub Chat</title>
+    <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="../css/base/reset.css">
+    <link rel="stylesheet" href="../css/base/theme.css">
+    <link rel="stylesheet" href="../css/components/buttons.css">
+    <link rel="stylesheet" href="../css/pages/chat.css">
+</head>
+<body>
+<main class="chat-page">
+    <section class="chat-card">
+        <header class="chat-header">
+            <a href="javascript:history.back()">
+                &larr; Back
+            </a>
+
+            <div>
+                <h1 id="chatUserName">
+                    Conversation
+                </h1>
+
+                <p id="chatStatus">
+                    Mutual connection
+                </p>
+            </div>
+        </header>
+
+        <div
+            id="messageList"
+            class="message-list">
+        </div>
+
+        <p
+            id="typingIndicator"
+            class="typing-indicator"
+            hidden>
+            Someone is typing...
+        </p>
+
+        <form
+            id="messageForm"
+            class="message-form">
+            <textarea
+                id="messageInput"
+                rows="2"
+                maxlength="1000"
+                placeholder="Type a message..."
+                required></textarea>
+
+            <button
+                class="primary-btn"
+                type="submit">
+                Send
+            </button>
+        </form>
+    </section>
+</main>
+
+<script
+    type="module"
+    src="../js/controllers/chat-controller.js"></script>
+</body>
+</html>

@@ -9,6 +9,9 @@
     <link rel="stylesheet" href="../css/base/theme.css">
     <link rel="stylesheet" href="../css/components/buttons.css">
     <link rel="stylesheet" href="../css/components/toast.css">
+    <link rel="stylesheet" href="../css/components/rating.css">
+    <link rel="stylesheet" href="../css/components/review.css">
+    <link rel="stylesheet" href="../css/components/comment.css">
     <link rel="stylesheet" href="../css/pages/resources.css">
     <link rel="stylesheet" href="../css/pages/resource-details.css">
 </head>
@@ -34,6 +37,65 @@
             <button class="secondary-btn" id="previewBtn" type="button">Preview</button>
             <button class="primary-btn" id="resourceActionBtn" type="button">Download</button>
         </div>
+    </section>
+
+    <section class="reviews-section">
+        <h2>Reviews</h2>
+
+        <div id="reviewSummary"></div>
+
+        <form id="reviewForm" class="review-form">
+            <label for="ratingSelect">
+                Rating
+            </label>
+
+            <select id="ratingSelect" required>
+                <option value="">Select Rating</option>
+                <option value="5">★★★★★</option>
+                <option value="4">★★★★☆</option>
+                <option value="3">★★★☆☆</option>
+                <option value="2">★★☆☆☆</option>
+                <option value="1">★☆☆☆☆</option>
+            </select>
+
+            <label for="reviewInput">
+                Review
+            </label>
+
+            <textarea
+                id="reviewInput"
+                rows="5"
+                placeholder="Share your experience..."
+                required></textarea>
+
+            <button
+                type="submit"
+                class="primary-btn">
+                Submit Review
+            </button>
+        </form>
+
+        <div id="reviewsList"></div>
+    </section>
+
+    <section class="comments-section">
+        <h2>Discussion</h2>
+
+        <form id="commentForm" class="comment-form">
+            <textarea
+                id="commentInput"
+                placeholder="Ask a question or start a discussion..."
+                rows="4"
+                required></textarea>
+
+            <button
+                class="primary-btn"
+                type="submit">
+                Post Comment
+            </button>
+        </form>
+
+        <div id="commentsList"></div>
     </section>
 
     <section class="related-section">

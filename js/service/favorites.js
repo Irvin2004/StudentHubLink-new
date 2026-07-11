@@ -14,8 +14,8 @@ import { auth, db } from "../firebase.js";
 import { createEmptyState } from "../components/empty-state.js";
 import { createResourceCard } from "../components/resource-card.js";
 import { COLLECTIONS } from "../config/firestore.js";
-import { getFavoriteIds } from "./favorites-service.js";
-import { initializeFavoriteButtons } from "./favorites-controller.js";
+import { getFavoriteIds } from "../services/favorites-service.js";
+import { initializeFavoriteButtons } from "../controllers/favorites-controller.js";
 import { showSkeleton } from "../utils/loading.js";
 import { handleError } from "../utils/error-handler.js";
 

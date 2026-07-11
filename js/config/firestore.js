@@ -5,5 +5,10 @@ export const COLLECTIONS = {
     NOTIFICATIONS: "notifications",
     LIBRARY: "libraries",
     ACHIEVEMENTS: "achievements",
-    FAVORITES: "favorites"
+    FAVORITES: "favorites",
+    REVIEWS: "reviews",
+    COMMENTS: "comments",
+    FOLLOWS: "follows",
+    CONVERSATIONS: "conversations",
+    MESSAGES: "messages"
 };

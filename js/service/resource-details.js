@@ -1,9 +1,21 @@
 import { auth, db } from "../firebase.js";
 import { createResourceCard } from "../components/resource-card.js";
+import {
+    initializeCommentForm
+} from "../controllers/comments-controller.js";
+import {
+    subscribeAndRenderComments
+} from "../renderers/comment-renderer.js";
 import { handleResourceAction } from "./marketplace-actions.js";
 import {
     getRelatedResources
 } from "./recommendation-engine.js";
+import {
+    initializeReviewForm
+} from "../controllers/reviews-controller.js";
+import {
+    renderReviews
+} from "../renderers/review-renderer.js";
 import { RESOURCE_STATUS } from "../utils/constants.js";
 import { setText } from "../utils/dom.js";
 import { formatPrice } from "../utils/formatPrice.js";
@@ -12,7 +24,8 @@ import { showToast } from "../utils/toast.js";
 
 import {
     doc,
-    getDoc
+    getDoc,
+    onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
 const params =
@@ -20,6 +33,12 @@ new URLSearchParams(window.location.search);
 
 const resourceId =
 params.get("id");
+
+let unsubscribeComments =
+null;
+
+let unsubscribeResource =
+null;
 
 async function loadResourceDetails() {
     if (!resourceId) {
@@ -41,6 +60,12 @@ async function loadResourceDetails() {
     };
 
     renderResourceDetails(resource);
+    await renderReviews(resource);
+    subscribeToResourceUpdates(resource.id);
+    initializeReviewForm(resource);
+    unsubscribeComments =
+    subscribeAndRenderComments(resource.id);
+    initializeCommentForm(resource.id);
 
     try {
         const related =
@@ -53,6 +78,33 @@ async function loadResourceDetails() {
     }
 
     bindResourceAction(resource);
+}
+
+function subscribeToResourceUpdates(resourceId) {
+    if (typeof unsubscribeResource === "function") {
+        unsubscribeResource();
+    }
+
+    unsubscribeResource =
+    onSnapshot(
+        doc(db, "resources", resourceId),
+        async (snapshot) => {
+            if (!snapshot.exists()) {
+                return;
+            }
+
+            const resource = {
+                id: snapshot.id,
+                ...snapshot.data()
+            };
+
+            renderResourceDetails(resource);
+            await renderReviews(resource);
+        },
+        (error) => {
+            logError("FIRESTORE", "Resource updates failed:", error);
+        }
+    );
 }
 
 function renderResourceDetails(resource) {
@@ -144,5 +196,15 @@ function renderRelatedResources(resources) {
         )
         .join("");
 }
+
+window.addEventListener("beforeunload", () => {
+    if (typeof unsubscribeComments === "function") {
+        unsubscribeComments();
+    }
+
+    if (typeof unsubscribeResource === "function") {
+        unsubscribeResource();
+    }
+});
 
 loadResourceDetails();

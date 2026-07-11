@@ -1,87 +1,183 @@
 # StudentHub
 
-StudentHub is a student resource platform for discovering, uploading, reviewing, purchasing, and downloading academic resources. The project currently runs as a static HTML/CSS/JavaScript app backed by Firebase Authentication, Cloud Firestore, and Firebase Storage.
+StudentHub is a Firebase-powered student resource platform for discovering, uploading, reviewing, discussing, saving, and sharing academic resources.
+
+It is evolving from a resource marketplace into a collaborative study platform with reviews, comments, followers, messaging, achievements, analytics, and backend-owned business logic.
+
+## Screenshots
+
+Screenshots are planned for the project documentation. Recommended captures:
+
+- Landing page
+- Marketplace
+- Resource details with reviews and comments
+- Favorites
+- Dashboard
+- Chat
 
 ## Features
 
-- Student registration and login with Firebase Authentication
+- Firebase Authentication
 - Role-based student and admin flows
 - Marketplace for approved study resources
 - Upload workflow with admin review
-- Resource download and purchase tracking
-- User library for accessed resources
-- Dashboard stats, recent activity, notifications, and analytics
-- Admin dashboard for pending resource approvals and platform metrics
+- Smart Search
+- Category and Price Filters
+- Sorting
+- Favorites
+- Dark Mode
+- Reviews and Ratings
+- Resource discussion comments
+- Real-time comments
+- Mutual follow system
+- Private messaging
+- Real-time chat messages
+- Typing indicators
+- User library
+- Notifications
+- Achievements
+- Dashboard Analytics
+- Leaderboards
+- Firestore Security Rules
+- Cloud Functions architecture
 
-## Latest Features (v1.1)
+## Latest Features
 
-- 🔍 Smart Search
-- 🏷️ Category & Price Filters
-- ↕️ Sorting
-- ❤️ Favorites
-- 🌙 Dark Mode
-- 🏆 Achievements
-- 📊 Dashboard Analytics
-- 🥇 Leaderboards
+### v1.3
 
-## Tech Stack
+- Followers
+- Mutual follow messaging
+- Real-time chat
+- Typing indicators
+- Real-time discussions
 
-- HTML, CSS, and JavaScript modules
+### v1.2
+
+- Reviews
+- Ratings
+- Comments
+- Rating stars
+- Dynamic review updates
+
+### v1.1
+
+- Smart Search
+- Category and Price Filters
+- Sorting
+- Favorites
+- Dark Mode
+- Achievements
+- Dashboard Analytics
+- Leaderboards
+
+## Technology Stack
+
+- HTML5
+- CSS3
+- JavaScript ES Modules
 - Firebase Authentication
 - Cloud Firestore
-- Firebase Storage
-- Chart.js for dashboard analytics
+- Cloud Functions
+- Firebase Storage planned
+- Firebase Hosting planned
+- Chart.js
+
+## Architecture Diagram
+
+```text
+Pages
+  -> Controllers
+  -> Renderers
+  -> Components
+  -> Services
+  -> Firebase
+  -> Cloud Functions
+```
+
+Backend business logic is moving into Cloud Functions so the frontend displays data while the backend owns sensitive updates.
 
 ## Project Structure
 
 ```text
 StudentHub/
-├── Admin/
-├── assets/
-├── css/
-│   ├── base/
-│   ├── components/
-│   └── pages/
-├── docs/
-│   ├── architecture.md
-│   ├── firestore-schema.md
-│   └── roadmap.md
-├── js/
-│   ├── service/
-│   └── utils/
-├── pages/
-├── README.md
-├── CHANGELOG.md
-├── CONTRIBUTING.md
-├── LICENSE
-└── .gitignore
+  Admin/
+  assets/
+  css/
+  docs/
+  functions/
+  js/
+    components/
+    controllers/
+    renderers/
+    service/
+    services/
+    utils/
+  pages/
+  firestore.rules
+  firebase.json
+  README.md
 ```
 
-## Running Locally
+## Installation
 
-Because the app uses JavaScript modules, serve the project over HTTP instead of opening files directly.
+Clone or open the project folder, then serve it over HTTP because the app uses JavaScript modules.
 
 ```powershell
 python -m http.server 8000 --bind 127.0.0.1
 ```
 
-Then open:
+Open:
 
 ```text
 http://127.0.0.1:8000/index.html
 ```
 
+## Firebase Setup
+
+Install Firebase CLI:
+
+```powershell
+npm install -g firebase-tools
+```
+
+Login:
+
+```powershell
+firebase login
+```
+
+Deploy Firestore rules:
+
+```powershell
+firebase deploy --only firestore:rules
+```
+
+Cloud Functions require the Firebase Blaze plan before deployment.
+
 ## Documentation
 
-- [Architecture](docs/architecture.md)
-- [Firestore Schema](docs/firestore-schema.md)
-- [Roadmap](docs/roadmap.md)
-- [Contributing](CONTRIBUTING.md)
+- [Architecture](docs/ARCHITECTURE.md)
+- [Database](docs/DATABASE.md)
+- [API](docs/API.md)
+- [Security](docs/SECURITY.md)
+- [Roadmap](docs/ROADMAP.md)
+- [Deployment](docs/DEPLOYMENT.md)
+- [Contributing](docs/CONTRIBUTING.md)
+- [Changelog](docs/CHANGELOG.md)
 
-## Status
+## Roadmap
 
-StudentHub is under active development. See [CHANGELOG.md](CHANGELOG.md) for notable changes and [docs/roadmap.md](docs/roadmap.md) for planned work.
+- v1: Authentication, Marketplace, Uploads
+- v1.1: Search, Favorites, Dark Mode
+- v1.2: Reviews, Ratings, Comments
+- v1.3: Followers, Messaging, Notifications
+- v1.4: Backend-owned Cloud Functions workflows
+- v2: AI Study Assistant, Flashcards, Quiz Generator
 
-## Author
+## License
 
-Amogelang Shogole
+StudentHub is licensed under the MIT License. See [LICENSE](LICENSE).
+
+## Contact
+
+Created by Amogelang Shogole.

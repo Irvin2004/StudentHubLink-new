@@ -25,10 +25,13 @@ export async function processDownload(resource, user) {
         });
     }
 
-    await updateDoc(doc(db, "resources", resource.id), {
-        downloadCount: increment(1),
-        updatedAt: serverTimestamp()
-    });
+    await tryDerivedWrite(
+        updateDoc(doc(db, "resources", resource.id), {
+            downloadCount: increment(1),
+            updatedAt: serverTimestamp()
+        }),
+        "Resource download count update"
+    );
 
     await addToLibrary(resource, user, "download");
 
@@ -50,17 +53,29 @@ export async function processDownload(resource, user) {
         type: "download"
     });
 
-    await awardAchievement(user.uid, {
-        key: "first-download",
-        title: "First Download",
-        description: "You downloaded your first study resource.",
-        icon: "download"
-    });
+    await tryDerivedWrite(
+        awardAchievement(user.uid, {
+            key: "first-download",
+            title: "First Download",
+            description: "You downloaded your first study resource.",
+            icon: "download"
+        }),
+        "Achievement award"
+    );
 }
 
+async function tryDerivedWrite(operation, label) {
+    try {
+        await operation;
+    } catch (error) {
+        if (error.code === "permission-denied") {
+            console.warn(
+                `${label} is blocked by Firestore rules and should move to Cloud Functions.`,
+                error
+            );
+            return;
+        }
 
-
-
-
-
-
+        throw error;
+    }
+}

@@ -3,6 +3,7 @@ import {
     getResourceAction
 } from "../utils/constants.js";
 import { createFavoriteButton } from "./favorite-button.js";
+import { createRatingStars } from "./rating-stars.js";
 import { escapeHtml } from "../utils/dom.js";
 import { formatDate } from "../utils/formatDate.js";
 import { formatPrice } from "../utils/formatPrice.js";
@@ -140,8 +141,6 @@ export function createResourceCard(resource, options = {}) {
     const metaMarkup =
     showMeta || showPrice || showDownloadCount ?
     `<div class="resource-meta">
-        ${showMeta ? `<span class="resource-rating">&#9733;&#9733;&#9733;&#9733;&#9733;</span>` : ""}
-        ${showMeta ? "<span>Coming Soon</span>" : ""}
         ${showPrice && !showPriceBadge ? `<span>${escapeHtml(formatPrice(resource.price || 0))}</span>` : ""}
         ${downloadMarkup}
     </div>` :
@@ -162,6 +161,11 @@ export function createResourceCard(resource, options = {}) {
                 </div>
 
                 <h3>${escapeHtml(resource.title || "Untitled Resource")}</h3>
+
+                ${createRatingStars(
+                    resource.averageRating || 0,
+                    resource.reviewCount || 0
+                )}
 
                 <p class="resource-category">
                     ${escapeHtml(resource.category || "General")}

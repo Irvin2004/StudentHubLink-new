@@ -1,8 +1,19 @@
-import { db } from "../firebase.js";
+import { auth, db } from "../firebase.js";
 import { createResourceCard } from "../components/resource-card.js";
+import {
+    areMutuals,
+    followUser,
+    isFollowing,
+    unfollowUser
+} from "../services/follows-service.js";
+import {
+    createOrGetConversation
+} from "../services/chat-service.js";
 import { RESOURCE_STATUS } from "../utils/constants.js";
 import { setText } from "../utils/dom.js";
+import { handleError } from "../utils/error-handler.js";
 import { formatPrice } from "../utils/formatPrice.js";
+import { showToast } from "../utils/toast.js";
 
 import {
     collection,
@@ -12,6 +23,10 @@ import {
     query,
     where
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+import {
+    onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 
 const params =
 new URLSearchParams(window.location.search);
@@ -37,6 +52,7 @@ async function loadUserProfile() {
     userSnap.data();
 
     renderProfile(userData);
+    setupFollowControls(userId);
     await loadUserResources(userId);
 }
 
@@ -102,6 +118,137 @@ function renderResources(resources) {
             })
         )
         .join("");
+}
+
+async function setupFollowControls(profileUserId) {
+    const followButton =
+    document.getElementById("followButton");
+
+    const messageButton =
+    document.getElementById("messageButton");
+
+    if (!followButton || !messageButton) {
+        return;
+    }
+
+    onAuthStateChanged(auth, async (currentUser) => {
+        if (!currentUser) {
+            followButton.textContent = "Log in to follow";
+            followButton.disabled = false;
+            followButton.hidden = false;
+            messageButton.hidden = true;
+
+            followButton.onclick = () => {
+                showToast(
+                    "Please log in first.",
+                    "warning"
+                );
+            };
+
+            return;
+        }
+
+        if (currentUser.uid === profileUserId) {
+            followButton.hidden = true;
+            messageButton.hidden = true;
+            return;
+        }
+
+        async function refreshControls() {
+            const following =
+            await isFollowing(
+                currentUser.uid,
+                profileUserId
+            );
+
+            const mutual =
+            await areMutuals(
+                currentUser.uid,
+                profileUserId
+            );
+
+            followButton.textContent =
+            following ? "Following" : "Follow";
+
+            followButton.classList.toggle(
+                "active",
+                following
+            );
+
+            messageButton.hidden = !mutual;
+        }
+
+        followButton.onclick = async () => {
+            try {
+                followButton.disabled = true;
+
+                const following =
+                await isFollowing(
+                    currentUser.uid,
+                    profileUserId
+                );
+
+                if (following) {
+                    await unfollowUser(
+                        currentUser.uid,
+                        profileUserId
+                    );
+
+                    showToast(
+                        "User unfollowed.",
+                        "success"
+                    );
+                } else {
+                    await followUser(
+                        currentUser.uid,
+                        profileUserId
+                    );
+
+                    showToast(
+                        "User followed.",
+                        "success"
+                    );
+                }
+
+                await refreshControls();
+            } catch (error) {
+                handleError(
+                    error,
+                    "Unable to update follow status."
+                );
+            } finally {
+                followButton.disabled = false;
+            }
+        };
+
+        messageButton.onclick = async () => {
+            try {
+                messageButton.disabled = true;
+                messageButton.textContent =
+                "Opening...";
+
+                const conversation =
+                await createOrGetConversation(
+                    currentUser.uid,
+                    profileUserId
+                );
+
+                window.location.href =
+                `chat.html?id=${conversation.id}`;
+            } catch (error) {
+                handleError(
+                    error,
+                    "Unable to open conversation."
+                );
+
+                messageButton.disabled = false;
+                messageButton.textContent =
+                "Message";
+            }
+        };
+
+        await refreshControls();
+    });
 }
 
 loadUserProfile();
