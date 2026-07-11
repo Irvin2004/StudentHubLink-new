@@ -13,6 +13,17 @@ StudentHub is a student resource platform for discovering, uploading, reviewing,
 - Dashboard stats, recent activity, notifications, and analytics
 - Admin dashboard for pending resource approvals and platform metrics
 
+## Latest Features (v1.1)
+
+- 🔍 Smart Search
+- 🏷️ Category & Price Filters
+- ↕️ Sorting
+- ❤️ Favorites
+- 🌙 Dark Mode
+- 🏆 Achievements
+- 📊 Dashboard Analytics
+- 🥇 Leaderboards
+
 ## Tech Stack
 
 - HTML, CSS, and JavaScript modules

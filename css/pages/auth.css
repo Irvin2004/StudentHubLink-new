@@ -57,7 +57,7 @@
 .auth-card {
     width: 100%;
     max-width: 430px;
-    background: white;
+    background: var(--white);
     border: 1px solid var(--border);
     border-radius: 28px;
     padding: 38px;
@@ -152,3 +152,4 @@
         font-size: 38px;
     }
 }
+

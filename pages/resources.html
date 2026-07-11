@@ -25,11 +25,22 @@
         <li><a href="../dashboard.html">Dashboard</a></li>
         <li><a href="resources.html">Marketplace</a></li>
         <li><a href="library.html">My Library</a></li>
+        <li><a href="favorites.html">&#10084; Favorites</a></li>
         <li><a href="achievements.html">🏆 Achievements</a></li>
         <li><a href="leaderboard.html">🏅 Leaderboard</a></li>
         <li><a href="upload.html">Upload</a></li>
         <li><a href="documents.html">Documents</a></li>
         <li><a href="profile.html">Profile</a></li>
+        <li>
+            <button
+                class="theme-toggle"
+                type="button"
+                data-theme-toggle
+                aria-label="Switch to dark mode"
+                title="Switch to dark mode">
+                ☾
+            </button>
+        </li>
     </ul>
 </nav>
 
@@ -45,22 +56,29 @@
         </div>
     </section>
 
-    <div class="marketplace-controls">
+    <section class="marketplace-controls">
         <input
             id="resourceSearch"
             type="search"
-            placeholder="Search by title, category, or author..."
+            placeholder="Search resources, categories or authors..."
             autocomplete="off"
         >
+
+        <select id="priceFilter" aria-label="Filter by price">
+            <option value="all">All prices</option>
+            <option value="free">Free</option>
+            <option value="paid">Paid</option>
+        </select>
 
         <select id="sortResources" aria-label="Sort resources">
             <option value="newest">Newest</option>
             <option value="oldest">Oldest</option>
-            <option value="free">Free First</option>
-            <option value="paid">Paid First</option>
-            <option value="downloads">Most Downloaded</option>
+            <option value="downloads">Most downloaded</option>
+            <option value="price-low">Price: low to high</option>
+            <option value="price-high">Price: high to low</option>
+            <option value="title">Title: A-Z</option>
         </select>
-    </div>
+    </section>
 
     <section class="marketplace-toolbar" aria-label="Marketplace categories">
         <button class="filter-btn active" type="button" data-category="All">
@@ -115,5 +133,6 @@
 </div>
 
 <script type="module" src="../js/service/marketplace.js"></script>
+<script type="module" src="../js/theme.js"></script>
 </body>
 </html>

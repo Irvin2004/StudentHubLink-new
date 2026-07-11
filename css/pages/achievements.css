@@ -29,7 +29,7 @@
 }
 
 .achievement-card {
-    background: white;
+    background: var(--white);
     border-radius: var(--radius-lg);
     padding: 24px;
     box-shadow: var(--shadow);
@@ -63,7 +63,7 @@
 
 .empty-state {
     grid-column: 1 / -1;
-    background: white;
+    background: var(--white);
     border: 1px dashed var(--border);
     border-radius: var(--radius-lg);
     padding: 32px;

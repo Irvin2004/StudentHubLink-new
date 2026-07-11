@@ -45,7 +45,7 @@
 }
 
 .resource-card {
-    background: white;
+    background: var(--white);
     border: 1px solid var(--border);
     border-radius: 20px;
     overflow: hidden;
@@ -92,7 +92,7 @@
 }
 
 .dashboard-card {
-    background: white;
+    background: var(--white);
     border-radius: 20px;
     border: 1px solid var(--border);
     padding: 24px;
@@ -112,7 +112,7 @@
     display: flex;
     align-items: center;
     gap: 18px;
-    background: white;
+    background: var(--white);
     border-radius: 18px;
     border: 1px solid var(--border);
     padding: 20px;

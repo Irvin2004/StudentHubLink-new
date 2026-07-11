@@ -7,7 +7,7 @@
 .resource-details-card {
     max-width: 850px;
     margin: auto;
-    background: white;
+    background: var(--white);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow);
     padding: 36px;

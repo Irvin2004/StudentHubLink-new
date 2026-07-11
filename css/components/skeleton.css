@@ -1,5 +1,5 @@
 .skeleton-card {
-    background: white;
+    background: var(--white);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow);
     padding: 24px;

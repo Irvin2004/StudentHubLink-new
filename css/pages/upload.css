@@ -1,5 +1,5 @@
 body {
-    background: #f4f6f9;
+    background: var(--bg);
     color: var(--text-main);
 }
 
@@ -11,7 +11,7 @@ body {
     align-items: center;
     justify-content: space-between;
     gap: 24px;
-    background: #003366;
+    background: var(--blue);
     color: white;
 }
 
@@ -62,7 +62,7 @@ body {
 }
 
 .upload-header h1 {
-    color: #003366;
+    color: var(--navy);
     font-size: 44px;
     line-height: 1.05;
     margin-bottom: 12px;
@@ -75,7 +75,7 @@ body {
 }
 
 .upload-card {
-    background: white;
+    background: var(--white);
     border: 1px solid rgba(148, 163, 184, 0.32);
     border-radius: 8px;
     padding: 28px;
@@ -84,7 +84,7 @@ body {
 
 .upload-card label {
     display: block;
-    color: #003366;
+    color: var(--navy);
     font-weight: 800;
     margin-bottom: 8px;
 }
@@ -97,14 +97,14 @@ body {
     padding: 13px 15px;
     border: 1px solid #ccc;
     border-radius: 6px;
-    background: white;
+    background: var(--white);
     font-size: 15px;
 }
 
 .upload-card input:focus,
 .upload-card textarea:focus,
 .upload-card select:focus {
-    border-color: #003366;
+    border-color: var(--navy);
     box-shadow: 0 0 0 4px rgba(0, 51, 102, 0.12);
     outline: none;
 }
@@ -122,7 +122,7 @@ body {
 .form-message {
     min-height: 22px;
     margin-top: 16px;
-    color: #003366;
+    color: var(--navy);
     font-weight: 700;
 }
 
@@ -140,3 +140,4 @@ body {
         font-size: 36px;
     }
 }
+

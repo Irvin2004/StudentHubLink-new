@@ -1,6 +1,11 @@
 import { auth, db } from "../firebase.js";
+import { createEmptyState } from "../components/empty-state.js";
 import { createResourceCard } from "../components/resource-card.js";
+import { filterResources } from "./filter-service.js";
+import { initializeFavoriteButtons } from "./favorites-controller.js";
 import { handleResourceAction } from "./marketplace-actions.js";
+import { searchResources } from "./search-service.js";
+import { sortResources } from "./sort-service.js";
 import {
     RESOURCE_ACTION,
     RESOURCE_STATUS,
@@ -29,6 +34,7 @@ const marketplaceState = {
     allResources: [],
     search: "",
     category: "All",
+    price: "all",
     sort: "newest"
 };
 
@@ -82,12 +88,12 @@ function renderMarketplace(resources) {
     }
 
     if (resources.length === 0) {
-        resourceGrid.innerHTML = `
-        <div class="empty-state">
-            <h3>No resources available</h3>
-            <p>Check back later or upload the first resource!</p>
-        </div>
-        `;
+        resourceGrid.innerHTML =
+        createEmptyState(
+            "No resources found",
+            "Try changing your search or filters.",
+            "&#128269;"
+        );
 
         return;
     }
@@ -107,92 +113,35 @@ function renderMarketplace(resources) {
 }
 
 function updateMarketplace() {
-    let resources =
-    [...marketplaceState.allResources];
+    let results =
+    searchResources(
+        marketplaceState.allResources,
+        marketplaceState.search
+    );
 
-    if (marketplaceState.search) {
-        const search =
-        marketplaceState.search.toLowerCase().trim();
+    results =
+    filterResources(results, {
+        category: marketplaceState.category,
+        price: marketplaceState.price
+    });
 
-        resources =
-        resources.filter((resource) => {
-            const title =
-            (resource.title || "").toLowerCase();
+    results =
+    sortResources(
+        results,
+        marketplaceState.sort
+    );
 
-            const description =
-            (resource.description || "").toLowerCase();
-
-            const category =
-            (resource.category || "").toLowerCase();
-
-            const owner =
-            (resource.ownerName || "").toLowerCase();
-
-            return (
-                title.includes(search) ||
-                description.includes(search) ||
-                category.includes(search) ||
-                owner.includes(search)
-            );
-        });
-    }
-
-    if (marketplaceState.category !== "All") {
-        resources =
-        resources.filter((resource) =>
-            resource.category === marketplaceState.category
+    if (!results.length) {
+        resourceGrid.innerHTML =
+        createEmptyState(
+            "No resources found",
+            "Try changing your search term or filters.",
+            "&#128269;"
         );
+        return;
     }
 
-    switch (marketplaceState.sort) {
-        case "newest":
-            resources.sort((a, b) => {
-                const first =
-                a.createdAt?.toDate?.() ?? new Date(0);
-
-                const second =
-                b.createdAt?.toDate?.() ?? new Date(0);
-
-                return second - first;
-            });
-            break;
-
-        case "oldest":
-            resources.sort((a, b) => {
-                const first =
-                a.createdAt?.toDate?.() ?? new Date(0);
-
-                const second =
-                b.createdAt?.toDate?.() ?? new Date(0);
-
-                return first - second;
-            });
-            break;
-
-        case "free":
-            resources.sort((a, b) =>
-                (a.price || 0) - (b.price || 0)
-            );
-            break;
-
-        case "paid":
-            resources.sort((a, b) =>
-                (b.price || 0) - (a.price || 0)
-            );
-            break;
-
-        case "downloads":
-            resources.sort((a, b) =>
-                (b.downloadCount || 0) -
-                (a.downloadCount || 0)
-            );
-            break;
-
-        default:
-            break;
-    }
-
-    renderMarketplace(resources);
+    renderMarketplace(results);
 }
 
 async function loadMarketplace() {
@@ -211,12 +160,12 @@ async function loadMarketplace() {
     } catch (error) {
         logError("FIRESTORE", "Marketplace load failed:", error);
 
-        resourceGrid.innerHTML = `
-        <div class="empty-state">
-            <h3>Could not load resources</h3>
-            <p>Please try again.</p>
-        </div>
-        `;
+        resourceGrid.innerHTML =
+        createEmptyState(
+            "Could not load resources",
+            "Please try again.",
+            "&#9888;"
+        );
     }
 }
 
@@ -296,9 +245,24 @@ function bindMarketplaceControls() {
     const sortSelect =
     document.getElementById("sortResources");
 
+    const priceSelect =
+    document.getElementById("priceFilter");
+
+    const categoryButtons =
+    document.querySelectorAll(".filter-btn");
+
     if (searchInput) {
         searchInput.addEventListener("input", (event) => {
             marketplaceState.search =
+            event.target.value;
+
+            updateMarketplace();
+        });
+    }
+
+    if (priceSelect) {
+        priceSelect.addEventListener("change", (event) => {
+            marketplaceState.price =
             event.target.value;
 
             updateMarketplace();
@@ -314,27 +278,24 @@ function bindMarketplaceControls() {
         });
     }
 
-    document
-        .querySelectorAll(".filter-btn")
-        .forEach((button) => {
-            button.addEventListener("click", () => {
-                document
-                    .querySelectorAll(".filter-btn")
-                    .forEach((filterButton) => {
-                        filterButton.classList.remove("active");
-                    });
+    categoryButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+            categoryButtons.forEach((item) =>
+                item.classList.remove("active")
+            );
 
-                button.classList.add("active");
+            button.classList.add("active");
 
-                marketplaceState.category =
-                button.dataset.category;
+            marketplaceState.category =
+            button.dataset.category || "All";
 
-                updateMarketplace();
-            });
+            updateMarketplace();
         });
+    });
 }
 
 if (resourceGrid) {
     bindMarketplaceControls();
+    initializeFavoriteButtons();
     loadMarketplace();
 }

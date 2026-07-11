@@ -16,13 +16,13 @@
     <link rel="stylesheet" href="css/components/cards.css">
     <link rel="stylesheet" href="css/components/toast.css">
     <link rel="stylesheet" href="css/components/footer.css">
-    <link rel="stylesheet" href="css/pages/landing.css">
+    <link rel="stylesheet" href="css/pages/landing.css?v=20260711-2">
 </head>
 <body>
 <header class="site-header">
     <nav class="nav">
         <a href="index.html" class="logo">
-            <img src="assets/logos/studenthub-logo.svg" alt="StudentHub Logo">
+            <img src="assets/logos/studenthub-logo.svg?v=20260711-2" alt="StudentHub Logo">
         </a>
 
         <div class="nav-links">
@@ -31,6 +31,14 @@
             <a href="#ai">AI Assistant</a>
             <a href="login.html">Login</a>
             <a href="register.html" class="btn btn-primary">Get Started</a>
+            <button
+                class="theme-toggle"
+                type="button"
+                data-theme-toggle
+                aria-label="Switch to dark mode"
+                title="Switch to dark mode">
+                ☾
+            </button>
         </div>
     </nav>
 </header>
@@ -185,5 +193,6 @@
 <footer class="footer">
     <p>&copy; 2026 StudentHub. Built to empower students.</p>
 </footer>
+<script type="module" src="js/theme.js"></script>
 </body>
 </html>

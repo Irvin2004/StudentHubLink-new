@@ -5,7 +5,7 @@
 }
 
 .public-profile-header {
-    background: white;
+    background: var(--white);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow);
     padding: 32px;

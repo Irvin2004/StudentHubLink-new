@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>StudentHub Favorites</title>
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../css/base/reset.css">
+<link rel="stylesheet" href="../css/base/theme.css">
+<link rel="stylesheet" href="../css/components/navbar.css">
+<link rel="stylesheet" href="../css/components/buttons.css">
+<link rel="stylesheet" href="../css/components/toast.css">
+<link rel="stylesheet" href="../css/components/skeleton.css">
+<link rel="stylesheet" href="../css/pages/resources.css">
+<link rel="stylesheet" href="../css/pages/favorites.css">
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="logo">
+        <h2>StudentHub</h2>
+    </div>
+
+    <ul class="nav-links">
+        <li><a href="../dashboard.html">Dashboard</a></li>
+        <li><a href="resources.html">Marketplace</a></li>
+        <li><a href="library.html">My Library</a></li>
+        <li><a href="favorites.html">&#10084; Favorites</a></li>
+        <li><a href="achievements.html">Achievements</a></li>
+        <li><a href="leaderboard.html">Leaderboard</a></li>
+        <li><a href="upload.html">Upload</a></li>
+        <li><a href="documents.html">Documents</a></li>
+        <li><a href="profile.html">Profile</a></li>
+    </ul>
+</nav>
+
+<main class="favorites-page">
+    <section class="page-header">
+        <h1>&#10084; My Favorites</h1>
+
+        <p>
+            Quickly access resources you've saved for later.
+        </p>
+    </section>
+
+    <section
+        id="favoritesGrid"
+        class="resource-grid">
+    </section>
+</main>
+
+<script type="module" src="../js/service/favorites.js"></script>
+<script type="module" src="../js/theme.js"></script>
+</body>
+</html>

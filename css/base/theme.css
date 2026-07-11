@@ -25,10 +25,29 @@
     --space-2xl: 48px;
 }
 
+[data-theme="dark"] {
+    --navy: #F8FAFC;
+    --blue: #60A5FA;
+    --blue-dark: #3B82F6;
+    --white: #111827;
+    --surface: #111827;
+    --bg: #0F172A;
+    --text-main: #F8FAFC;
+    --text-muted: #94A3B8;
+    --border: #334155;
+    --success: #22C55E;
+    --warning: #F59E0B;
+    --danger: #EF4444;
+    --shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+}
+
 body {
     font-family: "Inter", Arial, sans-serif;
     background: var(--bg);
     color: var(--text-main);
+    transition:
+        background-color 0.25s ease,
+        color 0.25s ease;
 }
 
 a {
@@ -38,6 +57,8 @@ a {
 input,
 select,
 textarea {
+    background: var(--white);
+    color: var(--text-main);
     width: 100%;
     padding: 13px 15px;
     border: 1px solid var(--border);

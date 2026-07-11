@@ -2,6 +2,7 @@ import {
     RESOURCE_ACTION,
     getResourceAction
 } from "../utils/constants.js";
+import { createFavoriteButton } from "./favorite-button.js";
 import { escapeHtml } from "../utils/dom.js";
 import { formatDate } from "../utils/formatDate.js";
 import { formatPrice } from "../utils/formatPrice.js";
@@ -75,9 +76,11 @@ function createResourceActions(resource, mode) {
 export function createResourceCard(resource, options = {}) {
     const {
         actions = "details",
+        isFavorite = false,
         showDate = true,
         showDetails = actions === "details",
         showDownloadCount = false,
+        showFavorite = actions === "marketplace" || isFavorite,
         showMeta = actions === "marketplace",
         showOwner = true,
         showPrice = true,
@@ -115,6 +118,11 @@ export function createResourceCard(resource, options = {}) {
     </span>` :
     "";
 
+    const favoriteMarkup =
+    showFavorite ?
+    createFavoriteButton(resource.id || resource.resourceId || "", isFavorite) :
+    "";
+
     const statusMarkup =
     statusLabel ?
     `<p class="library-date">
@@ -150,6 +158,7 @@ export function createResourceCard(resource, options = {}) {
                 <div class="resource-card-top">
                     <span class="resource-icon" aria-hidden="true">&#128196;</span>
                     ${priceMarkup}
+                    ${favoriteMarkup}
                 </div>
 
                 <h3>${escapeHtml(resource.title || "Untitled Resource")}</h3>

@@ -31,7 +31,7 @@
 
 .btn-outline,
 .btn-secondary {
-    background: white;
+    background: var(--white);
     color: var(--navy);
     border: 1px solid var(--border);
 }
@@ -41,4 +41,25 @@
     border-color: var(--blue);
     color: var(--blue);
     transform: translateY(-2px);
+}
+
+.theme-toggle {
+    width: 44px;
+    height: 44px;
+    display: grid;
+    place-items: center;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--white);
+    color: var(--text-main);
+    box-shadow: var(--shadow);
+    cursor: pointer;
+    font-size: 20px;
+    transition: 0.25s ease;
+}
+
+.theme-toggle:hover {
+    transform: translateY(-2px);
+    border-color: var(--blue);
+    color: var(--blue);
 }
