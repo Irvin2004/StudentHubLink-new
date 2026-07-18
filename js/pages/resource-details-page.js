@@ -6,10 +6,10 @@ import {
 import {
     subscribeAndRenderComments
 } from "../renderers/comment-renderer.js";
-import { handleResourceAction } from "./marketplace-actions.js";
+import { handleResourceAction } from "../services/marketplace-actions-service.js";
 import {
     getRelatedResources
-} from "./recommendation-engine.js";
+} from "../services/recommendation-service.js";
 import {
     initializeReviewForm
 } from "../controllers/reviews-controller.js";

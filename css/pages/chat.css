@@ -1,3 +1,5 @@
+/* Page-owned styles; isolated from other StudentHub screens. */
+@scope (body[data-page="chat"]) {
 .chat-page {
     min-height: 100vh;
     padding: 32px;
@@ -152,4 +154,5 @@
     color: var(--text-muted);
     font-size: 0.85rem;
     font-style: italic;
+}
 }

@@ -1,7 +1,7 @@
 import { auth, db } from "../firebase.js";
 import {
     addActivity
-} from "./activity.js";
+} from "../services/activity-service.js";
 import { RESOURCE_STATUS, TRANSACTION_STATUS } from "../utils/constants.js";
 import {
     setButtonLoading,

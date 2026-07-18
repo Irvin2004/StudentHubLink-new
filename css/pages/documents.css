@@ -1,4 +1,5 @@
-
+/* Page-owned styles; isolated from other StudentHub screens. */
+@scope (body[data-page="documents"]) {
 *{
     margin:0;
     padding:0;
@@ -144,4 +145,5 @@ input[type=file]{
     padding:10px 20px;
     border-radius:5px;
     cursor:pointer;
+}
 }

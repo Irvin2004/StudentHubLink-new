@@ -92,3 +92,10 @@ The following frontend writes are expected to move to Cloud Functions:
 - Resource download counters
 - User reputation/statistics counters
 - Advanced moderation workflows
+
+## Current Implementation Notes
+
+- Firestore rules were deployed to `studenthub-c9bc0` on 2026-07-11.
+- Review rating aggregation is handled by `functions/reviews/review-functions.js`.
+- Client-side derived writes fail gracefully so the primary review and download actions can still complete.
+- Cloud Functions deployment requires the Firebase Blaze plan.

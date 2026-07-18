@@ -108,8 +108,8 @@ StudentHub/
   js/
     components/
     controllers/
+    pages/
     renderers/
-    service/
     services/
     utils/
   pages/
@@ -156,14 +156,14 @@ Cloud Functions require the Firebase Blaze plan before deployment.
 
 ## Documentation
 
-- [Architecture](docs/ARCHITECTURE.md)
-- [Database](docs/DATABASE.md)
+- [Architecture](docs/architecture.md)
+- [Firestore schema](docs/firestore-schema.md)
 - [API](docs/API.md)
 - [Security](docs/SECURITY.md)
-- [Roadmap](docs/ROADMAP.md)
+- [Roadmap](docs/roadmap.md)
 - [Deployment](docs/DEPLOYMENT.md)
-- [Contributing](docs/CONTRIBUTING.md)
-- [Changelog](docs/CHANGELOG.md)
+- [Contributing](CONTRIBUTING.md)
+- [Changelog](CHANGELOG.md)
 
 ## Roadmap
 

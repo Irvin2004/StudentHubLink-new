@@ -6,10 +6,10 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
 import { db } from "../firebase.js";
-import { addToLibrary } from "./library.js";
-import { addActivity } from "./activity.js";
-import { awardAchievement } from "./achievement-engine.js";
-import { createNotification } from "./notifications.js";
+import { addToLibrary } from "../pages/library-page.js";
+import { addActivity } from "./activity-service.js";
+import { awardAchievement } from "./achievement-service.js";
+import { createNotification } from "./notification-service.js";
 import { DEBUG } from "../config/debug.js";
 import { log } from "../utils/logger.js";
 

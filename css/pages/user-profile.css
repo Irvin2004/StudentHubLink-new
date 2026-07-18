@@ -1,3 +1,5 @@
+/* Page-owned styles; isolated from other StudentHub screens. */
+@scope (body[data-page="user-profile"]) {
 .profile-page {
     padding: 32px;
     background: var(--bg);
@@ -43,4 +45,5 @@
     grid-template-columns: repeat(3, 1fr);
     gap: 18px;
     margin-bottom: 32px;
+}
 }

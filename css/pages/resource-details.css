@@ -1,3 +1,5 @@
+/* Page-owned styles; isolated from other StudentHub screens. */
+@scope (body[data-page="resource-details"]) {
 .resource-details-page {
     min-height: 100vh;
     background: var(--bg);
@@ -91,4 +93,5 @@
 .related-section h2 {
     color: var(--navy);
     margin-bottom: 18px;
+}
 }

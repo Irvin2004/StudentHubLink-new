@@ -1,5 +1,5 @@
-import { processDownload } from "./download-engine.js";
-import { processPurchase } from "./purchase-engine.js";
+import { processDownload } from "./download-service.js";
+import { processPurchase } from "./purchase-service.js";
 
 export async function handleResourceAction(resource, user) {
     if (!resource || !user) {

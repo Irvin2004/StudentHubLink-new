@@ -23,6 +23,9 @@ The format follows a lightweight version of [Keep a Changelog](https://keepachan
 - Removed dead JavaScript wrapper files and direct pages to service modules.
 - Centralized shared DOM helpers in `js/utils/dom.js`.
 - Centralized resource action bookkeeping for downloads and purchases.
+- Separated route bootstraps into `js/pages/` and Firebase/business modules into `js/services/`.
+- Scoped page-specific CSS to explicit `data-page` roots to prevent cross-page style leakage.
+- Standardized page and stylesheet filenames on kebab-case.
 
 ### Removed
 

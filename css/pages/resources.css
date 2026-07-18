@@ -1,3 +1,5 @@
+/* Page-owned styles; isolated from other StudentHub screens. */
+@scope (body:is([data-page="resources"], [data-page="favorites"], [data-page="library"], [data-page="resource-details"], [data-page="user-profile"])) {
 body {
     background: var(--bg);
     color: var(--text-main);
@@ -536,4 +538,4 @@ body {
     justify-content: flex-end;
     gap: 12px;
 }
-
+}

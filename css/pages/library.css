@@ -1,3 +1,5 @@
+/* Page-owned styles; isolated from other StudentHub screens. */
+@scope (body[data-page="library"]) {
 .library-page {
     max-width: 1180px;
     margin: 0 auto;
@@ -116,4 +118,5 @@
     .library-controls select {
         width: 100%;
     }
+}
 }

@@ -1,3 +1,5 @@
+/* Page-owned styles; isolated from other StudentHub screens. */
+@scope (body[data-page="landing"]) {
 .hero {
     max-width: 1200px;
     margin: auto;
@@ -442,4 +444,5 @@
     .stats-section {
         grid-template-columns: 1fr;
     }
+}
 }

@@ -8,7 +8,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
 import { db } from "../firebase.js";
-import { createNotification } from "./notifications.js";
+import { createNotification } from "./notification-service.js";
 
 export async function awardAchievement(userId, achievement) {
     const achievementQuery =

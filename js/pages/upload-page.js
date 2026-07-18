@@ -1,7 +1,7 @@
 import { app, auth, db } from "../firebase.js";
-import { createActivity } from "./activity.js";
-import { createNotification } from "./notifications.js";
-import { handleResourceAction } from "./marketplace-actions.js";
+import { createActivity } from "../services/activity-service.js";
+import { createNotification } from "../services/notification-service.js";
+import { handleResourceAction } from "../services/marketplace-actions-service.js";
 import {
     getResourceAction,
     getReviewStatus,

@@ -29,6 +29,7 @@ Pages
 - `css/`: base theme styles, component styles, and page-specific layouts.
 - `js/components/`: reusable UI fragments such as resource cards, rating stars, review cards, comment cards, and message bubbles.
 - `js/controllers/`: user interaction handlers such as review forms, comments, favorites, and chat.
+- `js/pages/`: route bootstraps that connect a page's DOM to controllers and services.
 - `js/renderers/`: data-to-UI rendering modules.
 - `js/services/`: Firebase access and business-facing service modules.
 - `js/utils/`: shared helpers for DOM, formatting, errors, logging, and constants.

@@ -1,3 +1,5 @@
+/* Page-owned styles; isolated from other StudentHub screens. */
+@scope (body[data-page="upload"]) {
 body {
     background: var(--bg);
     color: var(--text-main);
@@ -140,4 +142,4 @@ body {
         font-size: 36px;
     }
 }
-
+}

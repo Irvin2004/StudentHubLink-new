@@ -1,11 +1,11 @@
 import { auth, db } from "../firebase.js";
 import { createEmptyState } from "../components/empty-state.js";
 import { createResourceCard } from "../components/resource-card.js";
-import { filterResources } from "./filter-service.js";
+import { filterResources } from "../services/filter-service.js";
 import { initializeFavoriteButtons } from "../controllers/favorites-controller.js";
-import { handleResourceAction } from "./marketplace-actions.js";
-import { searchResources } from "./search-service.js";
-import { sortResources } from "./sort-service.js";
+import { handleResourceAction } from "../services/marketplace-actions-service.js";
+import { searchResources } from "../services/search-service.js";
+import { sortResources } from "../services/sort-service.js";
 import {
     RESOURCE_ACTION,
     RESOURCE_STATUS,

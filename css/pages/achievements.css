@@ -1,3 +1,5 @@
+/* Page-owned styles; isolated from other StudentHub screens. */
+@scope (body[data-page="achievements"]) {
 .achievements-page {
     min-height: 100vh;
     padding: 40px;
@@ -84,4 +86,5 @@
     .page-header h1 {
         font-size: 34px;
     }
+}
 }

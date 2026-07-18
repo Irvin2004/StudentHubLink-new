@@ -1,4 +1,6 @@
-body:has(> .sidebar + .main){
+/* Page-owned styles; isolated from other StudentHub screens. */
+@scope (body[data-page="admin-dashboard"]) {
+:scope{
     display:flex;
 }
 
@@ -101,4 +103,4 @@ th{
     border-radius:5px;
     cursor:pointer;
 }
-
+}

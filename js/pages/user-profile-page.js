@@ -8,7 +8,7 @@ import {
 } from "../services/follows-service.js";
 import {
     createOrGetConversation
-} from "../services/chat-service.js";
+} from "../services/conversation-service.js";
 import { RESOURCE_STATUS } from "../utils/constants.js";
 import { setText } from "../utils/dom.js";
 import { handleError } from "../utils/error-handler.js";

@@ -28,7 +28,8 @@ http://127.0.0.1:8000/index.html
 ## Code Style
 
 - Use plain JavaScript modules.
-- Keep Firebase access inside `js/service/` modules where possible.
+- Keep Firebase access inside `js/services/` modules.
+- Keep page bootstrapping and DOM orchestration inside `js/pages/` or `js/controllers/`.
 - Put reusable helpers in `js/utils/`.
 - Keep CSS organized by base, components, and page-specific files.
 - Prefer clear names over abbreviations.
