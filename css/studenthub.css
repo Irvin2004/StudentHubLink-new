@@ -1,0 +1,49 @@
+/* StudentHub design system: the only local stylesheet pages need to load. */
+@import url("./base/variables.css");
+@import url("./base/reset.css");
+@import url("./base/typography.css");
+@import url("./base/animations.css");
+@import url("./base/utilities.css");
+
+@import url("./components/buttons.css");
+@import url("./components/cards.css");
+@import url("./components/forms.css");
+@import url("./components/badges.css");
+@import url("./components/avatars.css");
+@import url("./components/modals.css");
+@import url("./components/dropdown.css");
+@import url("./components/navbar.css");
+@import url("./components/sidebar.css");
+@import url("./components/toast.css");
+@import url("./components/chat.css");
+@import url("./components/tables.css");
+@import url("./components/tabs.css");
+@import url("./components/skeleton.css");
+@import url("./components/loading.css");
+@import url("./components/comment.css");
+@import url("./components/review.css");
+@import url("./components/rating.css");
+@import url("./components/footer.css");
+
+@import url("./layouts/dashboard.css");
+@import url("./layouts/profile.css");
+@import url("./layouts/messaging.css");
+@import url("./layouts/settings.css");
+
+/* Compatibility layer while existing pages move onto the reusable primitives. */
+@import url("./pages/landing.css");
+@import url("./pages/auth.css");
+@import url("./pages/dashboard.css");
+@import url("./pages/admin-dashboard.css?v=20260718-2");
+@import url("./pages/profile.css");
+@import url("./pages/use-profile.css");
+@import url("./pages/resources.css");
+@import url("./pages/resource-details.css");
+@import url("./pages/upload.css");
+@import url("./pages/library.css");
+@import url("./pages/documents.css");
+@import url("./pages/favorites.css");
+@import url("./pages/achievements.css");
+@import url("./pages/leaderboard.css");
+@import url("./pages/messages.css");
+@import url("./pages/chat.css");

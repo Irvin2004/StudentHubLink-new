@@ -10,5 +10,7 @@ export const COLLECTIONS = {
     COMMENTS: "comments",
     FOLLOWS: "follows",
     CONVERSATIONS: "conversations",
-    MESSAGES: "messages"
+    MESSAGES: "messages",
+    PRESENCE: "presence",
+    TYPING_STATUS: "typingStatus"
 };

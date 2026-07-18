@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Messages | StudentHub</title>
+    <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="../css/studenthub.css?v=20260718-3">
+</head>
+<body>
+    <header class="site-header">
+        <nav class="nav" aria-label="Primary navigation">
+            <a class="logo" href="../dashboard.html">
+                <span>SH</span>
+                StudentHub
+            </a>
+
+            <div class="nav-links">
+                <a href="../dashboard.html">Dashboard</a>
+                <a href="resources.html">Marketplace</a>
+                <a href="library.html">My Library</a>
+                <a href="messages.html" aria-current="page">Messages</a>
+                <a href="profile.html">Profile</a>
+                <button
+                    class="theme-toggle"
+                    type="button"
+                    data-theme-toggle
+                    aria-label="Switch to dark mode"
+                    title="Switch to dark mode">
+                    Dark
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <main class="messages-page">
+        <section class="messages-panel" aria-labelledby="messagesTitle">
+            <header class="messages-header">
+                <div>
+                    <p class="messages-eyebrow">Your connections</p>
+                    <h1 id="messagesTitle">Messages</h1>
+                    <p>Chat with your mutual connections.</p>
+                </div>
+
+                <label class="conversation-search">
+                    <span class="visually-hidden">Search conversations</span>
+                    <input
+                        type="search"
+                        id="conversationSearch"
+                        placeholder="Search conversations..."
+                        autocomplete="off"
+                    >
+                </label>
+            </header>
+
+            <div
+                id="conversationList"
+                class="conversation-list"
+                aria-live="polite"
+            >
+                <p class="conversation-loading">Loading conversations...</p>
+            </div>
+        </section>
+    </main>
+
+    <script type="module" src="../js/controllers/messages-controller.js"></script>
+    <script type="module" src="../js/theme.js"></script>
+</body>
+</html>

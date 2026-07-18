@@ -125,10 +125,49 @@ service cloud.firestore {
         ).data.participantIds;
       allow create: if signedIn()
         && request.resource.data.senderId == request.auth.uid
+        && request.resource.data.receiverId != request.auth.uid
+        && request.resource.data.deliveredAt == null
+        && request.resource.data.readAt == null
         && request.auth.uid in get(
           /databases/$(database)/documents/conversations/$(request.resource.data.conversationId)
+        ).data.participantIds
+        && request.resource.data.receiverId in get(
+          /databases/$(database)/documents/conversations/$(request.resource.data.conversationId)
         ).data.participantIds;
-      allow update, delete: if false;
+      allow update: if signedIn()
+        && request.auth.uid == resource.data.receiverId
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(["deliveredAt", "readAt"]);
+      allow delete: if false;
+    }
+
+    match /presence/{userId} {
+      allow read: if signedIn();
+      allow create, update: if isOwner(userId)
+        && request.resource.data.keys().hasOnly(["online", "lastSeen"])
+        && request.resource.data.online is bool;
+      allow delete: if false;
+    }
+
+    match /typingStatus/{typingId} {
+      allow read: if signedIn()
+        && request.auth.uid in get(
+          /databases/$(database)/documents/conversations/$(resource.data.conversationId)
+        ).data.participantIds;
+      allow create, update: if signedIn()
+        && request.resource.data.userId == request.auth.uid
+        && typingId == request.resource.data.conversationId + "_" + request.auth.uid
+        && request.auth.uid in get(
+          /databases/$(database)/documents/conversations/$(request.resource.data.conversationId)
+        ).data.participantIds
+        && request.resource.data.keys().hasOnly([
+          "conversationId",
+          "userId",
+          "typing",
+          "updatedAt"
+        ])
+        && request.resource.data.typing is bool;
+      allow delete: if false;
     }
 
     match /notifications/{notificationId} {

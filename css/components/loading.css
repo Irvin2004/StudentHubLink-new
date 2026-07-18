@@ -1,0 +1,4 @@
+.loader { display: inline-block; width: 28px; height: 28px; border: 3px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 700ms linear infinite; }
+.loader-sm { width: 18px; height: 18px; border-width: 2px; }
+.loader-lg { width: 44px; height: 44px; border-width: 4px; }
+.loading-state { display: grid; place-items: center; min-height: 180px; color: var(--text-secondary); }

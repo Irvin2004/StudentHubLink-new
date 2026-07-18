@@ -1,0 +1,4 @@
+.tabs { display: flex; gap: var(--space-1); overflow-x: auto; border-bottom: 1px solid var(--border); }
+.tab { flex: 0 0 auto; padding: var(--space-3) var(--space-4); border: 0; border-bottom: 2px solid transparent; background: transparent; color: var(--text-secondary); }
+.tab:hover, .tab[aria-selected="true"], .tab.is-active { border-bottom-color: var(--primary); color: var(--primary); }
+.tab-panel { padding-block: var(--space-5); }

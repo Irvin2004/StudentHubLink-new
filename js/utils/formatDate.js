@@ -54,3 +54,18 @@ export function formatLongDate(value) {
         }
     });
 }
+
+export function formatTime(value, {
+    fallback = "",
+    locale,
+    options = {
+        hour: "2-digit",
+        minute: "2-digit"
+    }
+} = {}) {
+    const date = toDate(value);
+
+    if (!date) return fallback;
+
+    return date.toLocaleTimeString(locale, options);
+}

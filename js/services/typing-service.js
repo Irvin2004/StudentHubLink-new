@@ -1,8 +1,11 @@
 import {
+    collection,
     doc,
     onSnapshot,
+    query,
     serverTimestamp,
-    updateDoc
+    setDoc,
+    where
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
 import { db } from "../firebase.js";
@@ -11,50 +14,54 @@ import { COLLECTIONS } from "../config/firestore.js";
 export async function setTypingStatus(
     conversationId,
     userId,
-    isTyping
+    typing
 ) {
-    await updateDoc(
+    if (!conversationId || !userId) return;
+
+    await setDoc(
         doc(
             db,
-            COLLECTIONS.CONVERSATIONS,
-            conversationId
+            COLLECTIONS.TYPING_STATUS,
+            `${conversationId}_${userId}`
         ),
         {
-            [`typing.${userId}`]: isTyping,
-            [`typingUpdatedAt.${userId}`]:
-                serverTimestamp()
-        }
+            conversationId,
+            userId,
+            typing: typing === true,
+            updatedAt: serverTimestamp()
+        },
+        { merge: true }
     );
 }
 
 export function subscribeToTypingStatus(
     conversationId,
-    currentUserId,
-    callback
+    callback,
+    onError
 ) {
+    const typingQuery = query(
+        collection(db, COLLECTIONS.TYPING_STATUS),
+        where("conversationId", "==", conversationId)
+    );
+
     return onSnapshot(
-        doc(
-            db,
-            COLLECTIONS.CONVERSATIONS,
-            conversationId
-        ),
+        typingQuery,
         (snapshot) => {
-            if (!snapshot.exists()) {
-                callback(false);
-                return;
-            }
-
-            const typing =
-            snapshot.data().typing || {};
-
-            const otherUserTyping =
-            Object.entries(typing).some(
-                ([userId, value]) =>
-                    userId !== currentUserId &&
-                    value === true
+            const statuses = snapshot.docs.map(
+                (statusDocument) => ({
+                    id: statusDocument.id,
+                    ...statusDocument.data()
+                })
             );
 
-            callback(otherUserTyping);
+            callback(statuses);
+        },
+        (error) => {
+            console.error("Typing listener failed:", error);
+
+            if (typeof onError === "function") {
+                onError(error);
+            }
         }
     );
 }

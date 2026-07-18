@@ -30,6 +30,13 @@ export const REVIEW_ACTION = {
 
 };
 
+export const MESSAGE_TYPES = Object.freeze({
+    TEXT: "text",
+    IMAGE: "image",
+    FILE: "file",
+    VOICE: "voice"
+});
+
 export function getResourceAction(resource) {
     return Number(resource?.price || 0) > 0 ?
         RESOURCE_ACTION.PURCHASE :

@@ -33,6 +33,9 @@ import {
     getNotifications,
     markAsRead
 } from "./notifications.js";
+import {
+    setUserOffline
+} from "../services/presence-service.js";
 
 function getGreeting(name) {
     const hour =
@@ -128,6 +131,14 @@ function setupLogout() {
 
     logoutBtn.addEventListener("click", async (event) => {
         event.preventDefault();
+
+        if (auth.currentUser) {
+            try {
+                await setUserOffline(auth.currentUser.uid);
+            } catch (error) {
+                warn("PRESENCE", "Could not update offline status:", error);
+            }
+        }
 
         await signOut(auth);
 

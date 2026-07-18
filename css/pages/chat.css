@@ -55,8 +55,72 @@
     margin-bottom: 8px;
 }
 
-.message-bubble small {
-    opacity: 0.8;
+.file-card {
+    min-width: min(280px, 65vw);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    margin-bottom: 8px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.14);
+    color: inherit;
+}
+
+.file-card-content {
+    min-width: 0;
+    display: grid;
+}
+
+.file-card-content strong {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.image-preview img {
+    width: min(320px, 60vw);
+    max-height: 320px;
+    display: block;
+    margin-bottom: 8px;
+    border-radius: 12px;
+    object-fit: cover;
+}
+
+.voice-message {
+    max-width: min(320px, 65vw);
+    display: block;
+    margin-bottom: 8px;
+}
+
+.deleted-message,
+.edited-label {
+    font-style: italic;
+    opacity: 0.75;
+}
+
+.message-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 6px;
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.78);
+}
+
+.message-row.theirs .message-footer {
+    color: var(--text-muted);
+}
+
+.sending,
+.sent,
+.delivered {
+    color: inherit;
+}
+
+.read {
+    color: #93c5fd;
+    font-weight: 700;
 }
 
 .message-row.theirs .message-bubble {
@@ -83,7 +147,9 @@
 }
 
 .typing-indicator {
-    padding: 0 24px 10px;
+    min-height: 20px;
+    margin: 8px 24px;
     color: var(--text-muted);
-    font-size: 14px;
+    font-size: 0.85rem;
+    font-style: italic;
 }

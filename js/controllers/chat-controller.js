@@ -1,9 +1,15 @@
 import { auth } from "../firebase.js";
-import { getConversationById } from "../services/chat-service.js";
 import {
+    getConversationById,
+    getUserProfile
+} from "../services/conversation-service.js";
+import {
+    createMessageId,
+    markConversationMessagesAsRead,
+    markMessagesAsDelivered,
     sendMessage,
     subscribeToMessages
-} from "../services/messages-service.js";
+} from "../services/message-service.js";
 import {
     setTypingStatus,
     subscribeToTypingStatus
@@ -40,6 +46,42 @@ null;
 let typingTimer =
 null;
 
+let latestMessages = [];
+let pendingMessages = [];
+let receiptUpdateChain = Promise.resolve();
+
+function renderChatMessages(currentUserId) {
+    const persistedIds = new Set(
+        latestMessages.map((message) => message.id)
+    );
+
+    const visiblePendingMessages = pendingMessages.filter(
+        (message) => !persistedIds.has(message.id)
+    );
+
+    renderMessages(
+        [...latestMessages, ...visiblePendingMessages],
+        currentUserId
+    );
+}
+
+function queueReceiptUpdates(messages, currentUser) {
+    receiptUpdateChain = receiptUpdateChain
+        .then(async () => {
+            await markMessagesAsDelivered(
+                messages,
+                currentUser.uid
+            );
+            await markConversationMessagesAsRead(
+                conversationId,
+                currentUser.uid
+            );
+        })
+        .catch((error) => {
+            console.error("Message receipt update failed:", error);
+        });
+}
+
 function renderChatMessage(message) {
     if (!messageList) {
         return;
@@ -50,6 +92,15 @@ function renderChatMessage(message) {
             ${message}
         </p>
     `;
+}
+
+function getParticipantName(profile) {
+    return (
+        profile?.fullName ||
+        profile?.name ||
+        profile?.displayName ||
+        "Student"
+    );
 }
 
 async function initializeChat(currentUser) {
@@ -82,27 +133,50 @@ async function initializeChat(currentUser) {
         throw new Error("Conversation participant is missing.");
     }
 
+    const otherUser = await getUserProfile(receiverId);
+    const otherUserName = getParticipantName(otherUser);
+    const chatUserName = document.getElementById("chatUserName");
+
+    if (chatUserName) {
+        chatUserName.textContent = otherUserName;
+    }
+
     unsubscribeMessages =
     subscribeToMessages(
         conversationId,
         (messages) => {
-            renderMessages(messages, currentUser.uid);
+            latestMessages = messages;
+            renderChatMessages(currentUser.uid);
+            queueReceiptUpdates(messages, currentUser);
         }
     );
 
     unsubscribeTyping =
     subscribeToTypingStatus(
         conversationId,
-        currentUser.uid,
-        (isTyping) => {
+        (statuses) => {
             const indicator =
             document.getElementById("typingIndicator");
 
             if (!indicator) return;
 
-            indicator.hidden = !isTyping;
+            const otherUserTyping = statuses.some(
+                (status) =>
+                    status.userId !== currentUser.uid &&
+                    status.typing === true
+            );
+
+            indicator.hidden = !otherUserTyping;
             indicator.textContent =
-            isTyping ? "The other user is typing..." : "";
+                otherUserTyping
+                    ? `${otherUserName} is typing...`
+                    : "";
+        },
+        (error) => {
+            handleError(
+                error,
+                "Unable to load typing status."
+            );
         }
     );
 
@@ -125,26 +199,68 @@ function initializeMessageForm(
     messageForm.onsubmit = async (event) => {
         event.preventDefault();
 
+        const text = messageInput.value.trim();
+
+        if (!text) {
+            handleError(
+                new Error("Message cannot be empty."),
+                "Unable to send message."
+            );
+            return;
+        }
+
+        const messageId = createMessageId();
+
+        pendingMessages.push({
+            id: messageId,
+            conversationId,
+            senderId: user.uid,
+            receiverId,
+            text,
+            createdAt: new Date(),
+            deliveredAt: null,
+            readAt: null,
+            status: "sending"
+        });
+
+        messageInput.value = "";
+        renderChatMessages(user.uid);
+
         try {
             await sendMessage({
                 conversationId,
                 senderId: user.uid,
                 receiverId,
-                text: messageInput.value
+                text,
+                messageId
             });
 
-            messageInput.value = "";
-
-            await setTypingStatus(
-                conversationId,
-                user.uid,
-                false
-            );
+            try {
+                await setTypingStatus(
+                    conversationId,
+                    user.uid,
+                    false
+                );
+            } catch (error) {
+                console.error(
+                    "Typing reset failed:",
+                    error
+                );
+            }
         } catch (error) {
+            if (!messageInput.value) {
+                messageInput.value = text;
+            }
+
             handleError(
                 error,
                 "Unable to send message."
             );
+        } finally {
+            pendingMessages = pendingMessages.filter(
+                (message) => message.id !== messageId
+            );
+            renderChatMessages(user.uid);
         }
     };
 }
@@ -188,7 +304,7 @@ function initializeTypingIndicator(user) {
                     );
                 }
             },
-            1500
+            1200
         );
     };
 }
@@ -217,6 +333,14 @@ window.addEventListener("beforeunload", () => {
 
     if (typeof unsubscribeTyping === "function") {
         unsubscribeTyping();
+    }
+
+    if (auth.currentUser && conversationId) {
+        setTypingStatus(
+            conversationId,
+            auth.currentUser.uid,
+            false
+        ).catch(() => {});
     }
 
     clearTimeout(typingTimer);
