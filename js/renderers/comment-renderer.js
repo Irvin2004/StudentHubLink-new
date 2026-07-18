@@ -16,7 +16,7 @@ export function renderCommentCards(comments) {
         createEmptyState(
             "No comments yet",
             "Ask the first question or start a discussion.",
-            "💬"
+            ""
         );
 
         return;

@@ -42,7 +42,7 @@ function updateThemeButtons(theme) {
             theme === "dark";
 
             button.textContent =
-            darkModeActive ? "☀" : "☾";
+            darkModeActive ? "Light" : "Dark";
 
             button.setAttribute(
                 "aria-label",

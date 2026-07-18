@@ -76,7 +76,6 @@ async function renderFavorites(favoriteIds) {
         createEmptyState(
             "No favorites yet",
             "Save resources to see them here.",
-            "&#10084;"
         );
         return;
     }
@@ -89,7 +88,6 @@ async function renderFavorites(favoriteIds) {
         createEmptyState(
             "No favorites found",
             "Saved resources may no longer be available.",
-            "&#10084;"
         );
         return;
     }

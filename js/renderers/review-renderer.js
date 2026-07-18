@@ -29,7 +29,7 @@ export async function renderReviews(resource) {
         createEmptyState(
             "No reviews yet",
             "Be the first to review this resource.",
-            "⭐"
+            ""
         );
 
         return;
