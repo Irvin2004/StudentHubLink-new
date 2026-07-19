@@ -28,7 +28,9 @@ export function createConversationItem(
         otherUser?.displayName ||
         "Student";
 
-    const initial = name.charAt(0).toUpperCase();
+    const initial = otherUser?.isGroup
+        ? "📚"
+        : name.charAt(0).toUpperCase();
     const unreadCount =
         conversation.unreadCounts?.[currentUserId] || 0;
     const lastMessage = getConversationPreview(conversation);
@@ -42,7 +44,7 @@ export function createConversationItem(
             <div class="conversation-avatar" aria-hidden="true">
                 ${escapeHtml(initial)}
                 ${
-                    otherUser?.online
+                    !otherUser?.isGroup && otherUser?.online
                         ? '<span class="online-dot"></span>'
                         : ""
                 }

@@ -20,6 +20,7 @@
             <a href="pages/resources.html">Marketplace</a>
             <a href="pages/library.html">My Library</a>
             <a href="pages/messages.html">Messages</a>
+            <a href="pages/groups.html">Study Groups</a>
             <a href="pages/favorites.html">&#10084; Favorites</a>
             <a href="pages/achievements.html">Achievements</a>
             <a href="pages/leaderboard.html">Leaderboard</a>
@@ -36,6 +37,12 @@
             </div>
 
             <div class="header-right">
+                <button
+                    id="openCreateGroup"
+                    class="btn btn-primary"
+                    type="button">
+                    Create Study Group
+                </button>
                 <button
                     class="theme-toggle"
                     type="button"
@@ -138,6 +145,78 @@
     </main>
 </div>
 
+<div
+    id="createGroupModal"
+    class="modal hidden"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="createGroupTitle">
+    <div class="modal-content">
+        <h2 id="createGroupTitle">Create Study Group</h2>
+
+        <form id="createGroupForm">
+            <label for="groupName">Group Name</label>
+            <input
+                id="groupName"
+                type="text"
+                maxlength="60"
+                placeholder="Example: Robotics Assignment Squad"
+                required
+            >
+
+            <label for="moduleName">Module or Subject</label>
+            <input
+                id="moduleName"
+                type="text"
+                maxlength="80"
+                placeholder="Example: Robotics Fundamentals"
+                required
+            >
+
+            <label for="moduleCode">Module Code</label>
+            <input
+                id="moduleCode"
+                type="text"
+                maxlength="20"
+                placeholder="Example: RFS"
+            >
+
+            <label for="groupDescription">Description</label>
+            <textarea
+                id="groupDescription"
+                rows="4"
+                maxlength="300"
+                placeholder="Explain what students will use this group for."
+            ></textarea>
+
+            <label for="groupTags">Tags</label>
+            <input
+                id="groupTags"
+                type="text"
+                maxlength="130"
+                placeholder="Assignments, Semester2, Arduino"
+            >
+            <label for="groupVisibility">Visibility</label>
+            <select id="groupVisibility">
+                <option value="public">Public</option>
+                <option value="private">Private</option>
+            </select>
+
+            <div class="modal-actions">
+                <button
+                    class="btn btn-secondary"
+                    type="button"
+                    id="cancelGroup">
+                    Cancel
+                </button>
+
+                <button class="btn btn-primary" type="submit">
+                    Create Group
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
 <script type="module" src="js/pages/auth-page.js"></script>
 <script type="module" src="js/theme.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

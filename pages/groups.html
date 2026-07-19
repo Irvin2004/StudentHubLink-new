@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study Groups | StudentHub</title>
+    <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="../css/studenthub.css?v=20260719-1">
+</head>
+<body data-page="groups">
+    <div class="groups-shell">
+        <aside class="groups-sidebar">
+            <a class="groups-brand" href="../dashboard.html">
+                <img src="../assets/favicon.svg" alt="">
+                <span>StudentHub</span>
+            </a>
+
+            <nav class="groups-nav" aria-label="Primary navigation">
+                <a href="../dashboard.html">Dashboard</a>
+                <a href="resources.html">Marketplace</a>
+                <a class="active" href="groups.html" aria-current="page">
+                    Study Groups
+                </a>
+                <a href="messages.html">Messages</a>
+                <a href="library.html">My Library</a>
+                <a href="profile.html">Profile</a>
+            </nav>
+
+            <div class="groups-sidebar-footer">
+                <button
+                    class="theme-toggle"
+                    type="button"
+                    data-theme-toggle
+                    aria-label="Switch color theme">
+                    Dark
+                </button>
+                <span>Choose your theme</span>
+            </div>
+        </aside>
+
+        <main class="groups-main">
+            <header class="groups-mobile-header">
+                <a class="groups-brand" href="../dashboard.html">
+                    <img src="../assets/favicon.svg" alt="">
+                    <span>StudentHub</span>
+                </a>
+                <a href="../dashboard.html">Dashboard</a>
+            </header>
+
+            <section class="groups-heading">
+                <div>
+                    <h1>Study Groups</h1>
+                    <p>Find your people. Learn together.</p>
+                </div>
+
+                <a class="btn btn-primary" href="../dashboard.html#createGroupModal">
+                    Create a group
+                </a>
+            </section>
+
+            <section class="groups-toolbar" aria-label="Find study groups">
+                <label class="groups-search" for="groupSearch">
+                    <svg
+                        aria-hidden="true"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2">
+                        <circle cx="11" cy="11" r="7"></circle>
+                        <path d="m20 20-4-4"></path>
+                    </svg>
+                    <span class="sr-only">Search study groups</span>
+                    <input
+                        id="groupSearch"
+                        type="search"
+                        placeholder="Search by group, subject, code, or tag..."
+                        autocomplete="off">
+                </label>
+
+                <label class="groups-filter" for="moduleFilter">
+                    <span>Subject</span>
+                    <select id="moduleFilter">
+                        <option value="">All subjects</option>
+                    </select>
+                </label>
+            </section>
+
+            <div class="groups-results-heading">
+                <h2>Explore groups</h2>
+                <p id="groupResultCount" aria-live="polite">Loading groups...</p>
+            </div>
+
+            <section
+                id="groupList"
+                class="group-grid"
+                aria-live="polite"
+                aria-busy="true">
+                <div class="group-card-skeleton"></div>
+                <div class="group-card-skeleton"></div>
+                <div class="group-card-skeleton"></div>
+            </section>
+        </main>
+    </div>
+
+    <script type="module" src="../js/controllers/groups-controller.js"></script>
+    <script type="module" src="../js/theme.js"></script>
+</body>
+</html>

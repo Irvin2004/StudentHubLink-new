@@ -1,8 +1,9 @@
-import { createMessageBubble } from "../components/message-bubble.js";
+import { createMessageBubble } from "../components/message-bubble.js?messaging=16";
 
 export function renderMessages(
     messages,
-    currentUserId
+    currentUserId,
+    options = {}
 ) {
     const container =
     document.getElementById("messageList");
@@ -13,10 +14,14 @@ export function renderMessages(
 
     container.innerHTML =
     messages
+        .filter((message) =>
+            !message.deletedFor?.includes(currentUserId)
+        )
         .map((message) =>
             createMessageBubble(
                 message,
-                currentUserId
+                currentUserId,
+                options
             )
         )
         .join("");

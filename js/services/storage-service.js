@@ -1,58 +1,81 @@
 import {
-    deleteObject,
     getDownloadURL,
     getStorage,
     ref,
-    uploadBytes
+    uploadBytesResumable
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-storage.js";
 
 import { app } from "../firebase.js";
-import { validateMessageFile } from "../utils/validators.js";
 
 const storage = getStorage(app);
 
-function getMessageFolder(file) {
-    if (file.type.startsWith("image/")) return "images";
-    if (file.type.startsWith("audio/")) return "voice";
-    return "files";
-}
-
-function createSafeFileName(fileName) {
-    return fileName
-        .normalize("NFKD")
-        .replace(/[^a-zA-Z0-9._-]/g, "_");
-}
-
-export async function uploadMessageFile(conversationId, file) {
-    if (!conversationId) {
-        throw new Error("Conversation is missing.");
+/**
+ * Uploads an attachment for a chat conversation.
+ *
+ * @param {File} file
+ * @param {string} conversationId
+ * @param {(progress: number) => void} onProgress
+ * @returns {Promise<{
+ *   url: string,
+ *   fileName: string,
+ *   fileSize: number,
+ *   mimeType: string
+ * }>}
+ */
+export function uploadChatAttachment(
+    file,
+    conversationId,
+    onProgress = () => {}
+) {
+    if (!file || !conversationId) {
+        return Promise.reject(
+            new Error("File and conversation information are required.")
+        );
     }
 
-    validateMessageFile(file);
+    return new Promise((resolve, reject) => {
+        const uniqueId = crypto.randomUUID();
+        const storedFileName =
+            `${Date.now()}_${uniqueId}_${file.name}`;
 
-    const folder = getMessageFolder(file);
-    const storagePath = [
-        "messages",
-        conversationId,
-        folder,
-        `${Date.now()}_${createSafeFileName(file.name)}`
-    ].join("/");
-    const fileReference = ref(storage, storagePath);
-    const snapshot = await uploadBytes(fileReference, file, {
-        contentType: file.type
+        const storageRef = ref(
+            storage,
+            `messages/${conversationId}/${storedFileName}`
+        );
+
+        const uploadTask = uploadBytesResumable(
+            storageRef,
+            file,
+            { contentType: file.type }
+        );
+
+        uploadTask.on(
+            "state_changed",
+            (snapshot) => {
+                const progress = Math.round(
+                    (snapshot.bytesTransferred /
+                        snapshot.totalBytes) * 100
+                );
+
+                onProgress(progress);
+            },
+            reject,
+            async () => {
+                try {
+                    const url = await getDownloadURL(
+                        uploadTask.snapshot.ref
+                    );
+
+                    resolve({
+                        url,
+                        fileName: file.name,
+                        fileSize: file.size,
+                        mimeType: file.type
+                    });
+                } catch (error) {
+                    reject(error);
+                }
+            }
+        );
     });
-
-    return {
-        fileUrl: await getDownloadURL(snapshot.ref),
-        fileName: file.name,
-        mimeType: file.type,
-        fileSize: file.size,
-        storagePath
-    };
-}
-
-export async function deleteStoredFile(storagePath) {
-    if (!storagePath) return;
-
-    await deleteObject(ref(storage, storagePath));
 }

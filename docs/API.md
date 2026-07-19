@@ -54,16 +54,44 @@ Rating aggregation is handled by the Cloud Function `updateResourceRating`.
 - `isFollowing(followerId, followingId)`
 - `areMutuals(firstUserId, secondUserId)`
 
-## Messaging
+## Conversations
+
+`conversation-service.js` owns conversation creation, loading, and real-time conversation lists.
 
 - `createOrGetConversation(firstUserId, secondUserId)`
+- `createOrGetGroupConversation({ groupId, title, memberCount })`
 - `getConversation(firstUserId, secondUserId)`
 - `getConversationById(conversationId)`
-- `sendMessage({ conversationId, senderId, receiverId, text })`
-- `subscribeToMessages(conversationId, callback)`
-- `setTypingStatus(conversationId, userId, isTyping)`
-- `subscribeToTypingStatus(conversationId, currentUserId, callback)`
+- `subscribeToUserConversations(userId, callback, onError)`
 
+## Messages
+
+`message-service.js` owns message delivery, edits, deletion, replies, reactions, and receipts.
+
+- `sendMessage({ conversationId, senderId, receiverId, groupId, conversationType, senderName, type, text })`
+- `subscribeToMessages(conversationId, callback, onError)`
+- `editMessage(...)`
+- `deleteMessageForEveryone(...)`
+- `deleteMessageForMe(...)`
+- `reactToMessage(...)`
+- `startReply(message)`
+
+## Presence
+
+`presence-service.js` owns online presence and typing state.
+
+- `setUserOnline(userId)`
+- `setUserOffline(userId)`
+- `subscribeToPresence(userId, callback, onError)`
+- `setTypingStatus(conversationId, userId, isTyping, displayName)`
+- `subscribeToTypingStatus(conversationId, callback, onError)`
+
+## Group Resources
+
+- `uploadGroupResource(file, groupId, onProgress)`
+- `createGroupResource(resourceData)`
+- `getGroupResources(groupId)`
+- `getGroupResource({ groupId, resourceId })`
 ## Notifications
 
 - `createNotification(notificationOrUserId, title, message, type)`

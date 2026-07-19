@@ -133,6 +133,73 @@ Path: `platform/financials`
 | `totalTransactions` | number | Number of paid transactions counted for platform metrics. |
 | `updatedAt` | timestamp | Last metrics update time. |
 
+## Study Groups
+
+Path: groups/{groupId}
+
+| Field | Type | Notes |
+| --- | --- | --- |
+| name | string | Group display name. |
+| description | string | Optional group description. |
+| moduleCode | string | Optional uppercase module code. |
+| moduleName | string | Module or subject display name. |
+| tags | array | Up to five searchable group tags. |
+| ownerId | string | Firebase Auth UID of the group owner. |
+| visibility | string | public or private. |
+| photoURL | string | Optional group image URL. |
+| memberCount | number | Starts at 1. |
+| createdAt | timestamp | Group creation time. |
+| updatedAt | timestamp | Last group update time. |
+
+Member path: groups/{groupId}/members/{userId}
+
+| Field | Type | Notes |
+| --- | --- | --- |
+| userId | string | Matches the member document ID. |
+| displayName | string | Member display name snapshot. |
+| photoURL | string | Optional profile image snapshot. |
+| role | string | owner, admin, moderator, or member. |
+| joinedAt | timestamp | Membership creation time. |
+
+## Group Resources
+
+Path: `groups/{groupId}/resources/{resourceId}`
+
+| Field | Type | Notes |
+| --- | --- | --- |
+| `title` | string | Trimmed display title, limited to 100 characters. |
+| `description` | string | Optional description, limited to 500 characters. |
+| `category` | string | Fixed value from `resource-categories.js`. |
+| `fileURL` | string | Firebase Storage download URL. |
+| `storagePath` | string | Original Storage path required for later deletion. |
+| `fileName` | string | Original uploaded filename. |
+| `fileSize` | number | File size in bytes. |
+| `mimeType` | string | Uploaded file MIME type. |
+| `uploaderId` | string | Firebase Auth UID of the uploader. |
+| `uploaderName` | string | Uploader display-name snapshot. |
+| `uploaderPhotoURL` | string | Optional uploader avatar snapshot. |
+| `downloadCount` | number | Starts at zero. |
+| `verificationCount` | number | Starts at zero. |
+| `verifiedBy` | array | User IDs that verified the resource. |
+| `createdAt` | timestamp | Resource creation time. |
+| `updatedAt` | timestamp | Last resource update time. |
+## Conversations
+
+Path: `conversations/{conversationId}`
+
+Direct conversations use `type: "direct"` and keep `participantIds` plus `conversationKey`. Legacy conversations without `type` are normalized as direct conversations.
+
+Group conversations use the deterministic ID `group_{groupId}` with `type: "group"`, `groupId`, `title`, and a member-count snapshot. Access is derived from `groups/{groupId}/members/{uid}` rather than a duplicated participant list.
+
+Both types share `lastMessage`, `lastMessageType`, `lastMessageSenderId`, `lastMessageAt`, `createdAt`, and `updatedAt`.
+
+## Messages
+
+Path: `messages/{messageId}`
+
+All messages share the same top-level collection. Direct messages set `receiverId` and use `deliveredAt`/`readAt`. Group messages set `receiverId: null`, include `groupId` and `senderName`, and store member receipts in `readBy`.
+
+Typing documents at `typingStatus/{conversationId}_{userId}` include `displayName`, allowing one or several group member names to appear in the indicator.
 ## Main Queries
 
 - Public marketplace resources: `resources where status == "approved" order by createdAt desc`
@@ -142,6 +209,7 @@ Path: `platform/financials`
 - User notifications: `notifications where userId == currentUser.uid order by createdAt desc limit 10`
 - User activity: `activities where userId == currentUser.uid`
 - Completed transactions: `transactions where status == "completed"`
+- Study group discovery: `getDocs(collection(db, "groups"))` with client-side search and subject filtering
 
 ## Notes
 

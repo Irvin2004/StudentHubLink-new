@@ -9,6 +9,7 @@ export const COLLECTIONS = {
     REVIEWS: "reviews",
     COMMENTS: "comments",
     FOLLOWS: "follows",
+    GROUPS: "groups",
     CONVERSATIONS: "conversations",
     MESSAGES: "messages",
     PRESENCE: "presence",

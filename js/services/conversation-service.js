@@ -1,6 +1,7 @@
 import {
     addDoc,
     collection,
+    collectionGroup,
     doc,
     getDoc,
     getDocs,
@@ -8,6 +9,7 @@ import {
     orderBy,
     query,
     serverTimestamp,
+    setDoc,
     where
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
@@ -24,7 +26,11 @@ export function getConversationKey(firstUserId, secondUserId) {
 function normalizeConversation(conversationId, data = {}) {
     return {
         id: conversationId,
+        type: data.type || "direct",
         participantIds: data.participantIds || [],
+        groupId: data.groupId || null,
+        title: data.title || "",
+        memberCount: Number(data.memberCount || 0),
         conversationKey: data.conversationKey || "",
         lastMessage: data.lastMessage || "",
         lastMessageType: data.lastMessageType || "text",
@@ -97,32 +103,108 @@ export function subscribeToUserConversations(
     callback,
     onError
 ) {
-    const conversationsQuery = query(
+    const directConversations = new Map();
+    const groupConversations = new Map();
+    let groupUnsubscribers = [];
+
+    const emit = () => {
+        const conversations = [
+            ...directConversations.values(),
+            ...groupConversations.values()
+        ].sort((first, second) => {
+            const firstTime = first.lastMessageAt?.toMillis?.() || 0;
+            const secondTime = second.lastMessageAt?.toMillis?.() || 0;
+            return secondTime - firstTime;
+        });
+
+        callback(conversations);
+    };
+
+    const reportError = (error) => {
+        console.error("Conversation listener failed:", error);
+        if (typeof onError === "function") onError(error);
+    };
+
+    const directQuery = query(
         collection(db, COLLECTIONS.CONVERSATIONS),
         where("participantIds", "array-contains", userId),
         orderBy("lastMessageAt", "desc")
     );
 
-    return onSnapshot(
-        conversationsQuery,
+    const unsubscribeDirect = onSnapshot(
+        directQuery,
         (snapshot) => {
-            callback(snapshot.docs.map((conversationDocument) =>
-                normalizeConversation(
+            directConversations.clear();
+            snapshot.docs.forEach((conversationDocument) => {
+                const conversation = normalizeConversation(
                     conversationDocument.id,
                     conversationDocument.data()
-                )
-            ));
+                );
+                directConversations.set(conversation.id, conversation);
+            });
+            emit();
         },
-        (error) => {
-            console.error("Conversation listener failed:", error);
-
-            if (typeof onError === "function") {
-                onError(error);
-            }
-        }
+        reportError
     );
-}
 
+    const membershipsQuery = query(
+        collectionGroup(db, "members"),
+        where("userId", "==", userId)
+    );
+
+    const unsubscribeMemberships = onSnapshot(
+        membershipsQuery,
+        (snapshot) => {
+            groupUnsubscribers.forEach((unsubscribe) => unsubscribe());
+            groupUnsubscribers = [];
+            groupConversations.clear();
+
+            const groupIds = [...new Set(snapshot.docs.map(
+                (memberDocument) => memberDocument.ref.parent.parent?.id
+            ).filter(Boolean))];
+
+            if (!groupIds.length) {
+                emit();
+                return;
+            }
+
+            for (let index = 0; index < groupIds.length; index += 30) {
+                const groupIdChunk = groupIds.slice(index, index + 30);
+                const groupQuery = query(
+                    collection(db, COLLECTIONS.CONVERSATIONS),
+                    where("groupId", "in", groupIdChunk)
+                );
+
+                groupUnsubscribers.push(onSnapshot(
+                    groupQuery,
+                    (groupSnapshot) => {
+                        groupIdChunk.forEach((groupId) => {
+                            const conversationId = `group_${groupId}`;
+                            groupConversations.delete(conversationId);
+                        });
+
+                        groupSnapshot.docs.forEach((conversationDocument) => {
+                            const conversation = normalizeConversation(
+                                conversationDocument.id,
+                                conversationDocument.data()
+                            );
+                            groupConversations.set(conversation.id, conversation);
+                        });
+                        emit();
+                    },
+                    reportError
+                ));
+            }
+        },
+        reportError
+    );
+
+    return () => {
+        unsubscribeDirect();
+        unsubscribeMemberships();
+        groupUnsubscribers.forEach((unsubscribe) => unsubscribe());
+    };
+}
 export async function createOrGetConversation(
     firstUserId,
     secondUserId
@@ -158,6 +240,7 @@ export async function createOrGetConversation(
     const conversationReference = await addDoc(
         collection(db, COLLECTIONS.CONVERSATIONS),
         {
+            type: "direct",
             conversationKey,
             participantIds,
             lastMessage: "",
@@ -172,6 +255,7 @@ export async function createOrGetConversation(
 
     return {
         id: conversationReference.id,
+        type: "direct",
         conversationKey,
         participantIds,
         lastMessage: "",
@@ -179,4 +263,43 @@ export async function createOrGetConversation(
         lastMessageSenderId: null,
         unreadCounts
     };
+}
+
+export async function createOrGetGroupConversation({
+    groupId,
+    title,
+    memberCount = 0
+}) {
+    if (!groupId || !title?.trim()) {
+        throw new Error("Group conversation information is missing.");
+    }
+
+    const conversationReference = doc(
+        db,
+        COLLECTIONS.CONVERSATIONS,
+        `group_${groupId}`
+    );
+    const existingSnapshot = await getDoc(conversationReference);
+
+    if (!existingSnapshot.exists()) {
+        await setDoc(conversationReference, {
+            type: "group",
+            groupId,
+            title: title.trim(),
+            memberCount: Number(memberCount || 0),
+            lastMessage: "",
+            lastMessageType: "text",
+            lastMessageSenderId: null,
+            lastMessageAt: serverTimestamp(),
+            unreadCounts: {},
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp()
+        });
+    }
+
+    const snapshot = existingSnapshot.exists()
+        ? existingSnapshot
+        : await getDoc(conversationReference);
+
+    return normalizeConversation(snapshot.id, snapshot.data());
 }

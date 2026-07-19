@@ -140,6 +140,16 @@ async function renderConversations(conversations, userId) {
 
     const items = await Promise.all(
         conversations.map(async (conversation) => {
+            if (conversation.type === "group") {
+                return {
+                    conversation,
+                    otherUser: {
+                        displayName: conversation.title || "Study Group",
+                        isGroup: true
+                    }
+                };
+            }
+
             const otherUserId = conversation.participantIds?.find(
                 (id) => id !== userId
             );

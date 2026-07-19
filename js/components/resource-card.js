@@ -7,6 +7,8 @@ import { createRatingStars } from "./rating-stars.js";
 import { escapeHtml } from "../utils/dom.js";
 import { formatDate } from "../utils/formatDate.js";
 import { formatPrice } from "../utils/formatPrice.js";
+import { formatFileSize } from "../utils/formatFileSize.js";
+import { getResourceCategoryLabel } from "../config/resource-categories.js";
 
 function createResourceActions(resource, mode) {
     const resourceId =
@@ -74,7 +76,56 @@ function createResourceActions(resource, mode) {
     return "";
 }
 
+function getGroupFileIcon(type = "") {
+    if (type.startsWith("image/")) return "🖼️";
+    if (type === "application/pdf") return "📄";
+    if (type.includes("word")) return "📝";
+    if (type.includes("zip")) return "🗜️";
+    return "📁";
+}
+
+function createGroupLibraryCard(resource) {
+    const resourceId = escapeHtml(resource.id || "");
+    const category = getResourceCategoryLabel(resource.category);
+
+    return `
+        <article class="resource-card group-library-resource-card">
+            <div class="resource-icon" aria-hidden="true">
+                ${getGroupFileIcon(resource.mimeType)}
+            </div>
+
+            <div class="resource-details">
+                <h3>${escapeHtml(resource.title || "Untitled Resource")}</h3>
+                <p>${escapeHtml(category)}</p>
+                <small>
+                    ${escapeHtml(formatFileSize(resource.fileSize))}
+                    &bull;
+                    ${escapeHtml(resource.uploaderName || "Student")}
+                </small>
+            </div>
+
+            <div class="resource-actions">
+                <button
+                    class="btn btn-secondary preview-resource"
+                    type="button"
+                    data-id="${resourceId}">
+                    Preview
+                </button>
+                <button
+                    class="btn btn-primary download-resource"
+                    type="button"
+                    data-id="${resourceId}">
+                    Download
+                </button>
+            </div>
+        </article>
+    `;
+}
 export function createResourceCard(resource, options = {}) {
+    if (options.variant === "group-library") {
+        return createGroupLibraryCard(resource);
+    }
+
     const {
         actions = "details",
         isFavorite = false,

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Group Resources | StudentHub</title>
+    <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="../css/studenthub.css?v=20260719-2">
+</head>
+<body data-page="group-resources">
+    <div class="groups-shell">
+        <aside class="groups-sidebar">
+            <a class="groups-brand" href="../dashboard.html">
+                <img src="../assets/favicon.svg" alt="">
+                <span>StudentHub</span>
+            </a>
+            <nav class="groups-nav" aria-label="Primary navigation">
+                <a href="../dashboard.html">Dashboard</a>
+                <a href="resources.html">Marketplace</a>
+                <a class="active" href="groups.html">Study Groups</a>
+                <a href="messages.html">Messages</a>
+                <a href="library.html">My Library</a>
+                <a href="profile.html">Profile</a>
+            </nav>
+        </aside>
+
+        <main class="groups-main group-resources-main">
+            <header class="group-resources-header">
+                <div>
+                    <a id="groupBackLink" class="group-back-link" href="groups.html">
+                        &larr; Back to group
+                    </a>
+                    <p class="eyebrow">Shared study library</p>
+                    <h1 id="groupResourcesTitle">Group Resources</h1>
+                    <p>Upload and discover useful files shared by group members.</p>
+                </div>
+            </header>
+
+            <p id="resourceAccessMessage" class="group-resource-notice">
+                Checking your group membership...
+            </p>
+
+            <section id="resourceUploadPanel" class="resource-upload-panel hidden">
+                <div class="section-heading">
+                    <div>
+                        <p class="eyebrow">Contribute</p>
+                        <h2>Upload a resource</h2>
+                    </div>
+                    <span>Maximum file size: 25 MB</span>
+                </div>
+
+                <form id="resourceUploadForm" class="resource-upload-form">
+                    <div class="form-group">
+                        <label for="resourceTitle">Resource title</label>
+                        <input
+                            id="resourceTitle"
+                            type="text"
+                            maxlength="100"
+                            placeholder="Example: Robotics Module 3 Notes"
+                            required>
+                    </div>
+
+                    <div class="form-group resource-description-field">
+                        <label for="resourceDescription">Description</label>
+                        <textarea
+                            id="resourceDescription"
+                            maxlength="500"
+                            rows="4"
+                            placeholder="Description (optional)"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="resourceCategory">Category</label>
+                        <select id="resourceCategory" required></select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="resourceFile">File</label>
+                        <input
+                            id="resourceFile"
+                            type="file"
+                            accept="image/*,.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.zip"
+                            required>
+                    </div>
+
+                    <button id="resourceUploadButton" class="btn btn-primary" type="submit">
+                        Upload Resource
+                    </button>
+                </form>
+
+                <div
+                    id="resourceUploadProgress"
+                    class="hidden"
+                    role="progressbar"
+                    aria-label="Resource upload progress"
+                    aria-valuemin="0"
+                    aria-valuemax="100"
+                    aria-valuenow="0">
+                    <div id="resourceUploadBar"></div>
+                </div>
+            </section>
+
+            <section class="resource-library">
+                <div class="section-heading">
+                    <div>
+                        <p class="eyebrow">Library</p>
+                        <h2>Shared resources</h2>
+                    </div>
+                </div>
+
+                <div class="resource-toolbar">
+                    <input
+                        id="resourceSearch"
+                        type="search"
+                        placeholder="Search resources..."
+                        aria-label="Search resources">
+
+                    <select
+                        id="resourceCategoryFilter"
+                        aria-label="Filter by category">
+                        <option value="all">All Categories</option>
+                    </select>
+
+                    <select id="resourceSort" aria-label="Sort resources">
+                        <option value="newest">Newest</option>
+                        <option value="oldest">Oldest</option>
+                        <option value="downloads">Most Downloaded</option>
+                    </select>
+                </div>
+
+                <div id="resourceList" class="group-resource-list">
+                    <p class="group-resource-notice">Loading resources...</p>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script type="module" src="../js/controllers/group-resources-controller.js?v=20260719-2"></script>
+    <script type="module" src="../js/theme.js"></script>
+</body>
+</html>

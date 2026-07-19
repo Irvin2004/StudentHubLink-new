@@ -4,18 +4,43 @@ import {
     getUserProfile
 } from "../services/conversation-service.js";
 import {
+    copyMessage,
     createMessageId,
+    deleteMessageForEveryone,
+    deleteMessageForMe,
+    editMessage,
     markConversationMessagesAsRead,
     markMessagesAsDelivered,
+    MESSAGE_TYPES,
+    reactToMessage,
     sendMessage,
+    startReply,
     subscribeToMessages
 } from "../services/message-service.js";
 import {
     setTypingStatus,
     subscribeToTypingStatus
-} from "../services/typing-service.js";
-import { renderMessages } from "../renderers/message-renderer.js";
+} from "../services/presence-service.js";
+import {
+    uploadChatAttachment
+} from "../services/storage-service.js";
+import { renderMessages } from "../renderers/message-renderer.js?messaging=16";
+import { getTypingIndicatorText } from "../components/typing-indicator.js";
+import { getStudyGroup } from "../services/group-service.js";
+import { openImageViewer } from "../components/image-viewer.js";
+import {
+    hideMessageMenu,
+    showMessageMenu
+} from "../components/message-menu.js?messaging=14";
+import {
+    createReactionPicker
+} from "../components/reaction-picker.js";
+import {
+    openDeleteMessageDialog
+} from "../components/delete-message-dialog.js?messaging=15";
+
 import { handleError } from "../utils/error-handler.js";
+import { validateAttachment } from "../utils/file-validator.js";
 import { showToast } from "../utils/toast.js";
 
 import {
@@ -37,6 +62,30 @@ document.getElementById("messageForm");
 const messageInput =
 document.getElementById("messageInput");
 
+const attachButton =
+document.getElementById("attachButton");
+
+const attachmentInput =
+document.getElementById("attachmentInput");
+
+const uploadProgressContainer =
+document.getElementById("uploadProgressContainer");
+
+const uploadProgressBar =
+document.getElementById("uploadProgressBar");
+
+const replyPreview =
+document.getElementById("replyPreview");
+
+const replySender =
+document.getElementById("replySender");
+
+const replyText =
+document.getElementById("replyText");
+
+const cancelReply =
+document.getElementById("cancelReply");
+
 let unsubscribeMessages =
 null;
 
@@ -49,6 +98,512 @@ null;
 let latestMessages = [];
 let pendingMessages = [];
 let receiptUpdateChain = Promise.resolve();
+let activeReceiverId = null;
+let activeConversation = null;
+let currentChatUser = null;
+let attachmentUploading = false;
+let activeOtherUserName = "Student";
+let replyingTo = null;
+let selectedMessage = null;
+let reactionPicker = null;
+
+function hideReactionPicker() {
+    reactionPicker?.remove();
+    reactionPicker = null;
+}
+
+function showReactionPicker(anchor) {
+    hideReactionPicker();
+
+    reactionPicker = createReactionPicker();
+    document.body.appendChild(reactionPicker);
+
+    const viewportInset = 8;
+    const pickerRect = reactionPicker.getBoundingClientRect();
+    const left = Math.min(
+        Math.max(anchor.left, viewportInset),
+        window.innerWidth - pickerRect.width - viewportInset
+    );
+    const top = Math.min(
+        Math.max(anchor.top, viewportInset),
+        window.innerHeight - pickerRect.height - viewportInset
+    );
+
+    reactionPicker.style.left = `${left}px`;
+    reactionPicker.style.top = `${top}px`;
+}
+
+function clearReply() {
+    replyingTo = null;
+    replyPreview?.classList.add("hidden");
+
+    if (replySender) replySender.textContent = "";
+    if (replyText) replyText.textContent = "";
+}
+
+function getReplySenderName(message) {
+    if (message.senderName) {
+        return message.senderName;
+    }
+
+    return message.senderId === currentChatUser?.uid
+        ? "You"
+        : activeOtherUserName;
+}
+
+function getMessageById(messageId) {
+    return [...latestMessages, ...pendingMessages]
+        .find((message) => message.id === messageId);
+}
+
+function openReply(message) {
+    if (!replyPreview || !replySender || !replyText) {
+        return;
+    }
+
+    replyingTo = startReply({
+        ...message,
+        senderName: getReplySenderName(message)
+    });
+
+    replySender.textContent = replyingTo.senderName;
+    replyText.textContent = replyingTo.preview;
+    replyPreview.classList.remove("hidden");
+    messageInput?.focus();
+}
+
+attachButton?.addEventListener("click", () => {
+    attachmentInput?.click();
+});
+
+messageList?.addEventListener("click", (event) => {
+    if (!(event.target instanceof Element)) {
+        return;
+    }
+
+    const reactionChip = event.target.closest(
+        ".reaction-chip[data-emoji]"
+    );
+
+    if (reactionChip) {
+        const message = reactionChip.closest(
+            ".message-row[data-message-id]"
+        );
+
+        if (!message || !currentChatUser || !conversationId) {
+            return;
+        }
+
+        reactToMessage({
+            conversationId,
+            messageId: message.dataset.messageId,
+            emoji: reactionChip.dataset.emoji,
+            userId: currentChatUser.uid
+        }).catch((error) => {
+            handleError(
+                error,
+                "Unable to update reaction."
+            );
+        });
+
+        return;
+    }
+
+    const replyButton = event.target.closest(
+        '[data-message-action="reply"]'
+    );
+
+    if (replyButton) {
+        const messageId = replyButton.dataset.messageId;
+        const message = getMessageById(messageId);
+
+        if (message) {
+            openReply(message);
+        }
+
+        return;
+    }
+
+    const image = event.target.closest(".chat-image-preview");
+
+    if (!image) {
+        return;
+    }
+
+    openImageViewer(
+        image.dataset.image,
+        image.alt
+    );
+});
+
+messageList?.addEventListener("contextmenu", (event) => {
+    if (!(event.target instanceof Element)) {
+        return;
+    }
+
+    const message = event.target.closest(
+        ".message-row[data-message-id]"
+    );
+
+    if (!message) {
+        return;
+    }
+
+    event.preventDefault();
+    hideReactionPicker();
+
+    const messageObject = getMessageById(
+        message.dataset.messageId
+    );
+
+    if (!messageObject) {
+        return;
+    }
+
+    selectedMessage = {
+        ...messageObject,
+        senderName: getReplySenderName(messageObject)
+    };
+
+    showMessageMenu(
+        event.clientX,
+        event.clientY,
+        selectedMessage,
+        currentChatUser?.uid
+    );
+});
+
+document.addEventListener("click", async (event) => {
+    if (!(event.target instanceof Element)) {
+        hideMessageMenu();
+        hideReactionPicker();
+        selectedMessage = null;
+        return;
+    }
+
+    const reactionOption = event.target.closest(
+        ".reaction-picker [data-emoji]"
+    );
+
+    if (
+        reactionOption &&
+        selectedMessage &&
+        currentChatUser &&
+        conversationId
+    ) {
+        const reactionMessage = selectedMessage;
+
+        reactionOption.setAttribute("disabled", "");
+        hideMessageMenu();
+
+        try {
+            await reactToMessage({
+                conversationId,
+                messageId: reactionMessage.id,
+                emoji: reactionOption.dataset.emoji,
+                userId: currentChatUser.uid
+            });
+        } catch (error) {
+            handleError(
+                error,
+                "Unable to update reaction."
+            );
+        } finally {
+            hideReactionPicker();
+            selectedMessage = null;
+        }
+
+        return;
+    }
+
+    if (event.target.closest(".reaction-picker")) {
+        return;
+    }
+
+    const actionButton = event.target.closest(
+        "#messageMenu [data-action]"
+    );
+
+    if (actionButton && selectedMessage) {
+        const action = actionButton.dataset.action;
+        const actionMessage = selectedMessage;
+
+        switch (action) {
+            case "reply":
+                openReply(actionMessage);
+                break;
+            case "copy":
+                try {
+                    await copyMessage(actionMessage.text || "");
+                    showToast("Message copied.", "success");
+                } catch (error) {
+                    handleError(
+                        error,
+                        "Unable to copy message."
+                    );
+                }
+                break;
+            case "copy-link":
+                try {
+                    await copyMessage(actionMessage.fileUrl || "");
+                    showToast("Link copied.", "success");
+                } catch (error) {
+                    handleError(
+                        error,
+                        "Unable to copy link."
+                    );
+                }
+                break;
+            case "edit":
+                if (
+                    !currentChatUser ||
+                    actionMessage.senderId !== currentChatUser.uid
+                ) {
+                    showToast(
+                        "You can only edit your own messages.",
+                        "warning"
+                    );
+                    break;
+                }
+
+                if (actionMessage.type !== MESSAGE_TYPES.TEXT) {
+                    showToast(
+                        "Only text messages can be edited.",
+                        "warning"
+                    );
+                    break;
+                }
+
+                hideMessageMenu();
+
+                {
+                    const newText = window.prompt(
+                        "Edit your message:",
+                        actionMessage.text
+                    );
+
+                    if (newText === null || !newText.trim()) {
+                        break;
+                    }
+
+                    try {
+                        await editMessage({
+                            conversationId,
+                            messageId: actionMessage.id,
+                            newText
+                        });
+
+                        showToast(
+                            "Message updated.",
+                            "success"
+                        );
+                    } catch (error) {
+                        handleError(
+                            error,
+                            "Unable to update message."
+                        );
+                    }
+                }
+                break;
+            case "delete":
+                if (!currentChatUser) {
+                    showToast(
+                        "The conversation is not ready yet.",
+                        "warning"
+                    );
+                    break;
+                }
+
+                hideMessageMenu();
+
+                {
+                    const canDeleteForEveryone =
+                        actionMessage.senderId ===
+                            currentChatUser.uid &&
+                        !actionMessage.deleted &&
+                        !actionMessage.deletedAt;
+                    const deleteScope =
+                        await openDeleteMessageDialog({
+                            canDeleteForEveryone
+                        });
+
+                    if (!deleteScope) {
+                        break;
+                    }
+
+                    try {
+                        if (
+                            deleteScope === "everyone" &&
+                            canDeleteForEveryone
+                        ) {
+                            await deleteMessageForEveryone({
+                                conversationId,
+                                messageId: actionMessage.id
+                            });
+
+                            showToast(
+                                "Message deleted for everyone.",
+                                "success"
+                            );
+                        } else {
+                            await deleteMessageForMe({
+                                conversationId,
+                                messageId: actionMessage.id,
+                                userId: currentChatUser.uid
+                            });
+
+                            showToast(
+                                "Message deleted for you.",
+                                "success"
+                            );
+                        }
+
+                        if (replyingTo?.id === actionMessage.id) {
+                            clearReply();
+                        }
+                    } catch (error) {
+                        handleError(
+                            error,
+                            "Unable to delete message."
+                        );
+                    }
+                }
+                break;
+            case "react":
+                showReactionPicker(
+                    actionButton.getBoundingClientRect()
+                );
+                hideMessageMenu();
+                return;
+        }
+    }
+
+    hideMessageMenu();
+    hideReactionPicker();
+    selectedMessage = null;
+});
+
+document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+        hideMessageMenu();
+        hideReactionPicker();
+        selectedMessage = null;
+    }
+});
+
+cancelReply?.addEventListener("click", clearReply);
+
+attachmentInput?.addEventListener("change", async () => {
+    const file = attachmentInput.files?.[0];
+
+    if (!file) {
+        return;
+    }
+
+    if (
+        !currentChatUser ||
+        !conversationId ||
+        (!activeReceiverId && activeConversation?.type !== "group")
+    ) {
+        showToast(
+            "The conversation is not ready yet.",
+            "error"
+        );
+        attachmentInput.value = "";
+        return;
+    }
+
+    if (attachmentUploading) {
+        showToast(
+            "Please wait for the current upload to finish.",
+            "warning"
+        );
+        attachmentInput.value = "";
+        return;
+    }
+
+    if (!uploadProgressContainer || !uploadProgressBar) {
+        handleError(
+            new Error("Upload progress controls are unavailable."),
+            "Unable to upload attachment."
+        );
+        attachmentInput.value = "";
+        return;
+    }
+
+    try {
+        attachmentUploading = true;
+        validateAttachment(file);
+
+        const attachmentReply = replyingTo
+            ? { ...replyingTo }
+            : null;
+
+        attachButton?.setAttribute("disabled", "");
+        uploadProgressContainer.classList.remove("hidden");
+        uploadProgressContainer.setAttribute("aria-valuenow", "0");
+        uploadProgressBar.style.width = "0%";
+
+        const uploadedFile = await uploadChatAttachment(
+            file,
+            conversationId,
+            (progress) => {
+                uploadProgressBar.style.width = `${progress}%`;
+                uploadProgressContainer.setAttribute(
+                    "aria-valuenow",
+                    String(progress)
+                );
+            }
+        );
+
+        const messageType = file.type.startsWith("image/")
+            ? MESSAGE_TYPES.IMAGE
+            : MESSAGE_TYPES.FILE;
+
+        await sendMessage({
+            conversationId,
+            senderId: currentChatUser.uid,
+            receiverId: activeReceiverId,
+            groupId: activeConversation?.groupId || null,
+            conversationType: activeConversation?.type || "direct",
+            senderName: getParticipantName(currentChatUser),
+            type: messageType,
+            text: "",
+            fileUrl: uploadedFile.url,
+            fileName: uploadedFile.fileName,
+            fileSize: uploadedFile.fileSize,
+            mimeType: uploadedFile.mimeType,
+            replyTo: attachmentReply
+        });
+
+        if (
+            attachmentReply &&
+            replyingTo?.id === attachmentReply.id
+        ) {
+            clearReply();
+        }
+
+        showToast(
+            messageType === MESSAGE_TYPES.IMAGE
+                ? "Image sent."
+                : "File sent.",
+            "success"
+        );
+    } catch (error) {
+        console.error("Attachment upload failed:", error);
+        handleError(
+            error,
+            "Unable to send attachment."
+        );
+    } finally {
+        attachmentUploading = false;
+        attachButton?.removeAttribute("disabled");
+        uploadProgressContainer.classList.add("hidden");
+        uploadProgressContainer.setAttribute("aria-valuenow", "0");
+        uploadProgressBar.style.width = "0%";
+        attachmentInput.value = "";
+    }
+});
 
 function renderChatMessages(currentUserId) {
     const persistedIds = new Set(
@@ -61,7 +616,11 @@ function renderChatMessages(currentUserId) {
 
     renderMessages(
         [...latestMessages, ...visiblePendingMessages],
-        currentUserId
+        currentUserId,
+        {
+            conversationType: activeConversation?.type || "direct",
+            memberCount: activeConversation?.memberCount || 0
+        }
     );
 }
 
@@ -70,11 +629,13 @@ function queueReceiptUpdates(messages, currentUser) {
         .then(async () => {
             await markMessagesAsDelivered(
                 messages,
-                currentUser.uid
+                currentUser.uid,
+                activeConversation?.type || "direct"
             );
             await markConversationMessagesAsRead(
                 conversationId,
-                currentUser.uid
+                currentUser.uid,
+                activeConversation?.type || "direct"
             );
         })
         .catch((error) => {
@@ -99,6 +660,7 @@ function getParticipantName(profile) {
         profile?.fullName ||
         profile?.name ||
         profile?.displayName ||
+        profile?.email ||
         "Student"
     );
 }
@@ -115,30 +677,61 @@ async function initializeChat(currentUser) {
 
     const conversation =
     await getConversationById(conversationId);
+    const isGroup = conversation.type === "group";
+    const group = isGroup
+        ? await getStudyGroup(conversation.groupId)
+        : null;
 
-    const participantIds =
-    conversation.participantIds || [];
+    if (group) {
+        conversation.title = group.name;
+        conversation.memberCount = Number(group.memberCount || 0);
+    }
+    const participantIds = conversation.participantIds || [];
 
-    if (!participantIds.includes(currentUser.uid)) {
+    if (!isGroup && !participantIds.includes(currentUser.uid)) {
         renderChatMessage("You do not have access to this conversation.");
         return;
     }
 
-    const receiverId =
-    participantIds.find((participantId) =>
-        participantId !== currentUser.uid
-    );
+    const receiverId = isGroup
+        ? null
+        : participantIds.find((participantId) =>
+            participantId !== currentUser.uid
+        );
 
-    if (!receiverId) {
+    if (!isGroup && !receiverId) {
         throw new Error("Conversation participant is missing.");
     }
 
-    const otherUser = await getUserProfile(receiverId);
+    activeConversation = conversation;
+    activeReceiverId = receiverId;
+    currentChatUser = currentUser;
+
+    const otherUser = receiverId
+        ? await getUserProfile(receiverId)
+        : null;
     const otherUserName = getParticipantName(otherUser);
+    activeOtherUserName = otherUserName;
+
     const chatUserName = document.getElementById("chatUserName");
+    const chatStatus = document.getElementById("chatStatus");
+    const chatHeaderLink = document.getElementById("chatHeaderLink");
 
     if (chatUserName) {
-        chatUserName.textContent = otherUserName;
+        chatUserName.textContent = isGroup
+            ? conversation.title || "Study Group"
+            : otherUserName;
+    }
+
+    if (chatStatus) {
+        chatStatus.textContent = isGroup
+            ? `${conversation.memberCount || 0} members`
+            : "Mutual connection";
+    }
+
+    if (chatHeaderLink && isGroup) {
+        chatHeaderLink.href = `group-details.html?id=${conversation.groupId}`;
+        chatHeaderLink.setAttribute("aria-label", "Open group information");
     }
 
     unsubscribeMessages =
@@ -160,17 +753,16 @@ async function initializeChat(currentUser) {
 
             if (!indicator) return;
 
-            const otherUserTyping = statuses.some(
-                (status) =>
-                    status.userId !== currentUser.uid &&
-                    status.typing === true
+            const typingText = getTypingIndicatorText(
+                statuses.map((status) => ({
+                    ...status,
+                    displayName: status.displayName || otherUserName
+                })),
+                currentUser.uid
             );
 
-            indicator.hidden = !otherUserTyping;
-            indicator.textContent =
-                otherUserTyping
-                    ? `${otherUserName} is typing...`
-                    : "";
+            indicator.hidden = !typingText;
+            indicator.textContent = typingText;
         },
         (error) => {
             handleError(
@@ -210,17 +802,25 @@ function initializeMessageForm(
         }
 
         const messageId = createMessageId();
+        const replyMetadata = replyingTo
+            ? { ...replyingTo }
+            : null;
 
         pendingMessages.push({
             id: messageId,
             conversationId,
             senderId: user.uid,
             receiverId,
+            groupId: activeConversation?.groupId || null,
+            conversationType: activeConversation?.type || "direct",
+            senderName: getParticipantName(user),
+            type: MESSAGE_TYPES.TEXT,
             text,
             createdAt: new Date(),
             deliveredAt: null,
             readAt: null,
-            status: "sending"
+            status: "sending",
+            replyTo: replyMetadata
         });
 
         messageInput.value = "";
@@ -231,15 +831,27 @@ function initializeMessageForm(
                 conversationId,
                 senderId: user.uid,
                 receiverId,
+                groupId: activeConversation?.groupId || null,
+                conversationType: activeConversation?.type || "direct",
+                senderName: getParticipantName(user),
                 text,
-                messageId
+                messageId,
+                replyTo: replyMetadata
             });
+
+            if (
+                replyMetadata &&
+                replyingTo?.id === replyMetadata.id
+            ) {
+                clearReply();
+            }
 
             try {
                 await setTypingStatus(
                     conversationId,
                     user.uid,
-                    false
+                    false,
+                    getParticipantName(user)
                 );
             } catch (error) {
                 console.error(
@@ -278,7 +890,8 @@ function initializeTypingIndicator(user) {
             await setTypingStatus(
                 conversationId,
                 user.uid,
-                hasText
+                hasText,
+                getParticipantName(user)
             );
         } catch (error) {
             console.error(
@@ -295,7 +908,8 @@ function initializeTypingIndicator(user) {
                     await setTypingStatus(
                         conversationId,
                         user.uid,
-                        false
+                        false,
+                        getParticipantName(user)
                     );
                 } catch (error) {
                     console.error(
@@ -339,7 +953,8 @@ window.addEventListener("beforeunload", () => {
         setTypingStatus(
             conversationId,
             auth.currentUser.uid,
-            false
+            false,
+            getParticipantName(auth.currentUser)
         ).catch(() => {});
     }
 

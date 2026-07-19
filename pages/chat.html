@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>StudentHub Chat</title>
     <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
-    <link rel="stylesheet" href="../css/studenthub.css?v=20260718-4">
+    <link rel="stylesheet" href="../css/studenthub.css?v=20260718-17">
 </head>
 <body data-page="chat">
 <main class="chat-page">
@@ -15,7 +15,11 @@
                 &larr; Back
             </a>
 
-            <div>
+            <a
+                id="chatHeaderLink"
+                class="chat-header-details"
+                href="#"
+                aria-label="Conversation details">
                 <h1 id="chatUserName">
                     Conversation
                 </h1>
@@ -23,7 +27,7 @@
                 <p id="chatStatus">
                     Mutual connection
                 </p>
-            </div>
+            </a>
         </header>
 
         <div
@@ -38,27 +42,75 @@
             Someone is typing...
         </p>
 
-        <form
-            id="messageForm"
-            class="message-form">
-            <textarea
-                id="messageInput"
-                rows="2"
-                maxlength="1000"
-                placeholder="Type a message..."
-                required></textarea>
+        <div class="chat-composer">
+            <div
+                id="replyPreview"
+                class="reply-preview hidden">
+                <div class="reply-content">
+                    <strong id="replySender"></strong>
+                    <p id="replyText"></p>
+                </div>
 
-            <button
-                class="primary-btn"
-                type="submit">
-                Send
-            </button>
-        </form>
+                <button
+                    id="cancelReply"
+                    type="button"
+                    aria-label="Cancel reply">
+                    &#10005;
+                </button>
+            </div>
+
+            <form
+                id="messageForm"
+                class="message-form chat-input">
+                <button
+                    id="attachButton"
+                    class="icon-button"
+                    type="button"
+                    title="Attach file"
+                    aria-label="Attach file">
+                    &#128206;
+                </button>
+
+                <input
+                    id="attachmentInput"
+                    type="file"
+                    hidden
+                    accept="image/*,.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.zip">
+
+                <textarea
+                    id="messageInput"
+                    rows="2"
+                    maxlength="1000"
+                    placeholder="Type a message..."
+                    required></textarea>
+
+                <button
+                    id="sendButton"
+                    class="primary-btn primary-button"
+                    type="submit">
+                    Send
+                </button>
+            </form>
+
+            <div
+                id="uploadProgressContainer"
+                class="upload-progress hidden"
+                role="progressbar"
+                aria-label="Attachment upload progress"
+                aria-valuemin="0"
+                aria-valuemax="100"
+                aria-valuenow="0">
+                <div
+                    id="uploadProgressBar"
+                    class="upload-progress-bar">
+                </div>
+            </div>
+        </div>
     </section>
 </main>
 
 <script
     type="module"
-    src="../js/controllers/chat-controller.js"></script>
+    src="../js/controllers/chat-controller.js?v=20260719-17"></script>
 </body>
 </html>

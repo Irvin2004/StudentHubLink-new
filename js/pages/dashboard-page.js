@@ -36,7 +36,110 @@ import {
 import {
     setUserOffline
 } from "../services/presence-service.js";
+import { createStudyGroup } from "../services/group-service.js";
+import { handleError } from "../utils/error-handler.js";
+import { showToast } from "../utils/toast.js";
 
+function setupCreateGroupModal() {
+    const openButton =
+    document.getElementById("openCreateGroup");
+
+    const modal =
+    document.getElementById("createGroupModal");
+
+    const form =
+    document.getElementById("createGroupForm");
+
+    const cancelButton =
+    document.getElementById("cancelGroup");
+
+    if (!openButton || !modal || !form || !cancelButton) {
+        return;
+    }
+
+    const closeModal = () => {
+        modal.classList.add("hidden");
+        form.reset();
+        openButton.focus();
+    };
+
+    openButton.addEventListener("click", () => {
+        modal.classList.remove("hidden");
+        document.getElementById("groupName")?.focus();
+    });
+
+    if (window.location.hash === "#createGroupModal") {
+        openButton.click();
+    }
+
+    cancelButton.addEventListener("click", closeModal);
+
+    modal.addEventListener("click", (event) => {
+        if (event.target === modal) {
+            closeModal();
+        }
+    });
+
+    document.addEventListener("keydown", (event) => {
+        if (
+            event.key === "Escape" &&
+            !modal.classList.contains("hidden")
+        ) {
+            closeModal();
+        }
+    });
+
+    form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+
+        const owner = auth.currentUser;
+        const submitButton =
+        form.querySelector('button[type="submit"]');
+
+        if (!owner) {
+            showToast(
+                "Sign in before creating a group.",
+                "error"
+            );
+            return;
+        }
+
+        try {
+            submitButton.disabled = true;
+            submitButton.textContent = "Creating...";
+
+            await createStudyGroup({
+                name:
+                    document.getElementById("groupName").value,
+                moduleName:
+                    document.getElementById("moduleName").value,
+                moduleCode:
+                    document.getElementById("moduleCode").value,
+                description:
+                    document.getElementById("groupDescription").value,
+                tags:
+                    document.getElementById("groupTags").value,
+                visibility:
+                    document.getElementById("groupVisibility").value,
+                owner
+            });
+
+            closeModal();
+            showToast(
+                "Study group created.",
+                "success"
+            );
+        } catch (error) {
+            handleError(
+                error,
+                "Unable to create the study group."
+            );
+        } finally {
+            submitButton.disabled = false;
+            submitButton.textContent = "Create Group";
+        }
+    });
+}
 function getGreeting(name) {
     const hour =
     new Date().getHours();
@@ -644,6 +747,7 @@ function renderChart(chart) {
 setupProfileMenu();
 setupNotificationMenu();
 setupLogout();
+setupCreateGroupModal();
 
 onAuthStateChanged(auth, (user) => {
     if (!user) {
