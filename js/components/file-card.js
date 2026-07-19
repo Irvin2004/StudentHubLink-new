@@ -1,5 +1,5 @@
 import { escapeHtml } from "../utils/dom.js";
-import { formatFileSize } from "../utils/formatFileSize.js";
+import { formatFileSize } from "../utils/format-file-size.js";
 import { sanitizeUrl } from "../utils/validators.js";
 
 export function createFileCard(file = {}) {

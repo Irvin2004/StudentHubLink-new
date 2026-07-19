@@ -17,7 +17,9 @@ import { handleError } from "../utils/error-handler.js";
 import { validateAttachment } from "../utils/file-validator.js";
 import { showToast } from "../utils/toast.js";
 import { sanitizeUrl } from "../utils/validators.js";
-import { filterAndSortResources } from "../utils/resource-library.js";
+import { filterResources } from "../services/filter-service.js";
+import { searchResources } from "../services/search-service.js";
+import { sortResources } from "../services/sort-service.js";
 
 const groupId = new URLSearchParams(window.location.search).get("id");
 const form = document.getElementById("resourceUploadForm");
@@ -64,11 +66,18 @@ function populateCategories() {
 }
 
 function applyResourceView() {
-    const resources = filterAndSortResources(allResources, {
-        search: searchInput?.value || "",
-        category: categoryFilter?.value || "all",
-        sort: sortSelect?.value || "newest"
+    const searchResults = searchResources(
+        allResources,
+        searchInput?.value || ""
+    );
+    const category = categoryFilter?.value || "all";
+    const filteredResources = filterResources(searchResults, {
+        category: category === "all" ? "" : category
     });
+    const resources = sortResources(
+        filteredResources,
+        sortSelect?.value || "newest"
+    );
 
     renderResources(resources, resourceList);
 }

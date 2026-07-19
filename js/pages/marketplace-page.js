@@ -12,7 +12,7 @@ import {
     getResourceAction
 } from "../utils/constants.js";
 import { setText } from "../utils/dom.js";
-import { formatPrice } from "../utils/formatPrice.js";
+import { formatPrice } from "../utils/format-price.js";
 import { clearSkeleton, showSkeleton } from "../utils/loading.js";
 import { warn, error as logError } from "../utils/logger.js";
 import { showToast } from "../utils/toast.js";

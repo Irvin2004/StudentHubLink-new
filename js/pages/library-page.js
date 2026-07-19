@@ -18,7 +18,7 @@ import {
     getResourceActionLabel,
     RESOURCE_ACTION
 } from "../utils/constants.js";
-import { getTimestampMillis } from "../utils/formatDate.js";
+import { getTimestampMillis } from "../utils/format-date.js";
 import { clearSkeleton, showSkeleton } from "../utils/loading.js";
 import { error as logError, warn } from "../utils/logger.js";
 

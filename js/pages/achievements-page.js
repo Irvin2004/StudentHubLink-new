@@ -12,7 +12,7 @@ import {
 import { auth, db } from "../firebase.js";
 import { createAchievementCard } from "../components/achievement-card.js";
 import { createEmptyState } from "../components/empty-state.js";
-import { getTimestampMillis } from "../utils/formatDate.js";
+import { getTimestampMillis } from "../utils/format-date.js";
 
 onAuthStateChanged(auth, async (user) => {
     if (!user) {

@@ -1,5 +1,5 @@
 import { auth, db } from "../firebase.js";
-import { formatCurrency } from "../utils/formatPrice.js";
+import { formatCurrency } from "../utils/format-price.js";
 import { error as logError } from "../utils/logger.js";
 import { showToast } from "../utils/toast.js";
 

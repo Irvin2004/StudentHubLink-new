@@ -18,7 +18,7 @@ import {
 } from "../renderers/review-renderer.js";
 import { RESOURCE_STATUS } from "../utils/constants.js";
 import { setText } from "../utils/dom.js";
-import { formatPrice } from "../utils/formatPrice.js";
+import { formatPrice } from "../utils/format-price.js";
 import { error as logError } from "../utils/logger.js";
 import { showToast } from "../utils/toast.js";
 

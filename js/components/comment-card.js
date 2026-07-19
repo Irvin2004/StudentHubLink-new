@@ -1,5 +1,5 @@
 import { escapeHtml } from "../utils/dom.js";
-import { formatDate } from "../utils/formatDate.js";
+import { formatDate } from "../utils/format-date.js";
 
 export function createCommentCard(comment, currentUserId = null) {
     const isOwner =

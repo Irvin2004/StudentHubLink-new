@@ -1,6 +1,6 @@
 import { createRatingStars } from "./rating-stars.js";
 import { escapeHtml } from "../utils/dom.js";
-import { formatDate } from "../utils/formatDate.js";
+import { formatDate } from "../utils/format-date.js";
 
 export function createReviewCard(review, currentUserId = null) {
     const isOwner =

@@ -5,9 +5,9 @@ import {
 import { createFavoriteButton } from "./favorite-button.js";
 import { createRatingStars } from "./rating-stars.js";
 import { escapeHtml } from "../utils/dom.js";
-import { formatDate } from "../utils/formatDate.js";
-import { formatPrice } from "../utils/formatPrice.js";
-import { formatFileSize } from "../utils/formatFileSize.js";
+import { formatDate } from "../utils/format-date.js";
+import { formatPrice } from "../utils/format-price.js";
+import { formatFileSize } from "../utils/format-file-size.js";
 import { getResourceCategoryLabel } from "../config/resource-categories.js";
 
 function createResourceActions(resource, mode) {

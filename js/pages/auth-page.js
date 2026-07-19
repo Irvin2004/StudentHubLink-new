@@ -8,8 +8,8 @@ import {
     setMessage,
     setText
 } from "../utils/dom.js";
-import { formatLongDate } from "../utils/formatDate.js";
-import { formatCurrency } from "../utils/formatPrice.js";
+import { formatLongDate } from "../utils/format-date.js";
+import { formatCurrency } from "../utils/format-price.js";
 import { error as logError, warn } from "../utils/logger.js";
 import { showToast } from "../utils/toast.js";
 

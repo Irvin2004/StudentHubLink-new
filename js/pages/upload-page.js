@@ -10,7 +10,7 @@ import {
     REVIEW_ACTION
 } from "../utils/constants.js";
 import { escapeHtml, setText } from "../utils/dom.js";
-import { formatPrice } from "../utils/formatPrice.js";
+import { formatPrice } from "../utils/format-price.js";
 import { error as logError } from "../utils/logger.js";
 import { showToast } from "../utils/toast.js";
 

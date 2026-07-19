@@ -25,8 +25,8 @@ import { getUserDocument } from "./auth-page.js";
 import { createEmptyState } from "../components/empty-state.js";
 import { createNotificationCard } from "../components/notification-card.js";
 import { escapeHtml, setText } from "../utils/dom.js";
-import { formatDate, getTimestampMillis } from "../utils/formatDate.js";
-import { formatCurrency } from "../utils/formatPrice.js";
+import { formatDate, getTimestampMillis } from "../utils/format-date.js";
+import { formatCurrency } from "../utils/format-price.js";
 import { showSkeleton } from "../utils/loading.js";
 import { error as logError, warn } from "../utils/logger.js";
 import {

@@ -1,5 +1,5 @@
 import { escapeHtml } from "../utils/dom.js";
-import { formatTime } from "../utils/formatDate.js?messaging=13";
+import { formatTime } from "../utils/format-date.js?messaging=13";
 import { sanitizeUrl } from "../utils/validators.js";
 import { createFileCard } from "./file-card.js";
 import { createImagePreview } from "./image-preview.js";
