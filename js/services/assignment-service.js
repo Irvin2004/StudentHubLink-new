@@ -14,9 +14,10 @@ import {
 
 import { db } from "../firebase.js";
 import { COLLECTIONS } from "../config/firestore.js";
-
-const MAX_TITLE_LENGTH = 120;
-const MAX_DESCRIPTION_LENGTH = 2000;
+import {
+    createAssignmentModel,
+    createAssignmentUpdateModel
+} from "../models/assignment.js";
 
 function cleanText(value) {
     return typeof value === "string"
@@ -44,79 +45,8 @@ function validateAssignmentId(assignmentId) {
     return cleanAssignmentId;
 }
 
-function validateTitle(title) {
-    const cleanTitle = cleanText(title);
-
-    if (!cleanTitle) {
-        throw new Error("Assignment title is required.");
-    }
-
-    if (cleanTitle.length > MAX_TITLE_LENGTH) {
-        throw new Error(
-            `Assignment title cannot exceed ${MAX_TITLE_LENGTH} characters.`
-        );
-    }
-
-    return cleanTitle;
-}
-
-function validateDescription(description = "") {
-    const cleanDescription = cleanText(description);
-
-    if (cleanDescription.length > MAX_DESCRIPTION_LENGTH) {
-        throw new Error(
-            `Description cannot exceed ${MAX_DESCRIPTION_LENGTH} characters.`
-        );
-    }
-
-    return cleanDescription;
-}
-
 function convertDueDate(dueDate) {
-    if (!dueDate) {
-        throw new Error("Assignment due date is required.");
-    }
-
-    if (dueDate instanceof Date) {
-        if (Number.isNaN(dueDate.getTime())) {
-            throw new Error("Choose a valid due date.");
-        }
-
-        return Timestamp.fromDate(dueDate);
-    }
-
-    const parsedDate = new Date(dueDate);
-
-    if (Number.isNaN(parsedDate.getTime())) {
-        throw new Error("Choose a valid due date.");
-    }
-
-    return Timestamp.fromDate(parsedDate);
-}
-
-function getCreatorDetails(assignmentData) {
-    const creator = assignmentData.creator;
-    const createdBy = cleanText(
-        assignmentData.createdBy || creator?.uid
-    );
-
-    if (!createdBy) {
-        throw new Error(
-            "A signed-in user is required to create an assignment."
-        );
-    }
-
-    return {
-        createdBy,
-        creatorName: cleanText(
-            assignmentData.creatorName ||
-            creator?.displayName ||
-            creator?.email
-        ) || "Student",
-        creatorPhotoURL: cleanText(
-            assignmentData.creatorPhotoURL || creator?.photoURL
-        )
-    };
+    return Timestamp.fromDate(dueDate);
 }
 
 export async function createAssignment(
@@ -124,12 +54,7 @@ export async function createAssignment(
     assignmentData = {}
 ) {
     const cleanGroupId = validateGroupId(groupId);
-    const title = validateTitle(assignmentData.title);
-    const description = validateDescription(
-        assignmentData.description
-    );
-    const dueDate = convertDueDate(assignmentData.dueDate);
-    const creatorDetails = getCreatorDetails(assignmentData);
+    const assignment = createAssignmentModel(assignmentData);
 
     const assignmentRef = await addDoc(
         collection(
@@ -139,16 +64,20 @@ export async function createAssignment(
             "assignments"
         ),
         {
-            title,
-            description,
-            dueDate,
-            ...creatorDetails,
+            ...assignment,
+            dueDate: convertDueDate(assignment.dueDate),
             createdAt: serverTimestamp(),
             updatedAt: serverTimestamp()
         }
     );
 
-    return assignmentRef.id;
+    const savedAssignment = await getDoc(assignmentRef);
+
+    return {
+        id: savedAssignment.id,
+        groupId: cleanGroupId,
+        ...savedAssignment.data()
+    };
 }
 
 export async function getAssignments(groupId) {
@@ -202,24 +131,12 @@ export async function updateAssignment(
 ) {
     const cleanGroupId = validateGroupId(groupId);
     const cleanAssignmentId = validateAssignmentId(assignmentId);
-    const validatedUpdates = {};
+    const validatedUpdates = createAssignmentUpdateModel(updates);
 
-    if (Object.hasOwn(updates, "title")) {
-        validatedUpdates.title = validateTitle(updates.title);
-    }
-
-    if (Object.hasOwn(updates, "description")) {
-        validatedUpdates.description = validateDescription(
-            updates.description
+    if (validatedUpdates.dueDate) {
+        validatedUpdates.dueDate = convertDueDate(
+            validatedUpdates.dueDate
         );
-    }
-
-    if (Object.hasOwn(updates, "dueDate")) {
-        validatedUpdates.dueDate = convertDueDate(updates.dueDate);
-    }
-
-    if (!Object.keys(validatedUpdates).length) {
-        throw new Error("Provide at least one assignment field to update.");
     }
 
     await updateDoc(
@@ -235,6 +152,8 @@ export async function updateAssignment(
             updatedAt: serverTimestamp()
         }
     );
+
+    return getAssignment(cleanGroupId, cleanAssignmentId);
 }
 
 export async function deleteAssignment(groupId, assignmentId) {
