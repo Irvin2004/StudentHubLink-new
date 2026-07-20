@@ -1,109 +1,98 @@
-const MAX_TITLE_LENGTH = 120;
-const MAX_DESCRIPTION_LENGTH = 2000;
+const TITLE_MAX_LENGTH = 120;
+const DESCRIPTION_MAX_LENGTH = 2000;
 
-function cleanText(value) {
-    return typeof value === "string"
-        ? value.trim()
-        : "";
-}
-
-function normalizeTitle(title) {
-    const cleanTitle = cleanText(title);
-
-    if (!cleanTitle) {
-        throw new Error("Assignment title is required.");
+function validateTitle(title) {
+    if (typeof title !== "string") {
+        throw new Error("Title is required.");
     }
 
-    if (cleanTitle.length > MAX_TITLE_LENGTH) {
+    const trimmed = title.trim();
+
+    if (!trimmed) {
+        throw new Error("Title is required.");
+    }
+
+    if (trimmed.length > TITLE_MAX_LENGTH) {
         throw new Error(
-            `Assignment title cannot exceed ${MAX_TITLE_LENGTH} characters.`
+            `Title cannot exceed ${TITLE_MAX_LENGTH} characters.`
         );
     }
 
-    return cleanTitle;
+    return trimmed;
 }
 
-function normalizeDescription(description = "") {
-    const cleanDescription = cleanText(description);
+function validateDescription(description = "") {
+    if (typeof description !== "string") {
+        throw new Error("Description must be text.");
+    }
 
-    if (cleanDescription.length > MAX_DESCRIPTION_LENGTH) {
+    const trimmed = description.trim();
+
+    if (trimmed.length > DESCRIPTION_MAX_LENGTH) {
         throw new Error(
-            `Description cannot exceed ${MAX_DESCRIPTION_LENGTH} characters.`
+            `Description cannot exceed ${DESCRIPTION_MAX_LENGTH} characters.`
         );
     }
 
-    return cleanDescription;
+    return trimmed;
 }
 
-function normalizeDueDate(dueDate) {
+function validateDueDate(dueDate) {
     if (!dueDate) {
-        throw new Error("Assignment due date is required.");
+        throw new Error("Due date is required.");
     }
 
-    const normalizedDate = dueDate instanceof Date
-        ? new Date(dueDate.getTime())
-        : new Date(dueDate);
+    const date = new Date(dueDate);
 
-    if (Number.isNaN(normalizedDate.getTime())) {
-        throw new Error("Choose a valid due date.");
+    if (Number.isNaN(date.getTime())) {
+        throw new Error("Invalid due date.");
     }
 
-    return normalizedDate;
+    return date;
 }
 
-function normalizeCreator(data) {
-    const creator = data.creator;
-    const createdBy = cleanText(data.createdBy || creator?.uid);
-
-    if (!createdBy) {
-        throw new Error(
-            "A signed-in user is required to create an assignment."
-        );
+export function validateAssignment(data) {
+    if (!data || typeof data !== "object") {
+        throw new Error("Assignment data is required.");
     }
 
     return {
-        createdBy,
-        creatorName: cleanText(
-            data.creatorName ||
-            creator?.displayName ||
-            creator?.email
-        ) || "Student",
-        creatorPhotoURL: cleanText(
-            data.creatorPhotoURL || creator?.photoURL
-        )
+        title: validateTitle(data.title),
+        description: validateDescription(data.description),
+        dueDate: validateDueDate(data.dueDate)
     };
 }
 
-export function validateAssignment(data = {}) {
+export function createAssignmentModel(data) {
+    const assignment = validateAssignment(data);
+
     return {
-        title: normalizeTitle(data.title),
-        description: normalizeDescription(data.description),
-        dueDate: normalizeDueDate(data.dueDate)
+        ...assignment,
+        createdBy: data.createdBy,
+        createdAt: null,
+        updatedAt: null
     };
 }
 
-export function createAssignmentModel(data = {}) {
-    return {
-        ...validateAssignment(data),
-        ...normalizeCreator(data)
-    };
-}
+export function createAssignmentUpdateModel(updates) {
+    if (!updates || typeof updates !== "object") {
+        throw new Error("Assignment updates are required.");
+    }
 
-export function createAssignmentUpdateModel(updates = {}) {
     const cleanUpdates = {};
 
     if (Object.hasOwn(updates, "title")) {
-        cleanUpdates.title = normalizeTitle(updates.title);
+        cleanUpdates.title = validateTitle(updates.title);
     }
 
     if (Object.hasOwn(updates, "description")) {
-        cleanUpdates.description = normalizeDescription(
+        cleanUpdates.description = validateDescription(
             updates.description
         );
     }
 
     if (Object.hasOwn(updates, "dueDate")) {
-        cleanUpdates.dueDate = normalizeDueDate(updates.dueDate);
+        cleanUpdates.dueDate = validateDueDate(updates.dueDate);
     }
 
     if (!Object.keys(cleanUpdates).length) {
