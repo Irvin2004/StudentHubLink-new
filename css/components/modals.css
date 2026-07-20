@@ -4,6 +4,49 @@
 .modal-header, .modal-actions { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
 .modal-header { margin-bottom: var(--space-4); }
 .modal-actions { justify-content: flex-end; margin-top: var(--space-6); }
+
+body.modal-open {
+    overflow: hidden;
+}
+
+.modal-body {
+    display: grid;
+    gap: var(--space-4);
+}
+
+.modal-header h2 {
+    margin: 0;
+}
+
+.modal-close {
+    display: grid;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    place-items: center;
+    background: transparent;
+    color: var(--text-secondary);
+    font: inherit;
+    font-size: 1.6rem;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.modal-close:hover {
+    background: var(--surface-muted);
+    color: var(--text-primary);
+}
+
+.modal-close:focus-visible {
+    outline: 3px solid
+        color-mix(
+            in srgb,
+            var(--primary) 25%,
+            transparent
+        );
+}
 .leave-group-card {
     width: min(100%, 460px);
 }
