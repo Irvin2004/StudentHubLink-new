@@ -34,7 +34,49 @@ function validateGroupId(groupId) {
     return cleanGroupId;
 }
 
+function validateAssignmentId(assignmentId) {
+    const cleanAssignmentId = cleanText(assignmentId);
+
+    if (!cleanAssignmentId) {
+        throw new Error("Assignment ID is required.");
+    }
+
+    return cleanAssignmentId;
+}
+
+function validateTitle(title) {
+    const cleanTitle = cleanText(title);
+
+    if (!cleanTitle) {
+        throw new Error("Assignment title is required.");
+    }
+
+    if (cleanTitle.length > MAX_TITLE_LENGTH) {
+        throw new Error(
+            `Assignment title cannot exceed ${MAX_TITLE_LENGTH} characters.`
+        );
+    }
+
+    return cleanTitle;
+}
+
+function validateDescription(description = "") {
+    const cleanDescription = cleanText(description);
+
+    if (cleanDescription.length > MAX_DESCRIPTION_LENGTH) {
+        throw new Error(
+            `Description cannot exceed ${MAX_DESCRIPTION_LENGTH} characters.`
+        );
+    }
+
+    return cleanDescription;
+}
+
 function convertDueDate(dueDate) {
+    if (!dueDate) {
+        throw new Error("Assignment due date is required.");
+    }
+
     if (dueDate instanceof Date) {
         if (Number.isNaN(dueDate.getTime())) {
             throw new Error("Choose a valid due date.");
@@ -52,61 +94,42 @@ function convertDueDate(dueDate) {
     return Timestamp.fromDate(parsedDate);
 }
 
-function validateAssignmentData({
-    title,
-    description,
-    dueDate,
-    creator
-}) {
-    const cleanTitle = cleanText(title);
-    const cleanDescription = cleanText(description);
+function getCreatorDetails(assignmentData) {
+    const creator = assignmentData.creator;
+    const createdBy = cleanText(
+        assignmentData.createdBy || creator?.uid
+    );
 
-    if (!cleanTitle) {
-        throw new Error("Assignment title is required.");
-    }
-
-    if (cleanTitle.length > MAX_TITLE_LENGTH) {
-        throw new Error(
-            `Assignment title cannot exceed ${MAX_TITLE_LENGTH} characters.`
-        );
-    }
-
-    if (cleanDescription.length > MAX_DESCRIPTION_LENGTH) {
-        throw new Error(
-            `Description cannot exceed ${MAX_DESCRIPTION_LENGTH} characters.`
-        );
-    }
-
-    if (!dueDate) {
-        throw new Error("Assignment due date is required.");
-    }
-
-    if (!creator?.uid) {
+    if (!createdBy) {
         throw new Error(
             "A signed-in user is required to create an assignment."
         );
     }
+
+    return {
+        createdBy,
+        creatorName: cleanText(
+            assignmentData.creatorName ||
+            creator?.displayName ||
+            creator?.email
+        ) || "Student",
+        creatorPhotoURL: cleanText(
+            assignmentData.creatorPhotoURL || creator?.photoURL
+        )
+    };
 }
 
-export async function createAssignment({
+export async function createAssignment(
     groupId,
-    title,
-    description = "",
-    dueDate,
-    creator
-}) {
+    assignmentData = {}
+) {
     const cleanGroupId = validateGroupId(groupId);
-
-    validateAssignmentData({
-        title,
-        description,
-        dueDate,
-        creator
-    });
-
-    const cleanTitle = cleanText(title);
-    const cleanDescription = cleanText(description);
-    const dueTimestamp = convertDueDate(dueDate);
+    const title = validateTitle(assignmentData.title);
+    const description = validateDescription(
+        assignmentData.description
+    );
+    const dueDate = convertDueDate(assignmentData.dueDate);
+    const creatorDetails = getCreatorDetails(assignmentData);
 
     const assignmentRef = await addDoc(
         collection(
@@ -116,17 +139,10 @@ export async function createAssignment({
             "assignments"
         ),
         {
-            title: cleanTitle,
-            description: cleanDescription,
-            dueDate: dueTimestamp,
-
-            createdBy: creator.uid,
-            creatorName:
-                creator.displayName ||
-                creator.email ||
-                "Student",
-            creatorPhotoURL: creator.photoURL || "",
-
+            title,
+            description,
+            dueDate,
+            ...creatorDetails,
             createdAt: serverTimestamp(),
             updatedAt: serverTimestamp()
         }
@@ -137,7 +153,6 @@ export async function createAssignment({
 
 export async function getAssignments(groupId) {
     const cleanGroupId = validateGroupId(groupId);
-
     const assignmentsQuery = query(
         collection(
             db,
@@ -147,7 +162,6 @@ export async function getAssignments(groupId) {
         ),
         orderBy("dueDate", "asc")
     );
-
     const snapshot = await getDocs(assignmentsQuery);
 
     return snapshot.docs.map((assignmentDocument) => ({
@@ -157,17 +171,9 @@ export async function getAssignments(groupId) {
     }));
 }
 
-export async function getAssignment({
-    groupId,
-    assignmentId
-}) {
+export async function getAssignment(groupId, assignmentId) {
     const cleanGroupId = validateGroupId(groupId);
-    const cleanAssignmentId = cleanText(assignmentId);
-
-    if (!cleanAssignmentId) {
-        throw new Error("Assignment ID is required.");
-    }
-
+    const cleanAssignmentId = validateAssignmentId(assignmentId);
     const snapshot = await getDoc(
         doc(
             db,
@@ -189,36 +195,31 @@ export async function getAssignment({
     };
 }
 
-export async function updateAssignment({
+export async function updateAssignment(
     groupId,
     assignmentId,
-    title,
-    description = "",
-    dueDate
-}) {
+    updates = {}
+) {
     const cleanGroupId = validateGroupId(groupId);
-    const cleanAssignmentId = cleanText(assignmentId);
-    const cleanTitle = cleanText(title);
-    const cleanDescription = cleanText(description);
+    const cleanAssignmentId = validateAssignmentId(assignmentId);
+    const validatedUpdates = {};
 
-    if (!cleanAssignmentId) {
-        throw new Error("Assignment ID is required.");
+    if (Object.hasOwn(updates, "title")) {
+        validatedUpdates.title = validateTitle(updates.title);
     }
 
-    if (!cleanTitle) {
-        throw new Error("Assignment title is required.");
-    }
-
-    if (cleanTitle.length > MAX_TITLE_LENGTH) {
-        throw new Error(
-            `Assignment title cannot exceed ${MAX_TITLE_LENGTH} characters.`
+    if (Object.hasOwn(updates, "description")) {
+        validatedUpdates.description = validateDescription(
+            updates.description
         );
     }
 
-    if (cleanDescription.length > MAX_DESCRIPTION_LENGTH) {
-        throw new Error(
-            `Description cannot exceed ${MAX_DESCRIPTION_LENGTH} characters.`
-        );
+    if (Object.hasOwn(updates, "dueDate")) {
+        validatedUpdates.dueDate = convertDueDate(updates.dueDate);
+    }
+
+    if (!Object.keys(validatedUpdates).length) {
+        throw new Error("Provide at least one assignment field to update.");
     }
 
     await updateDoc(
@@ -230,24 +231,15 @@ export async function updateAssignment({
             cleanAssignmentId
         ),
         {
-            title: cleanTitle,
-            description: cleanDescription,
-            dueDate: convertDueDate(dueDate),
+            ...validatedUpdates,
             updatedAt: serverTimestamp()
         }
     );
 }
 
-export async function deleteAssignment({
-    groupId,
-    assignmentId
-}) {
+export async function deleteAssignment(groupId, assignmentId) {
     const cleanGroupId = validateGroupId(groupId);
-    const cleanAssignmentId = cleanText(assignmentId);
-
-    if (!cleanAssignmentId) {
-        throw new Error("Assignment ID is required.");
-    }
+    const cleanAssignmentId = validateAssignmentId(assignmentId);
 
     await deleteDoc(
         doc(
