@@ -13,7 +13,7 @@ import {
     leaveStudyGroup
 } from "../services/group-service.js";
 import { escapeHtml } from "../utils/dom.js";
-import { handleError } from "../utils/error-handler.js";
+import { handleError } from "../utils/error-handler.js?security=1";
 import { showToast } from "../utils/toast.js";
 
 const auth = getAuth();
@@ -34,6 +34,12 @@ document.getElementById("groupChatButton");
 
 const groupResourcesLink =
 document.getElementById("groupResourcesLink");
+
+const assignmentsTab =
+document.getElementById("assignmentsTab");
+
+const groupDetailTabs =
+document.getElementById("groupDetailTabs");
 
 let currentUser = null;
 let currentGroup = null;
@@ -108,6 +114,11 @@ function updateJoinButton() {
     const isPrivate =
         currentGroup.visibility === "private";
 
+    groupDetailTabs?.classList.toggle(
+        "hidden",
+        !(isOwner || isJoined)
+    );
+
     joinButton.disabled =
         isOwner || (!isJoined && isPrivate);
 
@@ -126,6 +137,10 @@ function updateJoinButton() {
         !(isOwner || isJoined)
     );
     groupResourcesLink?.classList.toggle(
+        "hidden",
+        !(isOwner || isJoined)
+    );
+    assignmentsTab?.classList.toggle(
         "hidden",
         !(isOwner || isJoined)
     );
@@ -217,6 +232,18 @@ async function loadGroup(user) {
     }
 }
 
+assignmentsTab?.addEventListener("click", () => {
+    if (
+        !currentGroup ||
+        (!isJoined && currentGroup.ownerId !== currentUser?.uid)
+    ) {
+        return;
+    }
+
+    window.location.href =
+        `group-assignments.html?id=${encodeURIComponent(currentGroup.id)}`;
+});
+
 groupChatButton?.addEventListener("click", async () => {
     if (!currentGroup || (!isJoined && currentGroup.ownerId !== currentUser?.uid)) {
         return;
@@ -236,7 +263,8 @@ groupChatButton?.addEventListener("click", async () => {
     } catch (error) {
         handleError(error, "Unable to open the group chat.");
         groupChatButton.disabled = false;
-        groupChatButton.textContent = "Open group chat";
+        groupChatButton.innerHTML =
+            '<span aria-hidden="true">&#128172;</span> Chat';
     }
 });
 joinButton?.addEventListener("click", async () => {

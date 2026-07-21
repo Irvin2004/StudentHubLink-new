@@ -1,25 +1,28 @@
 import { getAssignmentStatus } from "../utils/assignment-status.js";
+import { getRelativeDueDate } from "../utils/assignment-due-date.js";
 import { escapeHtml } from "../utils/dom.js";
 import { formatDate } from "../utils/format-date.js";
+import { sortAssignments } from "../utils/sort-assignments.js";
 
 const STATUS_DETAILS = Object.freeze({
     upcoming: {
-        icon: "&#128994;",
-        label: "Upcoming"
+        label: "Upcoming",
+        badgeClass: "badge-primary"
     },
     today: {
-        icon: "&#128993;",
-        label: "Due Today"
+        label: "Due Today",
+        badgeClass: "badge-warning"
     },
     overdue: {
-        icon: "&#128308;",
-        label: "Overdue"
+        label: "Overdue",
+        badgeClass: "badge-danger"
     }
 });
 
 export function renderAssignmentCard(assignment) {
     const status = getAssignmentStatus(assignment.dueDate);
     const statusDetails = STATUS_DETAILS[status];
+    const relativeDueDate = getRelativeDueDate(assignment.dueDate);
     const dueDate = formatDate(assignment.dueDate, {
         fallback: "Date unavailable",
         locale: "en-GB",
@@ -45,17 +48,20 @@ export function renderAssignmentCard(assignment) {
                     ` : ""}
                 </div>
 
-                <span class="assignment-status is-${status}">
-                    <span aria-hidden="true">${statusDetails.icon}</span>
+                <span class="badge assignment-status ${statusDetails.badgeClass}">
                     ${statusDetails.label}
                 </span>
             </header>
 
             <footer class="assignment-footer">
                 <div class="assignment-meta">
-                    <span>
+                    <span class="assignment-due-date" title="Due ${escapeHtml(dueDate)}">
                         <span aria-hidden="true">&#128197;</span>
-                        Due: ${escapeHtml(dueDate)}
+                        <strong>${escapeHtml(relativeDueDate)}</strong>
+                        <span class="assignment-due-date-exact">
+                            <span aria-hidden="true">&middot;</span>
+                            ${escapeHtml(dueDate)}
+                        </span>
                     </span>
                     <span>
                         <span aria-hidden="true">&#128100;</span>
@@ -75,8 +81,9 @@ export function renderAssignmentCard(assignment) {
                         Edit
                     </button>
                     <button
-                        class="btn btn-secondary"
+                        class="btn btn-secondary assignment-delete"
                         type="button"
+                        data-assignment-id="${escapeHtml(assignment.id)}"
                         data-assignment-action="delete"
                         aria-label="Delete ${escapeHtml(assignment.title)}">
                         <span aria-hidden="true">&#128465;</span>
@@ -93,22 +100,20 @@ export function renderAssignments(assignments, container) {
         throw new Error("Assignments container is required.");
     }
 
-    const assignmentList = Array.isArray(assignments)
-        ? assignments
-        : [];
+    const assignmentList = sortAssignments(assignments);
 
     container.innerHTML = assignmentList.length
         ? assignmentList.map(renderAssignmentCard).join("")
         : `
             <div class="assignment-empty-state">
                 <span aria-hidden="true">&#128218;</span>
-                <h2>No assignments yet.</h2>
-                <p>Be the first to create one.</p>
+                <h2>No assignments yet</h2>
+                <p>Assignments help your group stay organised.</p>
                 <button
                     class="btn btn-primary"
                     type="button"
                     data-assignment-create>
-                    + New Assignment
+                    Create Assignment
                 </button>
             </div>
         `;

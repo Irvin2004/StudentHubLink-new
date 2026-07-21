@@ -195,4 +195,5 @@ export function closeModal(modalOrId) {
     state?.previouslyFocusedElement?.focus?.();
 
     modalState.delete(modal);
+    modal.dispatchEvent(new CustomEvent("modal:closed"));
 }

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Group Assignments | StudentHub</title>
+    <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="../css/studenthub.css?v=20260721-4">
+</head>
+<body data-page="group-assignments">
+    <div class="groups-shell">
+        <aside class="groups-sidebar">
+            <a class="groups-brand" href="../dashboard.html">
+                <img src="../assets/favicon.svg" alt="">
+                <span>StudentHub</span>
+            </a>
+
+            <nav class="groups-nav" aria-label="Primary navigation">
+                <a href="../dashboard.html">Dashboard</a>
+                <a href="resources.html">Marketplace</a>
+                <a class="active" href="groups.html">Study Groups</a>
+                <a href="messages.html">Messages</a>
+                <a href="library.html">My Library</a>
+                <a href="profile.html">Profile</a>
+            </nav>
+
+            <div class="groups-sidebar-footer">
+                <button
+                    class="theme-toggle"
+                    type="button"
+                    data-theme-toggle
+                    aria-label="Switch color theme">
+                    Dark
+                </button>
+                <span>Choose your theme</span>
+            </div>
+        </aside>
+
+        <main class="groups-main group-assignments-main">
+            <header class="groups-mobile-header">
+                <a class="groups-brand" href="../dashboard.html">
+                    <img src="../assets/favicon.svg" alt="">
+                    <span>StudentHub</span>
+                </a>
+                <a href="groups.html">Groups</a>
+            </header>
+
+            <a id="assignmentGroupBackLink" class="group-back-link" href="groups.html">
+                &larr; Back to group
+            </a>
+
+            <p id="assignmentAccessMessage" class="assignment-notice">
+                Checking your group membership...
+            </p>
+
+            <section id="groupAssignments" class="group-assignments hidden">
+                <header class="assignments-header">
+                    <div>
+                        <p class="eyebrow">Study group</p>
+                        <h1 id="assignmentPageTitle">Assignments</h1>
+                        <p>Keep track of group work and upcoming due dates.</p>
+                    </div>
+
+                    <button
+                        id="newAssignmentButton"
+                        class="btn btn-primary"
+                        type="button"
+                        aria-haspopup="dialog"
+                        aria-controls="assignmentModal">
+                        + New Assignment
+                    </button>
+                </header>
+
+                <div id="assignmentsList" class="assignments-list" aria-live="polite">
+                    <p class="assignment-notice">Loading assignments...</p>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script type="module" src="../js/controllers/group-assignments-controller.js?v=20260721-4"></script>
+    <script type="module" src="../js/theme.js"></script>
+</body>
+</html>

@@ -1,4 +1,4 @@
-@scope (body[data-page="groups"], body[data-page="group-details"]) {
+@scope (body[data-page="groups"], body[data-page="group-details"], body[data-page="group-assignments"]) {
     .groups-shell {
         min-height: 100vh;
         display: grid;
@@ -500,6 +500,21 @@
         padding: var(--space-5);
     }
 
+    .group-detail-tabs {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: var(--space-2);
+        margin-top: var(--space-3);
+    }
+
+    .group-tab {
+        min-width: 0;
+        min-height: 46px;
+        padding-inline: var(--space-2);
+        font-size: 0.8125rem;
+        white-space: nowrap;
+    }
+
     .group-detail-join {
         width: 100%;
         min-height: 52px;
@@ -583,6 +598,10 @@
 
         .group-detail-layout {
             grid-template-columns: minmax(0, 1fr) 300px;
+        }
+
+        .group-detail-tabs {
+            grid-template-columns: 1fr;
         }
     }
 

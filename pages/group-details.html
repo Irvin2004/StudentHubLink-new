@@ -108,17 +108,29 @@
                         type="button">
                         Join group
                     </button>
-                    <button
-                        id="groupChatButton"
-                        class="btn btn-secondary group-detail-join hidden"
-                        type="button">
-                        Open group chat
-                    </button>                    <a
-                        id="groupResourcesLink"
-                        class="btn btn-secondary group-detail-join hidden"
-                        href="#">
-                        Group resources
-                    </a>
+                    <nav
+                        id="groupDetailTabs"
+                        class="group-detail-tabs hidden"
+                        aria-label="Group sections">
+                        <button
+                            id="groupChatButton"
+                            class="btn btn-secondary group-tab hidden"
+                            type="button">
+                            <span aria-hidden="true">&#128172;</span> Chat
+                        </button>
+                        <a
+                            id="groupResourcesLink"
+                            class="btn btn-secondary group-tab hidden"
+                            href="#">
+                            <span aria-hidden="true">&#128196;</span> Resources
+                        </a>
+                        <button
+                            id="assignmentsTab"
+                            class="btn btn-secondary group-tab hidden"
+                            type="button">
+                            <span aria-hidden="true">&#128221;</span> Assignments
+                        </button>
+                    </nav>
 
                     <p class="group-join-note">
                         Public groups can be joined immediately. Private groups require an invitation.
