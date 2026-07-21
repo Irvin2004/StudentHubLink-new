@@ -23,6 +23,43 @@ box-shadow:0 2px 8px rgba(0,0,0,0.1);
 margin-bottom:20px;
 }
 
+.profile-card > p {
+margin:8px 0;
+color:var(--text-main);
+}
+
+.profile-edit-form{
+display:grid;
+gap:10px;
+}
+
+.profile-edit-form label{
+font-weight:700;
+color:var(--text-main);
+}
+
+.profile-edit-form input,
+.profile-edit-form textarea{
+width:100%;
+padding:12px 14px;
+border:1px solid var(--border);
+border-radius:10px;
+background:var(--surface);
+color:var(--text-main);
+font:inherit;
+}
+
+.profile-edit-form input:focus,
+.profile-edit-form textarea:focus{
+outline:3px solid rgba(59,130,246,0.18);
+border-color:var(--blue);
+}
+
+.profile-edit-form button{
+justify-self:start;
+margin-top:8px;
+}
+
 .stats{
 display:grid;
 grid-template-columns:repeat(auto-fit,minmax(200px,1fr));

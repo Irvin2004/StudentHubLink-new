@@ -11,7 +11,6 @@ import { db } from "../firebase.js";
 import { error as logError, warn } from "../utils/logger.js";
 
 const ACTIVITY_COLLECTION = "activities";
-const LEGACY_ACTIVITY_COLLECTION = "activity";
 
 function normalizeActivityInput(activityOrUserId, type, title, description, icon = "info") {
     if (typeof activityOrUserId === "object" && activityOrUserId !== null) {
@@ -77,34 +76,18 @@ export async function getRecentActivities(userId, activityLimit = 5) {
         return [];
     }
 
-    const activityCollections = [
-        ACTIVITY_COLLECTION,
-        LEGACY_ACTIVITY_COLLECTION
-    ];
-
-    const activityResults = await Promise.all(
-        activityCollections.map(async (collectionName) => {
-            try {
-                const activityQuery = query(
-                    collection(db, collectionName),
-                    where("userId", "==", userId)
-                );
-
-                const snapshot = await getDocs(activityQuery);
-
-                return snapshot.docs.map((doc) => ({
-                    id: doc.id,
-                    ...doc.data()
-                }));
-            } catch (error) {
-                warn("FIRESTORE", `Could not load ${collectionName}:`, error);
-                return [];
-            }
-        })
+    const activityQuery = query(
+        collection(db, ACTIVITY_COLLECTION),
+        where("userId", "==", userId)
     );
 
-    return activityResults
-        .flat()
+    const snapshot = await getDocs(activityQuery);
+
+    return snapshot.docs
+        .map((activityDocument) => ({
+            id: activityDocument.id,
+            ...activityDocument.data()
+        }))
         .sort((first, second) => {
             const firstTime =
                 typeof first.createdAt?.toMillis === "function" ?

@@ -19,6 +19,7 @@ import {
 import { RESOURCE_STATUS } from "../utils/constants.js";
 import { setText } from "../utils/dom.js";
 import { formatPrice } from "../utils/format-price.js";
+import { handleError } from "../utils/error-handler.js?security=1";
 import { error as logError } from "../utils/logger.js";
 import { showToast } from "../utils/toast.js";
 
@@ -164,7 +165,7 @@ function bindResourceAction(resource) {
                 "success"
             );
         } catch (error) {
-            showToast(error.message || "Something went wrong.", "error");
+            handleError(error, "Unable to download this resource.");
             actionButton.disabled = false;
         }
     });
@@ -197,7 +198,10 @@ function renderRelatedResources(resources) {
         .join("");
 }
 
-window.addEventListener("beforeunload", () => {
+window.addEventListener("pagehide", (event) => {
+    if (event.persisted) {
+        return;
+    }
     if (typeof unsubscribeComments === "function") {
         unsubscribeComments();
     }

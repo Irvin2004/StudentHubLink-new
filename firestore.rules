@@ -20,39 +20,116 @@ service cloud.firestore {
         && userDoc().data.role == "admin";
     }
 
+    function isGroupManager(groupId) {
+      return isGroupMember(groupId)
+        && get(
+          /databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid)
+        ).data.role in ["owner", "admin"];
+    }
+
     function unchanged(field) {
       return !(field in request.resource.data)
         || request.resource.data[field] == resource.data[field];
     }
 
     match /users/{userId} {
-      allow read: if signedIn();
+      allow read: if signedIn()
+        && (
+          isOwner(userId)
+          || isAdmin()
+          || resource.data.get("profileVisibility", "public") == "public"
+        );
       allow create: if isOwner(userId)
         && request.resource.data.uid == userId
         && request.resource.data.role == "student";
-      allow update: if isAdmin()
-        || (
-          isOwner(userId)
-          && request.resource.data.role == resource.data.role
-          && request.resource.data.uid == resource.data.uid
-        );
-      allow delete: if isAdmin();
+      allow update: if isOwner(userId)
+        && request.resource.data.role == resource.data.role
+        && request.resource.data.uid == resource.data.uid;
+      allow delete: if isOwner(userId);
+    }
+
+    // Collection-group membership lookups must be restricted to the signed-in
+    // user's own membership documents. Group-specific reads remain governed by
+    // the narrower rule under /groups/{groupId}/members/{userId} below.
+    match /{path=**}/members/{memberId} {
+      allow read: if signedIn()
+        && memberId == request.auth.uid
+        && resource.data.userId == request.auth.uid;
+    }
+
+    match /friendRequests/{requestId} {
+      allow read: if signedIn()
+        && request.auth.uid in [resource.data.senderId, resource.data.receiverId];
+      allow create: if signedIn()
+        && request.resource.data.senderId == request.auth.uid
+        && request.resource.data.receiverId != request.auth.uid
+        && request.resource.data.status == "pending";
+      allow update: if signedIn()
+        && resource.data.receiverId == request.auth.uid
+        && request.resource.data.senderId == resource.data.senderId
+        && request.resource.data.receiverId == resource.data.receiverId
+        && resource.data.status == "pending"
+        && request.resource.data.status in ["accepted", "declined"];
+      allow delete: if signedIn()
+        && request.auth.uid in [resource.data.senderId, resource.data.receiverId];
+    }
+
+    match /friends/{friendId} {
+      allow read: if signedIn()
+        && request.auth.uid in resource.data.participantIds;
+      allow create: if signedIn()
+        && request.resource.data.participantIds is list
+        && request.resource.data.participantIds.size() == 2
+        && request.auth.uid in request.resource.data.participantIds
+        && request.resource.data.requestId is string
+        && getAfter(
+          /databases/$(database)/documents/friendRequests/$(request.resource.data.requestId)
+        ).data.receiverId == request.auth.uid
+        && getAfter(
+          /databases/$(database)/documents/friendRequests/$(request.resource.data.requestId)
+        ).data.status == "accepted"
+        && request.resource.data.participantIds.toSet()
+          == [
+            getAfter(
+              /databases/$(database)/documents/friendRequests/$(request.resource.data.requestId)
+            ).data.senderId,
+            request.auth.uid
+          ].toSet();
+      allow update: if false;
+      allow delete: if signedIn()
+        && request.auth.uid in resource.data.participantIds;
     }
 
     match /resources/{resourceId} {
       allow read: if true;
       allow create: if signedIn()
-        && request.resource.data.userId == request.auth.uid;
+        && request.resource.data.ownerId == request.auth.uid
+        && request.resource.data.approved == false
+        && request.resource.data.downloadCount == 0
+        && request.resource.data.purchaseCount == 0;
       allow update: if isAdmin()
         || (
           signedIn()
-          && resource.data.userId == request.auth.uid
-          && request.resource.data.userId == resource.data.userId
+          && resource.data.ownerId == request.auth.uid
+          && request.resource.data.ownerId == resource.data.ownerId
+          && request.resource.data.approved == resource.data.approved
+          && request.resource.data.status == resource.data.status
           && unchanged("averageRating")
           && unchanged("reviewCount")
+          && unchanged("downloadCount")
+          && unchanged("purchaseCount")
+        )
+        || (
+          signedIn()
+          && resource.data.approved == true
+          && request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(["downloadCount", "updatedAt"])
+          && request.resource.data.downloadCount
+            == resource.data.downloadCount + 1
+          && request.resource.data.updatedAt == request.time
         );
       allow delete: if isAdmin()
-        || (signedIn() && resource.data.userId == request.auth.uid);
+        || (signedIn() && resource.data.ownerId == request.auth.uid);
     }
 
     match /reviews/{reviewId} {
@@ -324,7 +401,7 @@ service cloud.firestore {
             "updatedAt"
           ])
           && request.resource.data.name is string
-          && request.resource.data.name.size() > 0
+          && request.resource.data.name.size() > 3
           && request.resource.data.name.size() <= 100
           && request.resource.data.description is string
           && request.resource.data.description.size() <= 1000
@@ -346,7 +423,11 @@ service cloud.firestore {
           && request.resource.data.memberCount >= 1;
       }
 
-      allow read: if signedIn();
+      allow read: if signedIn()
+        && (
+          resource.data.visibility == "public"
+          || isGroupMember(groupId)
+        );
       allow create: if signedIn()
         && groupFieldsAreValid()
         && request.resource.data.ownerId == request.auth.uid
@@ -358,7 +439,22 @@ service cloud.firestore {
         && request.resource.data.ownerId == resource.data.ownerId
         && request.resource.data.createdAt == resource.data.createdAt
         && (
-          resource.data.ownerId == request.auth.uid
+          (
+            isGroupManager(groupId)
+            && request.resource.data.memberCount == resource.data.memberCount
+            && request.resource.data.diff(resource.data).affectedKeys()
+              .hasOnly([
+                "name",
+                "description",
+                "moduleCode",
+                "moduleName",
+                "tags",
+                "visibility",
+                "photoURL",
+                "updatedAt"
+              ])
+            && request.resource.data.updatedAt == request.time
+          )
           || (
             resource.data.visibility == "public"
             && request.resource.data.diff(resource.data).affectedKeys()
@@ -419,7 +515,14 @@ service cloud.firestore {
             ];
         }
 
-        allow read: if signedIn();
+        allow read: if signedIn()
+          && (
+            resource.data.userId == request.auth.uid
+            || get(
+              /databases/$(database)/documents/groups/$(groupId)
+            ).data.visibility == "public"
+            || isGroupMember(groupId)
+          );
         allow create: if signedIn()
           && request.auth.uid == userId
           && memberFieldsAreValid()
@@ -491,27 +594,133 @@ service cloud.firestore {
         allow read: if isGroupResourceMember();
 
         allow create: if isGroupResourceMember()
+          && request.resource.data.keys().hasOnly([
+            "title",
+            "description",
+            "category",
+            "fileURL",
+            "storagePath",
+            "fileName",
+            "fileSize",
+            "mimeType",
+            "uploaderId",
+            "uploaderName",
+            "uploaderPhotoURL",
+            "downloadCount",
+            "verificationCount",
+            "verifiedBy",
+            "createdAt",
+            "updatedAt"
+          ])
           && request.resource.data.uploaderId == request.auth.uid
+          && request.resource.data.title is string
+          && request.resource.data.title.size() > 0
+          && request.resource.data.title.size() <= 100
+          && request.resource.data.description is string
+          && request.resource.data.description.size() <= 500
+          && request.resource.data.category in [
+            "notes",
+            "assignments",
+            "past-papers",
+            "memorandums",
+            "practicals",
+            "projects",
+            "books",
+            "other"
+          ]
+          && request.resource.data.fileURL is string
+          && request.resource.data.storagePath is string
+          && request.resource.data.fileName is string
+          && request.resource.data.fileSize is int
+          && request.resource.data.fileSize > 0
+          && request.resource.data.fileSize <= 25 * 1024 * 1024
+          && request.resource.data.mimeType is string
           && request.resource.data.downloadCount == 0
-          && request.resource.data.verificationCount == 0;
+          && request.resource.data.verificationCount == 0
+          && request.resource.data.verifiedBy == []
+          && request.resource.data.createdAt == request.time
+          && request.resource.data.updatedAt == request.time;
 
-        allow update: if isResourceUploader()
-          || isGroupResourceOwner();
+        allow update: if (
+            isResourceUploader()
+            || isGroupResourceOwner()
+          )
+          && request.resource.data.uploaderId == resource.data.uploaderId
+          && request.resource.data.storagePath == resource.data.storagePath
+          && request.resource.data.createdAt == resource.data.createdAt
+          && request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(["title", "description", "category", "updatedAt"])
+          && request.resource.data.updatedAt == request.time
+          || (
+            isGroupResourceMember()
+            && request.resource.data.diff(resource.data).affectedKeys()
+              .hasOnly(["downloadCount", "updatedAt"])
+            && request.resource.data.downloadCount
+              == resource.data.downloadCount + 1
+            && request.resource.data.updatedAt == request.time
+          );
 
         allow delete: if isResourceUploader()
           || isGroupResourceOwner();
       }
+
+      match /assignments/{assignmentId} {
+        function isAssignmentCreator() {
+          return signedIn()
+            && resource.data.createdBy == request.auth.uid;
+        }
+
+        function isAssignmentGroupOwner() {
+          return signedIn()
+            && get(
+              /databases/$(database)/documents/groups/$(groupId)
+            ).data.ownerId == request.auth.uid;
+        }
+
+        allow read: if isGroupMember(groupId);
+
+        allow create: if isGroupMember(groupId)
+          && request.resource.data.createdBy == request.auth.uid;
+
+        allow update, delete: if isAssignmentCreator()
+          || isAssignmentGroupOwner();
+      }
+    }
+
+    match /assignments/{assignmentId} {
+      allow read: if signedIn();
+      allow create, update, delete: if isAdmin();
     }
 
     match /notifications/{notificationId} {
       allow read: if signedIn()
         && resource.data.userId == request.auth.uid;
       allow create: if signedIn()
-        && request.resource.data.userId == request.auth.uid;
+        && (
+          request.resource.data.userId == request.auth.uid
+          || isAdmin()
+        )
+        && request.resource.data.keys().hasOnly([
+          "userId",
+          "title",
+          "message",
+          "type",
+          "read",
+          "createdAt"
+        ])
+        && request.resource.data.read == false
+        && request.resource.data.createdAt == request.time;
       allow update: if signedIn()
         && resource.data.userId == request.auth.uid
-        && request.resource.data.userId == resource.data.userId;
-      allow delete: if isAdmin();
+        && request.resource.data.userId == resource.data.userId
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(["read"])
+        && request.resource.data.read is bool;
+      allow delete: if signedIn()
+        && (
+          resource.data.userId == request.auth.uid
+          || isAdmin()
+        );
     }
 
     match /achievements/{achievementId} {
@@ -524,12 +733,25 @@ service cloud.firestore {
       allow read: if signedIn()
         && (resource.data.userId == request.auth.uid || isAdmin());
       allow create: if signedIn()
-        && request.resource.data.userId == request.auth.uid;
+        && (
+          request.resource.data.userId == request.auth.uid
+          || isAdmin()
+        );
       allow update, delete: if isAdmin();
     }
 
+    match /transactions/{transactionId} {
+      allow read: if isAdmin();
+      allow create, update, delete: if false;
+    }
+
+    match /platform/{documentId} {
+      allow read: if isAdmin();
+      allow create, update, delete: if false;
+    }
+
     match /{document=**} {
-      allow read, write: if isAdmin();
+      allow read, write: if false;
     }
   }
 }

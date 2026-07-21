@@ -16,7 +16,7 @@ import {
 import {
     createEmptyState
 } from "../components/empty-state.js";
-import { handleError } from "../utils/error-handler.js";
+import { handleError } from "../utils/error-handler.js?security=1";
 
 const conversationList =
     document.getElementById("conversationList");
@@ -28,6 +28,7 @@ let renderedConversations = [];
 let currentUserId = null;
 let unsubscribeConversations = null;
 let renderRequestId = 0;
+let conversationLoadFailed = false;
 const presenceUnsubscribers = new Map();
 
 async function getUserProfile(userId) {
@@ -74,6 +75,16 @@ function displayConversations(items, userId) {
             )
         )
         .join("");
+}
+
+function displayConversationError() {
+    if (!conversationList) return;
+
+    conversationList.innerHTML = createEmptyState(
+        "Conversations unavailable",
+        "We couldn't load your conversations. Check your connection and try again.",
+        "&#9888;"
+    );
 }
 
 function clearPresenceSubscriptions() {
@@ -190,6 +201,7 @@ onAuthStateChanged(auth, (user) => {
     }
 
     currentUserId = user.uid;
+    conversationLoadFailed = false;
     clearPresenceSubscriptions();
 
     if (typeof unsubscribeConversations === "function") {
@@ -199,18 +211,27 @@ onAuthStateChanged(auth, (user) => {
     unsubscribeConversations = subscribeToUserConversations(
         user.uid,
         (conversations) => {
+            if (conversationLoadFailed) return;
+
             renderConversations(conversations, user.uid)
                 .catch((error) => {
                     handleError(error, "Unable to load conversations.");
                 });
         },
         (error) => {
+            conversationLoadFailed = true;
+            renderedConversations = [];
+            clearPresenceSubscriptions();
+            displayConversationError();
             handleError(error, "Unable to load conversations.");
         }
     );
 });
 
-window.addEventListener("beforeunload", () => {
+window.addEventListener("pagehide", (event) => {
+    if (event.persisted) {
+        return;
+    }
     if (typeof unsubscribeConversations === "function") {
         unsubscribeConversations();
     }

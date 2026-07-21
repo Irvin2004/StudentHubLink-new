@@ -1,6 +1,6 @@
 import { auth } from "../firebase.js";
 import { toggleFavorite } from "../services/favorites-service.js";
-import { handleError } from "../utils/error-handler.js";
+import { handleError } from "../utils/error-handler.js?security=1";
 import { showToast } from "../utils/toast.js";
 
 function updateFavoriteButton(button, isFavorite) {

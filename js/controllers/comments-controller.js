@@ -1,7 +1,7 @@
 import { auth } from "../firebase.js";
 import { addComment } from "../services/comments-service.js";
 import { showToast } from "../utils/toast.js";
-import { handleError } from "../utils/error-handler.js";
+import { handleError } from "../utils/error-handler.js?security=1";
 
 export function initializeCommentForm(resourceId) {
     const form =

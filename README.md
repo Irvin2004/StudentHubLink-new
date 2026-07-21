@@ -78,8 +78,8 @@ Screenshots are planned for the project documentation. Recommended captures:
 - Firebase Authentication
 - Cloud Firestore
 - Cloud Functions
-- Firebase Storage planned
-- Firebase Hosting planned
+- Firebase Storage
+- Firebase Hosting
 - Chart.js
 
 ## Architecture Diagram
@@ -134,6 +134,12 @@ http://127.0.0.1:8000/index.html
 
 ## Firebase Setup
 
+Copy `.env.example` to `.env` and provide the Firebase web-app values from
+Firebase Console. This static build does not inject environment variables by
+itself, so mirror those values in `js/firebase.js` for local development or use
+your deployment pipeline to replace them at build time. Never commit private
+service-account credentials.
+
 Install Firebase CLI:
 
 ```powershell
@@ -151,6 +157,15 @@ Deploy Firestore rules:
 ```powershell
 firebase deploy --only firestore:rules
 ```
+
+Deploy the required Firestore indexes and Storage rules:
+
+```powershell
+firebase deploy --only firestore:indexes,storage
+```
+
+Firebase Storage must be initialized in Firebase Console before the first
+Storage rules deployment or resource upload.
 
 Cloud Functions require the Firebase Blaze plan before deployment.
 

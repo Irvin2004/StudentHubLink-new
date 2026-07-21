@@ -1,0 +1,112 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isAllowedUpload() {
+      return request.resource != null
+        && request.resource.size > 0
+        && request.resource.size <= 25 * 1024 * 1024
+        && request.resource.contentType.matches(
+          '^(image/(jpeg|png|webp)|application/(pdf|msword|vnd[.]openxmlformats-officedocument[.]wordprocessingml[.]document|vnd[.]ms-powerpoint|vnd[.]openxmlformats-officedocument[.]presentationml[.]presentation|vnd[.]ms-excel|vnd[.]openxmlformats-officedocument[.]spreadsheetml[.]sheet|zip|x-zip-compressed))$'
+        )
+        && request.resource.name.matches(
+          '.*[.](jpg|jpeg|png|webp|pdf|doc|docx|ppt|pptx|xls|xlsx|zip)$'
+        );
+    }
+
+    function conversation(conversationId) {
+      return firestore.get(
+        /databases/(default)/documents/conversations/$(conversationId)
+      ).data;
+    }
+
+    function isGroupMember(groupId) {
+      return signedIn()
+        && firestore.exists(
+          /databases/(default)/documents/groups/$(groupId)/members/$(request.auth.uid)
+        );
+    }
+
+    function isGroupOwner(groupId) {
+      return signedIn()
+        && firestore.get(
+          /databases/(default)/documents/groups/$(groupId)
+        ).data.ownerId == request.auth.uid;
+    }
+
+    function canAccessConversation(conversationId) {
+      return signedIn()
+        && (
+          (
+            conversation(conversationId).type == "direct"
+            && request.auth.uid in conversation(conversationId).participantIds
+          )
+          ||
+          (
+            conversation(conversationId).type == "group"
+            && isGroupMember(conversation(conversationId).groupId)
+          )
+        );
+    }
+
+    match /messages/{conversationId}/{senderId}/{fileName} {
+      allow read: if canAccessConversation(conversationId);
+      allow create, update: if canAccessConversation(conversationId)
+        && request.auth.uid == senderId
+        && isAllowedUpload();
+      allow delete: if canAccessConversation(conversationId)
+        && request.auth.uid == senderId;
+    }
+
+    match /messages/{conversationId}/{legacyFileName} {
+      allow read: if canAccessConversation(conversationId);
+      allow write: if false;
+    }
+
+    match /groups/{groupId}/resources/{uploaderId}/{fileName} {
+      allow read: if isGroupMember(groupId);
+      allow create, update: if isGroupMember(groupId)
+        && request.auth.uid == uploaderId
+        && isAllowedUpload();
+      allow delete: if signedIn()
+        && (
+          request.auth.uid == uploaderId
+          || isGroupOwner(groupId)
+        );
+    }
+
+    match /groups/{groupId}/resources/{legacyFileName} {
+      allow read: if isGroupMember(groupId);
+      allow write: if false;
+    }
+
+    match /resources/{userId}/{fileName} {
+      allow read: if true;
+      allow create, update: if signedIn()
+        && request.auth.uid == userId
+        && isAllowedUpload();
+      allow delete: if signedIn()
+        && request.auth.uid == userId;
+    }
+
+    match /profiles/{userId}/{fileName} {
+      allow read: if signedIn();
+      allow create, update: if signedIn()
+        && request.auth.uid == userId
+        && request.resource.size > 0
+        && request.resource.size <= 5 * 1024 * 1024
+        && request.resource.contentType.matches('^image/(jpeg|png|webp)$')
+        && request.resource.name.matches('.*[.](jpg|jpeg|png|webp)$');
+      allow delete: if signedIn()
+        && request.auth.uid == userId;
+    }
+
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

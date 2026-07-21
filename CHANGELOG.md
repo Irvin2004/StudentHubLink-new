@@ -8,6 +8,11 @@ The format follows a lightweight version of [Keep a Changelog](https://keepachan
 
 ### Added
 
+- Added password-reset and email-verification workflows.
+- Added editable student profile fields with Firebase Auth and Firestore updates.
+- Added required Firestore indexes for ordered resources and notifications.
+- Added `.env.example` for Firebase web configuration.
+- Added attachment-free study-group assignments with member access checks, a creation form, empty/error states, and due-date-derived status labels.
 - Added formal project documentation files:
   - `CONTRIBUTING.md`
   - `LICENSE`
@@ -18,6 +23,9 @@ The format follows a lightweight version of [Keep a Changelog](https://keepachan
 
 ### Changed
 
+- Unified resource upload validation around the shared 25 MB policy and Office-file support.
+- Improved conversation-load failures with an explicit error state.
+- Restricted collection-group membership reads to each signed-in user's own membership records.
 - Updated the README into a project overview with setup, structure, and documentation links.
 - Consolidated Firestore documentation into `docs/firestore-schema.md`.
 - Removed dead JavaScript wrapper files and direct pages to service modules.
@@ -31,6 +39,11 @@ The format follows a lightweight version of [Keep a Changelog](https://keepachan
 
 - Removed unused `css/pages/register.css`.
 - Removed legacy `js/auth.js`, `js/resources.js`, and `js/admin-dashboard.js` wrapper files.
+
+### Fixed
+
+- Fixed dark-theme contrast on authentication marketing panels.
+- Removed the unauthorized legacy activity-collection query.
 
 ## [2.0.0] - 2026-07-03
 

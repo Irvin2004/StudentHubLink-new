@@ -7,14 +7,14 @@ import { renderResources } from "../renderers/resource-renderer.js";
 import {
     getStudyGroup,
     getStudyGroupMemberships
-} from "../services/group-service.js";
+} from "../services/group-service.js?security=1";
 import {
     createGroupResource,
     getGroupResources
-} from "../services/resource-service.js";
-import { uploadGroupResource } from "../services/resource-storage-service.js";
-import { handleError } from "../utils/error-handler.js";
-import { validateAttachment } from "../utils/file-validator.js";
+} from "../services/resource-service.js?security=1";
+import { uploadGroupResource } from "../services/resource-storage-service.js?security=1";
+import { handleError } from "../utils/error-handler.js?security=1";
+import { validateAttachment } from "../utils/file-validator.js?security=1";
 import { showToast } from "../utils/toast.js";
 import { sanitizeUrl } from "../utils/validators.js";
 import { filterResources } from "../services/filter-service.js";
@@ -153,6 +153,7 @@ form?.addEventListener("submit", async (event) => {
         const uploaded = await uploadGroupResource(
             file,
             groupId,
+            currentUser.uid,
             setProgress
         );
 

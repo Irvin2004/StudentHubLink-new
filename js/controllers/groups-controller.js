@@ -11,8 +11,8 @@ import {
     getStudyGroups,
     joinStudyGroup,
     leaveStudyGroup
-} from "../services/group-service.js";
-import { handleError } from "../utils/error-handler.js";
+} from "../services/group-service.js?security=1";
+import { handleError } from "../utils/error-handler.js?security=1";
 import { showToast } from "../utils/toast.js";
 
 const auth = getAuth();

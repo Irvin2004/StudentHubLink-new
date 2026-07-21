@@ -3,8 +3,10 @@ import {
     doc,
     getDoc,
     getDocs,
+    query,
     runTransaction,
     serverTimestamp,
+    where,
     writeBatch
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
@@ -85,6 +87,12 @@ export async function createStudyGroup({
 
     if (!cleanName) {
         throw new Error("Group name is required.");
+    }
+
+    if (cleanName.length < 4) {
+        throw new Error(
+            "Group name must be at least 4 characters."
+        );
     }
 
     if (!cleanModuleName) {
@@ -184,9 +192,11 @@ export async function getStudyGroup(groupId) {
 }
 
 export async function getStudyGroups() {
-    const snapshot = await getDocs(
-        collection(db, COLLECTIONS.GROUPS)
+    const publicGroupsQuery = query(
+        collection(db, COLLECTIONS.GROUPS),
+        where("visibility", "==", GROUP_VISIBILITY.PUBLIC)
     );
+    const snapshot = await getDocs(publicGroupsQuery);
 
     return snapshot.docs
         .map((groupDocument) => ({

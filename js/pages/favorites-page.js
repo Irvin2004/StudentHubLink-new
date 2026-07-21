@@ -17,7 +17,7 @@ import { COLLECTIONS } from "../config/firestore.js";
 import { getFavoriteIds } from "../services/favorites-service.js";
 import { initializeFavoriteButtons } from "../controllers/favorites-controller.js";
 import { showSkeleton } from "../utils/loading.js";
-import { handleError } from "../utils/error-handler.js";
+import { handleError } from "../utils/error-handler.js?security=1";
 
 const FIRESTORE_IN_LIMIT =
 10;

@@ -92,12 +92,12 @@
             <input
                 id="resourceFile"
                 type="file"
-                accept=".pdf,.jpg,.jpeg,.png,.zip,application/pdf,image/jpeg,image/png,application/zip"
+                accept=".jpg,.jpeg,.png,.webp,.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.zip"
                 required
             >
 
             <p class="upload-help">
-                Accepted files: PDF, JPG, PNG, and ZIP. Maximum size: 20MB.
+                Accepted files: PDF, images, Word, PowerPoint, Excel, and ZIP. Maximum size: 25 MB.
             </p>
 
             <button id="uploadResourceBtn" class="btn-primary" type="submit">
@@ -109,8 +109,8 @@
     </section>
 </main>
 
-<script type="module" src="../js/pages/auth-page.js"></script>
+<script type="module" src="../js/pages/auth-page.js?security=1"></script>
 <script type="module" src="../js/theme.js"></script>
-<script type="module" src="../js/pages/upload-page.js"></script>
+<script type="module" src="../js/pages/upload-page.js?security=1"></script>
 </body>
 </html>

@@ -37,7 +37,7 @@ import {
     setUserOffline
 } from "../services/presence-service.js";
 import { createStudyGroup } from "../services/group-service.js";
-import { handleError } from "../utils/error-handler.js";
+import { handleError } from "../utils/error-handler.js?security=1";
 import { showToast } from "../utils/toast.js";
 
 function setupCreateGroupModal() {

@@ -11,8 +11,10 @@ import {
 } from "../utils/constants.js";
 import { escapeHtml, setText } from "../utils/dom.js";
 import { formatPrice } from "../utils/format-price.js";
+import { handleError } from "../utils/error-handler.js?security=1";
 import { error as logError } from "../utils/logger.js";
 import { showToast } from "../utils/toast.js";
+import { validateAttachment } from "../utils/file-validator.js?security=1";
 
 import {
     onAuthStateChanged
@@ -98,43 +100,10 @@ async function uploadResource(user) {
     const file =
     fileInput.files[0];
 
-    const allowedTypes = [
-        "application/pdf",
-        "image/jpeg",
-        "image/jpg",
-        "image/png",
-        "application/zip",
-        "application/x-zip-compressed"
-    ];
-
-    const allowedExtensions = [
-        ".pdf",
-        ".jpg",
-        ".jpeg",
-        ".png",
-        ".zip"
-    ];
-
-    const fileName =
-    file.name.toLowerCase();
-
-    const hasAllowedType =
-    allowedTypes.includes(file.type);
-
-    const hasAllowedExtension =
-    allowedExtensions.some((extension) => fileName.endsWith(extension));
-
-    if (!hasAllowedType && !hasAllowedExtension) {
-        message.textContent =
-        "Only PDF, JPG, PNG and ZIP files are allowed.";
-
-        return;
-    }
-
-    const MAX_SIZE = 20 * 1024 * 1024;
-
-    if (file.size > MAX_SIZE) {
-        message.textContent = "File size exceeds the 20MB limit.";
+    try {
+        validateAttachment(file);
+    } catch (error) {
+        message.textContent = error.message;
         return;
     }
 
@@ -214,7 +183,9 @@ async function uploadResource(user) {
         message.textContent = "Resource uploaded for admin approval.";
         document.getElementById("resourceUploadForm").reset();
     } catch (error) {
-        message.textContent = error.message;
+        handleError(error, "Unable to upload this resource.");
+        message.textContent =
+            "The resource could not be uploaded. Please try again.";
     } finally {
         uploadBtn.disabled = false;
     }
@@ -300,7 +271,7 @@ async function loadResourceDetails(user) {
             window.open(resource.fileUrl, "_blank");
             actionBtn.textContent = "Downloaded";
         } catch (error) {
-            showToast(error.message || "Something went wrong.", "error");
+            handleError(error, "Unable to download this resource.");
             actionBtn.disabled = false;
         }
     });

@@ -2,7 +2,7 @@ import { auth } from "../firebase.js";
 import { addReview } from "../services/reviews-service.js";
 import { renderReviews } from "../renderers/review-renderer.js";
 import { showToast } from "../utils/toast.js";
-import { handleError } from "../utils/error-handler.js";
+import { handleError } from "../utils/error-handler.js?security=1";
 
 export function initializeReviewForm(resource) {
     const resourceId =
@@ -49,7 +49,7 @@ export function initializeReviewForm(resource) {
         } catch (error) {
             handleError(
                 error,
-                error.message
+                "Unable to submit your review."
             );
         }
     });

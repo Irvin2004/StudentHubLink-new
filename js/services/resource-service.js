@@ -13,6 +13,11 @@ import { db } from "../firebase.js";
 import {
     isValidResourceCategory
 } from "../config/resource-categories.js";
+import {
+    ALLOWED_EXTENSIONS,
+    ALLOWED_TYPES,
+    MAX_FILE_SIZE
+} from "../utils/file-validator.js?security=1";
 
 const MAX_TITLE_LENGTH = 100;
 const MAX_DESCRIPTION_LENGTH = 500;
@@ -63,8 +68,20 @@ function validateResourceData({
         throw new Error("A valid file size is required.");
     }
 
-    if (!mimeType) {
-        throw new Error("File type is required.");
+    if (fileSize > MAX_FILE_SIZE) {
+        throw new Error("Maximum file size is 25 MB.");
+    }
+
+    const lowerFileName = fileName.toLowerCase();
+    const hasAllowedExtension = ALLOWED_EXTENSIONS.some(
+        (extension) => lowerFileName.endsWith(extension)
+    );
+
+    if (
+        !ALLOWED_TYPES.includes(mimeType) ||
+        !hasAllowedExtension
+    ) {
+        throw new Error("Unsupported file type.");
     }
 
     if (!uploader?.uid) {

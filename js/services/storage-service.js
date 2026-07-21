@@ -6,6 +6,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-storage.js";
 
 import { app } from "../firebase.js";
+import { validateAttachment } from "../utils/file-validator.js?security=1";
 
 const storage = getStorage(app);
 
@@ -14,6 +15,7 @@ const storage = getStorage(app);
  *
  * @param {File} file
  * @param {string} conversationId
+ * @param {string} senderId
  * @param {(progress: number) => void} onProgress
  * @returns {Promise<{
  *   url: string,
@@ -25,22 +27,28 @@ const storage = getStorage(app);
 export function uploadChatAttachment(
     file,
     conversationId,
+    senderId,
     onProgress = () => {}
 ) {
-    if (!file || !conversationId) {
+    if (!file || !conversationId || !senderId) {
         return Promise.reject(
             new Error("File and conversation information are required.")
         );
     }
 
+    validateAttachment(file);
+
     return new Promise((resolve, reject) => {
         const uniqueId = crypto.randomUUID();
+        const safeFileName = file.name
+            .replace(/[^a-zA-Z0-9._-]/g, "_")
+            .toLowerCase();
         const storedFileName =
-            `${Date.now()}_${uniqueId}_${file.name}`;
+            `${Date.now()}_${uniqueId}_${safeFileName}`;
 
         const storageRef = ref(
             storage,
-            `messages/${conversationId}/${storedFileName}`
+            `messages/${conversationId}/${senderId}/${storedFileName}`
         );
 
         const uploadTask = uploadBytesResumable(

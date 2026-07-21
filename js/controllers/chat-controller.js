@@ -23,10 +23,10 @@ import {
 } from "../services/presence-service.js";
 import {
     uploadChatAttachment
-} from "../services/storage-service.js";
+} from "../services/storage-service.js?security=1";
 import { renderMessages } from "../renderers/message-renderer.js?messaging=16";
 import { getTypingIndicatorText } from "../components/typing-indicator.js";
-import { getStudyGroup } from "../services/group-service.js";
+import { getStudyGroup } from "../services/group-service.js?security=1";
 import { openImageViewer } from "../components/image-viewer.js";
 import {
     hideMessageMenu,
@@ -39,8 +39,8 @@ import {
     openDeleteMessageDialog
 } from "../components/delete-message-dialog.js?messaging=15";
 
-import { handleError } from "../utils/error-handler.js";
-import { validateAttachment } from "../utils/file-validator.js";
+import { handleError } from "../utils/error-handler.js?security=1";
+import { validateAttachment } from "../utils/file-validator.js?security=1";
 import { showToast } from "../utils/toast.js";
 
 import {
@@ -547,6 +547,7 @@ attachmentInput?.addEventListener("change", async () => {
         const uploadedFile = await uploadChatAttachment(
             file,
             conversationId,
+            currentChatUser.uid,
             (progress) => {
                 uploadProgressBar.style.width = `${progress}%`;
                 uploadProgressContainer.setAttribute(
@@ -940,7 +941,10 @@ onAuthStateChanged(auth, async (currentUser) => {
     }
 });
 
-window.addEventListener("beforeunload", () => {
+window.addEventListener("pagehide", (event) => {
+    if (event.persisted) {
+        return;
+    }
     if (typeof unsubscribeMessages === "function") {
         unsubscribeMessages();
     }

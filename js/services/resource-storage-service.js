@@ -6,29 +6,33 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-storage.js";
 
 import { app } from "../firebase.js";
+import { validateAttachment } from "../utils/file-validator.js?security=1";
 
 const storage = getStorage(app);
 
 export function uploadGroupResource(
     file,
     groupId,
+    uploaderId,
     onProgress = () => {}
 ) {
-    if (!(file instanceof File) || !groupId) {
+    if (!(file instanceof File) || !groupId || !uploaderId) {
         return Promise.reject(
             new Error("File and group information are required.")
         );
     }
 
+    validateAttachment(file);
+
     return new Promise((resolve, reject) => {
         const safeFileName = file.name.replace(
             /[^a-zA-Z0-9._-]/g,
             "_"
-        );
+        ).toLowerCase();
         const storedFileName =
             `${Date.now()}-${crypto.randomUUID()}-${safeFileName}`;
         const storagePath =
-            `groups/${groupId}/resources/${storedFileName}`;
+            `groups/${groupId}/resources/${uploaderId}/${storedFileName}`;
         const storageReference = ref(storage, storagePath);
         const uploadTask = uploadBytesResumable(
             storageReference,

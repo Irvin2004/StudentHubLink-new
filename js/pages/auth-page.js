@@ -10,11 +10,16 @@ import {
 } from "../utils/dom.js";
 import { formatLongDate } from "../utils/format-date.js";
 import { formatCurrency } from "../utils/format-price.js";
+import {
+    getUserFriendlyErrorMessage
+} from "../utils/error-handler.js?security=1";
 import { error as logError, warn } from "../utils/logger.js";
 import { showToast } from "../utils/toast.js";
 
 import {
     createUserWithEmailAndPassword,
+    sendEmailVerification,
+    sendPasswordResetEmail,
     signInWithEmailAndPassword,
     updateProfile,
     onAuthStateChanged
@@ -79,6 +84,7 @@ export async function getUserDocument(user) {
         fullName: user.displayName || "Student",
         email: user.email,
         role: "student",
+        profileVisibility: "public",
         institution: "",
         course: "",
         yearOfStudy: "",
@@ -143,7 +149,12 @@ async function loadProfileStats(user, userData) {
     setText("profileEarnings", formatCurrency(earnings));
 }
 
-function renderUserProfile(userData) {
+function setInputValue(id, value) {
+    const input = document.getElementById(id);
+    if (input) input.value = value || "";
+}
+
+function renderUserProfile(userData, user) {
     const displayName =
     userData.name || userData.fullName || "Student";
 
@@ -155,6 +166,105 @@ function renderUserProfile(userData) {
     setText("profileCourse", userData.course || "Not added yet");
     setText("profileYear", userData.yearOfStudy || "Not added yet");
     setText("profileBio", userData.bio || "No bio added yet.");
+    setText(
+        "profileVerification",
+        user?.emailVerified ? "Email verified" : "Email not verified"
+    );
+
+    const resendButton = document.getElementById("resendVerificationBtn");
+    if (resendButton) resendButton.hidden = Boolean(user?.emailVerified);
+
+    setInputValue("profileFullName", displayName);
+    setInputValue("profileInstitutionInput", userData.institution);
+    setInputValue("profileCourseInput", userData.course);
+    setInputValue("profileYearInput", userData.yearOfStudy);
+    setInputValue("profileBioInput", userData.bio);
+}
+
+function bindProfileActions(user, userData) {
+    const profileForm = document.getElementById("profileForm");
+    const saveButton = document.getElementById("saveProfileBtn");
+    const resendButton = document.getElementById("resendVerificationBtn");
+
+    if (profileForm) {
+        profileForm.onsubmit = async (event) => {
+            event.preventDefault();
+
+            const fullName = document.getElementById("profileFullName").value.trim();
+            const institution = document.getElementById("profileInstitutionInput").value.trim();
+            const course = document.getElementById("profileCourseInput").value.trim();
+            const yearOfStudy = document.getElementById("profileYearInput").value.trim();
+            const bio = document.getElementById("profileBioInput").value.trim();
+
+            if (!fullName) {
+                setMessage("profileMessage", "Please enter your full name.", "error");
+                return;
+            }
+
+            setButtonLoading(saveButton, true, "Saving profile...");
+            setMessage("profileMessage", "Saving your changes...");
+
+            try {
+                await updateProfile(user, { displayName: fullName });
+                await setDoc(doc(db, "users", user.uid), {
+                    name: fullName,
+                    fullName,
+                    displayName: fullName,
+                    institution,
+                    course,
+                    yearOfStudy,
+                    bio,
+                    updatedAt: serverTimestamp()
+                }, { merge: true });
+
+                Object.assign(userData, {
+                    name: fullName,
+                    fullName,
+                    displayName: fullName,
+                    institution,
+                    course,
+                    yearOfStudy,
+                    bio
+                });
+                renderUserProfile(userData, user);
+                setMessage("profileMessage", "Profile updated successfully.", "success");
+            } catch (error) {
+                logError("AUTH", "Profile update failed.", error);
+                setMessage(
+                    "profileMessage",
+                    getUserFriendlyErrorMessage(error, "Unable to update your profile."),
+                    "error"
+                );
+            } finally {
+                setButtonLoading(saveButton, false);
+            }
+        };
+    }
+
+    if (resendButton) {
+        resendButton.onclick = async () => {
+            setButtonLoading(resendButton, true, "Sending...");
+            setMessage("profileMessage", "Sending verification email...");
+
+            try {
+                await sendEmailVerification(user);
+                setMessage(
+                    "profileMessage",
+                    "Verification email sent. Check your inbox and spam folder.",
+                    "success"
+                );
+            } catch (error) {
+                logError("AUTH", "Verification email failed.", error);
+                setMessage(
+                    "profileMessage",
+                    getUserFriendlyErrorMessage(error, "Unable to send a verification email."),
+                    "error"
+                );
+            } finally {
+                setButtonLoading(resendButton, false);
+            }
+        };
+    }
 }
 
 async function loadAdminStats() {
@@ -230,6 +340,12 @@ registerForm.addEventListener("submit", async (event) => {
         }
 
         try {
+            await sendEmailVerification(userCredential.user);
+        } catch (error) {
+            warn("AUTH", "Account created, but verification email could not be sent:", error);
+        }
+
+        try {
             await setDoc(doc(db, "users", userCredential.user.uid), {
                 uid: userCredential.user.uid,
                 name: fullName,
@@ -237,6 +353,7 @@ registerForm.addEventListener("submit", async (event) => {
                 displayName: fullName,
                 email: userCredential.user.email,
                 role: "student",
+                profileVisibility: "public",
                 photoURL: "",
                 institution: "",
                 course: "",
@@ -277,11 +394,64 @@ registerForm.addEventListener("submit", async (event) => {
 
     } catch(error){
 
-        setMessage("registerMessage", error.message, "error");
+        logError("AUTH", "Registration failed.", error);
+        setMessage(
+            "registerMessage",
+            getUserFriendlyErrorMessage(
+                error,
+                "Unable to create your account. Please try again."
+            ),
+            "error"
+        );
         setButtonLoading(registerBtn, false);
 
     }
 
+});
+}
+
+const resetPasswordButton =
+document.getElementById("resetPasswordBtn");
+
+if (resetPasswordButton) {
+resetPasswordButton.addEventListener("click", async () => {
+    const email = document.getElementById("loginEmail").value.trim();
+
+    if (!email) {
+        setMessage("loginMessage", "Enter your email address first.", "error");
+        document.getElementById("loginEmail").focus();
+        return;
+    }
+
+    setButtonLoading(resetPasswordButton, true, "Sending reset link...");
+    setMessage("loginMessage", "Requesting a password reset...");
+
+    try {
+        await sendPasswordResetEmail(auth, email);
+        setMessage(
+            "loginMessage",
+            "If an account exists for that email, a password reset link has been sent.",
+            "success"
+        );
+    } catch (error) {
+        if (error?.code === "auth/user-not-found") {
+            setMessage(
+                "loginMessage",
+                "If an account exists for that email, a password reset link has been sent.",
+                "success"
+            );
+            return;
+        }
+
+        logError("AUTH", "Password reset failed.", error);
+        setMessage(
+            "loginMessage",
+            getUserFriendlyErrorMessage(error, "Unable to send a password reset link."),
+            "error"
+        );
+    } finally {
+        setButtonLoading(resetPasswordButton, false);
+    }
 });
 }
 
@@ -322,7 +492,15 @@ loginForm.addEventListener("submit", async (event) => {
 
     } catch(error) {
 
-        setMessage("loginMessage", error.message, "error");
+        logError("AUTH", "Sign-in failed.", error);
+        setMessage(
+            "loginMessage",
+            getUserFriendlyErrorMessage(
+                error,
+                "Unable to sign in. Check your details and try again."
+            ),
+            "error"
+        );
         setButtonLoading(loginBtn, false);
 
     }
@@ -374,7 +552,8 @@ onAuthStateChanged(auth, async (user) => {
         return;
     }
 
-    renderUserProfile(userData);
+    renderUserProfile(userData, user);
+    bindProfileActions(user, userData);
     await loadProfileStats(user, userData);
 
     if (isAdminPage) {

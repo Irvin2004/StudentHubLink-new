@@ -33,6 +33,10 @@
 <div class="profile-card">
 <h1 id="userName">Student</h1>
 <p id="userEmail">Loading account...</p>
+<p id="profileVerification">Checking email verification...</p>
+<button id="resendVerificationBtn" class="btn-secondary" type="button" hidden>
+Resend verification email
+</button>
 <p id="profileMemberSince">Member since loading...</p>
 <p>Role: <span id="profileRole">student</span></p>
 <p>Institution: <span id="profileInstitution">Loading...</span></p>
@@ -40,6 +44,28 @@
 <p>Year of study: <span id="profileYear">Loading...</span></p>
 <p id="profileBio">Loading profile...</p>
 </div>
+
+<form class="profile-card profile-edit-form" id="profileForm">
+<h2>Update profile</h2>
+
+<label for="profileFullName">Full name</label>
+<input id="profileFullName" type="text" maxlength="120" required>
+
+<label for="profileInstitutionInput">Institution</label>
+<input id="profileInstitutionInput" type="text" maxlength="160">
+
+<label for="profileCourseInput">Course</label>
+<input id="profileCourseInput" type="text" maxlength="160">
+
+<label for="profileYearInput">Year of study</label>
+<input id="profileYearInput" type="text" maxlength="40">
+
+<label for="profileBioInput">Bio</label>
+<textarea id="profileBioInput" rows="4" maxlength="500"></textarea>
+
+<button id="saveProfileBtn" class="btn-primary" type="submit">Save profile</button>
+<p id="profileMessage" class="form-message" role="status"></p>
+</form>
 
 <div class="stats">
 
@@ -62,7 +88,7 @@
 
 </div>
 
-<script type="module" src="../js/pages/auth-page.js"></script>
+<script type="module" src="../js/pages/auth-page.js?security=1"></script>
 <script type="module" src="../js/theme.js"></script>
 </body>
 </html>

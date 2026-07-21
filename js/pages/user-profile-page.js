@@ -11,7 +11,7 @@ import {
 } from "../services/conversation-service.js";
 import { RESOURCE_STATUS } from "../utils/constants.js";
 import { setText } from "../utils/dom.js";
-import { handleError } from "../utils/error-handler.js";
+import { handleError } from "../utils/error-handler.js?security=1";
 import { formatPrice } from "../utils/format-price.js";
 import { showToast } from "../utils/toast.js";
 
