@@ -1,7 +1,4 @@
 import { auth, db } from "../firebase.js";
-import {
-    addActivity
-} from "../services/activity-service.js";
 import { RESOURCE_STATUS, TRANSACTION_STATUS } from "../utils/constants.js";
 import {
     setButtonLoading,
@@ -370,14 +367,6 @@ registerForm.addEventListener("submit", async (event) => {
                 lastLoginAt: serverTimestamp()
             });
 
-            await addActivity({
-                userId: userCredential.user.uid,
-                type: "register",
-                title: "Welcome to StudentHub",
-                description: "Your account was created successfully.",
-                icon: "user-plus"
-            });   
-            
             setMessage(
             "registerMessage",
             "Account created successfully. Opening dashboard...",

@@ -7,7 +7,6 @@ import {
 
 import { db } from "../firebase.js";
 import { addToLibrary } from "../pages/library-page.js";
-import { addActivity } from "./activity-service.js";
 import { awardAchievement } from "./achievement-service.js";
 import { createNotification } from "./notification-service.js";
 import { DEBUG } from "../config/debug.js";
@@ -34,17 +33,6 @@ export async function processDownload(resource, user) {
     );
 
     await addToLibrary(resource, user, "download");
-
-    await addActivity({
-        userId: user.uid,
-        type: "download",
-        title: "Resource downloaded",
-        description: resource.title || "A resource was downloaded.",
-        icon: "download",
-        resourceId: resource.id,
-        ownerId: resource.ownerId || "",
-        ownerName: resource.ownerName || "Unknown Author"
-    });
 
     await createNotification({
         userId: user.uid,

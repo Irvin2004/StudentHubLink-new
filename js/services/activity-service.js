@@ -1,105 +1,186 @@
 import {
     addDoc,
     collection,
+    deleteDoc,
+    doc,
+    getDoc,
     getDocs,
+    limit,
+    onSnapshot,
+    orderBy,
     query,
-    serverTimestamp,
-    where
+    serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
 import { db } from "../firebase.js";
-import { error as logError, warn } from "../utils/logger.js";
+import { createActivityModel } from "../models/activity.js";
 
-const ACTIVITY_COLLECTION = "activities";
+function cleanText(value) {
+    return typeof value === "string" ? value.trim() : "";
+}
 
-function normalizeActivityInput(activityOrUserId, type, title, description, icon = "info") {
-    if (typeof activityOrUserId === "object" && activityOrUserId !== null) {
-        return {
-            icon: "info",
-            ...activityOrUserId
-        };
+function validateGroupId(groupId) {
+    const cleanGroupId = cleanText(groupId);
+
+    if (!cleanGroupId) {
+        throw new Error("Group ID is required.");
     }
 
+    return cleanGroupId;
+}
+
+function validateActivityId(activityId) {
+    const cleanActivityId = cleanText(activityId);
+
+    if (!cleanActivityId) {
+        throw new Error("Activity ID is required.");
+    }
+
+    return cleanActivityId;
+}
+
+function getActivitiesCollection(groupId) {
+    return collection(
+        db,
+        "groups",
+        groupId,
+        "activities"
+    );
+}
+
+function getActivityReference(groupId, activityId) {
+    return doc(getActivitiesCollection(groupId), activityId);
+}
+
+function mapActivityDocument(activityDocument) {
     return {
-        userId: activityOrUserId,
-        type,
-        title,
-        description,
-        icon
+        id: activityDocument.id,
+        ...activityDocument.data()
     };
 }
 
-export async function addActivity({
-    userId,
-    type,
-    title,
-    description,
-    icon = "info",
-    resourceId = "",
-    ownerId = "",
-    ownerName = ""
-}) {
-    if (!userId) {
-        warn("FIRESTORE", "Activity skipped: missing userId.");
-        return null;
-    }
+function normalizeFirestoreError(error) {
+    const code = String(error?.code || "")
+        .replace(/^firestore\//, "");
 
-    try {
-        const activityRef = await addDoc(collection(db, ACTIVITY_COLLECTION), {
-            userId,
-            type,
-            title,
-            description,
-            icon,
-            resourceId,
-            ownerId,
-            ownerName,
-            read: false,
-            createdAt: serverTimestamp()
+    if (code === "permission-denied") {
+        const permissionError = new Error("Permission denied.", {
+            cause: error
         });
+        permissionError.code = "permission-denied";
+        return permissionError;
+    }
 
-        return activityRef.id;
+    if (code === "not-found") {
+        const notFoundError = new Error("Activity not found.", {
+            cause: error
+        });
+        notFoundError.code = "not-found";
+        return notFoundError;
+    }
+
+    return error;
+}
+
+async function runFirestoreOperation(operation) {
+    try {
+        return await operation();
     } catch (error) {
-        logError("FIRESTORE", "Activity error:", error);
-        return null;
+        throw normalizeFirestoreError(error);
     }
 }
 
-export async function createActivity(activityOrUserId, type, title, description, icon) {
-    return addActivity(
-        normalizeActivityInput(activityOrUserId, type, title, description, icon)
+export async function createActivity(groupId, activity = {}) {
+    const cleanGroupId = validateGroupId(groupId);
+    const suppliedGroupId = cleanText(activity.groupId);
+
+    if (suppliedGroupId && suppliedGroupId !== cleanGroupId) {
+        throw new Error("Activity group ID must match the target group.");
+    }
+
+    const activityData = createActivityModel({
+        ...activity,
+        groupId: cleanGroupId
+    });
+
+    return runFirestoreOperation(async () => {
+        const activityReference = await addDoc(
+            getActivitiesCollection(cleanGroupId),
+            {
+                ...activityData,
+                createdAt: serverTimestamp(),
+                updatedAt: serverTimestamp()
+            }
+        );
+
+        return {
+            id: activityReference.id,
+            ...activityData,
+            createdAt: null,
+            updatedAt: null
+        };
+    });
+}
+
+export async function getGroupActivities(groupId) {
+    const cleanGroupId = validateGroupId(groupId);
+
+    return runFirestoreOperation(async () => {
+        const activitiesQuery = query(
+            getActivitiesCollection(cleanGroupId),
+            orderBy("createdAt", "desc"),
+            limit(100)
+        );
+        const snapshot = await getDocs(activitiesQuery);
+
+        return snapshot.docs.map(mapActivityDocument);
+    });
+}
+
+export function subscribeToGroupActivities(
+    groupId,
+    callback,
+    onError = () => {}
+) {
+    const cleanGroupId = validateGroupId(groupId);
+
+    if (typeof callback !== "function") {
+        throw new Error("Activity subscriber is required.");
+    }
+
+    const activitiesQuery = query(
+        getActivitiesCollection(cleanGroupId),
+        orderBy("createdAt", "desc"),
+        limit(100)
+    );
+
+    return onSnapshot(
+        activitiesQuery,
+        (snapshot) => {
+            callback(snapshot.docs.map(mapActivityDocument));
+        },
+        (error) => {
+            onError(normalizeFirestoreError(error));
+        }
     );
 }
 
-export async function getRecentActivities(userId, activityLimit = 5) {
-    if (!userId) {
-        return [];
-    }
+export async function deleteActivity(groupId, activityId) {
+    const cleanGroupId = validateGroupId(groupId);
+    const cleanActivityId = validateActivityId(activityId);
 
-    const activityQuery = query(
-        collection(db, ACTIVITY_COLLECTION),
-        where("userId", "==", userId)
-    );
+    return runFirestoreOperation(async () => {
+        const activityReference = getActivityReference(
+            cleanGroupId,
+            cleanActivityId
+        );
+        const snapshot = await getDoc(activityReference);
 
-    const snapshot = await getDocs(activityQuery);
+        if (!snapshot.exists()) {
+            throw new Error("Activity not found.");
+        }
 
-    return snapshot.docs
-        .map((activityDocument) => ({
-            id: activityDocument.id,
-            ...activityDocument.data()
-        }))
-        .sort((first, second) => {
-            const firstTime =
-                typeof first.createdAt?.toMillis === "function" ?
-                first.createdAt.toMillis() :
-                new Date(first.createdAt || 0).getTime();
-
-            const secondTime =
-                typeof second.createdAt?.toMillis === "function" ?
-                second.createdAt.toMillis() :
-                new Date(second.createdAt || 0).getTime();
-
-            return secondTime - firstTime;
-        })
-        .slice(0, activityLimit);
+        await deleteDoc(activityReference);
+        return true;
+    });
 }

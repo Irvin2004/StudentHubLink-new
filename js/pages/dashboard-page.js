@@ -20,7 +20,6 @@ from
 "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
 import { auth, db } from "../firebase.js";
-import { getRecentActivities } from "../services/activity-service.js";
 import { getUserDocument } from "./auth-page.js";
 import { mountNotificationPanel } from "../components/notification-panel.js";
 import { escapeHtml, setText } from "../utils/dom.js";
@@ -233,7 +232,7 @@ async function loadDashboard(user) {
     await loadStats(user, userData);
 
     const activities =
-    await loadActivities(user);
+    await loadActivities();
 
     const recentlyAdded =
     await loadRecentlyAdded();
@@ -291,10 +290,10 @@ async function loadUserProfile(user) {
     }
 }
 
-async function loadActivities(user) {
+async function loadActivities() {
     showSkeleton("recentActivityList", 3);
 
-    return getRecentActivities(user.uid);
+    return [];
 }
 
 async function loadRecentlyAdded() {

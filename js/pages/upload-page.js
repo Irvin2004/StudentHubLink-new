@@ -1,5 +1,4 @@
 import { app, auth, db } from "../firebase.js";
-import { createActivity } from "../services/activity-service.js";
 import { createNotification } from "../services/notification-service.js";
 import { handleResourceAction } from "../services/marketplace-actions-service.js";
 import {
@@ -12,7 +11,6 @@ import {
 import { escapeHtml, setText } from "../utils/dom.js";
 import { formatPrice } from "../utils/format-price.js";
 import { handleError } from "../utils/error-handler.js?security=1";
-import { error as logError } from "../utils/logger.js";
 import { showToast } from "../utils/toast.js";
 import { validateAttachment } from "../utils/file-validator.js?security=1";
 
@@ -134,7 +132,6 @@ async function uploadResource(user) {
         const ownerName =
         userProfile.name || userProfile.fullName || user.displayName || "Student";
 
-        const resourceRef =
         await addDoc(collection(db, "resources"), {
             title,
             description,
@@ -164,21 +161,6 @@ async function uploadResource(user) {
         }, {
             merge: true
         });
-
-        try {
-            await createActivity({
-                userId: user.uid,
-                type: "upload",
-                title: "Resource uploaded",
-                description: `${title} was uploaded for admin approval.`,
-                icon: "upload",
-                resourceId: resourceRef.id,
-                ownerId: user.uid,
-                ownerName
-            });
-        } catch (error) {
-            logError("FIRESTORE", "Upload activity failed:", error);
-        }
 
         message.textContent = "Resource uploaded for admin approval.";
         document.getElementById("resourceUploadForm").reset();
@@ -369,19 +351,6 @@ async function loadPendingResources(user) {
             `${reviewedResource?.title || "Your resource"} is now available.` :
             `${reviewedResource?.title || "Your resource"} was not approved.`
         );
-
-        await createActivity({
-            userId: reviewedResource?.ownerId,
-            type: approved ? "approval" : "rejection",
-            title: approved ? "Resource approved" : "Resource rejected",
-            description: approved ?
-            `${reviewedResource?.title || "Your resource"} is now available.` :
-            `${reviewedResource?.title || "Your resource"} was not approved.`,
-            icon: approved ? "approval" : "info",
-            resourceId: reviewedResource?.id,
-            ownerId: reviewedResource?.ownerId,
-            ownerName: reviewedResource?.ownerName
-        });
 
         await loadPendingResources(user);
     };

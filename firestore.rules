@@ -847,6 +847,74 @@ service cloud.firestore {
         allow update, delete: if isAssignmentCreator()
           || isAssignmentGroupOwner();
       }
+
+      match /activities/{activityId} {
+        function activityFieldsAreValid() {
+          return request.resource.data.keys().hasOnly([
+              "type",
+              "actorId",
+              "actorName",
+              "title",
+              "description",
+              "groupId",
+              "referenceId",
+              "visibility",
+              "metadata",
+              "createdAt",
+              "updatedAt"
+            ])
+            && request.resource.data.keys().hasAll([
+              "type",
+              "actorId",
+              "actorName",
+              "title",
+              "description",
+              "groupId",
+              "referenceId",
+              "visibility",
+              "metadata",
+              "createdAt",
+              "updatedAt"
+            ])
+            && request.resource.data.type in [
+              "assignment_created",
+              "assignment_updated",
+              "resource_created",
+              "message_sent",
+              "friend_request_accepted",
+              "group_created",
+              "group_joined",
+              "system"
+            ]
+            && request.resource.data.actorId is string
+            && request.resource.data.actorId == request.auth.uid
+            && request.resource.data.actorName is string
+            && request.resource.data.actorName.size() <= 120
+            && request.resource.data.title is string
+            && request.resource.data.title.size() > 0
+            && request.resource.data.title.size() <= 160
+            && request.resource.data.description is string
+            && request.resource.data.groupId == groupId
+            && request.resource.data.referenceId is string
+            && request.resource.data.visibility in [
+              "group", "friends", "private", "public"
+            ]
+            && request.resource.data.metadata is map
+            && request.resource.data.createdAt == request.time
+            && request.resource.data.updatedAt == request.time;
+        }
+
+        allow read: if isGroupMember(groupId);
+        allow create: if isGroupMember(groupId)
+          && activityFieldsAreValid();
+        allow update: if false;
+        allow delete: if signedIn()
+          && (
+            resource.data.actorId == request.auth.uid
+            || isGroupManager(groupId)
+            || isAdmin()
+          );
+      }
     }
 
     match /assignments/{assignmentId} {
@@ -873,17 +941,6 @@ service cloud.firestore {
       allow read: if signedIn()
         && (resource.data.userId == request.auth.uid || isAdmin());
       allow create, update, delete: if isAdmin();
-    }
-
-    match /activities/{activityId} {
-      allow read: if signedIn()
-        && (resource.data.userId == request.auth.uid || isAdmin());
-      allow create: if signedIn()
-        && (
-          request.resource.data.userId == request.auth.uid
-          || isAdmin()
-        );
-      allow update, delete: if isAdmin();
     }
 
     match /transactions/{transactionId} {

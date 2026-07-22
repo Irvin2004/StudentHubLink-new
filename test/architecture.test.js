@@ -87,3 +87,29 @@ test("dashboard refresh manager updates only affected widgets", () => {
     }]);
     assert.match(elements.stats.innerHTML, /Messages: 3/);
 });
+
+test("activity service and rules use the group-scoped path", () => {
+    const service = read("js/services/activity-service.js");
+    const rules = read("firestore.rules");
+
+    assert.match(
+        service,
+        /collection\(\s*db,\s*"groups",\s*groupId,\s*"activities"/s
+    );
+    assert.match(
+        service,
+        /orderBy\("createdAt",\s*"desc"\)/
+    );
+    assert.match(service, /onSnapshot/);
+    assert.match(service, /createActivityModel/);
+    assert.match(service, /serverTimestamp\(\)/);
+    assert.doesNotMatch(service, /ACTIVITY_COLLECTION/);
+    assert.match(
+        rules,
+        /match \/groups\/\{groupId\}[\s\S]*match \/activities\/\{activityId\}/
+    );
+    assert.doesNotMatch(
+        rules,
+        /^\s{4}match \/activities\/\{activityId\}/m
+    );
+});
