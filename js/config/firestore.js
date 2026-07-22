@@ -12,6 +12,5 @@ export const COLLECTIONS = {
     GROUPS: "groups",
     CONVERSATIONS: "conversations",
     MESSAGES: "messages",
-    PRESENCE: "presence",
-    TYPING_STATUS: "typingStatus"
+    PRESENCE: "presence"
 };

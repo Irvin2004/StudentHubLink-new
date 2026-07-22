@@ -516,37 +516,6 @@ service cloud.firestore {
         );
       allow delete: if false;
     }
-    match /presence/{userId} {
-      allow read: if signedIn();
-      allow create, update: if isOwner(userId)
-        && request.resource.data.keys().hasOnly(["online", "lastSeen"])
-        && request.resource.data.online is bool;
-      allow delete: if false;
-    }
-
-    match /typingStatus/{typingId} {
-      allow read: if canAccessConversation(
-        conversationFor(resource.data.conversationId)
-      );
-      allow create, update: if signedIn()
-        && request.resource.data.userId == request.auth.uid
-        && typingId == request.resource.data.conversationId + "_" + request.auth.uid
-        && canAccessConversation(
-          conversationFor(request.resource.data.conversationId)
-        )
-        && request.resource.data.keys().hasOnly([
-          "conversationId",
-          "userId",
-          "displayName",
-          "typing",
-          "updatedAt"
-        ])
-        && request.resource.data.displayName is string
-        && request.resource.data.displayName.size() > 0
-        && request.resource.data.displayName.size() <= 120
-        && request.resource.data.typing is bool;
-      allow delete: if false;
-    }
     match /groups/{groupId} {
       function groupFieldsAreValid() {
         return request.resource.data.keys().hasOnly([
@@ -935,6 +904,70 @@ service cloud.firestore {
         && request.resource.data.read is bool
         && request.resource.data.updatedAt == request.time;
       allow delete: if isOwner(userId) || isAdmin();
+    }
+
+    match /users/{userId}/presence/{presenceId} {
+      function presenceFieldsAreValid() {
+        return presenceId == "status"
+          && request.resource.data.keys().hasOnly([
+            "status",
+            "conversationId",
+            "lastSeen",
+            "updatedAt",
+            "userName"
+          ])
+          && request.resource.data.keys().hasAll([
+            "status",
+            "conversationId",
+            "lastSeen",
+            "updatedAt"
+          ])
+          && request.resource.data.status in [
+            "online", "offline", "typing"
+          ]
+          && request.resource.data.conversationId is string
+          && (
+            request.resource.data.status == "typing"
+              ? request.resource.data.conversationId.size() > 0
+              : request.resource.data.conversationId == ""
+          )
+          && (
+            !("userName" in request.resource.data)
+            || (
+              request.resource.data.userName is string
+              && request.resource.data.userName.size() <= 120
+            )
+          )
+          && (
+            request.resource.data.lastSeen == null
+            || request.resource.data.lastSeen is timestamp
+          )
+          && request.resource.data.updatedAt == request.time;
+      }
+
+      allow read: if signedIn();
+      allow create: if isOwner(userId)
+        && presenceFieldsAreValid()
+        && (
+          request.resource.data.status == "offline"
+            ? request.resource.data.lastSeen == request.time
+            : request.resource.data.lastSeen == null
+        );
+      allow update: if isOwner(userId)
+        && presenceFieldsAreValid()
+        && (
+          request.resource.data.status == "offline"
+            ? request.resource.data.lastSeen == request.time
+            : request.resource.data.lastSeen == resource.data.lastSeen
+        );
+      allow delete: if false;
+    }
+
+    // Legacy presence documents remain read-only so collection-group typing
+    // queries cannot be blocked by the retired root-level collection.
+    match /presence/{legacyPresenceId} {
+      allow read: if signedIn();
+      allow create, update, delete: if false;
     }
 
     match /achievements/{achievementId} {

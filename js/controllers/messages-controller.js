@@ -10,6 +10,7 @@ import {
 import {
     subscribeToPresence
 } from "../services/presence-service.js";
+import { PRESENCE_STATUS } from "../config/presence-status.js";
 import {
     createConversationItem
 } from "../components/conversation-item.js";
@@ -116,7 +117,10 @@ function syncPresenceSubscriptions(items) {
             userId,
             (presence) => {
                 let changed = false;
-                const online = presence.online === true;
+                const online = (
+                    presence.status === PRESENCE_STATUS.ONLINE ||
+                    presence.status === PRESENCE_STATUS.TYPING
+                );
 
                 renderedConversations.forEach(({ otherUser }) => {
                     if (otherUser?.id !== userId) return;

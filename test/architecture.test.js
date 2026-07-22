@@ -128,3 +128,28 @@ test("activity controller coordinates service and renderer boundaries", () => {
     assert.match(dashboard, /initializeActivityFeed/);
     assert.doesNotMatch(dashboard, /getGroupActivities|subscribeToGroupActivities/);
 });
+
+test("presence service uses user-scoped status documents", () => {
+    const service = read("js/services/presence-service.js");
+    const rules = read("firestore.rules");
+
+    assert.match(
+        service,
+        /COLLECTIONS\.USERS,[\s\S]*userId,[\s\S]*COLLECTIONS\.PRESENCE,[\s\S]*"status"/
+    );
+    assert.match(service, /PRESENCE_STATUS\.ONLINE/);
+    assert.match(service, /PRESENCE_STATUS\.OFFLINE/);
+    assert.match(service, /PRESENCE_STATUS\.TYPING/);
+    assert.match(service, /const TYPING_TIMEOUT = 2000/);
+    assert.match(service, /subscribeToPresence/);
+    assert.doesNotMatch(service, /document\.|window\.|innerHTML/);
+    assert.match(
+        rules,
+        /match \/users\/\{userId\}\/presence\/\{presenceId\}/
+    );
+    assert.doesNotMatch(
+        rules,
+        /match \/presence\/\{legacyPresenceId\}[\s\S]*allow create, update: if/
+    );
+    assert.doesNotMatch(rules, /^\s{4}match \/typingStatus\/\{typingId\}/m);
+});
