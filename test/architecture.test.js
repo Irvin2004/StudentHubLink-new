@@ -82,6 +82,32 @@ test("reaction renderer composes normalized reactions into messages", () => {
     assert.doesNotMatch(bubble, /function renderReactions/);
 });
 
+test("reaction controller owns chat reaction orchestration", () => {
+    const controller = read("js/controllers/reaction-controller.js");
+    const chat = read("js/controllers/chat-controller.js");
+    const messages = read("js/renderers/message-renderer.js");
+
+    assert.match(controller, /export function initializeReactions\(/);
+    assert.match(controller, /addReaction/);
+    assert.match(controller, /removeReaction/);
+    assert.match(controller, /subscribeToReactions/);
+    assert.match(controller, /createReactionPicker/);
+    assert.match(controller, /renderReactionBar/);
+    assert.match(controller, /new MutationObserver/);
+    assert.match(controller, /subscriptions\.forEach/);
+    assert.equal(
+        (controller.match(/messageContainer\.addEventListener/g) || [])
+            .length,
+        1
+    );
+    assert.match(chat, /initializeReactions\(/);
+    assert.doesNotMatch(
+        chat,
+        /addReaction|removeReaction|subscribeToReactions|reactToMessage|ReactionPicker|renderReactionBar/
+    );
+    assert.match(messages, /dataset\.reactionContainer/);
+});
+
 test("custom dialogs use the shared focus trap", () => {
     assert.match(read("js/components/image-viewer.js"), /activateFocusTrap/);
     assert.match(read("js/components/delete-message-dialog.js"), /activateFocusTrap/);

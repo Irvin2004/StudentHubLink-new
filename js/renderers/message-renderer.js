@@ -1,5 +1,5 @@
-import { createMessageBubble } from "../components/message-bubble.js?messaging=16";
-import { renderReactionBar } from "./reaction-renderer.js";
+import { createMessageBubble } from "../components/message-bubble.js?messaging=17";
+import { renderReactionBar } from "./reaction-renderer.js?reactions=1";
 
 export function renderMessages(
     messages,
@@ -40,17 +40,17 @@ export function renderMessages(
             !message ||
             message.deleted ||
             message.deletedAt ||
-            !Array.isArray(message.reactions) ||
-            !message.reactions.length
+            message.status === "sending"
         ) {
             return;
         }
 
         const reactionContainer = document.createElement("div");
         reactionContainer.dataset.messageId = message.id || "";
+        reactionContainer.dataset.reactionContainer = "";
 
         renderReactionBar(
-            message.reactions,
+            Array.isArray(message.reactions) ? message.reactions : [],
             currentUserId,
             reactionContainer
         );

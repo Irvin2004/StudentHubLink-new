@@ -12,7 +12,6 @@ import {
     markConversationMessagesAsRead,
     markMessagesAsDelivered,
     MESSAGE_TYPES,
-    reactToMessage,
     sendMessage,
     startReply,
     subscribeToMessages
@@ -24,17 +23,15 @@ import {
 import {
     uploadChatAttachment
 } from "../services/storage-service.js?security=1";
-import { renderMessages } from "../renderers/message-renderer.js?messaging=16";
+import { renderMessages } from "../renderers/message-renderer.js?messaging=17";
 import { getTypingIndicatorText } from "../components/typing-indicator.js";
 import { getStudyGroup } from "../services/group-service.js?security=1";
 import { openImageViewer } from "../components/image-viewer.js";
 import {
     hideMessageMenu,
     showMessageMenu
-} from "../components/message-menu.js?messaging=14";
-import {
-    createReactionPicker
-} from "../components/reaction-picker.js";
+} from "../components/message-menu.js?messaging=15";
+import { initializeReactions } from "./reaction-controller.js?reactions=1";
 import {
     openDeleteMessageDialog
 } from "../components/delete-message-dialog.js?messaging=15";
@@ -110,33 +107,7 @@ let attachmentUploading = false;
 let activeOtherUserName = "Student";
 let replyingTo = null;
 let selectedMessage = null;
-let reactionPicker = null;
-
-function hideReactionPicker() {
-    reactionPicker?.remove();
-    reactionPicker = null;
-}
-
-function showReactionPicker(anchor) {
-    hideReactionPicker();
-
-    reactionPicker = createReactionPicker();
-    document.body.appendChild(reactionPicker);
-
-    const viewportInset = 8;
-    const pickerRect = reactionPicker.getBoundingClientRect();
-    const left = Math.min(
-        Math.max(anchor.left, viewportInset),
-        window.innerWidth - pickerRect.width - viewportInset
-    );
-    const top = Math.min(
-        Math.max(anchor.top, viewportInset),
-        window.innerHeight - pickerRect.height - viewportInset
-    );
-
-    reactionPicker.style.left = `${left}px`;
-    reactionPicker.style.top = `${top}px`;
-}
+let reactionController = null;
 
 function clearReply() {
     replyingTo = null;
@@ -186,34 +157,6 @@ messageList?.addEventListener("click", (event) => {
         return;
     }
 
-    const reactionChip = event.target.closest(
-        ".reaction-chip[data-emoji]"
-    );
-
-    if (reactionChip) {
-        const message = reactionChip.closest(
-            ".message-row[data-message-id]"
-        );
-
-        if (!message || !currentChatUser || !conversationId) {
-            return;
-        }
-
-        reactToMessage({
-            conversationId,
-            messageId: message.dataset.messageId,
-            emoji: reactionChip.dataset.emoji,
-            userId: currentChatUser.uid
-        }).catch((error) => {
-            handleError(
-                error,
-                "Unable to update reaction."
-            );
-        });
-
-        return;
-    }
-
     const replyButton = event.target.closest(
         '[data-message-action="reply"]'
     );
@@ -255,7 +198,6 @@ messageList?.addEventListener("contextmenu", (event) => {
     }
 
     event.preventDefault();
-    hideReactionPicker();
 
     const messageObject = getMessageById(
         message.dataset.messageId
@@ -281,47 +223,7 @@ messageList?.addEventListener("contextmenu", (event) => {
 document.addEventListener("click", async (event) => {
     if (!(event.target instanceof Element)) {
         hideMessageMenu();
-        hideReactionPicker();
         selectedMessage = null;
-        return;
-    }
-
-    const reactionOption = event.target.closest(
-        ".reaction-picker [data-emoji]"
-    );
-
-    if (
-        reactionOption &&
-        selectedMessage &&
-        currentChatUser &&
-        conversationId
-    ) {
-        const reactionMessage = selectedMessage;
-
-        reactionOption.setAttribute("disabled", "");
-        hideMessageMenu();
-
-        try {
-            await reactToMessage({
-                conversationId,
-                messageId: reactionMessage.id,
-                emoji: reactionOption.dataset.emoji,
-                userId: currentChatUser.uid
-            });
-        } catch (error) {
-            handleError(
-                error,
-                "Unable to update reaction."
-            );
-        } finally {
-            hideReactionPicker();
-            selectedMessage = null;
-        }
-
-        return;
-    }
-
-    if (event.target.closest(".reaction-picker")) {
         return;
     }
 
@@ -474,24 +376,16 @@ document.addEventListener("click", async (event) => {
                     }
                 }
                 break;
-            case "react":
-                showReactionPicker(
-                    actionButton.getBoundingClientRect()
-                );
-                hideMessageMenu();
-                return;
         }
     }
 
     hideMessageMenu();
-    hideReactionPicker();
     selectedMessage = null;
 });
 
 document.addEventListener("keydown", (event) => {
     if (event.key === "Escape") {
         hideMessageMenu();
-        hideReactionPicker();
         selectedMessage = null;
     }
 });
@@ -740,6 +634,13 @@ async function initializeChat(currentUser) {
         chatHeaderLink.setAttribute("aria-label", "Open group information");
     }
 
+    reactionController?.destroy();
+    reactionController = initializeReactions({
+        conversationId,
+        currentUserId: currentUser.uid,
+        messageContainer: messageList
+    });
+
     unsubscribeMessages =
     subscribeToMessages(
         conversationId,
@@ -977,6 +878,9 @@ window.addEventListener("pagehide", (event) => {
     if (typeof unsubscribeTyping === "function") {
         unsubscribeTyping();
     }
+
+    reactionController?.destroy();
+    reactionController = null;
 
     if (auth.currentUser && conversationId) {
         setTypingStatus(

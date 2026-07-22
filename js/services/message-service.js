@@ -2,7 +2,6 @@ import {
     collection,
     deleteDoc,
     doc,
-    getDoc,
     getDocs,
     increment,
     limitToLast,
@@ -496,48 +495,6 @@ export function subscribeToReactions(
 
             console.error("Reaction listener failed:", error);
         }
-    );
-}
-
-/* Compatibility adapter for the current chat controller. */
-export async function reactToMessage({
-    conversationId,
-    messageId,
-    emoji,
-    userId
-}) {
-    const cleanConversationId = validateId(
-        conversationId,
-        "Conversation ID"
-    );
-    const model = createReactionModel({
-        messageId,
-        userId,
-        reaction: emoji
-    });
-    const reactionReference = getReactionReference(
-        cleanConversationId,
-        model.messageId,
-        model.userId
-    );
-    const currentReaction = await getDoc(reactionReference);
-
-    if (
-        currentReaction.exists() &&
-        currentReaction.data().reaction === model.reaction
-    ) {
-        return removeReaction(
-            cleanConversationId,
-            model.messageId,
-            model.userId
-        );
-    }
-
-    return addReaction(
-        cleanConversationId,
-        model.messageId,
-        model.userId,
-        model.reaction
     );
 }
 

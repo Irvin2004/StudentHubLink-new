@@ -111,6 +111,15 @@ export function createMessageBubble(message, currentUserId, options = {}) {
 
                 <div class="message-footer">
                     ${!deleted ? `<button
+                        class="message-reaction-button"
+                        type="button"
+                        data-message-action="react"
+                        data-message-id="${escapeHtml(message.id)}"
+                        aria-label="React to message">
+                        &#128512; React
+                    </button>` : ""}
+
+                    ${!deleted ? `<button
                         class="message-reply-button"
                         type="button"
                         data-message-action="reply"

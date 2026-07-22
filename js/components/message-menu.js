@@ -106,6 +106,7 @@ export function showMessageMenu(
         });
 
     messageMenu.classList.remove("hidden");
+    messageMenu.dataset.messageId = message?.id || "";
 
     const menuRect = messageMenu.getBoundingClientRect();
     const maxLeft = Math.max(
