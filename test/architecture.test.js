@@ -20,7 +20,10 @@ test("message deep links include conversation and message context", () => {
 
 test("message reactions no longer mutate embedded message maps", () => {
     const source = read("js/services/message-service.js");
-    assert.doesNotMatch(source, /runTransaction/);
+    assert.doesNotMatch(
+        source,
+        /transaction\.update\([\s\S]{0,120}\{ reactions \}/
+    );
 });
 
 test("message reactions use user-keyed nested documents", () => {
@@ -41,6 +44,26 @@ test("message reactions use user-keyed nested documents", () => {
         rules,
         /affectedKeys\(\)[\s\S]{0,80}hasOnly\(\["reactions"\]\)/
     );
+    assert.doesNotMatch(service, /document\.|window\.|innerHTML/);
+});
+
+test("message read receipts use user-keyed nested documents", () => {
+    const service = read("js/services/message-service.js");
+    const rules = read("firestore.rules");
+
+    assert.match(service, /function getReadReceiptsCollection\(/);
+    assert.match(service, /export async function markMessageDelivered\(/);
+    assert.match(service, /export async function markMessageRead\(/);
+    assert.match(service, /export async function getReadReceipts\(/);
+    assert.match(service, /export function subscribeToReadReceipts\(/);
+    assert.match(service, /createReadReceiptModel/);
+    assert.match(service, /MESSAGE_STATUS\.DELIVERED/);
+    assert.match(service, /MESSAGE_STATUS\.READ/);
+    assert.match(
+        rules,
+        /conversations\/\{conversationId\}\/messages\/\{messageId\}\/readReceipts\/\{userId\}/
+    );
+    assert.match(rules, /function receiptTransitionIsValid\(\)/);
     assert.doesNotMatch(service, /document\.|window\.|innerHTML/);
 });
 

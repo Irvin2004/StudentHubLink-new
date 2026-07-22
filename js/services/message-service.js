@@ -8,6 +8,7 @@ import {
     onSnapshot,
     orderBy,
     query,
+    runTransaction,
     serverTimestamp,
     setDoc,
     arrayUnion,
@@ -19,6 +20,11 @@ import {
 import { db } from "../firebase.js";
 import { COLLECTIONS } from "../config/firestore.js";
 import { MESSAGE_TYPES } from "../utils/constants.js?messaging=13";
+import {
+    MESSAGE_STATUS,
+    isValidMessageStatus
+} from "../config/message-status.js";
+import { createReadReceiptModel } from "../models/read-receipt.js";
 import { createReactionModel } from "../models/reaction.js";
 import { emitMessageSent } from "../events/message-events.js";
 import { error as logError } from "../utils/logger.js";
@@ -147,6 +153,44 @@ function normalizeReaction(reactionDocument) {
     return {
         userId: reactionDocument.id,
         reaction: reactionDocument.data().reaction
+    };
+}
+
+function getReadReceiptsCollection(conversationId, messageId) {
+    return collection(
+        db,
+        COLLECTIONS.CONVERSATIONS,
+        conversationId,
+        COLLECTIONS.MESSAGES,
+        messageId,
+        "readReceipts"
+    );
+}
+
+function getReadReceiptReference(conversationId, messageId, userId) {
+    return doc(
+        getReadReceiptsCollection(conversationId, messageId),
+        userId
+    );
+}
+
+function validateReceiptStatus(status) {
+    if (!isValidMessageStatus(status)) {
+        throw new Error("Invalid message status.");
+    }
+
+    return status;
+}
+
+function normalizeReadReceipt(receiptDocument) {
+    const data = receiptDocument.data();
+
+    return {
+        userId: receiptDocument.id,
+        status: validateReceiptStatus(data.status),
+        deliveredAt: data.deliveredAt || null,
+        readAt: data.readAt || null,
+        updatedAt: data.updatedAt || null
     };
 }
 
@@ -494,6 +538,153 @@ export function subscribeToReactions(
             }
 
             console.error("Reaction listener failed:", error);
+        }
+    );
+}
+
+export async function markMessageDelivered(
+    conversationId,
+    messageId,
+    userId
+) {
+    const cleanConversationId = validateId(
+        conversationId,
+        "Conversation ID"
+    );
+    const receipt = createReadReceiptModel({
+        conversationId: cleanConversationId,
+        messageId,
+        userId
+    });
+    const status = validateReceiptStatus(MESSAGE_STATUS.DELIVERED);
+    const receiptReference = getReadReceiptReference(
+        receipt.conversationId,
+        receipt.messageId,
+        receipt.userId
+    );
+
+    return runTransaction(db, async (transaction) => {
+        const snapshot = await transaction.get(receiptReference);
+
+        if (snapshot.exists()) {
+            return normalizeReadReceipt(snapshot);
+        }
+
+        transaction.set(receiptReference, {
+            status,
+            deliveredAt: serverTimestamp(),
+            readAt: null,
+            updatedAt: serverTimestamp()
+        });
+
+        return {
+            userId: receipt.userId,
+            status,
+            deliveredAt: null,
+            readAt: null,
+            updatedAt: null
+        };
+    });
+}
+
+export async function markMessageRead(
+    conversationId,
+    messageId,
+    userId
+) {
+    const cleanConversationId = validateId(
+        conversationId,
+        "Conversation ID"
+    );
+    const receipt = createReadReceiptModel({
+        conversationId: cleanConversationId,
+        messageId,
+        userId
+    });
+    const status = validateReceiptStatus(MESSAGE_STATUS.READ);
+    const receiptReference = getReadReceiptReference(
+        receipt.conversationId,
+        receipt.messageId,
+        receipt.userId
+    );
+
+    return runTransaction(db, async (transaction) => {
+        const snapshot = await transaction.get(receiptReference);
+        const existingData = snapshot.exists() ? snapshot.data() : {};
+
+        if (snapshot.exists()) {
+            validateReceiptStatus(existingData.status);
+        }
+
+        if (
+            snapshot.exists() &&
+            existingData.status === MESSAGE_STATUS.READ
+        ) {
+            return normalizeReadReceipt(snapshot);
+        }
+
+        transaction.set(
+            receiptReference,
+            {
+                status,
+                deliveredAt: existingData.deliveredAt || serverTimestamp(),
+                readAt: serverTimestamp(),
+                updatedAt: serverTimestamp()
+            },
+            { merge: true }
+        );
+
+        return {
+            userId: receipt.userId,
+            status,
+            deliveredAt: existingData.deliveredAt || null,
+            readAt: null,
+            updatedAt: null
+        };
+    });
+}
+
+export async function getReadReceipts(conversationId, messageId) {
+    const cleanConversationId = validateId(
+        conversationId,
+        "Conversation ID"
+    );
+    const cleanMessageId = validateId(messageId, "Message ID");
+    const snapshot = await getDocs(
+        getReadReceiptsCollection(cleanConversationId, cleanMessageId)
+    );
+
+    return snapshot.docs.map(normalizeReadReceipt);
+}
+
+export function subscribeToReadReceipts(
+    conversationId,
+    messageId,
+    callback,
+    onError
+) {
+    const cleanConversationId = validateId(
+        conversationId,
+        "Conversation ID"
+    );
+    const cleanMessageId = validateId(messageId, "Message ID");
+
+    if (typeof callback !== "function") {
+        throw new Error("Read receipt subscriber is required.");
+    }
+
+    return onSnapshot(
+        getReadReceiptsCollection(cleanConversationId, cleanMessageId),
+        (snapshot) => callback(
+            snapshot.docs.map(normalizeReadReceipt)
+        ),
+        (error) => {
+            if (typeof onError === "function") {
+                onError(error);
+                return;
+            }
+
+            console.error("Read receipt listener failed:", error);
         }
     );
 }

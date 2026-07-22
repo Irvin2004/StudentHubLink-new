@@ -445,6 +445,70 @@ service cloud.firestore {
         && canAccessReactionMessage();
     }
 
+    match /conversations/{conversationId}/messages/{messageId}/readReceipts/{userId} {
+      function sourceMessage() {
+        return get(
+          /databases/$(database)/documents/messages/$(messageId)
+        );
+      }
+
+      function canAccessReceiptMessage() {
+        return exists(
+            /databases/$(database)/documents/messages/$(messageId)
+          )
+          && sourceMessage().data.conversationId == conversationId
+          && canAccessConversation(conversationFor(conversationId));
+      }
+
+      function receiptFieldsAreValid() {
+        return request.resource.data.keys().hasOnly([
+            "status", "deliveredAt", "readAt", "updatedAt"
+          ])
+          && request.resource.data.keys().hasAll([
+            "status", "deliveredAt", "readAt", "updatedAt"
+          ])
+          && request.resource.data.status in [
+            "sent", "delivered", "read"
+          ]
+          && request.resource.data.updatedAt == request.time
+          && (
+            request.resource.data.status == "sent"
+              ? request.resource.data.deliveredAt == null
+                && request.resource.data.readAt == null
+              : request.resource.data.status == "delivered"
+                ? request.resource.data.deliveredAt == request.time
+                  && request.resource.data.readAt == null
+                : request.resource.data.deliveredAt is timestamp
+                  && request.resource.data.readAt == request.time
+          );
+      }
+
+      function receiptTransitionIsValid() {
+        return (
+            resource.data.status == "sent"
+            && request.resource.data.status in ["delivered", "read"]
+          )
+          || (
+            resource.data.status == "delivered"
+            && request.resource.data.status == "read"
+            && request.resource.data.deliveredAt
+              == resource.data.deliveredAt
+          );
+      }
+
+      allow read: if canAccessReceiptMessage();
+      allow create: if signedIn()
+        && request.auth.uid == userId
+        && canAccessReceiptMessage()
+        && receiptFieldsAreValid();
+      allow update: if signedIn()
+        && request.auth.uid == userId
+        && canAccessReceiptMessage()
+        && receiptFieldsAreValid()
+        && receiptTransitionIsValid();
+      allow delete: if false;
+    }
+
     match /messages/{messageId} {
       allow read: if canAccessConversation(
         conversationFor(resource.data.conversationId)
