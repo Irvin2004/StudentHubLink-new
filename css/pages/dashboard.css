@@ -1,4 +1,5 @@
-/* Page-owned styles; isolated from other StudentHub screens. */
+/* StudentHub dashboard page styles */
+/* Legacy root-dashboard styles; isolated from other StudentHub screens. */
 @scope (body[data-page="dashboard"]) {
 .dashboard-page {
     min-height: 100vh;
