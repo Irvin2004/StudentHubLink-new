@@ -171,3 +171,21 @@ test("presence renderer stays reusable and passive", () => {
     assert.match(styles, /@keyframes presence-typing-dot/);
     assert.match(styles, /prefers-reduced-motion/);
 });
+
+test("presence controller coordinates lifecycle and typing cleanup", () => {
+    const controller = read("js/controllers/presence-controller.js");
+
+    assert.match(controller, /export function initializePresence\(options\)/);
+    assert.match(controller, /setUserOnline/);
+    assert.match(controller, /setUserOffline/);
+    assert.match(controller, /setUserTyping/);
+    assert.match(controller, /stopTyping/);
+    assert.match(controller, /subscribeToPresence/);
+    assert.match(controller, /renderPresence/);
+    assert.match(controller, /removeEventListener/);
+    assert.match(controller, /unsubscribe\(\)/);
+    assert.doesNotMatch(
+        controller,
+        /firebase-firestore|onSnapshot|setDoc|innerHTML/
+    );
+});
