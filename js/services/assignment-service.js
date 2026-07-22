@@ -18,6 +18,8 @@ import {
     createAssignmentModel,
     createAssignmentUpdateModel
 } from "../models/assignment.js";
+import { emitAssignmentCreated } from "../events/assignment-events.js";
+import { error as logError } from "../utils/logger.js";
 
 function cleanText(value) {
     return typeof value === "string"
@@ -100,7 +102,7 @@ export async function createAssignment(
         createdBy
     } = createAssignmentModel(assignmentData);
 
-    return runFirestoreOperation(async () => {
+    const assignment = await runFirestoreOperation(async () => {
         const assignmentRef = await addDoc(
             getAssignmentsCollection(cleanGroupId),
             {
@@ -121,6 +123,22 @@ export async function createAssignment(
             ...savedAssignment.data()
         };
     });
+
+    try {
+        await emitAssignmentCreated({
+            assignment,
+            groupId: cleanGroupId,
+            creatorId: createdBy
+        });
+    } catch (error) {
+        logError(
+            "NOTIFICATIONS",
+            "Could not emit assignment-created notifications:",
+            error
+        );
+    }
+
+    return assignment;
 }
 
 export async function getAssignments(groupId) {
