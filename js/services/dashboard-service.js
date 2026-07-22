@@ -5,6 +5,7 @@ import {
 } from "./group-service.js";
 import { getNotifications } from "./notification-service.js";
 import { getAssignmentStatus } from "../utils/assignment-status.js";
+import { log } from "../utils/logger.js";
 
 function validateUserId(userId) {
     const cleanUserId = typeof userId === "string"
@@ -51,6 +52,20 @@ async function getUpcomingAssignments(groups) {
         .filter(isUpcomingAssignment);
 }
 
+async function loadWidget(name, loader) {
+    try {
+        const result = await loader();
+        return Array.isArray(result) ? result : [];
+    } catch (error) {
+        log(
+            "DASHBOARD",
+            `${name} widget is unavailable:`,
+            error
+        );
+        return [];
+    }
+}
+
 function getUnreadMessageCount(conversations) {
     return conversations.reduce((total, conversation) => {
         const unreadCount = Number(
@@ -67,9 +82,15 @@ function getUnreadMessageCount(conversations) {
 
 export async function getDashboardData(userId) {
     const cleanUserId = validateUserId(userId);
-    const groupsPromise = getUserGroups(cleanUserId);
+    const groupsPromise = loadWidget(
+        "Groups",
+        () => getUserGroups(cleanUserId)
+    );
     const assignmentsPromise = groupsPromise.then(
-        getUpcomingAssignments
+        (groups) => loadWidget(
+            "Assignments",
+            () => getUpcomingAssignments(groups)
+        )
     );
 
     const [
@@ -79,7 +100,10 @@ export async function getDashboardData(userId) {
     ] = await Promise.all([
         groupsPromise,
         assignmentsPromise,
-        getNotifications(cleanUserId)
+        loadWidget(
+            "Notifications",
+            () => getNotifications(cleanUserId)
+        )
     ]);
 
     /*

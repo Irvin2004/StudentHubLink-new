@@ -19,6 +19,7 @@
     <!-- Existing shared component styles -->
     <link rel="stylesheet" href="../css/components/buttons.css">
     <link rel="stylesheet" href="../css/components/toast.css">
+    <link rel="stylesheet" href="../css/components/notification-card.css">
 
     <!-- Dashboard styles -->
     <link rel="stylesheet" href="../css/pages/dashboard.css">
@@ -102,7 +103,7 @@
 
             <button
                 id="retryDashboardButton"
-                class="button button-primary"
+                class="btn btn-primary"
                 type="button"
             >
                 Try Again
@@ -129,10 +130,21 @@
                     </p>
                 </div>
 
-                <time
-                    id="dashboardDate"
-                    class="dashboard-date"
-                ></time>
+                <div class="dashboard-welcome-actions">
+                    <time
+                        id="dashboardDate"
+                        class="dashboard-date"
+                    ></time>
+
+                    <button
+                        id="refreshDashboardButton"
+                        class="btn btn-secondary dashboard-refresh-button"
+                        type="button"
+                    >
+                        <span data-refresh-icon aria-hidden="true">&#8635;</span>
+                        Refresh
+                    </button>
+                </div>
             </section>
 
             <section
