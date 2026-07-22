@@ -292,6 +292,16 @@
     gap: 2rem;
 }
 
+.dashboard-activity-card {
+    margin-top: 2rem;
+}
+
+.dashboard-activity-card .dashboard-card-content {
+    width: 100%;
+    max-width: 900px;
+    margin-inline: auto;
+}
+
 .dashboard-card-header {
     display: flex;
     align-items: center;

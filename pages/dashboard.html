@@ -21,6 +21,7 @@
     <link rel="stylesheet" href="../css/components/toast.css">
     <link rel="stylesheet" href="../css/components/notification-card.css">
     <link rel="stylesheet" href="../css/components/search-dropdown.css">
+    <link rel="stylesheet" href="../css/components/activity-feed.css">
 
     <!-- Dashboard styles -->
     <link rel="stylesheet" href="../css/pages/dashboard.css">
@@ -349,6 +350,33 @@
                     </div>
                 </section>
             </div>
+
+            <section
+                class="dashboard-card dashboard-activity-card"
+                aria-labelledby="recentActivityHeading"
+            >
+                <div class="dashboard-card-header">
+                    <div>
+                        <p class="dashboard-section-label">
+                            Community
+                        </p>
+
+                        <h2 id="recentActivityHeading">
+                            Recent activity
+                        </h2>
+                    </div>
+
+                    <a href="./groups.html">
+                        View groups
+                    </a>
+                </div>
+
+                <div
+                    id="activityFeed"
+                    class="dashboard-card-content"
+                    aria-live="polite"
+                ></div>
+            </section>
         </div>
     </main>
 
@@ -363,7 +391,7 @@
 
     <script
         type="module"
-        src="../js/controllers/dashboard-controller.js?v=20260723-search1"
+        src="../js/controllers/dashboard-controller.js?v=20260723-activity1"
     ></script>
 </body>
 </html>

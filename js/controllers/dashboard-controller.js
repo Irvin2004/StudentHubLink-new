@@ -5,6 +5,8 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 
 import { auth } from "../firebase.js";
+import { initializeActivityFeed } from
+    "./activity-controller.js?activity-feed=1";
 import { createDashboardRefreshManager } from "./dashboard-refresh.js?live=1";
 import { initialiseSearch } from "./search-controller.js?global-search=1";
 import { renderDashboard } from "../renderers/dashboard-renderer.js?live=1";
@@ -22,6 +24,7 @@ let destroyed = false;
 let unsubscribeAuth = () => {};
 let stopLiveUpdates = () => {};
 let stopSearch = () => {};
+let activityFeedController = { destroy() {} };
 
 function getRequiredElement(id) {
     const element = document.getElementById(id);
@@ -48,6 +51,7 @@ function getDashboardElements() {
         assignments: getRequiredElement("dashboardAssignments"),
         notifications: getRequiredElement("dashboardNotifications"),
         groups: getRequiredElement("dashboardGroups"),
+        activity: getRequiredElement("activityFeed"),
         searchInput: getRequiredElement("globalSearchInput"),
         searchDropdown: getRequiredElement("searchDropdown")
     };
@@ -257,6 +261,11 @@ async function loadDashboard(elements, {
         }
 
         renderDashboard(dashboardData, elements);
+        activityFeedController.destroy();
+        activityFeedController = initializeActivityFeed({
+            container: elements.activity,
+            groupId: dashboardData.groups[0]?.id
+        });
         stopLiveUpdates();
         const refreshManager = createDashboardRefreshManager({
             data: dashboardData,
@@ -310,6 +319,7 @@ async function initialiseDashboard() {
         loadSequence += 1;
         stopLiveUpdates();
         stopSearch();
+        activityFeedController.destroy();
         unsubscribeAuth();
         elements.retryButton.removeEventListener("click", refresh);
         elements.refreshButton.removeEventListener("click", refresh);
@@ -361,5 +371,6 @@ window.addEventListener("pageshow", (event) => {
     unsubscribeAuth = () => {};
     stopLiveUpdates = () => {};
     stopSearch = () => {};
+    activityFeedController = { destroy() {} };
     initialiseDashboard();
 });

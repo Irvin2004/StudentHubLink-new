@@ -113,3 +113,18 @@ test("activity service and rules use the group-scoped path", () => {
         /^\s{4}match \/activities\/\{activityId\}/m
     );
 });
+
+test("activity controller coordinates service and renderer boundaries", () => {
+    const controller = read("js/controllers/activity-controller.js");
+    const dashboard = read("js/controllers/dashboard-controller.js");
+
+    assert.match(controller, /getGroupActivities/);
+    assert.match(controller, /subscribeToGroupActivities/);
+    assert.match(controller, /renderActivityLoading/);
+    assert.match(controller, /renderActivityFeed/);
+    assert.match(controller, /renderActivityError/);
+    assert.doesNotMatch(controller, /onSnapshot|firebase-firestore|innerHTML\s*=/);
+    assert.match(controller, /destroy\(\)/);
+    assert.match(dashboard, /initializeActivityFeed/);
+    assert.doesNotMatch(dashboard, /getGroupActivities|subscribeToGroupActivities/);
+});
