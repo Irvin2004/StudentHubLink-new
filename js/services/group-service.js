@@ -209,6 +209,24 @@ export async function getStudyGroups() {
         );
 }
 
+export async function getUserGroups(userId) {
+    const cleanUserId = typeof userId === "string"
+        ? userId.trim()
+        : "";
+
+    if (!cleanUserId) {
+        throw new Error("User ID is required.");
+    }
+
+    const groups = await getStudyGroups();
+    const memberships = await getStudyGroupMemberships(
+        groups.map((group) => group.id),
+        cleanUserId
+    );
+
+    return groups.filter((group) => memberships.has(group.id));
+}
+
 export function subscribeToUserStudyGroups(
     userId,
     onGroups,

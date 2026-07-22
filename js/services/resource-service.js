@@ -19,6 +19,7 @@ import {
     ALLOWED_TYPES,
     MAX_FILE_SIZE
 } from "../utils/file-validator.js?security=1";
+import { getUserGroups } from "./group-service.js?unified-search=1";
 
 const MAX_TITLE_LENGTH = 100;
 const MAX_DESCRIPTION_LENGTH = 500;
@@ -167,6 +168,20 @@ export async function getGroupResources(groupId) {
         groupId,
         ...resourceDocument.data()
     }));
+}
+
+export async function getResources(userId) {
+    const groups = await getUserGroups(userId);
+
+    if (!groups.length) {
+        return [];
+    }
+
+    const resourceLists = await Promise.all(
+        groups.map((group) => getGroupResources(group.id))
+    );
+
+    return resourceLists.flat();
 }
 
 export async function getGroupResource({ groupId, resourceId }) {

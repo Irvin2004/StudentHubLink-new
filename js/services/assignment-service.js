@@ -22,6 +22,8 @@ import {
 } from "../models/assignment.js";
 import { emitAssignmentCreated } from "../events/assignment-events.js";
 import { error as logError } from "../utils/logger.js";
+import { getAssignmentStatus } from "../utils/assignment-status.js";
+import { getUserGroups } from "./group-service.js?unified-search=1";
 
 function cleanText(value) {
     return typeof value === "string"
@@ -158,6 +160,26 @@ export async function getAssignments(groupId) {
             groupId: cleanGroupId,
             ...assignmentDocument.data()
         }));
+    });
+}
+
+export async function getUpcomingAssignments(userId) {
+    const groups = await getUserGroups(userId);
+
+    if (!groups.length) {
+        return [];
+    }
+
+    const assignmentLists = await Promise.all(
+        groups.map((group) => getAssignments(group.id))
+    );
+
+    return assignmentLists.flat().filter((assignment) => {
+        try {
+            return getAssignmentStatus(assignment?.dueDate) !== "overdue";
+        } catch {
+            return false;
+        }
     });
 }
 
