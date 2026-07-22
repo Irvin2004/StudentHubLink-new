@@ -153,3 +153,21 @@ test("presence service uses user-scoped status documents", () => {
     );
     assert.doesNotMatch(rules, /^\s{4}match \/typingStatus\/\{typingId\}/m);
 });
+
+test("presence renderer stays reusable and passive", () => {
+    const renderer = read("js/renderers/presence-renderer.js");
+    const styles = read("css/components/presence.css");
+
+    assert.match(renderer, /export function renderPresence\(/);
+    assert.match(renderer, /export function renderPresenceBadge\(/);
+    assert.match(renderer, /export function renderTypingIndicator\(/);
+    assert.match(renderer, /export function clearPresence\(/);
+    assert.match(renderer, /currentConversationId/);
+    assert.match(renderer, /aria-live="polite"/);
+    assert.doesNotMatch(
+        renderer,
+        /firebase|firestore|onSnapshot|addEventListener/
+    );
+    assert.match(styles, /@keyframes presence-typing-dot/);
+    assert.match(styles, /prefers-reduced-motion/);
+});
