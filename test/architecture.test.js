@@ -67,6 +67,26 @@ test("message read receipts use user-keyed nested documents", () => {
     assert.doesNotMatch(service, /document\.|window\.|innerHTML/);
 });
 
+test("read receipt renderer owns passive message status display", () => {
+    const renderer = read("js/renderers/read-receipt-renderer.js");
+    const messages = read("js/renderers/message-renderer.js");
+    const bubble = read("js/components/message-bubble.js");
+
+    assert.match(renderer, /MESSAGE_STATUS\.SENT/);
+    assert.match(renderer, /MESSAGE_STATUS\.DELIVERED/);
+    assert.match(renderer, /MESSAGE_STATUS\.READ/);
+    assert.match(renderer, /export function renderReadReceipt\(/);
+    assert.match(renderer, /export function renderMessageStatus\(/);
+    assert.match(renderer, /export function clearReadReceipt\(/);
+    assert.doesNotMatch(
+        renderer,
+        /addEventListener|firestore|firebase|markMessageRead|markMessageDelivered/
+    );
+    assert.match(messages, /renderReadReceipt/);
+    assert.match(bubble, /data-read-receipt-container/);
+    assert.doesNotMatch(bubble, /function getStatusIcon/);
+});
+
 test("reaction picker owns UI behavior without service coupling", () => {
     const picker = read("js/components/reaction-picker.js");
 

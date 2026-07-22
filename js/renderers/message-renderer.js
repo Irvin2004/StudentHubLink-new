@@ -1,5 +1,6 @@
-import { createMessageBubble } from "../components/message-bubble.js?messaging=17";
+import { createMessageBubble } from "../components/message-bubble.js?messaging=18";
 import { renderReactionBar } from "./reaction-renderer.js?reactions=1";
+import { renderReadReceipt } from "./read-receipt-renderer.js?receipts=1";
 
 export function renderMessages(
     messages,
@@ -58,6 +59,27 @@ export function renderMessages(
         messageRow
             .querySelector(".message-footer")
             ?.before(reactionContainer);
+
+        const statusContainer = messageRow.querySelector(
+            "[data-read-receipt-container]"
+        );
+
+        if (statusContainer) {
+            renderReadReceipt(
+                Array.isArray(message.readReceipts)
+                    ? message.readReceipts
+                    : [],
+                currentUserId,
+                {
+                    ...message,
+                    expectedRecipientCount:
+                        options.conversationType === "group"
+                            ? Math.max(Number(options.memberCount || 0) - 1, 1)
+                            : 1
+                },
+                statusContainer
+            );
+        }
     });
 
     container.scrollTop =

@@ -23,7 +23,7 @@ import {
 import {
     uploadChatAttachment
 } from "../services/storage-service.js?security=1";
-import { renderMessages } from "../renderers/message-renderer.js?messaging=17";
+import { renderMessages } from "../renderers/message-renderer.js?messaging=18";
 import { getTypingIndicatorText } from "../components/typing-indicator.js";
 import { getStudyGroup } from "../services/group-service.js?security=1";
 import { openImageViewer } from "../components/image-viewer.js";

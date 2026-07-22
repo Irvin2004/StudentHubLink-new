@@ -43,49 +43,6 @@ function renderMessageContent(message) {
     `;
 }
 
-function getStatusIcon(message, options = {}) {
-    if (message.status === "sending") {
-        return `
-            <span class="sending" aria-label="Sending">
-                &#128339; Sending...
-            </span>
-        `;
-    }
-
-    if (options.conversationType === "group") {
-        const readers = new Set(message.readBy || []);
-        readers.delete(message.senderId);
-        const seenCount = readers.size;
-
-        if (
-            options.memberCount > 0 &&
-            seenCount >= options.memberCount - 1
-        ) {
-            return `
-                <span class="read group-read" aria-label="Seen by everyone">
-                    Seen by everyone
-                </span>
-            `;
-        }
-
-        return `
-            <span class="delivered group-read" aria-label="Seen by ${seenCount}">
-                ${seenCount > 0 ? `Seen by ${seenCount}` : "Sent"}
-            </span>
-        `;
-    }
-
-    if (message.readAt) {
-        return `<span class="read" aria-label="Read">&#10003;&#10003;</span>`;
-    }
-
-    if (message.deliveredAt) {
-        return `<span class="delivered" aria-label="Delivered">&#10003;&#10003;</span>`;
-    }
-
-    return `<span class="sent" aria-label="Sent">&#10003;</span>`;
-}
-
 export function createMessageBubble(message, currentUserId, options = {}) {
     const mine = message.senderId === currentUserId;
     const deleted = message.deleted || Boolean(message.deletedAt);
@@ -135,7 +92,19 @@ export function createMessageBubble(message, currentUserId, options = {}) {
                             : ""}
                     </span>
 
-                    ${mine ? getStatusIcon(message, options) : ""}
+                    ${mine && message.status === "sending" ? `
+                        <span class="sending" aria-label="Sending">
+                            &#128339; Sending...
+                        </span>
+                    ` : ""}
+
+                    ${mine && message.status !== "sending" ? `
+                        <div
+                            class="read-receipt-container"
+                            data-read-receipt-container
+                            data-message-id="${escapeHtml(message.id)}">
+                        </div>
+                    ` : ""}
                 </div>
             </div>
         </div>
