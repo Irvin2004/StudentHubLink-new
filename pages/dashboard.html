@@ -20,6 +20,7 @@
     <link rel="stylesheet" href="../css/components/buttons.css">
     <link rel="stylesheet" href="../css/components/toast.css">
     <link rel="stylesheet" href="../css/components/notification-card.css">
+    <link rel="stylesheet" href="../css/components/search-dropdown.css">
 
     <!-- Dashboard styles -->
     <link rel="stylesheet" href="../css/pages/dashboard.css">
@@ -51,6 +52,25 @@
                 Messages
             </a>
         </nav>
+
+        <div
+            id="searchDropdown"
+            class="dashboard-global-search"
+            role="search"
+        >
+            <label class="sr-only" for="globalSearchInput">
+                Search StudentHub
+            </label>
+            <span class="dashboard-search-icon" aria-hidden="true">
+                &#128269;
+            </span>
+            <input
+                id="globalSearchInput"
+                type="search"
+                placeholder="Search StudentHub"
+                aria-label="Search StudentHub"
+            >
+        </div>
 
         <div class="dashboard-header-actions">
             <button
@@ -343,7 +363,7 @@
 
     <script
         type="module"
-        src="../js/controllers/dashboard-controller.js?v=20260722-live2"
+        src="../js/controllers/dashboard-controller.js?v=20260723-search1"
     ></script>
 </body>
 </html>

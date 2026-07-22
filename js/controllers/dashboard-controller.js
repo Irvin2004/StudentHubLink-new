@@ -6,6 +6,7 @@ import {
 
 import { auth } from "../firebase.js";
 import { createDashboardRefreshManager } from "./dashboard-refresh.js?live=1";
+import { initialiseSearch } from "./search-controller.js?global-search=1";
 import { renderDashboard } from "../renderers/dashboard-renderer.js?live=1";
 import { subscribeToAssignments } from "../services/assignment-service.js?dashboard-live=1";
 import { subscribeToUserConversations } from "../services/conversation-service.js?dashboard-live=1";
@@ -20,6 +21,7 @@ let loadSequence = 0;
 let destroyed = false;
 let unsubscribeAuth = () => {};
 let stopLiveUpdates = () => {};
+let stopSearch = () => {};
 
 function getRequiredElement(id) {
     const element = document.getElementById(id);
@@ -45,7 +47,9 @@ function getDashboardElements() {
         stats: getRequiredElement("dashboardStats"),
         assignments: getRequiredElement("dashboardAssignments"),
         notifications: getRequiredElement("dashboardNotifications"),
-        groups: getRequiredElement("dashboardGroups")
+        groups: getRequiredElement("dashboardGroups"),
+        searchInput: getRequiredElement("globalSearchInput"),
+        searchDropdown: getRequiredElement("searchDropdown")
     };
 }
 
@@ -292,6 +296,10 @@ async function initialiseDashboard() {
 
     elements.retryButton.addEventListener("click", refresh);
     elements.refreshButton.addEventListener("click", refresh);
+    stopSearch = initialiseSearch({
+        input: elements.searchInput,
+        dropdown: elements.searchDropdown
+    });
 
     const destroy = () => {
         if (destroyed) {
@@ -301,6 +309,7 @@ async function initialiseDashboard() {
         destroyed = true;
         loadSequence += 1;
         stopLiveUpdates();
+        stopSearch();
         unsubscribeAuth();
         elements.retryButton.removeEventListener("click", refresh);
         elements.refreshButton.removeEventListener("click", refresh);
@@ -351,5 +360,6 @@ window.addEventListener("pageshow", (event) => {
     currentUser = null;
     unsubscribeAuth = () => {};
     stopLiveUpdates = () => {};
+    stopSearch = () => {};
     initialiseDashboard();
 });
