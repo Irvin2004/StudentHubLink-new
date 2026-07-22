@@ -16,6 +16,8 @@ import {
 import { db } from "../firebase.js";
 import { COLLECTIONS } from "../config/firestore.js";
 import { MESSAGE_TYPES } from "../utils/constants.js?messaging=13";
+import { emitMessageSent } from "../events/message-events.js";
+import { error as logError } from "../utils/logger.js";
 
 export { MESSAGE_TYPES };
 
@@ -173,6 +175,24 @@ export async function sendMessage(input) {
     batch.update(conversationRef, conversationUpdate);
 
     await batch.commit();
+
+    try {
+        await emitMessageSent({
+            message: {
+                id: messageId,
+                ...message
+            },
+            chatId: conversationId,
+            senderId,
+            chatType: isGroupMessage ? "group" : "direct"
+        });
+    } catch (error) {
+        logError(
+            "NOTIFICATIONS",
+            "Message notification event failed:",
+            error
+        );
+    }
 
     return messageId;
 }
