@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>StudentHub Dashboard</title>
     <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-    <link rel="stylesheet" href="css/studenthub.css?v=20260718-4">
+    <link rel="stylesheet" href="css/studenthub.css?v=20260722-2">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -57,18 +57,36 @@
                 </div>
 
                 <div class="notification-menu">
-                    <button class="notification-btn" id="notificationBtn" aria-label="Notifications" type="button">
-                        N
-                        <span id="notificationCount">0</span>
+                    <button
+                        class="notification-btn"
+                        id="notificationBtn"
+                        aria-label="Notifications, none unread"
+                        aria-controls="notificationDropdown"
+                        aria-expanded="false"
+                        type="button">
+                        <span class="notification-bell" aria-hidden="true">&#128276;</span>
+                        <span id="notificationCount" hidden>0</span>
                     </button>
 
-                    <div class="notification-dropdown" id="notificationDropdown">
+                    <div
+                        class="notification-dropdown"
+                        id="notificationDropdown"
+                        aria-label="Notifications">
                         <div class="notification-header">
                             <h3>Notifications</h3>
                         </div>
 
                         <div id="notificationList" class="notification-list">
-                            <p class="empty-state">No notifications yet.</p>
+                            <p class="notification-loading">Loading notifications...</p>
+                        </div>
+
+                        <div class="notification-footer">
+                            <button
+                                id="markAllNotificationsRead"
+                                type="button"
+                                disabled>
+                                Mark all read
+                            </button>
                         </div>
                     </div>
                 </div>

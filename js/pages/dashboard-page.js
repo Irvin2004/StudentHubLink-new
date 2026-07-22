@@ -22,17 +22,12 @@ from
 import { auth, db } from "../firebase.js";
 import { getRecentActivities } from "../services/activity-service.js";
 import { getUserDocument } from "./auth-page.js";
-import { createEmptyState } from "../components/empty-state.js";
-import { createNotificationCard } from "../components/notification-card.js";
+import { mountNotificationPanel } from "../components/notification-panel.js";
 import { escapeHtml, setText } from "../utils/dom.js";
 import { formatDate, getTimestampMillis } from "../utils/format-date.js";
 import { formatCurrency } from "../utils/format-price.js";
 import { showSkeleton } from "../utils/loading.js";
 import { error as logError, warn } from "../utils/logger.js";
-import {
-    getNotifications,
-    markAsRead
-} from "../services/notification-service.js";
 import {
     setUserOffline
 } from "../services/presence-service.js";
@@ -194,36 +189,6 @@ function setupProfileMenu() {
     });
 }
 
-function setupNotificationMenu() {
-    const notificationButton =
-    document.getElementById("notificationBtn");
-
-    const notificationDropdown =
-    document.getElementById("notificationDropdown");
-
-    if (notificationButton && notificationDropdown) {
-        notificationButton.addEventListener("click", async (event) => {
-            event.stopPropagation();
-            notificationDropdown.classList.toggle("show");
-
-            if (notificationDropdown.classList.contains("show")) {
-                await markVisibleNotificationsAsRead();
-            }
-        });
-    }
-
-    window.addEventListener("click", (event) => {
-        if (
-            notificationButton &&
-            notificationDropdown &&
-            !notificationButton.contains(event.target) &&
-            !notificationDropdown.contains(event.target)
-        ) {
-            notificationDropdown.classList.remove("show");
-        }
-    });
-}
-
 function setupLogout() {
     const logoutBtn =
     document.getElementById("logoutBtn");
@@ -276,16 +241,12 @@ async function loadDashboard(user) {
     const chart =
     await loadChart(user);
 
-    const notifications =
-    await loadNotifications(user);
-
     renderDashboard({
         userData,
         stats,
         activities,
         recentlyAdded,
-        chart,
-        notifications
+        chart
     });
 }
 
@@ -334,23 +295,6 @@ async function loadActivities(user) {
     showSkeleton("recentActivityList", 3);
 
     return getRecentActivities(user.uid);
-}
-
-async function loadNotifications(user) {
-    const notificationList =
-    document.getElementById("notificationList");
-
-    if (notificationList) {
-        notificationList.innerHTML =
-        `<p class="empty-state">Loading notifications...</p>`;
-    }
-
-    try {
-        return await getNotifications(user.uid);
-    } catch (error) {
-        warn("NOTIFICATIONS", "Could not load notifications:", error);
-        return [];
-    }
 }
 
 async function loadRecentlyAdded() {
@@ -482,8 +426,7 @@ function renderDashboard({
     stats,
     activities,
     recentlyAdded,
-    chart,
-    notifications
+    chart
 }) {
     const displayName =
     userData.name || userData.fullName || userData.displayName || "Student";
@@ -509,9 +452,6 @@ function renderDashboard({
         renderChart(chart);
     }
 
-    if (notifications) {
-        renderNotifications(notifications);
-    }
 }
 
 function formatRelativeDate(value) {
@@ -615,73 +555,6 @@ function renderActivities(activities) {
     }).join("");
 }
 
-function renderNotifications(notifications) {
-    const notificationList =
-    document.getElementById("notificationList");
-
-    const notificationCount =
-    document.getElementById("notificationCount");
-
-    if (!notificationList) {
-        return;
-    }
-
-    const unreadCount =
-    notifications.filter((notification) => !notification.read).length;
-
-    if (notificationCount) {
-        notificationCount.textContent =
-        unreadCount;
-
-        notificationCount.hidden =
-        unreadCount === 0;
-    }
-
-    if (!notifications.length) {
-        notificationList.innerHTML =
-        createEmptyState(
-            "No notifications yet",
-            "Updates and achievements will appear here.",
-            "&#128276;"
-        );
-        return;
-    }
-
-    notificationList.innerHTML =
-    notifications.map(createNotificationCard).join("");
-}
-
-async function markVisibleNotificationsAsRead() {
-    const unreadNotifications =
-    Array.from(document.querySelectorAll(".notification-item[data-unread='true']"));
-
-    if (!unreadNotifications.length) {
-        return;
-    }
-
-    const notificationCount =
-    document.getElementById("notificationCount");
-
-    unreadNotifications.forEach((notification) => {
-        notification.classList.remove("unread");
-        notification.dataset.unread = "false";
-    });
-
-    if (notificationCount) {
-        notificationCount.textContent = "0";
-        notificationCount.hidden = true;
-    }
-
-    await Promise.all(
-        unreadNotifications.map((notification) =>
-            markAsRead(notification.dataset.notificationId)
-                .catch((error) => {
-                    warn("NOTIFICATIONS", "Could not mark notification as read:", error);
-                })
-        )
-    );
-}
-
 let analyticsChartInstance = null;
 
 function renderChart(chart) {
@@ -745,14 +618,26 @@ function renderChart(chart) {
 }
 
 setupProfileMenu();
-setupNotificationMenu();
 setupLogout();
 setupCreateGroupModal();
 
+let unmountNotificationPanel = () => {};
+
 onAuthStateChanged(auth, (user) => {
+    unmountNotificationPanel();
+
     if (!user) {
         return;
     }
+
+    unmountNotificationPanel = mountNotificationPanel({
+        recipientId: user.uid,
+        trigger: document.getElementById("notificationBtn"),
+        panel: document.getElementById("notificationDropdown"),
+        list: document.getElementById("notificationList"),
+        badge: document.getElementById("notificationCount"),
+        markAllButton: document.getElementById("markAllNotificationsRead")
+    });
 
     loadDashboard(user);
 });

@@ -82,15 +82,20 @@
     background: var(--white);
     cursor: pointer;
     box-shadow: var(--shadow);
-    font-size: 18px;
+    font-size: 19px;
 }
 
-.notification-btn span {
+.notification-bell {
+    line-height: 1;
+}
+
+.notification-btn #notificationCount {
     position: absolute;
     top: -6px;
     right: -6px;
-    width: 20px;
+    min-width: 20px;
     height: 20px;
+    padding: 0 5px;
     background: var(--danger);
     color: white;
     border-radius: 50%;
@@ -138,22 +143,48 @@
 
 .notification-item {
     display: grid;
-    gap: 4px;
+    grid-template-columns: 32px 1fr 8px;
+    align-items: start;
+    gap: 10px;
+    width: 100%;
     padding: 14px 18px;
+    border: 0;
     border-bottom: 1px solid var(--border);
     background: var(--white);
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
 }
 
 .notification-item.unread {
     background: rgba(59, 130, 246, 0.08);
 }
 
-.notification-item h4 {
+.notification-item:hover,
+.notification-item:focus-visible {
+    background: color-mix(in srgb, var(--blue) 10%, var(--white));
+}
+
+.notification-icon {
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--blue) 12%, var(--white));
+}
+
+.notification-content {
+    display: grid;
+    gap: 4px;
+}
+
+.notification-item strong {
     color: var(--navy);
     font-size: 14px;
 }
 
-.notification-item p {
+.notification-content > span {
     color: var(--text-muted);
     font-size: 13px;
     line-height: 1.45;
@@ -163,6 +194,63 @@
     color: var(--text-muted);
     font-size: 12px;
     font-weight: 700;
+}
+
+.notification-unread-dot {
+    width: 8px;
+    height: 8px;
+    margin-top: 6px;
+    border-radius: 50%;
+    background: transparent;
+}
+
+.notification-item.unread .notification-unread-dot {
+    background: var(--blue);
+}
+
+.notification-empty,
+.notification-loading,
+.notification-error {
+    padding: 28px 18px;
+    color: var(--text-muted);
+    text-align: center;
+}
+
+.notification-empty {
+    display: grid;
+    gap: 6px;
+}
+
+.notification-empty > span {
+    font-size: 24px;
+}
+
+.notification-empty strong {
+    color: var(--navy);
+}
+
+.notification-empty p {
+    font-size: 13px;
+}
+
+.notification-footer {
+    padding: 12px 18px;
+    border-top: 1px solid var(--border);
+}
+
+.notification-footer button {
+    width: 100%;
+    border: 0;
+    background: transparent;
+    color: var(--blue);
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.notification-footer button:disabled {
+    color: var(--text-muted);
+    cursor: default;
+    opacity: 0.65;
 }
 
 .profile-menu {
@@ -426,6 +514,12 @@
 
     .search-box input {
         width: 100%;
+    }
+
+    .notification-dropdown {
+        left: 0;
+        right: 0;
+        width: auto;
     }
 
     .stats-grid,
