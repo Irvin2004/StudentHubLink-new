@@ -16,6 +16,7 @@ import {
 import { db } from "../firebase.js";
 import { COLLECTIONS } from "../config/firestore.js";
 import { areMutuals } from "./follows-service.js";
+import { log } from "../utils/logger.js";
 
 export function getConversationKey(firstUserId, secondUserId) {
     return [firstUserId, secondUserId]
@@ -121,7 +122,7 @@ export function subscribeToUserConversations(
     };
 
     const reportError = (error) => {
-        console.error("Conversation listener failed:", error);
+        log("CONVERSATIONS", "Conversation listener failed:", error);
         if (typeof onError === "function") onError(error);
     };
 

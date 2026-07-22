@@ -5,15 +5,21 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 
 import { auth } from "../firebase.js";
-import { renderDashboard } from "../renderers/dashboard-renderer.js";
+import { createDashboardRefreshManager } from "./dashboard-refresh.js?live=1";
+import { renderDashboard } from "../renderers/dashboard-renderer.js?live=1";
+import { subscribeToAssignments } from "../services/assignment-service.js?dashboard-live=1";
+import { subscribeToUserConversations } from "../services/conversation-service.js?dashboard-live=1";
 import { getDashboardData } from "../services/dashboard-service.js";
+import { subscribeToUserStudyGroups } from "../services/group-service.js?dashboard-live=1";
+import { subscribeToNotifications } from "../services/notification-service.js";
 import { getUserFriendlyErrorMessage } from "../utils/error-handler.js";
-import { error as logError } from "../utils/logger.js";
+import { error as logError, log } from "../utils/logger.js";
 
 let currentUser = null;
 let loadSequence = 0;
 let destroyed = false;
 let unsubscribeAuth = () => {};
+let stopLiveUpdates = () => {};
 
 function getRequiredElement(id) {
     const element = document.getElementById(id);
@@ -77,6 +83,148 @@ function updateDashboardIdentity(user, elements) {
     }).format(new Date());
 }
 
+function startLiveDashboardUpdates({
+    userId,
+    groups,
+    assignments,
+    refreshManager
+}) {
+    const subscriptions = [];
+    const assignmentSubscriptions = new Map();
+    const assignmentsByGroup = new Map();
+    let stopped = false;
+
+    asAssignmentGroups(assignments).forEach((groupAssignments, groupId) => {
+        assignmentsByGroup.set(groupId, groupAssignments);
+    });
+
+    const reportError = (widget, error) => {
+        log("DASHBOARD", `${widget} live update failed:`, error);
+    };
+
+    const refreshAllAssignments = () => {
+        refreshManager.refreshAssignments(
+            [...assignmentsByGroup.values()].flat()
+        );
+    };
+
+    const syncAssignmentSubscriptions = (nextGroups) => {
+        const nextGroupIds = new Set(
+            nextGroups.map((group) => group.id).filter(Boolean)
+        );
+
+        assignmentSubscriptions.forEach((unsubscribe, groupId) => {
+            if (nextGroupIds.has(groupId)) {
+                return;
+            }
+
+            unsubscribe();
+            assignmentSubscriptions.delete(groupId);
+            assignmentsByGroup.delete(groupId);
+        });
+
+        nextGroupIds.forEach((groupId) => {
+            if (assignmentSubscriptions.has(groupId)) {
+                return;
+            }
+
+            try {
+                const unsubscribe = subscribeToAssignments(
+                    groupId,
+                    (nextAssignments) => {
+                        if (stopped) return;
+                        assignmentsByGroup.set(groupId, nextAssignments);
+                        refreshAllAssignments();
+                    },
+                    (error) => reportError("Assignments", error)
+                );
+                assignmentSubscriptions.set(groupId, unsubscribe);
+            } catch (error) {
+                reportError("Assignments", error);
+            }
+        });
+
+        refreshAllAssignments();
+    };
+
+    const subscribeSafely = (widget, subscribe) => {
+        try {
+            const unsubscribe = subscribe();
+
+            if (typeof unsubscribe === "function") {
+                subscriptions.push(unsubscribe);
+            }
+        } catch (error) {
+            reportError(widget, error);
+        }
+    };
+
+    syncAssignmentSubscriptions(groups);
+
+    subscribeSafely("Notifications", () =>
+        subscribeToNotifications(
+            userId,
+            (notifications) => {
+                if (!stopped) {
+                    refreshManager.refreshNotifications(notifications);
+                }
+            },
+            (error) => reportError("Notifications", error)
+        )
+    );
+
+    subscribeSafely("Messages", () =>
+        subscribeToUserConversations(
+            userId,
+            (conversations) => {
+                if (!stopped) {
+                    refreshManager.refreshConversations(conversations);
+                }
+            },
+            (error) => reportError("Messages", error)
+        )
+    );
+
+    subscribeSafely("Groups", () =>
+        subscribeToUserStudyGroups(
+            userId,
+            (nextGroups) => {
+                if (stopped) return;
+                refreshManager.refreshGroups(nextGroups);
+                syncAssignmentSubscriptions(nextGroups);
+            },
+            (error) => reportError("Groups", error)
+        )
+    );
+
+    return () => {
+        if (stopped) return;
+
+        stopped = true;
+        subscriptions.forEach((unsubscribe) => unsubscribe());
+        assignmentSubscriptions.forEach((unsubscribe) => unsubscribe());
+        subscriptions.length = 0;
+        assignmentSubscriptions.clear();
+        assignmentsByGroup.clear();
+    };
+}
+
+function asAssignmentGroups(assignments) {
+    const groupedAssignments = new Map();
+
+    (Array.isArray(assignments) ? assignments : []).forEach((assignment) => {
+        const groupId = assignment?.groupId;
+
+        if (!groupId) return;
+
+        const groupAssignments = groupedAssignments.get(groupId) || [];
+        groupAssignments.push(assignment);
+        groupedAssignments.set(groupId, groupAssignments);
+    });
+
+    return groupedAssignments;
+}
+
 async function loadDashboard(elements, {
     preserveContent = false
 } = {}) {
@@ -105,6 +253,18 @@ async function loadDashboard(elements, {
         }
 
         renderDashboard(dashboardData, elements);
+        stopLiveUpdates();
+        const refreshManager = createDashboardRefreshManager({
+            data: dashboardData,
+            elements,
+            userId: currentUser.uid
+        });
+        stopLiveUpdates = startLiveDashboardUpdates({
+            userId: currentUser.uid,
+            groups: dashboardData.groups,
+            assignments: dashboardData.assignments,
+            refreshManager
+        });
         setViewState(elements, "success");
     } catch (error) {
         if (destroyed || requestId !== loadSequence) {
@@ -140,6 +300,7 @@ async function initialiseDashboard() {
 
         destroyed = true;
         loadSequence += 1;
+        stopLiveUpdates();
         unsubscribeAuth();
         elements.retryButton.removeEventListener("click", refresh);
         elements.refreshButton.removeEventListener("click", refresh);
@@ -157,6 +318,8 @@ async function initialiseDashboard() {
                 return;
             }
 
+            stopLiveUpdates();
+            stopLiveUpdates = () => {};
             currentUser = user;
             updateDashboardIdentity(user, elements);
             loadDashboard(elements);
@@ -178,3 +341,15 @@ async function initialiseDashboard() {
 }
 
 document.addEventListener("DOMContentLoaded", initialiseDashboard);
+
+window.addEventListener("pageshow", (event) => {
+    if (!event.persisted || !destroyed) {
+        return;
+    }
+
+    destroyed = false;
+    currentUser = null;
+    unsubscribeAuth = () => {};
+    stopLiveUpdates = () => {};
+    initialiseDashboard();
+});

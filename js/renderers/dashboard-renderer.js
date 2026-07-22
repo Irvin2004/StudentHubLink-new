@@ -27,6 +27,12 @@ const STAT_CARDS = Object.freeze([
         key: "unreadNotifications",
         link: "#dashboardNotifications",
         title: "Notifications"
+    },
+    {
+        icon: "&#128172;",
+        key: "unreadMessages",
+        link: "./messages.html",
+        title: "Messages"
     }
 ]);
 
@@ -192,11 +198,22 @@ function renderGroups(groups, container) {
 }
 
 export function renderDashboard(data = {}, elements = {}) {
-    renderStats(data.stats, elements.stats);
-    renderAssignments(data.assignments, elements.assignments);
-    renderDashboardNotifications(
-        data.notifications,
-        elements.notifications
-    );
-    renderGroups(data.groups, elements.groups);
+    if (elements.stats) {
+        renderStats(data.stats, elements.stats);
+    }
+
+    if (elements.assignments) {
+        renderAssignments(data.assignments, elements.assignments);
+    }
+
+    if (elements.notifications) {
+        renderDashboardNotifications(
+            data.notifications,
+            elements.notifications
+        );
+    }
+
+    if (elements.groups) {
+        renderGroups(data.groups, elements.groups);
+    }
 }

@@ -6,6 +6,7 @@ import {
     getDoc,
     getDocs,
     limit,
+    onSnapshot,
     orderBy,
     query,
     serverTimestamp,
@@ -158,6 +159,40 @@ export async function getAssignments(groupId) {
             ...assignmentDocument.data()
         }));
     });
+}
+
+export function subscribeToAssignments(
+    groupId,
+    onAssignments,
+    onError = () => {}
+) {
+    const cleanGroupId = validateGroupId(groupId);
+
+    if (typeof onAssignments !== "function") {
+        throw new Error("Assignment subscriber is required.");
+    }
+
+    const assignmentsQuery = query(
+        getAssignmentsCollection(cleanGroupId),
+        orderBy("dueDate", "asc"),
+        limit(100)
+    );
+
+    return onSnapshot(
+        assignmentsQuery,
+        (snapshot) => {
+            onAssignments(
+                snapshot.docs.map((assignmentDocument) => ({
+                    id: assignmentDocument.id,
+                    groupId: cleanGroupId,
+                    ...assignmentDocument.data()
+                }))
+            );
+        },
+        (error) => {
+            onError(normalizeFirestoreError(error));
+        }
+    );
 }
 
 export async function getAssignment(groupId, assignmentId) {

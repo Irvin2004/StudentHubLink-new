@@ -3,6 +3,7 @@ import {
     doc,
     getDoc,
     getDocs,
+    onSnapshot,
     query,
     runTransaction,
     serverTimestamp,
@@ -206,6 +207,76 @@ export async function getStudyGroups() {
         .sort((firstGroup, secondGroup) =>
             firstGroup.name.localeCompare(secondGroup.name)
         );
+}
+
+export function subscribeToUserStudyGroups(
+    userId,
+    onGroups,
+    onError = () => {}
+) {
+    const cleanUserId = typeof userId === "string"
+        ? userId.trim()
+        : "";
+
+    if (!cleanUserId) {
+        throw new Error("User ID is required.");
+    }
+
+    if (typeof onGroups !== "function") {
+        throw new Error("Study group subscriber is required.");
+    }
+
+    let emissionSequence = 0;
+    let destroyed = false;
+    const publicGroupsQuery = query(
+        collection(db, COLLECTIONS.GROUPS),
+        where("visibility", "==", GROUP_VISIBILITY.PUBLIC)
+    );
+
+    const unsubscribe = onSnapshot(
+        publicGroupsQuery,
+        async (snapshot) => {
+            const sequence = ++emissionSequence;
+            const groups = snapshot.docs
+                .map((groupDocument) => ({
+                    id: groupDocument.id,
+                    ...groupDocument.data()
+                }))
+                .sort((firstGroup, secondGroup) =>
+                    firstGroup.name.localeCompare(secondGroup.name)
+                );
+
+            try {
+                const memberships = await getStudyGroupMemberships(
+                    groups.map((group) => group.id),
+                    cleanUserId
+                );
+
+                if (destroyed || sequence !== emissionSequence) {
+                    return;
+                }
+
+                onGroups(
+                    groups.filter((group) => memberships.has(group.id))
+                );
+            } catch (error) {
+                if (!destroyed) {
+                    onError(error);
+                }
+            }
+        },
+        (error) => {
+            if (!destroyed) {
+                onError(error);
+            }
+        }
+    );
+
+    return () => {
+        destroyed = true;
+        emissionSequence += 1;
+        unsubscribe();
+    };
 }
 
 export async function getStudyGroupMemberships(
