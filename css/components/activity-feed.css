@@ -1,0 +1,175 @@
+.activity-feed {
+    display: grid;
+    gap: var(--space-6);
+}
+
+.activity-date-section + .activity-date-section {
+    padding-top: var(--space-5);
+    border-top: 1px solid var(--border);
+}
+
+.activity-date {
+    margin: 0 0 var(--space-3);
+    color: var(--text-secondary);
+    font-size: 0.8125rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+.activity-list {
+    position: relative;
+    display: grid;
+    gap: var(--space-2);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.activity-list::before {
+    position: absolute;
+    top: 24px;
+    bottom: 24px;
+    left: 34px;
+    width: 2px;
+    background: var(--border);
+    content: "";
+}
+
+.activity-item {
+    position: relative;
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr);
+    gap: var(--space-3);
+    padding: var(--space-3);
+    border-radius: var(--radius-md);
+    transition: background-color var(--transition-fast);
+}
+
+.activity-item:hover {
+    background: var(--surface-muted);
+}
+
+.activity-icon {
+    z-index: 1;
+    display: grid;
+    width: 44px;
+    height: 44px;
+    place-items: center;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+    background: var(--surface);
+    font-size: 1.125rem;
+}
+
+.activity-content {
+    display: grid;
+    min-width: 0;
+    align-content: center;
+    gap: var(--space-1);
+}
+
+.activity-content h4,
+.activity-content p {
+    margin: 0;
+}
+
+.activity-content h4 {
+    color: var(--text-primary);
+    font-size: 0.9375rem;
+    line-height: 1.4;
+}
+
+.activity-content p {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    line-height: 1.5;
+}
+
+.activity-time {
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+}
+
+.activity-state {
+    display: grid;
+    min-height: 180px;
+    padding: var(--space-8) var(--space-4);
+    place-items: center;
+    align-content: center;
+    gap: var(--space-2);
+    border: 1px dashed var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface);
+    color: var(--text-secondary);
+    text-align: center;
+}
+
+.activity-state strong {
+    color: var(--text-primary);
+}
+
+.activity-state p {
+    margin: 0;
+    font-size: 0.875rem;
+}
+
+.activity-state-icon {
+    font-size: 1.75rem;
+}
+
+.activity-loading {
+    justify-items: stretch;
+}
+
+.activity-loading > span:last-child {
+    justify-self: center;
+}
+
+.activity-loading-bar {
+    height: 52px;
+    border-radius: var(--radius-md);
+    background: linear-gradient(
+        90deg,
+        var(--surface-muted) 25%,
+        color-mix(in srgb, var(--surface-muted) 60%, var(--surface)) 50%,
+        var(--surface-muted) 75%
+    );
+    background-size: 200% 100%;
+    animation: activity-loading 1.4s ease-in-out infinite;
+}
+
+.activity-error strong {
+    color: var(--danger);
+}
+
+@keyframes activity-loading {
+    from { background-position: 200% 0; }
+    to { background-position: -200% 0; }
+}
+
+@media (max-width: 640px) {
+    .activity-item {
+        grid-template-columns: 40px minmax(0, 1fr);
+        padding-inline: var(--space-2);
+    }
+
+    .activity-icon {
+        width: 40px;
+        height: 40px;
+    }
+
+    .activity-list::before {
+        left: 28px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .activity-item {
+        transition: none;
+    }
+
+    .activity-loading-bar {
+        animation: none;
+    }
+}
