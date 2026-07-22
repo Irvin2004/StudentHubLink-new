@@ -1,0 +1,52 @@
+.reaction-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1, 0.25rem);
+    margin-top: var(--space-2, 0.5rem);
+}
+
+.reaction-chip {
+    display: inline-flex;
+    min-height: 1.875rem;
+    align-items: center;
+    gap: var(--space-1, 0.25rem);
+    padding: 0.25rem 0.625rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill, 999px);
+    background: var(--surface-muted);
+    color: var(--text-primary);
+    cursor: pointer;
+    font: inherit;
+    font-size: 0.8125rem;
+    transition: border-color var(--transition-fast),
+        background-color var(--transition-fast),
+        transform var(--transition-fast);
+}
+
+.reaction-chip:hover {
+    border-color: var(--primary);
+    transform: translateY(-1px);
+}
+
+.reaction-chip:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
+.reaction-chip.mine {
+    border-color: var(--primary);
+    background: var(--primary-soft);
+    color: var(--primary-hover);
+}
+
+.reaction-emoji {
+    font-size: 1rem;
+    line-height: 1;
+}
+
+.reaction-count {
+    min-width: 1ch;
+    font-weight: 800;
+    line-height: 1;
+    text-align: center;
+}

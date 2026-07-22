@@ -86,34 +86,6 @@ function getStatusIcon(message, options = {}) {
     return `<span class="sent" aria-label="Sent">&#10003;</span>`;
 }
 
-function renderReactions(message, currentUserId) {
-    if (message.deleted || message.deletedAt || !message.reactions) return "";
-
-    const reactions = Object.entries(message.reactions)
-        .filter(([, users]) => Array.isArray(users) && users.length > 0);
-
-    if (!reactions.length) return "";
-
-    return `
-        <div class="message-reactions">
-            ${reactions.map(([emoji, users]) => {
-                const reacted = users.includes(currentUserId);
-                return `
-                    <button
-                        class="reaction-chip${reacted ? " reacted" : ""}"
-                        type="button"
-                        data-emoji="${escapeHtml(emoji)}"
-                        aria-label="${escapeHtml(emoji)} reaction, ${users.length}"
-                        aria-pressed="${reacted}">
-                        ${escapeHtml(emoji)}
-                        <span>${users.length}</span>
-                    </button>
-                `;
-            }).join("")}
-        </div>
-    `;
-}
-
 export function createMessageBubble(message, currentUserId, options = {}) {
     const mine = message.senderId === currentUserId;
     const deleted = message.deleted || Boolean(message.deletedAt);
@@ -136,7 +108,6 @@ export function createMessageBubble(message, currentUserId, options = {}) {
                 ` : ""}
 
                 ${renderMessageContent(message)}
-                ${renderReactions(message, currentUserId)}
 
                 <div class="message-footer">
                     ${!deleted ? `<button

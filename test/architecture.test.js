@@ -63,6 +63,25 @@ test("reaction picker owns UI behavior without service coupling", () => {
     );
 });
 
+test("reaction renderer composes normalized reactions into messages", () => {
+    const renderer = read("js/renderers/reaction-renderer.js");
+    const messages = read("js/renderers/message-renderer.js");
+    const bubble = read("js/components/message-bubble.js");
+
+    assert.match(renderer, /export function renderReactionBar\(/);
+    assert.match(renderer, /export function renderReactionChip\(/);
+    assert.match(renderer, /export function clearReactionBar\(/);
+    assert.match(renderer, /data-message-id/);
+    assert.match(renderer, /data-reaction/);
+    assert.match(renderer, /mine/);
+    assert.doesNotMatch(
+        renderer,
+        /addEventListener|firestore|firebase|addReaction|removeReaction/
+    );
+    assert.match(messages, /renderReactionBar/);
+    assert.doesNotMatch(bubble, /function renderReactions/);
+});
+
 test("custom dialogs use the shared focus trap", () => {
     assert.match(read("js/components/image-viewer.js"), /activateFocusTrap/);
     assert.match(read("js/components/delete-message-dialog.js"), /activateFocusTrap/);

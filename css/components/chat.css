@@ -278,30 +278,3 @@
         font-size: 24px;
     }
 }
-
-.message-reactions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin-top: var(--space-2);
-}
-
-.reaction-chip {
-    display: flex;
-    align-items: center;
-    gap: var(--space-1);
-    padding: 4px 10px;
-    border: 1px solid transparent;
-    border-radius: var(--radius-pill);
-    background: var(--primary-soft);
-    color: var(--text-primary);
-    cursor: pointer;
-    font-size: 13px;
-}
-
-.reaction-chip:hover,
-.reaction-chip:focus-visible,
-.reaction-chip.reacted {
-    border-color: var(--primary);
-    outline: none;
-}

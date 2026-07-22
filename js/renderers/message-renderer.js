@@ -1,4 +1,5 @@
 import { createMessageBubble } from "../components/message-bubble.js?messaging=16";
+import { renderReactionBar } from "./reaction-renderer.js";
 
 export function renderMessages(
     messages,
@@ -12,11 +13,13 @@ export function renderMessages(
         return;
     }
 
-    container.innerHTML =
-    messages
+    const visibleMessages = messages
         .filter((message) =>
             !message.deletedFor?.includes(currentUserId)
-        )
+        );
+
+    container.innerHTML =
+    visibleMessages
         .map((message) =>
             createMessageBubble(
                 message,
@@ -25,6 +28,37 @@ export function renderMessages(
             )
         )
         .join("");
+
+    const messageRows = container.querySelectorAll(
+        ".message-row[data-message-id]"
+    );
+
+    messageRows.forEach((messageRow, index) => {
+        const message = visibleMessages[index];
+
+        if (
+            !message ||
+            message.deleted ||
+            message.deletedAt ||
+            !Array.isArray(message.reactions) ||
+            !message.reactions.length
+        ) {
+            return;
+        }
+
+        const reactionContainer = document.createElement("div");
+        reactionContainer.dataset.messageId = message.id || "";
+
+        renderReactionBar(
+            message.reactions,
+            currentUserId,
+            reactionContainer
+        );
+
+        messageRow
+            .querySelector(".message-footer")
+            ?.before(reactionContainer);
+    });
 
     container.scrollTop =
     container.scrollHeight;
