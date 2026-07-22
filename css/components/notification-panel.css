@@ -1,0 +1,139 @@
+.notification-panel-anchor {
+    position: relative;
+}
+
+.notification-bell-button {
+    position: relative;
+}
+
+.notification-panel {
+    position: absolute;
+    top: calc(100% + var(--space-3));
+    right: 0;
+    z-index: 100;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    width: min(380px, calc(100vw - 32px));
+    max-height: min(560px, calc(100vh - 96px));
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    box-shadow: var(--shadow-lg);
+    color: var(--text-primary);
+}
+
+.notification-panel[hidden] {
+    display: none;
+}
+
+.notification-panel-header {
+    padding: var(--space-4) var(--space-5);
+    border-bottom: 1px solid var(--border);
+}
+
+.notification-panel-header h2 {
+    margin: 0;
+    color: var(--text-primary);
+    font-size: 1rem;
+}
+
+.notification-panel-list {
+    min-height: 150px;
+    padding: var(--space-3);
+    overflow-y: auto;
+}
+
+.notification-panel-loading {
+    display: grid;
+    gap: var(--space-3);
+    padding: var(--space-2) 0;
+}
+
+.notification-panel-skeleton {
+    height: 76px;
+    border-radius: var(--radius-md);
+    background: linear-gradient(
+        90deg,
+        var(--surface-muted) 25%,
+        color-mix(in srgb, var(--surface-muted) 60%, var(--surface)) 50%,
+        var(--surface-muted) 75%
+    );
+    background-size: 200% 100%;
+    animation: notification-panel-loading 1.4s ease-in-out infinite;
+}
+
+.notification-panel-footer {
+    padding: var(--space-3) var(--space-5);
+    border-top: 1px solid var(--border);
+}
+
+.notification-panel-mark-all {
+    width: 100%;
+    padding: var(--space-2);
+    border: 0;
+    background: transparent;
+    color: var(--primary);
+    font: inherit;
+    font-size: 0.875rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.notification-panel-mark-all:disabled {
+    color: var(--text-secondary);
+    cursor: default;
+    opacity: 0.65;
+}
+
+.notification-panel-error {
+    margin: 0;
+    padding: var(--space-6) var(--space-4);
+    color: var(--danger);
+    text-align: center;
+}
+
+.notification-badge {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    display: grid;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 5px;
+    place-items: center;
+    border: 2px solid var(--surface);
+    border-radius: var(--radius-pill);
+    background: var(--danger);
+    color: #fff;
+    font-size: 0.6875rem;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.notification-badge[hidden] {
+    display: none;
+}
+
+@keyframes notification-panel-loading {
+    from { background-position: 200% 0; }
+    to { background-position: -200% 0; }
+}
+
+@media (max-width: 640px) {
+    .notification-panel {
+        position: fixed;
+        top: 72px;
+        right: var(--space-3);
+        left: var(--space-3);
+        width: auto;
+        max-height: calc(100vh - 84px);
+        border-radius: var(--radius-md);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .notification-panel-skeleton {
+        animation: none;
+    }
+}
