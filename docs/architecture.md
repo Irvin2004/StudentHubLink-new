@@ -19,6 +19,7 @@ Pages
   -> Controllers
   -> Renderers
   -> Components
+  -> Domain Events
   -> Services
   -> Firebase
 ```
@@ -32,6 +33,8 @@ Pages
 - `js/pages/`: route bootstraps that connect a page's DOM to controllers and services.
 - `js/renderers/`: data-to-UI rendering modules.
 - `js/services/`: Firebase access and business-facing service modules.
+- `js/models/`: pure validation and normalization for persisted domain data.
+- `js/events/`: post-write domain events that coordinate secondary actions such as notifications.
 - `js/utils/`: shared helpers for DOM, formatting, errors, logging, and constants.
 
 ## Backend
@@ -60,6 +63,20 @@ functions/
 ```
 
 ## Current Backend Flow
+
+Notifications use a recipient-owned collection and event-proven writes:
+
+```text
+Primary service write
+  -> Domain event
+  -> Notification service
+  -> users/{recipientId}/notifications/{notificationId}
+  -> Real-time notification controller subscription
+```
+
+Firestore rules validate the source assignment, message, resource, or friend
+request before allowing a cross-user notification. Notification failure remains
+secondary and never rolls back the primary action.
 
 Reviews are now backend-owned for rating aggregation:
 

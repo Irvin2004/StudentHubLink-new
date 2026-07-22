@@ -4,6 +4,7 @@ import {
     doc,
     getDoc,
     getDocs,
+    limit,
     orderBy,
     query,
     serverTimestamp
@@ -156,7 +157,8 @@ export async function getGroupResources(groupId) {
 
     const resourcesQuery = query(
         collection(db, "groups", groupId, "resources"),
-        orderBy("createdAt", "desc")
+        orderBy("createdAt", "desc"),
+        limit(100)
     );
     const snapshot = await getDocs(resourcesQuery);
 

@@ -32,6 +32,119 @@ service cloud.firestore {
         || request.resource.data[field] == resource.data[field];
     }
 
+    function notificationFieldsAreValid(userId) {
+      return request.resource.data.keys().hasOnly([
+          "recipientId", "senderId", "groupId", "conversationId",
+          "referenceId", "title", "message", "type", "read",
+          "createdAt", "updatedAt"
+        ])
+        && request.resource.data.keys().hasAll([
+          "recipientId", "senderId", "groupId", "conversationId",
+          "referenceId", "title", "message", "type", "read",
+          "createdAt", "updatedAt"
+        ])
+        && request.resource.data.recipientId == userId
+        && request.resource.data.recipientId is string
+        && request.resource.data.senderId is string
+        && request.resource.data.title is string
+        && request.resource.data.title.size() > 0
+        && request.resource.data.title.size() <= 120
+        && request.resource.data.message is string
+        && request.resource.data.message.size() > 0
+        && request.resource.data.message.size() <= 500
+        && request.resource.data.type in [
+          "friend_request", "friend_accepted", "group_invite",
+          "new_assignment", "assignment_due", "new_resource",
+          "new_message", "mention", "system"
+        ]
+        && request.resource.data.read == false
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.updatedAt == request.time;
+    }
+
+    function assignmentNotificationIsValid(userId) {
+      let assignmentPath = /databases/$(database)/documents/groups/$(request.resource.data.groupId)/assignments/$(request.resource.data.referenceId);
+      let memberPath = /databases/$(database)/documents/groups/$(request.resource.data.groupId)/members/$(userId);
+      return request.resource.data.type in ["new_assignment", "assignment_due"]
+        && request.resource.data.senderId == request.auth.uid
+        && userId != request.auth.uid
+        && exists(assignmentPath)
+        && get(assignmentPath).data.createdBy == request.auth.uid
+        && exists(memberPath);
+    }
+
+    function messageNotificationIsValid(userId) {
+      let messagePath = /databases/$(database)/documents/messages/$(request.resource.data.referenceId);
+      let conversationPath = /databases/$(database)/documents/conversations/$(request.resource.data.conversationId);
+      return request.resource.data.type in ["new_message", "mention"]
+        && request.resource.data.senderId == request.auth.uid
+        && userId != request.auth.uid
+        && exists(messagePath)
+        && exists(conversationPath)
+        && get(messagePath).data.senderId == request.auth.uid
+        && get(messagePath).data.conversationId == request.resource.data.conversationId
+        && (
+          (
+            get(conversationPath).data.get("type", "direct") == "direct"
+            && userId in get(conversationPath).data.participantIds
+          )
+          || (
+            get(conversationPath).data.get("type", "direct") == "group"
+            && request.resource.data.groupId == get(conversationPath).data.groupId
+            && exists(/databases/$(database)/documents/groups/$(request.resource.data.groupId)/members/$(userId))
+          )
+        );
+    }
+
+    function friendNotificationIsValid(userId) {
+      let friendRequestPath = /databases/$(database)/documents/friendRequests/$(request.resource.data.referenceId);
+      return exists(friendRequestPath)
+        && (
+          (
+            request.resource.data.type == "friend_request"
+            && get(friendRequestPath).data.status == "pending"
+            && get(friendRequestPath).data.senderId == request.auth.uid
+            && get(friendRequestPath).data.receiverId == userId
+          )
+          || (
+            request.resource.data.type == "friend_accepted"
+            && get(friendRequestPath).data.status == "accepted"
+            && get(friendRequestPath).data.receiverId == request.auth.uid
+            && get(friendRequestPath).data.senderId == userId
+          )
+        );
+    }
+
+    function resourceNotificationIsValid(userId) {
+      let resourcePath = /databases/$(database)/documents/groups/$(request.resource.data.groupId)/resources/$(request.resource.data.referenceId);
+      return request.resource.data.type == "new_resource"
+        && request.resource.data.senderId == request.auth.uid
+        && userId != request.auth.uid
+        && exists(resourcePath)
+        && get(resourcePath).data.uploaderId == request.auth.uid
+        && exists(/databases/$(database)/documents/groups/$(request.resource.data.groupId)/members/$(userId));
+    }
+
+    function notificationSourceIsValid(userId) {
+      return isAdmin()
+        || (
+          request.resource.data.type in ["new_assignment", "assignment_due"]
+          && assignmentNotificationIsValid(userId)
+        )
+        || (
+          request.resource.data.type in ["new_message", "mention"]
+          && messageNotificationIsValid(userId)
+        )
+        || (
+          request.resource.data.type in ["friend_request", "friend_accepted"]
+          && friendNotificationIsValid(userId)
+        )
+        || (
+          request.resource.data.type == "new_resource"
+          && resourceNotificationIsValid(userId)
+        );
+    }
+
     match /users/{userId} {
       allow read: if signedIn()
         && (
@@ -135,11 +248,39 @@ service cloud.firestore {
     match /reviews/{reviewId} {
       allow read: if true;
       allow create: if signedIn()
-        && request.resource.data.userId == request.auth.uid;
+        && reviewId == request.resource.data.resourceId + "_" + request.auth.uid
+        && request.resource.data.keys().hasOnly([
+          "resourceId", "userId", "userName", "rating", "review",
+          "createdAt", "updatedAt"
+        ])
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.resourceId is string
+        && request.resource.data.resourceId.size() > 0
+        && request.resource.data.userName is string
+        && request.resource.data.userName.size() > 0
+        && request.resource.data.userName.size() <= 120
+        && request.resource.data.rating is int
+        && request.resource.data.rating >= 1
+        && request.resource.data.rating <= 5
+        && request.resource.data.review is string
+        && request.resource.data.review.size() > 0
+        && request.resource.data.review.size() <= 1000
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.updatedAt == request.time;
       allow update: if signedIn()
         && resource.data.userId == request.auth.uid
         && request.resource.data.userId == resource.data.userId
-        && request.resource.data.resourceId == resource.data.resourceId;
+        && request.resource.data.resourceId == resource.data.resourceId
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(["rating", "review", "updatedAt"])
+        && request.resource.data.rating is int
+        && request.resource.data.rating >= 1
+        && request.resource.data.rating <= 5
+        && request.resource.data.review is string
+        && request.resource.data.review.size() > 0
+        && request.resource.data.review.size() <= 1000
+        && request.resource.data.updatedAt == request.time;
       allow delete: if isAdmin()
         || (signedIn() && resource.data.userId == request.auth.uid);
     }
@@ -147,11 +288,32 @@ service cloud.firestore {
     match /comments/{commentId} {
       allow read: if true;
       allow create: if signedIn()
-        && request.resource.data.userId == request.auth.uid;
+        && request.resource.data.keys().hasOnly([
+          "resourceId", "userId", "userName", "message",
+          "createdAt", "updatedAt"
+        ])
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.resourceId is string
+        && request.resource.data.resourceId.size() > 0
+        && request.resource.data.userName is string
+        && request.resource.data.userName.size() > 0
+        && request.resource.data.userName.size() <= 120
+        && request.resource.data.message is string
+        && request.resource.data.message.size() > 0
+        && request.resource.data.message.size() <= 1000
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.updatedAt == request.time;
       allow update: if signedIn()
         && resource.data.userId == request.auth.uid
         && request.resource.data.userId == resource.data.userId
-        && request.resource.data.resourceId == resource.data.resourceId;
+        && request.resource.data.resourceId == resource.data.resourceId
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(["message", "updatedAt"])
+        && request.resource.data.message is string
+        && request.resource.data.message.size() > 0
+        && request.resource.data.message.size() <= 1000
+        && request.resource.data.updatedAt == request.time;
       allow delete: if isAdmin()
         || (signedIn() && resource.data.userId == request.auth.uid);
     }
@@ -692,68 +854,19 @@ service cloud.firestore {
       allow create, update, delete: if isAdmin();
     }
 
-    match /notifications/{notificationId} {
-      allow read: if signedIn()
-        && (
-          resource.data.get("recipientId", "") == request.auth.uid
-          || resource.data.get("userId", "") == request.auth.uid
-        );
+    match /users/{userId}/notifications/{notificationId} {
+      allow read: if isOwner(userId)
+        && resource.data.recipientId == userId;
       allow create: if signedIn()
-        && (
-          request.resource.data.recipientId == request.auth.uid
-          || isAdmin()
-        )
-        && request.resource.data.keys().hasOnly([
-          "recipientId",
-          "senderId",
-          "groupId",
-          "referenceId",
-          "title",
-          "message",
-          "type",
-          "read",
-          "createdAt"
-        ])
-        && request.resource.data.keys().hasAll([
-          "recipientId",
-          "senderId",
-          "groupId",
-          "referenceId",
-          "title",
-          "message",
-          "type",
-          "read",
-          "createdAt"
-        ])
-        && request.resource.data.recipientId is string
-        && request.resource.data.title is string
-        && request.resource.data.message is string
-        && request.resource.data.type in [
-          "friend_request",
-          "friend_accepted",
-          "group_invite",
-          "new_assignment",
-          "new_resource",
-          "new_message",
-          "mention",
-          "system"
-        ]
-        && request.resource.data.read == false
-        && request.resource.data.createdAt == request.time;
-      allow update: if signedIn()
-        && (
-          resource.data.get("recipientId", "") == request.auth.uid
-          || resource.data.get("userId", "") == request.auth.uid
-        )
+        && notificationFieldsAreValid(userId)
+        && notificationSourceIsValid(userId);
+      allow update: if isOwner(userId)
+        && resource.data.recipientId == userId
         && request.resource.data.diff(resource.data).affectedKeys()
-          .hasOnly(["read"])
-        && request.resource.data.read is bool;
-      allow delete: if signedIn()
-        && (
-          resource.data.get("recipientId", "") == request.auth.uid
-          || resource.data.get("userId", "") == request.auth.uid
-          || isAdmin()
-        );
+          .hasOnly(["read", "updatedAt"])
+        && request.resource.data.read is bool
+        && request.resource.data.updatedAt == request.time;
+      allow delete: if isOwner(userId) || isAdmin();
     }
 
     match /achievements/{achievementId} {

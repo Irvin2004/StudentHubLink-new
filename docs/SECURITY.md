@@ -44,7 +44,13 @@ Students cannot:
 - Change their own UID.
 - Update derived rating totals directly.
 - Award themselves achievements directly.
-- Create notifications for other users.
+- Create arbitrary notifications for other users.
+
+Cross-user notifications are allowed only when rules verify the source event:
+
+- The referenced assignment/resource exists and both users belong to its group.
+- The referenced message belongs to a conversation accessible to the recipient.
+- The referenced friend request matches the sender, recipient, and lifecycle state.
 
 ### Admins
 
@@ -71,7 +77,7 @@ Cloud Functions own sensitive business logic, including:
 
 - Rating aggregation
 - Achievement awarding
-- Cross-user notifications
+- Privileged/system notifications
 - Derived statistics
 - Future analytics counters
 
@@ -88,7 +94,7 @@ firebase deploy --only firestore:rules
 The following frontend writes are expected to move to Cloud Functions:
 
 - Achievement creation
-- Cross-user notification creation
+- Move high-volume notification fan-out to Cloud Functions as usage grows.
 - Resource download counters
 - User reputation/statistics counters
 - Advanced moderation workflows

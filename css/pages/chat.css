@@ -77,6 +77,11 @@
     color: white;
 }
 
+.message-row.message-targeted .message-bubble {
+    outline: 3px solid var(--primary);
+    outline-offset: 3px;
+}
+
 .message-bubble p {
     margin-bottom: 8px;
 }

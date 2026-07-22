@@ -20,6 +20,7 @@ import { showToast } from "../utils/toast.js";
 import {
     collection,
     getDocs,
+    limit,
     orderBy,
     query,
     where
@@ -43,7 +44,8 @@ async function getApprovedResources() {
     query(
         collection(db, "resources"),
         where("status", "==", RESOURCE_STATUS.APPROVED),
-        orderBy("createdAt", "desc")
+        orderBy("createdAt", "desc"),
+        limit(100)
     );
 
     try {
@@ -61,7 +63,8 @@ async function getApprovedResources() {
     const fallbackQuery =
     query(
         collection(db, "resources"),
-        where("status", "==", RESOURCE_STATUS.APPROVED)
+        where("status", "==", RESOURCE_STATUS.APPROVED),
+        limit(100)
     );
 
     const snapshot =

@@ -53,6 +53,9 @@ function getNotificationDestination(notification) {
         notification.referenceId || ""
     );
     const senderId = encodeURIComponent(notification.senderId || "");
+    const conversationId = encodeURIComponent(
+        notification.conversationId || ""
+    );
 
     switch (notification.type) {
         case NOTIFICATION_TYPES.NEW_ASSIGNMENT:
@@ -63,8 +66,11 @@ function getNotificationDestination(notification) {
 
         case NOTIFICATION_TYPES.NEW_MESSAGE:
         case NOTIFICATION_TYPES.MENTION:
-            return notification.referenceId
-                ? `${pagesPrefix}chat.html?id=${referenceId}`
+            return notification.conversationId
+                ? `${pagesPrefix}chat.html?id=${conversationId}` +
+                    (notification.referenceId
+                        ? `&message=${referenceId}`
+                        : "")
                 : `${pagesPrefix}messages.html`;
 
         case NOTIFICATION_TYPES.NEW_RESOURCE:

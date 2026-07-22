@@ -8,6 +8,9 @@ The format follows a lightweight version of [Keep a Changelog](https://keepachan
 
 ### Added
 
+- Added recipient-owned real-time notifications with assignment, message, and friend-request domain events.
+- Added pure review/comment models and dependency-free architecture regression tests.
+
 - Added password-reset and email-verification workflows.
 - Added editable student profile fields with Firebase Auth and Firestore updates.
 - Added required Firestore indexes for ordered resources and notifications.
@@ -22,6 +25,10 @@ The format follows a lightweight version of [Keep a Changelog](https://keepachan
   - `docs/roadmap.md`
 
 ### Changed
+
+- Hardened notification, review, and comment Firestore authorization and validation.
+- Added bounded list/listener queries and cached group notification recipient lookups.
+- Standardized focus trapping for custom image and message-deletion dialogs.
 
 - Unified resource upload validation around the shared 25 MB policy and Office-file support.
 - Improved conversation-load failures with an explicit error state.

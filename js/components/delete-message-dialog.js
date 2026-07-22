@@ -1,3 +1,5 @@
+import { activateFocusTrap } from "../utils/focus-trap.js";
+
 let activeDialog = null;
 
 export function openDeleteMessageDialog({
@@ -5,7 +7,6 @@ export function openDeleteMessageDialog({
 } = {}) {
     activeDialog?.remove();
 
-    const previousFocus = document.activeElement;
     const dialog = document.createElement("div");
 
     activeDialog = dialog;
@@ -87,22 +88,13 @@ export function openDeleteMessageDialog({
     document.body.appendChild(dialog);
 
     return new Promise((resolve) => {
+        let deactivateFocusTrap = null;
         const finish = (choice) => {
-            document.removeEventListener("keydown", onKeydown);
+            deactivateFocusTrap?.();
             dialog.remove();
             activeDialog = null;
 
-            if (previousFocus instanceof HTMLElement) {
-                previousFocus.focus();
-            }
-
             resolve(choice);
-        };
-
-        const onKeydown = (event) => {
-            if (event.key === "Escape") {
-                finish(null);
-            }
         };
 
         dialog.addEventListener("click", (event) => {
@@ -127,13 +119,15 @@ export function openDeleteMessageDialog({
                 finish(selectedScope?.value || "me");
             });
 
-        document.addEventListener("keydown", onKeydown);
-
-        (
+        const initialFocus = (
             dialog.querySelector(
                 'input[name="deleteScope"]:checked'
             ) ||
             dialog.querySelector("[data-delete-cancel]")
-        )?.focus();
+        );
+        deactivateFocusTrap = activateFocusTrap(dialog, {
+            initialFocus,
+            onEscape: () => finish(null)
+        });
     });
 }

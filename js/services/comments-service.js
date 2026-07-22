@@ -4,6 +4,7 @@ import {
     deleteDoc,
     doc,
     getDocs,
+    limit,
     onSnapshot,
     orderBy,
     query,
@@ -14,6 +15,10 @@ import {
 
 import { db } from "../firebase.js";
 import { COLLECTIONS } from "../config/firestore.js";
+import {
+    createCommentModel,
+    createCommentUpdateModel
+} from "../models/comment.js";
 
 export async function addComment({
     resourceId,
@@ -21,20 +26,14 @@ export async function addComment({
     userName,
     message
 }) {
-    const cleanMessage =
-    message.trim();
-
-    if (!resourceId || !userId || !cleanMessage) {
-        throw new Error("Comment details are incomplete.");
-    }
+    const comment = createCommentModel({
+        resourceId, userId, userName, message
+    });
 
     const commentRef = await addDoc(
         collection(db, COLLECTIONS.COMMENTS),
         {
-            resourceId,
-            userId,
-            userName: userName || "Student",
-            message: cleanMessage,
+            ...comment,
             createdAt: serverTimestamp(),
             updatedAt: serverTimestamp()
         }
@@ -47,7 +46,8 @@ export async function getCommentsForResource(resourceId) {
     const commentsQuery = query(
         collection(db, COLLECTIONS.COMMENTS),
         where("resourceId", "==", resourceId),
-        orderBy("createdAt", "asc")
+        orderBy("createdAt", "asc"),
+        limit(200)
     );
 
     const snapshot = await getDocs(commentsQuery);
@@ -62,7 +62,8 @@ export function subscribeToComments(resourceId, callback) {
     const commentsQuery = query(
         collection(db, COLLECTIONS.COMMENTS),
         where("resourceId", "==", resourceId),
-        orderBy("createdAt", "asc")
+        orderBy("createdAt", "asc"),
+        limit(200)
     );
 
     return onSnapshot(
@@ -80,17 +81,12 @@ export function subscribeToComments(resourceId, callback) {
 }
 
 export async function updateComment(commentId, message) {
-    const cleanMessage =
-    message.trim();
-
-    if (!cleanMessage) {
-        throw new Error("Comment cannot be empty.");
-    }
+    const updates = createCommentUpdateModel({ message });
 
     await updateDoc(
         doc(db, COLLECTIONS.COMMENTS, commentId),
         {
-            message: cleanMessage,
+            ...updates,
             updatedAt: serverTimestamp()
         }
     );

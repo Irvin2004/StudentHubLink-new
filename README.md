@@ -89,6 +89,7 @@ Pages
   -> Controllers
   -> Renderers
   -> Components
+  -> Domain Events
   -> Services
   -> Firebase
   -> Cloud Functions

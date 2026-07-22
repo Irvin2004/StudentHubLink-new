@@ -1,4 +1,4 @@
-import { auth, db } from "../firebase.js";
+import { auth } from "../firebase.js";
 import { createResourceCard } from "../components/resource-card.js";
 import {
     initializeCommentForm
@@ -7,6 +7,10 @@ import {
     subscribeAndRenderComments
 } from "../renderers/comment-renderer.js";
 import { handleResourceAction } from "../services/marketplace-actions-service.js";
+import {
+    getMarketplaceResource,
+    subscribeToMarketplaceResource
+} from "../services/marketplace-resource-service.js";
 import {
     getRelatedResources
 } from "../services/recommendation-service.js";
@@ -22,12 +26,6 @@ import { formatPrice } from "../utils/format-price.js";
 import { handleError } from "../utils/error-handler.js?security=1";
 import { error as logError } from "../utils/logger.js";
 import { showToast } from "../utils/toast.js";
-
-import {
-    doc,
-    getDoc,
-    onSnapshot
-} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
 const params =
 new URLSearchParams(window.location.search);
@@ -47,18 +45,12 @@ async function loadResourceDetails() {
         return;
     }
 
-    const resourceSnap =
-    await getDoc(doc(db, "resources", resourceId));
+    const resource = await getMarketplaceResource(resourceId);
 
-    if (!resourceSnap.exists()) {
+    if (!resource) {
         document.body.innerHTML = "<p>Resource does not exist.</p>";
         return;
     }
-
-    const resource = {
-        id: resourceSnap.id,
-        ...resourceSnap.data()
-    };
 
     renderResourceDetails(resource);
     await renderReviews(resource);
@@ -87,17 +79,12 @@ function subscribeToResourceUpdates(resourceId) {
     }
 
     unsubscribeResource =
-    onSnapshot(
-        doc(db, "resources", resourceId),
-        async (snapshot) => {
-            if (!snapshot.exists()) {
+    subscribeToMarketplaceResource(
+        resourceId,
+        async (resource) => {
+            if (!resource) {
                 return;
             }
-
-            const resource = {
-                id: snapshot.id,
-                ...snapshot.data()
-            };
 
             renderResourceDetails(resource);
             await renderReviews(resource);

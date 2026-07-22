@@ -8,6 +8,7 @@ import { escapeHtml } from "../utils/dom.js";
 import { formatDate } from "../utils/format-date.js";
 import { formatPrice } from "../utils/format-price.js";
 import { formatFileSize } from "../utils/format-file-size.js";
+import { sanitizeUrl } from "../utils/validators.js";
 import { getResourceCategoryLabel } from "../config/resource-categories.js";
 
 function createResourceActions(resource, mode) {
@@ -35,10 +36,12 @@ function createResourceActions(resource, mode) {
 
     if (mode === "library") {
         const fileUrl =
-        resource.fileUrl || resource.downloadUrl || "";
+        sanitizeUrl(resource.fileUrl || resource.downloadUrl || "");
+
+        const hasFileUrl = fileUrl !== "#";
 
         const openAction =
-        fileUrl ?
+        hasFileUrl ?
         `<a class="btn-secondary" href="${escapeHtml(fileUrl)}" target="_blank" rel="noopener">
             Open
         </a>` :
@@ -47,7 +50,7 @@ function createResourceActions(resource, mode) {
         </button>`;
 
         const downloadAgainAction =
-        fileUrl ?
+        hasFileUrl ?
         `<a class="btn-primary" href="${escapeHtml(fileUrl)}" target="_blank" rel="noopener">
             Download Again
         </a>` :

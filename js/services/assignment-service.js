@@ -5,6 +5,7 @@ import {
     doc,
     getDoc,
     getDocs,
+    limit,
     orderBy,
     query,
     serverTimestamp,
@@ -146,7 +147,8 @@ export async function getAssignments(groupId) {
     return runFirestoreOperation(async () => {
         const assignmentsQuery = query(
             getAssignmentsCollection(cleanGroupId),
-            orderBy("dueDate", "asc")
+            orderBy("dueDate", "asc"),
+            limit(100)
         );
         const snapshot = await getDocs(assignmentsQuery);
 

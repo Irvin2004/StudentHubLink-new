@@ -168,7 +168,8 @@ export async function acceptFriendRequest(requestId, recipientId) {
     try {
         await emitFriendRequestAccepted({
             senderId: friendRequest.senderId,
-            recipientId: cleanRecipientId
+            recipientId: cleanRecipientId,
+            requestId: cleanRequestId
         });
     } catch (error) {
         logError(

@@ -1,26 +1,10 @@
 import { NOTIFICATION_TYPES } from "../config/notification-types.js";
-import { getStudyGroupMembers } from "../services/group-service.js";
 import { createNotification } from "../services/notification-service.js";
 import { error as logError } from "../utils/logger.js";
-
-function cleanId(value) {
-    return typeof value === "string"
-        ? value.trim()
-        : "";
-}
-
-async function getAssignmentRecipients(groupId, creatorId) {
-    const members = await getStudyGroupMembers(groupId);
-    const cleanCreatorId = cleanId(creatorId);
-
-    return Array.from(new Set(
-        members
-            .map((member) => cleanId(member.userId || member.id))
-            .filter((memberId) => (
-                memberId && memberId !== cleanCreatorId
-            ))
-    ));
-}
+import {
+    cleanEventId,
+    getGroupEventRecipients
+} from "./recipient-utils.js";
 
 export async function emitAssignmentCreated({
     assignment,
@@ -28,9 +12,9 @@ export async function emitAssignmentCreated({
     creatorId
 } = {}) {
     try {
-        const cleanGroupId = cleanId(groupId);
-        const cleanCreatorId = cleanId(creatorId);
-        const recipients = await getAssignmentRecipients(
+        const cleanGroupId = cleanEventId(groupId);
+        const cleanCreatorId = cleanEventId(creatorId);
+        const recipients = await getGroupEventRecipients(
             cleanGroupId,
             cleanCreatorId
         );

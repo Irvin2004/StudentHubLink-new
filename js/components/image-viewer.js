@@ -1,15 +1,15 @@
 import { sanitizeUrl } from "../utils/validators.js";
+import { activateFocusTrap } from "../utils/focus-trap.js";
 
-let previouslyFocusedElement = null;
+let deactivateFocusTrap = null;
 
 function closeImageViewer(viewer) {
     viewer.classList.remove("show");
     viewer.setAttribute("aria-hidden", "true");
     document.body.classList.remove("image-viewer-open");
 
-    if (previouslyFocusedElement instanceof HTMLElement) {
-        previouslyFocusedElement.focus();
-    }
+    deactivateFocusTrap?.();
+    deactivateFocusTrap = null;
 }
 
 function createImageViewer() {
@@ -50,15 +50,6 @@ function createImageViewer() {
         .querySelector(".image-viewer-close")
         .addEventListener("click", () => closeImageViewer(viewer));
 
-    document.addEventListener("keydown", (event) => {
-        if (
-            event.key === "Escape" &&
-            viewer.classList.contains("show")
-        ) {
-            closeImageViewer(viewer);
-        }
-    });
-
     document.body.appendChild(viewer);
     return viewer;
 }
@@ -77,11 +68,13 @@ export function openImageViewer(imageUrl, imageName = "Image") {
     const image = viewer.querySelector(".image-viewer-image");
     const closeButton = viewer.querySelector(".image-viewer-close");
 
-    previouslyFocusedElement = document.activeElement;
     image.src = safeImageUrl;
     image.alt = imageName || "Image";
     viewer.classList.add("show");
     viewer.setAttribute("aria-hidden", "false");
     document.body.classList.add("image-viewer-open");
-    closeButton.focus();
+    deactivateFocusTrap = activateFocusTrap(viewer, {
+        initialFocus: closeButton,
+        onEscape: () => closeImageViewer(viewer)
+    });
 }

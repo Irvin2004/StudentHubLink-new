@@ -1,18 +1,23 @@
 import {
-    addDoc,
     collection,
     deleteDoc,
     doc,
     getDocs,
+    limit,
     orderBy,
     query,
     serverTimestamp,
+    setDoc,
     updateDoc,
     where
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
 import { db } from "../firebase.js";
 import { COLLECTIONS } from "../config/firestore.js";
+import {
+    createReviewModel,
+    createReviewUpdateModel
+} from "../models/review.js";
 
 export async function addReview({
     resourceId,
@@ -21,9 +26,9 @@ export async function addReview({
     rating,
     review
 }) {
-    if (!resourceId || !userId) {
-        throw new Error("Resource and user details are required.");
-    }
+    const reviewData = createReviewModel({
+        resourceId, userId, userName, rating, review
+    });
 
     const existingReview =
         await getUserReview(resourceId, userId);
@@ -32,14 +37,15 @@ export async function addReview({
         throw new Error("You have already reviewed this resource.");
     }
 
-    const reviewRef = await addDoc(
-        collection(db, COLLECTIONS.REVIEWS),
+    const reviewRef = doc(
+        db,
+        COLLECTIONS.REVIEWS,
+        `${reviewData.resourceId}_${reviewData.userId}`
+    );
+    await setDoc(
+        reviewRef,
         {
-            resourceId,
-            userId,
-            userName: userName || "Student",
-            rating: Number(rating),
-            review: review.trim(),
+            ...reviewData,
             createdAt: serverTimestamp(),
             updatedAt: serverTimestamp()
         }
@@ -52,7 +58,8 @@ export async function getReviewsForResource(resourceId) {
     const reviewsQuery = query(
         collection(db, COLLECTIONS.REVIEWS),
         where("resourceId", "==", resourceId),
-        orderBy("createdAt", "desc")
+        orderBy("createdAt", "desc"),
+        limit(100)
     );
 
     const snapshot = await getDocs(reviewsQuery);
@@ -89,11 +96,11 @@ export async function updateReview({
     rating,
     review
 }) {
+    const updates = createReviewUpdateModel({ rating, review });
     await updateDoc(
         doc(db, COLLECTIONS.REVIEWS, reviewId),
         {
-            rating: Number(rating),
-            review: review.trim(),
+            ...updates,
             updatedAt: serverTimestamp()
         }
     );

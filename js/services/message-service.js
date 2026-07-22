@@ -3,9 +3,11 @@ import {
     doc,
     getDocs,
     increment,
+    limitToLast,
     onSnapshot,
     orderBy,
     query,
+    runTransaction,
     serverTimestamp,
     arrayUnion,
     updateDoc,
@@ -273,7 +275,8 @@ export function subscribeToMessages(
     const messagesQuery = query(
         collection(db, COLLECTIONS.MESSAGES),
         where("conversationId", "==", conversationId),
-        orderBy("createdAt", "asc")
+        orderBy("createdAt", "asc"),
+        limitToLast(200)
     );
 
     return onSnapshot(

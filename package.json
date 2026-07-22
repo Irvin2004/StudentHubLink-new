@@ -1,0 +1,9 @@
+{
+  "name": "studenthub-web",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "node scripts/check-js.mjs && node --test",
+    "test": "node --test"
+  }
+}

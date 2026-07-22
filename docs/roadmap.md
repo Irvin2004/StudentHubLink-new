@@ -34,13 +34,15 @@
 - Real-time chat
 - Typing indicators
 - Notifications
+- Recipient-owned real-time notification panel
+- Assignment, message, and friend-request domain events
 
 ## Version 1.4
 
 - Backend-owned business logic
 - Cloud Functions for ratings
 - Cloud Functions for achievements
-- Cloud Functions for notifications
+- Cloud Functions for high-volume notification fan-out
 - Safer derived counters
 
 ## Version 2

@@ -53,6 +53,11 @@ new URLSearchParams(window.location.search);
 const conversationId =
 params.get("id");
 
+const targetMessageId =
+params.get("message");
+
+let targetMessageLocated = false;
+
 const messageList =
 document.getElementById("messageList");
 
@@ -741,6 +746,26 @@ async function initializeChat(currentUser) {
         (messages) => {
             latestMessages = messages;
             renderChatMessages(currentUser.uid);
+
+            if (targetMessageId && !targetMessageLocated) {
+                const targetMessage = Array.from(
+                    messageList?.querySelectorAll("[data-message-id]") || []
+                ).find((element) => (
+                    element.dataset.messageId === targetMessageId
+                ));
+
+                if (targetMessage) {
+                    targetMessageLocated = true;
+                    targetMessage.classList.add("message-targeted");
+                    targetMessage.setAttribute("tabindex", "-1");
+                    targetMessage.scrollIntoView({
+                        behavior: "smooth",
+                        block: "center"
+                    });
+                    targetMessage.focus({ preventScroll: true });
+                }
+            }
+
             queueReceiptUpdates(messages, currentUser);
         }
     );

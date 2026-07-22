@@ -46,13 +46,15 @@ export async function emitFriendRequestSent({
 
 export async function emitFriendRequestAccepted({
     senderId,
-    recipientId
+    recipientId,
+    requestId
 } = {}) {
     return deliverFriendNotification(
         {
             type: NOTIFICATION_TYPES.FRIEND_ACCEPTED,
             recipientId: senderId,
             senderId: recipientId,
+            referenceId: requestId,
             title: "Friend Request Accepted",
             message: "Your friend request has been accepted."
         },

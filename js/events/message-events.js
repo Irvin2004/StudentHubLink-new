@@ -1,40 +1,17 @@
 import { NOTIFICATION_TYPES } from "../config/notification-types.js";
 import { getConversationById } from "../services/conversation-service.js";
-import { getStudyGroupMembers } from "../services/group-service.js";
 import { createNotification } from "../services/notification-service.js";
 import { error as logError } from "../utils/logger.js";
-
-function cleanId(value) {
-    return typeof value === "string"
-        ? value.trim()
-        : "";
-}
-
-function uniqueRecipients(recipientIds, senderId) {
-    const cleanSenderId = cleanId(senderId);
-
-    return Array.from(new Set(
-        recipientIds
-            .map(cleanId)
-            .filter((recipientId) => (
-                recipientId && recipientId !== cleanSenderId
-            ))
-    ));
-}
-
-async function getGroupRecipients(groupId, senderId) {
-    const members = await getStudyGroupMembers(groupId);
-
-    return uniqueRecipients(
-        members.map((member) => member.userId || member.id),
-        senderId
-    );
-}
+import {
+    cleanEventId,
+    getGroupEventRecipients,
+    uniqueEventRecipients
+} from "./recipient-utils.js";
 
 async function getPrivateRecipients(chatId, senderId) {
     const conversation = await getConversationById(chatId);
 
-    return uniqueRecipients(
+    return uniqueEventRecipients(
         conversation.participantIds || [],
         senderId
     );
@@ -53,14 +30,14 @@ export async function emitMessageSent({
     chatType
 } = {}) {
     try {
-        const cleanChatId = cleanId(chatId);
-        const cleanSenderId = cleanId(senderId);
+        const cleanChatId = cleanEventId(chatId);
+        const cleanSenderId = cleanEventId(senderId);
         const isGroupChat = chatType === "group";
         const cleanGroupId = isGroupChat
-            ? cleanId(message?.groupId)
+            ? cleanEventId(message?.groupId)
             : "";
         const recipients = isGroupChat
-            ? await getGroupRecipients(cleanGroupId, cleanSenderId)
+            ? await getGroupEventRecipients(cleanGroupId, cleanSenderId)
             : await getPrivateRecipients(cleanChatId, cleanSenderId);
         const eligibleRecipients = recipients.filter((recipientId) =>
             shouldNotifyRecipient({
@@ -77,6 +54,7 @@ export async function emitMessageSent({
                         recipientId,
                         senderId: cleanSenderId,
                         groupId: cleanGroupId || null,
+                        conversationId: cleanChatId,
                         referenceId: message?.id,
                         title: "New Message",
                         message: `${senderName} sent a new message.`

@@ -94,11 +94,28 @@ Rating aggregation is handled by the Cloud Function `updateResourceRating`.
 - `getGroupResource({ groupId, resourceId })`
 ## Notifications
 
-- `createNotification(notificationOrUserId, title, message, type)`
+- `createNotification(notificationData)`
 - `getNotifications(userId)`
-- `markAsRead(notificationId)`
+- `getNotification(userId, notificationId)`
+- `markAsRead(userId, notificationId)`
+- `markAllAsRead(userId)`
+- `deleteNotification(userId, notificationId)`
+- `subscribeToNotifications(userId, callback, onError)`
 
-Sensitive notification creation for other users should move to Cloud Functions.
+Cross-user writes are authorized only when Firestore can verify the referenced
+assignment, message, resource, or friend request.
+
+## Domain Events
+
+- `emitAssignmentCreated({ assignment, groupId, creatorId })`
+- `emitMessageSent({ message, chatId, senderId, chatType })`
+- `emitFriendRequestSent({ senderId, recipientId, requestId })`
+- `emitFriendRequestAccepted({ senderId, recipientId, requestId })`
+
+## Friends
+
+- `sendFriendRequest(senderId, recipientId)`
+- `acceptFriendRequest(requestId, recipientId)`
 
 ## Achievements
 

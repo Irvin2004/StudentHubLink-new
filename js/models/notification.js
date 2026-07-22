@@ -78,6 +78,10 @@ export function validateNotification(data) {
         recipientId: validateRecipientId(data.recipientId),
         senderId: normalizeOptionalId(data.senderId, "Sender ID"),
         groupId: normalizeOptionalId(data.groupId, "Group ID"),
+        conversationId: normalizeOptionalId(
+            data.conversationId,
+            "Conversation ID"
+        ),
         referenceId: normalizeOptionalId(
             data.referenceId,
             "Reference ID"

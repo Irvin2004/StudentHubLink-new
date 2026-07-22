@@ -5,6 +5,7 @@ import {
     doc,
     getDoc,
     getDocs,
+    limit,
     onSnapshot,
     orderBy,
     query,
@@ -111,9 +112,13 @@ export async function createNotification(notificationData = {}) {
                 updatedAt: serverTimestamp()
             }
         );
-        const savedNotification = await getDoc(notificationReference);
 
-        return mapNotificationDocument(savedNotification);
+        return {
+            id: notificationReference.id,
+            ...notification,
+            createdAt: null,
+            updatedAt: null
+        };
     });
 }
 
@@ -123,7 +128,8 @@ export async function getNotifications(userId) {
     return runFirestoreOperation(async () => {
         const notificationsQuery = query(
             getNotificationsCollection(cleanUserId),
-            orderBy("createdAt", "desc")
+            orderBy("createdAt", "desc"),
+            limit(100)
         );
         const snapshot = await getDocs(notificationsQuery);
 
@@ -237,7 +243,8 @@ export function subscribeToNotifications(
 
     const notificationsQuery = query(
         getNotificationsCollection(cleanUserId),
-        orderBy("createdAt", "desc")
+        orderBy("createdAt", "desc"),
+        limit(100)
     );
 
     return onSnapshot(

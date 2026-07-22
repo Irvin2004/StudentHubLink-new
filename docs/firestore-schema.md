@@ -1,6 +1,8 @@
 # Firestore Schema
 
-StudentHub uses top-level collections for users, resources, transactions, libraries, notifications, activities, and platform metrics.
+StudentHub uses top-level collections for users, resources, transactions,
+libraries, activities, and platform metrics. Notifications live in a
+recipient-owned subcollection under each user.
 
 ## Users
 
@@ -112,13 +114,21 @@ Path: `activities/{activityId}`
 
 ## Notifications
 
-Path: `notifications/{notificationId}`
+Path: `users/{userId}/notifications/{notificationId}`
 
 | Field | Type | Notes |
 | --- | --- | --- |
-| `userId` | string | User who should receive the notification. |
+| `recipientId` | string | User who should receive the notification; matches the parent user ID. |
+| `senderId` | string/null | User responsible for the source event. |
+| `groupId` | string/null | Related study group. |
+| `conversationId` | string/null | Conversation opened by message notifications. |
+| `referenceId` | string/null | Assignment, message, resource, or friend-request ID. |
 | `title` | string | Short notification title. |
 | `message` | string | Notification body. |
+| `type` | string | Value from `NOTIFICATION_TYPES`. |
+| `read` | boolean | Recipient read state. |
+| `createdAt` | timestamp | Server creation time. |
+| `updatedAt` | timestamp | Server modification time. |
 | `type` | string | Suggested value: `info` unless more specific types are added. |
 | `read` | boolean | Defaults to `false`. |
 | `createdAt` | timestamp | Notification creation time. |
@@ -206,7 +216,7 @@ Typing documents at `typingStatus/{conversationId}_{userId}` include `displayNam
 - Admin review queue: `resources where status == "pending"`
 - User uploads: `resources where ownerId == currentUser.uid`
 - User library: `libraries where userId == currentUser.uid`
-- User notifications: `notifications where userId == currentUser.uid order by createdAt desc limit 10`
+- User notifications: `users/{currentUser.uid}/notifications order by createdAt desc limit 100`
 - User activity: `activities where userId == currentUser.uid`
 - Completed transactions: `transactions where status == "completed"`
 - Study group discovery: `getDocs(collection(db, "groups"))` with client-side search and subject filtering
