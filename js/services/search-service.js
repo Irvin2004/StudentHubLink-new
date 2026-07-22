@@ -1,6 +1,12 @@
-export function searchResources(resources, searchTerm) {
-    const term =
-    String(searchTerm || "").trim().toLowerCase();
+export function normalizeSearchQuery(query) {
+    return String(query || "")
+        .trim()
+        .replace(/\s+/g, " ")
+        .toLowerCase();
+}
+
+export function searchResources(resources = [], searchTerm) {
+    const term = normalizeSearchQuery(searchTerm);
 
     if (!term) {
         return [...resources];
@@ -15,7 +21,9 @@ export function searchResources(resources, searchTerm) {
         ];
 
         return searchableFields.some((field) =>
-            String(field || "").toLowerCase().includes(term)
+            String(field || "")
+                .toLowerCase()
+                .includes(term)
         );
     });
 }
