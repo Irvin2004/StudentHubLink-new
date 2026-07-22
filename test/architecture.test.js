@@ -44,6 +44,25 @@ test("message reactions use user-keyed nested documents", () => {
     assert.doesNotMatch(service, /document\.|window\.|innerHTML/);
 });
 
+test("reaction picker owns UI behavior without service coupling", () => {
+    const picker = read("js/components/reaction-picker.js");
+
+    assert.match(picker, /export function createReactionPicker\(/);
+    assert.match(picker, /export function openReactionPicker\(/);
+    assert.match(picker, /export function closeReactionPicker\(/);
+    assert.match(picker, /export function toggleReactionPicker\(/);
+    assert.match(picker, /export function destroyReactionPicker\(/);
+    assert.match(picker, /ArrowLeft/);
+    assert.match(picker, /ArrowRight/);
+    assert.match(picker, /Escape/);
+    assert.match(picker, /getBoundingClientRect/);
+    assert.match(picker, /currentReaction/);
+    assert.doesNotMatch(
+        picker,
+        /message-service|addReaction|removeReaction|firestore|firebase/
+    );
+});
+
 test("custom dialogs use the shared focus trap", () => {
     assert.match(read("js/components/image-viewer.js"), /activateFocusTrap/);
     assert.match(read("js/components/delete-message-dialog.js"), /activateFocusTrap/);
