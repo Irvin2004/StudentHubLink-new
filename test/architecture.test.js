@@ -18,9 +18,30 @@ test("message deep links include conversation and message context", () => {
     assert.match(read("js/controllers/notification-controller.js"), /&message=/);
 });
 
-test("message transactions import runTransaction", () => {
+test("message reactions no longer mutate embedded message maps", () => {
     const source = read("js/services/message-service.js");
-    assert.match(source.slice(0, source.indexOf("from \"https://")), /runTransaction/);
+    assert.doesNotMatch(source, /runTransaction/);
+});
+
+test("message reactions use user-keyed nested documents", () => {
+    const service = read("js/services/message-service.js");
+    const rules = read("firestore.rules");
+
+    assert.match(service, /function getReactionsCollection\(/);
+    assert.match(service, /export async function addReaction\(/);
+    assert.match(service, /export async function removeReaction\(/);
+    assert.match(service, /export async function getMessageReactions\(/);
+    assert.match(service, /export function subscribeToReactions\(/);
+    assert.match(service, /createReactionModel/);
+    assert.match(
+        rules,
+        /conversations\/\{conversationId\}\/messages\/\{messageId\}\/reactions\/\{userId\}/
+    );
+    assert.doesNotMatch(
+        rules,
+        /affectedKeys\(\)[\s\S]{0,80}hasOnly\(\["reactions"\]\)/
+    );
+    assert.doesNotMatch(service, /document\.|window\.|innerHTML/);
 });
 
 test("custom dialogs use the shared focus trap", () => {

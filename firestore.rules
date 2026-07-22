@@ -406,6 +406,45 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    match /conversations/{conversationId}/messages/{messageId}/reactions/{userId} {
+      function sourceMessage() {
+        return get(
+          /databases/$(database)/documents/messages/$(messageId)
+        );
+      }
+
+      function canAccessReactionMessage() {
+        return exists(
+            /databases/$(database)/documents/messages/$(messageId)
+          )
+          && sourceMessage().data.conversationId == conversationId
+          && canAccessConversation(conversationFor(conversationId));
+      }
+
+      function reactionFieldsAreValid() {
+        return request.resource.data.keys().hasOnly([
+            "reaction", "createdAt", "updatedAt"
+          ])
+          && request.resource.data.keys().hasAll([
+            "reaction", "createdAt", "updatedAt"
+          ])
+          && request.resource.data.reaction in [
+            "👍", "❤️", "😂", "😮", "🎉"
+          ]
+          && request.resource.data.createdAt == request.time
+          && request.resource.data.updatedAt == request.time;
+      }
+
+      allow read: if canAccessReactionMessage();
+      allow create, update: if signedIn()
+        && request.auth.uid == userId
+        && canAccessReactionMessage()
+        && reactionFieldsAreValid();
+      allow delete: if signedIn()
+        && request.auth.uid == userId
+        && canAccessReactionMessage();
+    }
+
     match /messages/{messageId} {
       allow read: if canAccessConversation(
         conversationFor(resource.data.conversationId)
@@ -466,12 +505,6 @@ service cloud.firestore {
                 .union([request.auth.uid].toSet())
             && request.resource.data.readBy.size()
               == request.resource.data.readBy.toSet().size()
-          )
-          ||
-          (
-            canAccessConversation(conversationFor(resource.data.conversationId))
-            && request.resource.data.diff(resource.data).affectedKeys()
-              .hasOnly(["reactions"])
           )
           ||
           (

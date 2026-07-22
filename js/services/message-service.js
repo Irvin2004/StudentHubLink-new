@@ -1,14 +1,16 @@
 import {
     collection,
+    deleteDoc,
     doc,
+    getDoc,
     getDocs,
     increment,
     limitToLast,
     onSnapshot,
     orderBy,
     query,
-    runTransaction,
     serverTimestamp,
+    setDoc,
     arrayUnion,
     updateDoc,
     where,
@@ -18,6 +20,7 @@ import {
 import { db } from "../firebase.js";
 import { COLLECTIONS } from "../config/firestore.js";
 import { MESSAGE_TYPES } from "../utils/constants.js?messaging=13";
+import { createReactionModel } from "../models/reaction.js";
 import { emitMessageSent } from "../events/message-events.js";
 import { error as logError } from "../utils/logger.js";
 
@@ -111,6 +114,41 @@ function getConversationPreview(message) {
     }
 
     return message.text;
+}
+
+function validateId(value, fieldName) {
+    const cleanValue = typeof value === "string" ? value.trim() : "";
+
+    if (!cleanValue) {
+        throw new Error(`${fieldName} is required.`);
+    }
+
+    return cleanValue;
+}
+
+function getReactionsCollection(conversationId, messageId) {
+    return collection(
+        db,
+        COLLECTIONS.CONVERSATIONS,
+        conversationId,
+        COLLECTIONS.MESSAGES,
+        messageId,
+        "reactions"
+    );
+}
+
+function getReactionReference(conversationId, messageId, userId) {
+    return doc(
+        getReactionsCollection(conversationId, messageId),
+        userId
+    );
+}
+
+function normalizeReaction(reactionDocument) {
+    return {
+        userId: reactionDocument.id,
+        reaction: reactionDocument.data().reaction
+    };
 }
 
 export async function sendMessage(input) {
@@ -367,52 +405,140 @@ export async function markConversationMessagesAsRead(
     });
     await batch.commit();
 }
+export async function addReaction(
+    conversationId,
+    messageId,
+    userId,
+    reaction
+) {
+    const cleanConversationId = validateId(
+        conversationId,
+        "Conversation ID"
+    );
+    const model = createReactionModel({
+        messageId,
+        userId,
+        reaction
+    });
+
+    await setDoc(
+        getReactionReference(
+            cleanConversationId,
+            model.messageId,
+            model.userId
+        ),
+        {
+            reaction: model.reaction,
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp()
+        }
+    );
+
+    return model;
+}
+
+export async function removeReaction(
+    conversationId,
+    messageId,
+    userId
+) {
+    const cleanConversationId = validateId(
+        conversationId,
+        "Conversation ID"
+    );
+    const cleanMessageId = validateId(messageId, "Message ID");
+    const cleanUserId = validateId(userId, "User ID");
+
+    await deleteDoc(getReactionReference(
+        cleanConversationId,
+        cleanMessageId,
+        cleanUserId
+    ));
+}
+
+export async function getMessageReactions(conversationId, messageId) {
+    const cleanConversationId = validateId(
+        conversationId,
+        "Conversation ID"
+    );
+    const cleanMessageId = validateId(messageId, "Message ID");
+    const snapshot = await getDocs(
+        getReactionsCollection(cleanConversationId, cleanMessageId)
+    );
+
+    return snapshot.docs.map(normalizeReaction);
+}
+
+export function subscribeToReactions(
+    conversationId,
+    messageId,
+    callback,
+    onError
+) {
+    const cleanConversationId = validateId(
+        conversationId,
+        "Conversation ID"
+    );
+    const cleanMessageId = validateId(messageId, "Message ID");
+
+    if (typeof callback !== "function") {
+        throw new Error("Reaction subscriber is required.");
+    }
+
+    return onSnapshot(
+        getReactionsCollection(cleanConversationId, cleanMessageId),
+        (snapshot) => callback(snapshot.docs.map(normalizeReaction)),
+        (error) => {
+            if (typeof onError === "function") {
+                onError(error);
+                return;
+            }
+
+            console.error("Reaction listener failed:", error);
+        }
+    );
+}
+
+/* Compatibility adapter for the current chat controller. */
 export async function reactToMessage({
     conversationId,
     messageId,
     emoji,
     userId
 }) {
-    if (!conversationId || !messageId || !emoji || !userId) {
-        throw new Error("Reaction information is incomplete.");
+    const cleanConversationId = validateId(
+        conversationId,
+        "Conversation ID"
+    );
+    const model = createReactionModel({
+        messageId,
+        userId,
+        reaction: emoji
+    });
+    const reactionReference = getReactionReference(
+        cleanConversationId,
+        model.messageId,
+        model.userId
+    );
+    const currentReaction = await getDoc(reactionReference);
+
+    if (
+        currentReaction.exists() &&
+        currentReaction.data().reaction === model.reaction
+    ) {
+        return removeReaction(
+            cleanConversationId,
+            model.messageId,
+            model.userId
+        );
     }
 
-    const messageReference = doc(
-        db,
-        COLLECTIONS.MESSAGES,
-        messageId
+    return addReaction(
+        cleanConversationId,
+        model.messageId,
+        model.userId,
+        model.reaction
     );
-
-    await runTransaction(db, async (transaction) => {
-        const snapshot = await transaction.get(messageReference);
-
-        if (!snapshot.exists()) {
-            throw new Error("Message not found.");
-        }
-
-        const message = snapshot.data();
-
-        if (message.conversationId !== conversationId) {
-            throw new Error("Message does not belong to this conversation.");
-        }
-
-        const reactions = { ...(message.reactions || {}) };
-        const users = [...new Set(
-            Array.isArray(reactions[emoji])
-                ? reactions[emoji]
-                : []
-        )];
-        const existingIndex = users.indexOf(userId);
-
-        if (existingIndex >= 0) {
-            users.splice(existingIndex, 1);
-        } else {
-            users.push(userId);
-        }
-
-        reactions[emoji] = users;
-        transaction.update(messageReference, { reactions });
-    });
 }
 
 export function copyMessage(text) {
