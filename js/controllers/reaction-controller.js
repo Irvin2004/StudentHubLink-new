@@ -15,6 +15,7 @@ import {
     renderReactionBar
 } from "../renderers/reaction-renderer.js?reactions=1";
 import { handleError } from "../utils/error-handler.js?security=1";
+import { logError } from "../services/error-service.js";
 
 function cleanId(value) {
     return typeof value === "string" ? value.trim() : "";
@@ -175,7 +176,7 @@ export function initializeReactions({
                 }
             },
             (error) => {
-                console.error("Reaction listener failed:", error);
+                logError(error, "Reaction listener failed");
             }
         );
     }

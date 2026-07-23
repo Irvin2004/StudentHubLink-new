@@ -1,6 +1,7 @@
 "use strict";
 
 import { THEMES } from "../config/theme-config.js";
+import { logError } from "./error-service.js";
 
 const THEME_STORAGE_KEY = "studenthub-theme";
 const SETTINGS_CHANGE_EVENT = "studenthub:settings-changed";
@@ -31,7 +32,7 @@ function saveTheme(theme) {
     try {
         window.localStorage.setItem(THEME_STORAGE_KEY, theme);
     } catch (error) {
-        console.warn("Unable to save theme preference:", error);
+        logError(error, "Unable to save theme preference");
     }
 }
 
@@ -45,7 +46,7 @@ function getSavedTheme() {
             ? savedTheme
             : THEMES.SYSTEM;
     } catch (error) {
-        console.warn("Unable to read theme preference:", error);
+        logError(error, "Unable to read theme preference");
         return THEMES.SYSTEM;
     }
 }

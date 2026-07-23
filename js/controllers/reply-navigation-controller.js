@@ -1,5 +1,7 @@
 "use strict";
 
+import { logError } from "../services/error-service.js";
+
 const HIGHLIGHT_DURATION = 2000;
 
 function cleanId(value) {
@@ -184,7 +186,7 @@ export function initializeReplyNavigation({
 
         event.preventDefault();
         void scrollToMessage(messageId).catch((error) => {
-            console.error("Unable to navigate to original message:", error);
+            logError(error, "Unable to navigate to original message");
         });
     }
 
@@ -203,7 +205,7 @@ export function initializeReplyNavigation({
         void scrollToMessage(
             getReplyMessageId(replyPreview)
         ).catch((error) => {
-            console.error("Unable to navigate to original message:", error);
+            logError(error, "Unable to navigate to original message");
         });
     }
 

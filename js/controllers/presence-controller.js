@@ -16,6 +16,7 @@ import {
 import {
     clearPresence,
     renderPresence
+import { logError } from "../services/error-service.js";
 } from "../renderers/presence-renderer.js";
 
 const TYPING_INACTIVITY_DELAY = 1900;
@@ -27,7 +28,7 @@ function cleanId(value) {
 }
 
 function reportPresenceError(action, error) {
-    console.warn(`Unable to ${action}:`, error);
+    logError(error, `Unable to ${action}`);
 }
 
 function runPresenceUpdate(action, update) {

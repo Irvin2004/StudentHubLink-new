@@ -1,19 +1,27 @@
-export function showToast(message, type = "success") {
-    let container = document.querySelector(".toast-container");
+import { ERROR_TYPES } from "../config/error-types.js";
+import {
+    showError,
+    showInfo,
+    showSuccess,
+    showWarning
+} from "../services/error-service.js";
 
-    if (!container) {
-        container = document.createElement("div");
-        container.className = "toast-container";
-        document.body.appendChild(container);
-    }
+const DISPLAYERS = Object.freeze({
+    [ERROR_TYPES.ERROR]: showError,
+    [ERROR_TYPES.INFO]: showInfo,
+    [ERROR_TYPES.SUCCESS]: showSuccess,
+    [ERROR_TYPES.WARNING]: showWarning
+});
 
-    const toast = document.createElement("div");
-    toast.className = `toast ${type}`;
-    toast.textContent = message;
+export function showToast(
+    message,
+    type = ERROR_TYPES.SUCCESS,
+    title = ""
+) {
+    const display = DISPLAYERS[type] || showInfo;
 
-    container.appendChild(toast);
-
-    setTimeout(() => {
-        toast.remove();
-    }, 3000);
+    return display({
+        title,
+        message
+    });
 }

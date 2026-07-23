@@ -9,6 +9,7 @@ import { MESSAGE_STATUS } from "../config/message-status.js";
 import {
     renderReadReceipt
 } from "../renderers/read-receipt-renderer.js?receipts=1";
+import { logError } from "../services/error-service.js";
 
 const READ_VISIBILITY_THRESHOLD = 0.6;
 
@@ -71,7 +72,7 @@ export function initializeReadReceipts({
     let destroyed = false;
 
     function reportError(action, error) {
-        console.error(`Unable to ${action} message receipt:`, error);
+        logError(error, `Unable to ${action} message receipt`);
     }
 
     function getReceipt(messageId) {

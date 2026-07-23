@@ -40,6 +40,7 @@ import {
     bindContextMenuInteractions
 } from "../components/context-menu.js";
 
+import { logError } from "../services/error-service.js";
 import { handleError } from "../utils/error-handler.js?security=1";
 import { validateAttachment } from "../utils/file-validator.js?security=1";
 import { showToast } from "../utils/toast.js";
@@ -486,7 +487,6 @@ attachmentInput?.addEventListener("change", async () => {
             "success"
         );
     } catch (error) {
-        console.error("Attachment upload failed:", error);
         handleError(
             error,
             "Unable to send attachment."
@@ -627,10 +627,7 @@ async function initializeChat(currentUser) {
         });
     } catch (error) {
         readReceiptController = null;
-        console.error(
-            "Failed to initialize read receipts:",
-            error
-        );
+        logError(error, "Failed to initialize read receipts");
     }
 
     unsubscribeMessages =
@@ -771,10 +768,7 @@ function initializeMessageForm(
                     getParticipantName(user)
                 );
             } catch (error) {
-                console.error(
-                    "Typing reset failed:",
-                    error
-                );
+                logError(error, "Typing reset failed");
             }
         } catch (error) {
             if (!messageInput.value) {
@@ -811,10 +805,7 @@ function initializeTypingIndicator(user) {
                 getParticipantName(user)
             );
         } catch (error) {
-            console.error(
-                "Typing status failed:",
-                error
-            );
+            logError(error, "Typing status failed");
         }
 
         clearTimeout(typingTimer);
@@ -829,10 +820,7 @@ function initializeTypingIndicator(user) {
                         getParticipantName(user)
                     );
                 } catch (error) {
-                    console.error(
-                        "Typing reset failed:",
-                        error
-                    );
+                    logError(error, "Typing reset failed");
                 }
             },
             1200

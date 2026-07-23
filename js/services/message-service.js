@@ -29,7 +29,7 @@ import { createReadReceiptModel } from "../models/read-receipt.js";
 import { createReactionModel } from "../models/reaction.js";
 import { createMessageModel } from "../models/message.js";
 import { emitMessageSent } from "../events/message-events.js";
-import { error as logError } from "../utils/logger.js";
+import { logError } from "./error-service.js";
 import { getConversationById } from "./conversation-service.js";
 import {
     deleteVoiceMessage,
@@ -333,11 +333,7 @@ export async function sendMessage(input) {
             chatType: isGroupMessage ? "group" : "direct"
         });
     } catch (error) {
-        logError(
-            "NOTIFICATIONS",
-            "Message notification event failed:",
-            error
-        );
+        logError(error, "Message notification event failed");
     }
 
     return messageId;
@@ -474,11 +470,7 @@ export async function sendVoiceMessage({
         try {
             await deleteVoiceMessage(uploaded.storagePath);
         } catch (cleanupError) {
-            logError(
-                "MESSAGES",
-                "Voice message cleanup failed:",
-                cleanupError
-            );
+            logError(cleanupError, "Voice message cleanup failed");
         }
 
         throw error;
@@ -597,7 +589,7 @@ export function subscribeToMessages(
             ));
         },
         (error) => {
-            console.error("Message listener failed:", error);
+            logError(error, "Message listener failed");
 
             if (typeof onError === "function") {
                 onError(error);
@@ -763,7 +755,7 @@ export function subscribeToReactions(
                 return;
             }
 
-            console.error("Reaction listener failed:", error);
+            logError(error, "Reaction listener failed");
         }
     );
 }
@@ -910,7 +902,7 @@ export function subscribeToReadReceipts(
                 return;
             }
 
-            console.error("Read receipt listener failed:", error);
+            logError(error, "Read receipt listener failed");
         }
     );
 }

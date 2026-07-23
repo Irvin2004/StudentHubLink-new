@@ -8,6 +8,7 @@ import {
 
 import { app } from "../firebase.js";
 import { validateAttachment } from "../utils/file-validator.js?security=1";
+import { logError } from "./error-service.js";
 
 const storage = getStorage(app);
 const MAX_VOICE_MESSAGE_SIZE = 25 * 1024 * 1024;
@@ -197,9 +198,9 @@ export async function uploadVoiceMessage(
                     try {
                         await deleteObject(uploadTask.snapshot.ref);
                     } catch (cleanupError) {
-                        console.error(
-                            "Voice upload cleanup failed:",
-                            cleanupError
+                        logError(
+                            cleanupError,
+                            "Voice upload cleanup failed"
                         );
                     }
 

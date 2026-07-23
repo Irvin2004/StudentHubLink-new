@@ -11,6 +11,7 @@ import { awardAchievement } from "./achievement-service.js";
 import { createNotification } from "./notification-service.js";
 import { DEBUG } from "../config/debug.js";
 import { log } from "../utils/logger.js";
+import { logError } from "./error-service.js";
 
 export async function processDownload(resource, user) {
     if (!resource || !user) {
@@ -57,9 +58,9 @@ async function tryDerivedWrite(operation, label) {
         await operation;
     } catch (error) {
         if (error.code === "permission-denied") {
-            console.warn(
-                `${label} is blocked by Firestore rules and should move to Cloud Functions.`,
-                error
+            logError(
+                error,
+                `${label} is blocked by Firestore rules and should move to Cloud Functions.`
             );
             return;
         }
