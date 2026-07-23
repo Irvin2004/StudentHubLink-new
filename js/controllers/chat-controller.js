@@ -623,12 +623,20 @@ async function initializeChat(currentUser) {
         messageContainer: messageList
     });
 
-    readReceiptController?.destroy();
-    readReceiptController = initializeReadReceipts({
-        conversationId,
-        currentUserId: currentUser.uid,
-        messagesContainer: messageList
-    });
+    try {
+        readReceiptController?.destroy();
+        readReceiptController = initializeReadReceipts({
+            conversationId,
+            currentUserId: currentUser.uid,
+            messagesContainer: messageList
+        });
+    } catch (error) {
+        readReceiptController = null;
+        console.error(
+            "Failed to initialize read receipts:",
+            error
+        );
+    }
 
     unsubscribeMessages =
     subscribeToMessages(
