@@ -1,6 +1,6 @@
 import { escapeHtml } from "../utils/dom.js";
 import { formatTime } from "../utils/format-date.js?messaging=13";
-import { sanitizeUrl } from "../utils/validators.js";
+import { MESSAGE_TYPES } from "../config/message-types.js";
 import { createFileCard } from "./file-card.js";
 import { createImagePreview } from "./image-preview.js";
 
@@ -17,24 +17,21 @@ function renderMessageContent(message) {
         ? `<p>${escapeHtml(message.text)}</p>`
         : "";
 
-    if (message.type === "image") {
+    if (message.type === MESSAGE_TYPES.IMAGE) {
         return `${createImagePreview(message)}${caption}`;
     }
 
-    if (message.type === "file") {
+    if (message.type === MESSAGE_TYPES.FILE) {
         return `${createFileCard(message)}${caption}`;
     }
 
-    if (message.type === "voice") {
-        const voiceUrl = message.voice?.url || message.fileUrl;
-
+    if (message.type === MESSAGE_TYPES.VOICE) {
         return `
-            <audio
-                class="voice-message"
-                controls
-                preload="metadata"
-                src="${escapeHtml(sanitizeUrl(voiceUrl))}"
-            ></audio>
+            <div
+                class="voice-message-container"
+                data-voice-message-container
+                data-message-id="${escapeHtml(message.id)}">
+            </div>
         `;
     }
 

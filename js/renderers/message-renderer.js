@@ -1,6 +1,11 @@
-import { createMessageBubble } from "../components/message-bubble.js?messaging=19";
+import { createMessageBubble } from "../components/message-bubble.js?messaging=20";
+import { MESSAGE_TYPES } from "../config/message-types.js";
 import { renderReactionBar } from "./reaction-renderer.js?reactions=1";
 import { renderReadReceipt } from "./read-receipt-renderer.js?receipts=1";
+import {
+    destroyVoiceMessage,
+    renderVoiceMessage
+} from "./voice-message-renderer.js?voice=1";
 
 export function renderMessages(
     messages,
@@ -19,6 +24,7 @@ export function renderMessages(
             !message.deletedFor?.includes(currentUserId)
         );
 
+    destroyVoiceMessage();
     container.innerHTML =
     visibleMessages
         .map((message) =>
@@ -44,6 +50,25 @@ export function renderMessages(
             message.status === "sending"
         ) {
             return;
+        }
+
+        switch (message.type) {
+            case MESSAGE_TYPES.VOICE: {
+                const voiceContainer = messageRow.querySelector(
+                    "[data-voice-message-container]"
+                );
+
+                if (voiceContainer) {
+                    renderVoiceMessage({
+                        message,
+                        container: voiceContainer,
+                        currentUserId
+                    });
+                }
+                break;
+            }
+            default:
+                break;
         }
 
         const reactionContainer = document.createElement("div");

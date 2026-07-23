@@ -1,0 +1,101 @@
+.voice-message {
+    width: min(320px, 65vw);
+    display: grid;
+    gap: var(--space-2);
+    margin-bottom: var(--space-2);
+}
+
+.voice-message__player,
+.voice-player {
+    min-width: 0;
+}
+
+.voice-player {
+    display: grid;
+    grid-template-columns: auto auto minmax(100px, 1fr) auto;
+    grid-template-rows: auto auto;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.voice-player-play,
+.voice-player-stop,
+.voice-player-speed {
+    min-width: 36px;
+    min-height: 36px;
+    padding: var(--space-1) var(--space-2);
+    border: 1px solid color-mix(in srgb, currentColor 28%, transparent);
+    border-radius: var(--radius-pill);
+    background: color-mix(in srgb, currentColor 10%, transparent);
+    color: inherit;
+    cursor: pointer;
+    font: inherit;
+}
+
+.voice-player-play:hover,
+.voice-player-stop:hover,
+.voice-player-speed:hover {
+    background: color-mix(in srgb, currentColor 18%, transparent);
+}
+
+.voice-player-play:focus-visible,
+.voice-player-stop:focus-visible,
+.voice-player-speed:focus-visible,
+.voice-player-progress:focus-visible,
+.voice-player:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+}
+
+.voice-player-progress {
+    width: 100%;
+    min-width: 100px;
+    margin: 0;
+    accent-color: currentColor;
+    cursor: pointer;
+}
+
+.voice-player-time {
+    grid-row: 2;
+    grid-column: 1 / -1;
+    justify-self: center;
+    font-size: 0.78rem;
+    font-variant-numeric: tabular-nums;
+    opacity: 0.82;
+}
+
+.voice-player-speed {
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+.voice-message__duration,
+.voice-message__loading,
+.voice-message__error {
+    margin: 0;
+    font-size: 0.78rem;
+}
+
+.voice-message__duration,
+.voice-message__loading {
+    opacity: 0.78;
+}
+
+.voice-message__error {
+    color: var(--danger);
+    font-weight: 600;
+}
+
+.message-row.mine .voice-message__error {
+    color: currentColor;
+}
+
+@media (max-width: 480px) {
+    .voice-message {
+        width: min(280px, 72vw);
+    }
+
+    .voice-player {
+        grid-template-columns: auto auto minmax(76px, 1fr) auto;
+    }
+}

@@ -118,12 +118,6 @@
     object-fit: cover;
 }
 
-.voice-message {
-    max-width: min(320px, 65vw);
-    display: block;
-    margin-bottom: 8px;
-}
-
 .deleted-message,
 .edited-label {
     font-style: italic;

@@ -209,7 +209,8 @@ export function createVoicePlayer({
     url,
     duration = 0,
     container,
-    onError = () => {}
+    onError = () => {},
+    onMetadata = () => {}
 } = {}) {
     if (!container?.replaceChildren) {
         throw new Error("Voice player container is required.");
@@ -223,6 +224,9 @@ export function createVoicePlayer({
 
     const cleanUrl = normalizeUrl(url);
     const reportError = typeof onError === "function" ? onError : () => {};
+    const reportMetadata = typeof onMetadata === "function"
+        ? onMetadata
+        : () => {};
     let totalDurationMs = normalizeDuration(duration);
     let currentTimeMs = 0;
     let playbackRateIndex = 0;
@@ -341,6 +345,7 @@ export function createVoicePlayer({
             progress.max = String(seconds);
             totalTime.textContent = formatDuration(totalDurationMs);
             updateProgress(currentTimeMs);
+            reportMetadata(totalDurationMs);
         },
         handleError(error) {
             if (!destroyed) reportError(error);
@@ -386,7 +391,11 @@ export function createVoicePlayer({
     function handleKeyboard(event) {
         if (event.target === progress) return;
 
-        if (event.key === " " || event.code === "Space") {
+        if (
+            event.key === " " ||
+            event.key === "Enter" ||
+            event.code === "Space"
+        ) {
             event.preventDefault();
             togglePlayback();
         } else if (event.key === "ArrowLeft") {

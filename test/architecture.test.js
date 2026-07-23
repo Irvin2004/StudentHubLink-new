@@ -91,7 +91,7 @@ test("voice recording stays browser-only and message types are centralized", () 
 test("voice messages upload before Firestore writes and remain deletable", () => {
     const storage = read("js/services/storage-service.js");
     const messages = read("js/services/message-service.js");
-    const bubble = read("js/components/message-bubble.js");
+    const voiceRenderer = read("js/renderers/voice-message-renderer.js");
     const storageRules = read("storage.rules");
     const firestoreRules = read("firestore.rules");
 
@@ -109,7 +109,7 @@ test("voice messages upload before Firestore writes and remain deletable", () =>
     assert.match(messages, /voice: voiceMessage\.voice/);
     assert.match(messages, /await deleteVoiceMessage\(uploaded\.storagePath\)/);
     assert.doesNotMatch(messages, /voice:\s*\{[^}]*blob/s);
-    assert.match(bubble, /message\.voice\?\.url/);
+    assert.match(voiceRenderer, /voice\.url \|\| message\?\.fileUrl/);
     assert.match(storageRules, /match \/voice\/\{conversationId\}\/\{userId\}/);
     assert.match(storageRules, /request\.auth\.uid == userId/);
     assert.match(firestoreRules, /"mimeType", "voice"/);
@@ -127,11 +127,33 @@ test("voice player uses one shared audio element and remains service-free", () =
     assert.match(player, /ArrowLeft/);
     assert.match(player, /ArrowRight/);
     assert.match(player, /Space/);
+    assert.match(player, /Enter/);
     assert.match(player, /aria-label/);
     assert.doesNotMatch(
         player,
         /firebase|firestore|storage-service|message-service|conversation/
     );
+});
+
+test("voice renderer delegates playback and composes message rendering", () => {
+    const voice = read("js/renderers/voice-message-renderer.js");
+    const messages = read("js/renderers/message-renderer.js");
+    const bubble = read("js/components/message-bubble.js");
+
+    assert.match(voice, /export function renderVoiceMessage\(/);
+    assert.match(voice, /export function destroyVoiceMessage\(/);
+    assert.match(voice, /createVoicePlayer\(/);
+    assert.match(voice, /voice-message__loading/);
+    assert.match(voice, /voice-message__error/);
+    assert.doesNotMatch(
+        voice,
+        /firebase|firestore|storage-service|message-service|\.play\(/
+    );
+    assert.match(messages, /case MESSAGE_TYPES\.VOICE/);
+    assert.match(messages, /renderVoiceMessage\(/);
+    assert.match(messages, /destroyVoiceMessage\(\)/);
+    assert.match(bubble, /data-voice-message-container/);
+    assert.doesNotMatch(bubble, /<audio/);
 });
 
 test("read receipt renderer owns passive message status display", () => {

@@ -21,7 +21,7 @@ import {
 import {
     uploadChatAttachment
 } from "../services/storage-service.js?security=1";
-import { renderMessages } from "../renderers/message-renderer.js?messaging=19";
+import { renderMessages } from "../renderers/message-renderer.js?messaging=20";
 import { getTypingIndicatorText } from "../components/typing-indicator.js";
 import { getStudyGroup } from "../services/group-service.js?security=1";
 import { openImageViewer } from "../components/image-viewer.js";
