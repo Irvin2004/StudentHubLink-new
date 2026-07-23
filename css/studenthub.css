@@ -56,3 +56,6 @@
 @import url("./pages/group-resources.css?v=20260719-1");
 @import url("./pages/group-assignments.css?v=20260721-4");
 @import url("./pages/chat.css?v=20260718-9");
+
+/* Loaded last so accessibility preferences override component styles. */
+@import url("./accessibility.css?v=20260723-1");

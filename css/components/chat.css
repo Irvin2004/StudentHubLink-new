@@ -247,7 +247,8 @@
 .reaction-option:hover,
 .reaction-option:focus-visible {
     background: var(--surface-muted);
-    outline: none;
+    outline: 3px solid var(--focus-ring, var(--primary));
+    outline-offset: 2px;
     transform: scale(1.15);
 }
 

@@ -32,7 +32,8 @@
 .context-menu__item:hover,
 .context-menu__item:focus-visible {
     background: var(--surface-muted);
-    outline: none;
+    outline: 3px solid var(--focus-ring, var(--primary));
+    outline-offset: -2px;
 }
 
 .context-menu__item:disabled {

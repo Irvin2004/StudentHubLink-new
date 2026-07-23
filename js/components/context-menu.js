@@ -1,6 +1,7 @@
 "use strict";
 
 let activeContextMenu = null;
+let contextMenuId = 0;
 
 function normalizeItems(items = []) {
     return items.map((item) => ({
@@ -55,8 +56,11 @@ export function createContextMenu({
     let isOpen = false;
 
     menu.className = "context-menu";
+    menu.id = `context-menu-${++contextMenuId}`;
     menu.setAttribute("role", "menu");
     menu.setAttribute("aria-label", "Actions");
+    menu.setAttribute("aria-orientation", "vertical");
+    menu.tabIndex = -1;
     menu.hidden = true;
 
     normalizedItems.forEach((item) => {
@@ -112,16 +116,16 @@ export function createContextMenu({
     };
 
     const handleKeydown = (event) => {
-        const buttons = enabledItems();
-        if (!buttons.length) return;
-
-        const currentIndex = buttons.indexOf(document.activeElement);
-
         if (event.key === "Escape") {
             event.preventDefault();
             close();
             return;
         }
+
+        const buttons = enabledItems();
+        if (!buttons.length) return;
+
+        const currentIndex = buttons.indexOf(document.activeElement);
 
         if (event.key === "ArrowDown" || event.key === "ArrowUp") {
             event.preventDefault();
@@ -129,6 +133,27 @@ export function createContextMenu({
             const nextIndex = currentIndex < 0
                 ? 0
                 : (currentIndex + direction + buttons.length) % buttons.length;
+            buttons[nextIndex].focus();
+            return;
+        }
+
+        if (event.key === "Home" || event.key === "End") {
+            event.preventDefault();
+            buttons[event.key === "Home" ? 0 : buttons.length - 1]
+                .focus();
+            return;
+        }
+
+        if (event.key === "Tab") {
+            event.preventDefault();
+            const direction = event.shiftKey ? -1 : 1;
+            const nextIndex = currentIndex < 0
+                ? 0
+                : (
+                    currentIndex +
+                    direction +
+                    buttons.length
+                ) % buttons.length;
             buttons[nextIndex].focus();
         }
     };
@@ -151,11 +176,14 @@ export function createContextMenu({
             isOpen = true;
             menu.hidden = false;
             trigger?.setAttribute?.("aria-expanded", "true");
+            trigger?.setAttribute?.("aria-haspopup", "menu");
+            trigger?.setAttribute?.("aria-controls", menu.id);
             positionMenu(menu, trigger, { x, y });
             document.addEventListener("pointerdown", handleOutsidePointer);
             window.addEventListener("resize", close);
             window.addEventListener("scroll", close, true);
-            enabledItems()[0]?.focus();
+            const firstItem = enabledItems()[0];
+            (firstItem || menu).focus();
         },
         close,
         destroy() {

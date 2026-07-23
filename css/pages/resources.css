@@ -110,7 +110,8 @@ body {
 
 .marketplace-controls input:focus,
 .marketplace-controls select:focus {
-    outline: none;
+    outline: 2px solid transparent;
+    outline-offset: 2px;
     border-color: var(--blue);
     box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.12);
 }

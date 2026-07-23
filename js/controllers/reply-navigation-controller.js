@@ -144,7 +144,7 @@ export function initializeReplyNavigation({
         }
 
         element.scrollIntoView({
-            behavior: "smooth",
+            behavior: shouldReduceMotion() ? "auto" : "smooth",
             block: "center"
         });
         highlightMessage(cleanMessageId);
@@ -157,6 +157,21 @@ export function initializeReplyNavigation({
             replyPreview?.dataset?.replyMessageId ||
             replyPreview?.dataset?.messageId
         );
+    }
+
+    function shouldReduceMotion() {
+        const documentReference = container?.ownerDocument;
+
+        if (
+            documentReference?.documentElement?.dataset
+                ?.reducedMotion === "true"
+        ) {
+            return true;
+        }
+
+        return documentReference?.defaultView
+            ?.matchMedia?.("(prefers-reduced-motion: reduce)")
+            ?.matches === true;
     }
 
     function handleClick(event) {
@@ -173,6 +188,25 @@ export function initializeReplyNavigation({
         });
     }
 
+    function handleKeydown(event) {
+        const replyPreview = event.target?.closest?.(".reply-preview");
+
+        if (
+            !replyPreview ||
+            !["Enter", " "].includes(event.key) ||
+            ["BUTTON", "A"].includes(replyPreview.tagName)
+        ) {
+            return;
+        }
+
+        event.preventDefault();
+        void scrollToMessage(
+            getReplyMessageId(replyPreview)
+        ).catch((error) => {
+            console.error("Unable to navigate to original message:", error);
+        });
+    }
+
     function destroy() {
         if (destroyed) {
             return;
@@ -180,6 +214,7 @@ export function initializeReplyNavigation({
 
         destroyed = true;
         container.removeEventListener("click", handleClick);
+        container.removeEventListener("keydown", handleKeydown);
         [...highlightTimers.keys()].forEach(clearHighlight);
         highlightTimers.clear();
         currentConversationId = "";
@@ -188,6 +223,7 @@ export function initializeReplyNavigation({
     }
 
     container.addEventListener("click", handleClick);
+    container.addEventListener("keydown", handleKeydown);
 
     return {
         scrollToMessage,

@@ -13,6 +13,7 @@
     --danger: var(--color-red-400);
     --border: var(--color-slate-700);
     --navy: var(--color-slate-50);
+    --focus-ring: var(--color-blue-300);
     --shadow-color-sm: rgb(0 0 0 / 0.2);
     --shadow-color: rgb(0 0 0 / 0.28);
     --shadow-color-lg: rgb(0 0 0 / 0.36);

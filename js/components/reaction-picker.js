@@ -131,10 +131,12 @@ function handlePickerKeydown(event) {
 
     switch (event.key) {
         case "ArrowLeft":
+        case "ArrowUp":
             event.preventDefault();
             updateSelection(selectedIndex - 1, true);
             break;
         case "ArrowRight":
+        case "ArrowDown":
             event.preventDefault();
             updateSelection(selectedIndex + 1, true);
             break;
@@ -158,6 +160,13 @@ function handlePickerKeydown(event) {
                 closeReactionPicker();
                 previousAnchor?.focus?.();
             }
+            break;
+        case "Tab":
+            event.preventDefault();
+            updateSelection(
+                selectedIndex + (event.shiftKey ? -1 : 1),
+                true
+            );
             break;
     }
 }
@@ -210,6 +219,7 @@ export function createReactionPicker(options = {}) {
     picker.className = "reaction-picker";
     picker.setAttribute("role", "toolbar");
     picker.setAttribute("aria-label", "Choose a reaction");
+    picker.setAttribute("aria-orientation", "horizontal");
     picker.innerHTML = REACTIONS.map(({ value, label }, index) => `
         <button
             class="reaction-option${

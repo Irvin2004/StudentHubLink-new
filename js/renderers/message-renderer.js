@@ -43,6 +43,54 @@ export function renderMessages(
     messageRows.forEach((messageRow, index) => {
         const message = visibleMessages[index];
 
+        if (message) {
+            const senderName = message.senderId === currentUserId
+                ? "You"
+                : message.senderName || "Student";
+
+            messageRow.setAttribute("role", "article");
+            messageRow.setAttribute(
+                "aria-label",
+                message.senderId === currentUserId
+                    ? "Your message"
+                    : `Message from ${senderName}`
+            );
+
+            const sharedImage = messageRow.querySelector(
+                ".chat-image-preview"
+            );
+
+            if (sharedImage) {
+                const imageDescription =
+                    String(message.text || "").trim() ||
+                    "Shared image";
+
+                sharedImage.alt = imageDescription;
+                sharedImage
+                    .closest("button")
+                    ?.setAttribute(
+                        "aria-label",
+                        `Open image: ${imageDescription}`
+                    );
+            }
+
+            const replyPreview = messageRow.querySelector(".reply-block");
+
+            if (replyPreview && message.reply?.messageId) {
+                replyPreview.classList.add("reply-preview");
+                replyPreview.dataset.replyMessageId =
+                    message.reply.messageId;
+                replyPreview.setAttribute("role", "button");
+                replyPreview.setAttribute("tabindex", "0");
+                replyPreview.setAttribute(
+                    "aria-label",
+                    `Jump to original message from ${
+                        message.reply.senderName || "Student"
+                    }`
+                );
+            }
+        }
+
         if (
             !message ||
             message.deleted ||

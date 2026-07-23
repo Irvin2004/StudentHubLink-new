@@ -4,6 +4,7 @@ const PLAYBACK_SPEEDS = Object.freeze([1, 1.5, 2]);
 const SEEK_STEP_SECONDS = 5;
 const players = new Set();
 const playersByContainer = new WeakMap();
+let voicePlayerId = 0;
 
 function normalizeUrl(value) {
     const url = String(value || "").trim();
@@ -232,6 +233,8 @@ export function createVoicePlayer({
     let playbackRateIndex = 0;
     let playing = false;
     let destroyed = false;
+    const instructionsId =
+        `voice-player-instructions-${++voicePlayerId}`;
 
     playersByContainer.get(container)?.destroy();
 
@@ -240,6 +243,7 @@ export function createVoicePlayer({
         attributes: {
             role: "group",
             "aria-label": "Voice message player",
+            "aria-describedby": instructionsId,
             tabindex: "0"
         }
     });
@@ -261,7 +265,12 @@ export function createVoicePlayer({
             max: String(totalDurationMs / 1000),
             step: "0.1",
             value: "0",
-            "aria-label": "Seek voice message"
+            "aria-label": "Seek voice message",
+            "aria-valuetext": `00:00 of ${
+                totalDurationMs > 0
+                    ? formatDuration(totalDurationMs)
+                    : "unknown duration"
+            }`
         }
     });
     const time = createElement(documentReference, "span", {
@@ -290,9 +299,24 @@ export function createVoicePlayer({
             "aria-label": "Playback speed, 1 times"
         }
     });
+    const instructions = createElement(documentReference, "span", {
+        className: "visually-hidden",
+        text:
+            "Press Enter or Space to play or pause. " +
+            "Use Left and Right Arrow keys to seek. " +
+            "Press Escape to stop.",
+        attributes: { id: instructionsId }
+    });
 
     time.append(currentTime, separator, totalTime);
-    root.append(playButton, stopButton, progress, time, speedButton);
+    root.append(
+        playButton,
+        stopButton,
+        progress,
+        time,
+        speedButton,
+        instructions
+    );
     container.replaceChildren(root);
 
     function updatePlayButton() {
@@ -309,6 +333,14 @@ export function createVoicePlayer({
             Math.min(normalizeDuration(milliseconds), totalDurationMs || Infinity)
         );
         progress.value = String(currentTimeMs / 1000);
+        progress.setAttribute(
+            "aria-valuetext",
+            `${formatDuration(currentTimeMs)} of ${
+                totalDurationMs > 0
+                    ? formatDuration(totalDurationMs)
+                    : "unknown duration"
+            }`
+        );
         currentTime.textContent = formatDuration(currentTimeMs);
     }
 
@@ -389,7 +421,7 @@ export function createVoicePlayer({
     }
 
     function handleKeyboard(event) {
-        if (event.target === progress) return;
+        if (event.target !== root) return;
 
         if (
             event.key === " " ||
@@ -404,6 +436,9 @@ export function createVoicePlayer({
         } else if (event.key === "ArrowRight") {
             event.preventDefault();
             seekTo((currentTimeMs / 1000) + SEEK_STEP_SECONDS);
+        } else if (event.key === "Escape") {
+            event.preventDefault();
+            stopPlayback();
         }
     }
 
