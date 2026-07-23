@@ -1,8 +1,5 @@
 import { formatDate } from "../utils/format-date.js";
 import { escapeHtml } from "../utils/dom.js";
-import {
-    createConversationMenu
-} from "./conversation-menu.js?preferences=4";
 
 function getConversationPreview(conversation) {
     if (conversation.lastMessageType === "image") {
@@ -43,6 +40,10 @@ export function createConversationItem(
             data-conversation-entry
             data-conversation-id="${escapeHtml(conversation.id)}"
             data-conversation-name="${escapeHtml(name.toLowerCase())}"
+            data-conversation-label="${escapeHtml(name)}"
+            data-conversation-type="${escapeHtml(conversation.type || "direct")}"
+            data-group-id="${escapeHtml(conversation.groupId || "")}"
+            data-other-user-id="${escapeHtml(otherUser?.id || "")}"
         >
             <a
                 class="conversation-item"
@@ -108,10 +109,14 @@ export function createConversationItem(
                     </div>
                 </div>
             </a>
-            ${createConversationMenu({
-                conversationId: conversation.id,
-                preference
-            })}
+            <button
+                class="conversation-menu-trigger"
+                type="button"
+                data-conversation-menu-trigger
+                aria-label="Actions for ${escapeHtml(name)}"
+                aria-haspopup="menu"
+                aria-expanded="false"
+            >&#8942;</button>
         </article>
     `;
 }

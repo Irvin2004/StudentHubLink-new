@@ -162,7 +162,7 @@ test("conversation preferences remain user-scoped and presentation-only", () => 
     const messagesController = read("js/controllers/messages-controller.js");
     const messageEvents = read("js/events/message-events.js");
     const renderer = read("js/renderers/conversation-renderer.js");
-    const menu = read("js/components/conversation-menu.js");
+    const menu = read("js/components/context-menu.js");
     const viewTabs = read("js/components/conversation-view-tabs.js");
     const sorter = read("js/utils/conversation-sorter.js");
     const rules = read("firestore.rules");
@@ -201,8 +201,17 @@ test("conversation preferences remain user-scoped and presentation-only", () => 
     assert.doesNotMatch(renderer, /\.sort\(|sortConversations|filter\(/);
     assert.match(renderer, /preference\.pinned/);
     assert.doesNotMatch(renderer, /firebase|firestore|addEventListener/);
-    assert.match(menu, /data-conversation-action/);
+    assert.match(menu, /export function createContextMenu\(/);
+    assert.match(menu, /export function openContextMenu\(/);
+    assert.match(menu, /export function closeContextMenu\(/);
+    assert.match(menu, /export function destroyContextMenu\(/);
+    assert.match(menu, /ArrowDown/);
+    assert.match(menu, /ArrowUp/);
     assert.doesNotMatch(menu, /conversation-service|firestore|firebase/);
+    assert.match(controller, /createContextMenu\(/);
+    assert.match(controller, /contextmenu/);
+    assert.match(controller, /pointerType !== "touch"/);
+    assert.match(controller, /Leave conversation/);
     assert.match(messageEvents, /getConversationPreference\(/);
     assert.match(messageEvents, /preference\.muted !== true/);
     assert.match(messageEvents, /preference\.archived/);

@@ -12,19 +12,19 @@ import {
 } from "../services/presence-service.js";
 import { PRESENCE_STATUS } from "../config/presence-status.js";
 import {
-    closeConversationMenu
-} from "../components/conversation-menu.js?preferences=2";
+    closeContextMenu
+} from "../components/context-menu.js";
 import {
     initializeConversationPreferences,
     prepareConversations
-} from "./conversation-controller.js?preferences=5";
+} from "./conversation-controller.js?context-menu=1";
 import {
     initializeConversationViewTabs
 } from "../components/conversation-view-tabs.js";
 import {
     renderConversationError,
     renderConversationList
-} from "../renderers/conversation-renderer.js?preferences=5";
+} from "../renderers/conversation-renderer.js?context-menu=1";
 import { handleError } from "../utils/error-handler.js?security=1";
 
 const conversationList =
@@ -77,7 +77,7 @@ function displayConversations(items, userId) {
         view
     });
 
-    closeConversationMenu();
+    closeContextMenu();
     renderConversationList({
         items: preparedItems,
         currentUserId: userId,
@@ -100,7 +100,7 @@ function displayConversations(items, userId) {
 function displayConversationError() {
     if (!conversationList) return;
 
-    closeConversationMenu();
+    closeContextMenu();
     renderConversationError(conversationList);
 }
 
