@@ -1,8 +1,17 @@
 "use strict";
 
+export const NOTIFICATION_DEFAULTS = Object.freeze({
+    enabled: true,
+    directMessages: true,
+    groupMessages: true,
+    mentions: true,
+    reactions: false,
+    readReceipts: false
+});
+
 export const SETTINGS_DEFAULTS = Object.freeze({
     theme: "system",
-    notificationsEnabled: true,
+    notifications: NOTIFICATION_DEFAULTS,
     compactMode: false,
     messagePreview: true,
     fontSize: "medium",
