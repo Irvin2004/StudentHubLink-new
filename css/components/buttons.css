@@ -11,7 +11,11 @@
     font-weight: 700;
     border: none;
     cursor: pointer;
-    transition: transform var(--transition-fast), background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
+    transition:
+        transform var(--transition-fast),
+        background var(--transition-fast),
+        border-color var(--transition-fast),
+        color var(--transition-fast);
     text-decoration: none;
     font-size: 15px;
 }
@@ -28,17 +32,53 @@
     font-size: 15px;
     font-weight: 700;
     text-decoration: none;
-    transition: transform var(--transition-fast), filter var(--transition-fast);
+    transition:
+        transform var(--transition-fast),
+        filter var(--transition-fast);
 }
 
-.btn-danger:hover { filter: brightness(0.92); transform: translateY(-2px); }
-.btn-sm { min-height: 34px; padding: 7px 12px; font-size: 0.8125rem; }
-.btn-md { min-height: 44px; }
-.btn-lg { min-height: 52px; padding: 14px 24px; font-size: 1rem; }
-.btn:disabled, .btn[disabled], .btn-danger:disabled { cursor: not-allowed; opacity: 0.55; transform: none; }
-.btn:focus-visible, .btn-danger:focus-visible, .theme-toggle:focus-visible { outline: 3px solid color-mix(in srgb, var(--primary) 35%, transparent); outline-offset: 2px; }
-.pagination { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: var(--space-2); }
-.pagination .is-active { border-color: var(--primary); background: var(--primary); color: #fff; }
+.btn-danger:hover {
+    filter: brightness(0.92);
+    transform: translateY(-2px);
+}
+.btn-sm {
+    min-height: 34px;
+    padding: 7px 12px;
+    font-size: 0.8125rem;
+}
+.btn-md {
+    min-height: 44px;
+}
+.btn-lg {
+    min-height: 52px;
+    padding: 14px 24px;
+    font-size: 1rem;
+}
+.btn:disabled,
+.btn[disabled],
+.btn-danger:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+    transform: none;
+}
+.btn:focus-visible,
+.btn-danger:focus-visible,
+.theme-toggle:focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--primary) 35%, transparent);
+    outline-offset: 2px;
+}
+.pagination {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+}
+.pagination .is-active {
+    border-color: var(--primary);
+    background: var(--primary);
+    color: #fff;
+}
 
 .btn-primary,
 .primary-btn {

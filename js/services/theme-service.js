@@ -16,16 +16,13 @@ function isValidTheme(theme) {
 }
 
 function getSystemTheme() {
-    const query = systemThemeQuery ||
-        window.matchMedia(SYSTEM_THEME_QUERY);
+    const query = systemThemeQuery || window.matchMedia(SYSTEM_THEME_QUERY);
 
     return query.matches ? THEMES.DARK : THEMES.LIGHT;
 }
 
 function resolveTheme(theme) {
-    return theme === THEMES.SYSTEM
-        ? getSystemTheme()
-        : theme;
+    return theme === THEMES.SYSTEM ? getSystemTheme() : theme;
 }
 
 function saveTheme(theme) {
@@ -38,13 +35,9 @@ function saveTheme(theme) {
 
 function getSavedTheme() {
     try {
-        const savedTheme = window.localStorage.getItem(
-            THEME_STORAGE_KEY
-        );
+        const savedTheme = window.localStorage.getItem(THEME_STORAGE_KEY);
 
-        return isValidTheme(savedTheme)
-            ? savedTheme
-            : THEMES.SYSTEM;
+        return isValidTheme(savedTheme) ? savedTheme : THEMES.SYSTEM;
     } catch (error) {
         logError(error, "Unable to read theme preference");
         return THEMES.SYSTEM;
@@ -54,26 +47,21 @@ function getSavedTheme() {
 function applyResolvedTheme(theme) {
     const resolvedTheme = resolveTheme(theme);
 
-    document.documentElement.setAttribute(
-        "data-theme",
-        resolvedTheme
-    );
+    document.documentElement.setAttribute("data-theme", resolvedTheme);
     updateThemeButtons(resolvedTheme);
 }
 
 function updateThemeButtons(theme) {
-    document
-        .querySelectorAll("[data-theme-toggle]")
-        .forEach((button) => {
-            const darkModeActive = theme === THEMES.DARK;
-            const label = darkModeActive
-                ? "Switch to light mode"
-                : "Switch to dark mode";
+    document.querySelectorAll("[data-theme-toggle]").forEach((button) => {
+        const darkModeActive = theme === THEMES.DARK;
+        const label = darkModeActive
+            ? "Switch to light mode"
+            : "Switch to dark mode";
 
-            button.textContent = darkModeActive ? "Light" : "Dark";
-            button.setAttribute("aria-label", label);
-            button.setAttribute("title", label);
-        });
+        button.textContent = darkModeActive ? "Light" : "Dark";
+        button.setAttribute("aria-label", label);
+        button.setAttribute("title", label);
+    });
 }
 
 function handleSystemThemeChange() {
@@ -97,11 +85,7 @@ function handleThemeToggle(event) {
 
     const resolvedTheme = resolveTheme(currentTheme);
 
-    applyTheme(
-        resolvedTheme === THEMES.DARK
-            ? THEMES.LIGHT
-            : THEMES.DARK
-    );
+    applyTheme(resolvedTheme === THEMES.DARK ? THEMES.LIGHT : THEMES.DARK);
 }
 
 export function applyTheme(theme) {
@@ -129,9 +113,7 @@ export function toggleTheme() {
     const resolvedTheme = resolveTheme(currentTheme);
 
     return applyTheme(
-        resolvedTheme === THEMES.DARK
-            ? THEMES.LIGHT
-            : THEMES.DARK
+        resolvedTheme === THEMES.DARK ? THEMES.LIGHT : THEMES.DARK
     );
 }
 
@@ -143,18 +125,12 @@ export function initializeTheme() {
     systemThemeQuery = window.matchMedia(SYSTEM_THEME_QUERY);
 
     if (systemThemeQuery.addEventListener) {
-        systemThemeQuery.addEventListener(
-            "change",
-            handleSystemThemeChange
-        );
+        systemThemeQuery.addEventListener("change", handleSystemThemeChange);
     } else {
         systemThemeQuery.addListener(handleSystemThemeChange);
     }
 
-    document.addEventListener(
-        SETTINGS_CHANGE_EVENT,
-        handleSettingsChange
-    );
+    document.addEventListener(SETTINGS_CHANGE_EVENT, handleSettingsChange);
     document.addEventListener("click", handleThemeToggle);
 
     initialized = true;
@@ -168,17 +144,11 @@ export function destroy() {
         return;
     }
 
-    document.removeEventListener(
-        SETTINGS_CHANGE_EVENT,
-        handleSettingsChange
-    );
+    document.removeEventListener(SETTINGS_CHANGE_EVENT, handleSettingsChange);
     document.removeEventListener("click", handleThemeToggle);
 
     if (systemThemeQuery?.removeEventListener) {
-        systemThemeQuery.removeEventListener(
-            "change",
-            handleSystemThemeChange
-        );
+        systemThemeQuery.removeEventListener("change", handleSystemThemeChange);
     } else {
         systemThemeQuery?.removeListener(handleSystemThemeChange);
     }

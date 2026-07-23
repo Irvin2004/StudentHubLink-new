@@ -13,7 +13,10 @@ function javascriptFiles(directory) {
 
 const files = [
     ...javascriptFiles("js"),
-    ...javascriptFiles("functions")
+    ...javascriptFiles("src"),
+    ...javascriptFiles("functions"),
+    "eslint.config.js",
+    "vite.config.js"
 ];
 
 for (const file of files) {

@@ -23,10 +23,7 @@ export function applyAccessibilitySettings(
     const reducedMotion = settings.reducedMotion === true;
 
     root.setAttribute("data-font-size", fontSize);
-    root.setAttribute(
-        "data-reduced-motion",
-        String(reducedMotion)
-    );
+    root.setAttribute("data-reduced-motion", String(reducedMotion));
 
     if (highContrast) {
         root.setAttribute("data-contrast", "high");
@@ -53,10 +50,7 @@ export function initializeAccessibilityRenderer({
 
     activeDocument = documentReference;
     settingsChangeHandler = (event) => {
-        applyAccessibilitySettings(
-            event.detail || {},
-            activeDocument
-        );
+        applyAccessibilitySettings(event.detail || {}, activeDocument);
     };
 
     activeDocument.addEventListener(
@@ -67,10 +61,7 @@ export function initializeAccessibilityRenderer({
 
     return {
         apply(settings) {
-            return applyAccessibilitySettings(
-                settings,
-                activeDocument
-            );
+            return applyAccessibilitySettings(settings, activeDocument);
         },
         destroy: destroyAccessibilityRenderer
     };

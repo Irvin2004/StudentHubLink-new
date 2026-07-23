@@ -26,40 +26,44 @@ export function sortResources(resources = [], sortBy = "newest") {
 
     switch (sortBy) {
         case "oldest":
-            return sorted.sort((first, second) =>
-                getDateValue(first.createdAt) -
-                getDateValue(second.createdAt)
+            return sorted.sort(
+                (first, second) =>
+                    getDateValue(first.createdAt) -
+                    getDateValue(second.createdAt)
             );
 
         case "downloads":
-            return sorted.sort((first, second) =>
-                Number(second.downloadCount || 0) -
-                Number(first.downloadCount || 0)
+            return sorted.sort(
+                (first, second) =>
+                    Number(second.downloadCount || 0) -
+                    Number(first.downloadCount || 0)
             );
 
         case "price-low":
-            return sorted.sort((first, second) =>
-                Number(first.price || 0) -
-                Number(second.price || 0)
+            return sorted.sort(
+                (first, second) =>
+                    Number(first.price || 0) - Number(second.price || 0)
             );
 
         case "price-high":
-            return sorted.sort((first, second) =>
-                Number(second.price || 0) -
-                Number(first.price || 0)
+            return sorted.sort(
+                (first, second) =>
+                    Number(second.price || 0) - Number(first.price || 0)
             );
 
         case "title":
             return sorted.sort((first, second) =>
-                String(first.title || "")
-                    .localeCompare(String(second.title || ""))
+                String(first.title || "").localeCompare(
+                    String(second.title || "")
+                )
             );
 
         case "newest":
         default:
-            return sorted.sort((first, second) =>
-                getDateValue(second.createdAt) -
-                getDateValue(first.createdAt)
+            return sorted.sort(
+                (first, second) =>
+                    getDateValue(second.createdAt) -
+                    getDateValue(first.createdAt)
             );
     }
 }

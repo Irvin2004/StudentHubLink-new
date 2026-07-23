@@ -47,9 +47,7 @@ export function validateUserSettings(settings) {
 
     for (const field of NOTIFICATION_BOOLEAN_FIELDS) {
         if (typeof settings.notifications[field] !== "boolean") {
-            throw new TypeError(
-                `notifications.${field} must be a boolean.`
-            );
+            throw new TypeError(`notifications.${field} must be a boolean.`);
         }
     }
 
@@ -57,11 +55,8 @@ export function validateUserSettings(settings) {
 }
 
 export function createUserSettings(data = {}) {
-    const {
-        notificationsEnabled,
-        notifications,
-        ...otherSettings
-    } = data || {};
+    const { notificationsEnabled, notifications, ...otherSettings } =
+        data || {};
     const mergedNotifications = {
         ...NOTIFICATION_DEFAULTS,
         ...(notifications || {})

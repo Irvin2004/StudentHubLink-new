@@ -7,21 +7,22 @@ const PREFERRED_MIME_TYPES = Object.freeze([
 ]);
 
 function createRecorderInstance(options = {}) {
-    const mediaDevices = options.mediaDevices ||
-        globalThis.navigator?.mediaDevices;
-    const MediaRecorderClass = options.MediaRecorder ||
-        globalThis.MediaRecorder;
-    const now = typeof options.now === "function"
-        ? options.now
-        : () => globalThis.performance?.now?.() ?? Date.now();
+    const mediaDevices =
+        options.mediaDevices || globalThis.navigator?.mediaDevices;
+    const MediaRecorderClass =
+        options.MediaRecorder || globalThis.MediaRecorder;
+    const now =
+        typeof options.now === "function"
+            ? options.now
+            : () => globalThis.performance?.now?.() ?? Date.now();
     const setTimer = options.setInterval || globalThis.setInterval;
     const clearTimer = options.clearInterval || globalThis.clearInterval;
-    const onTick = typeof options.onTick === "function"
-        ? options.onTick
-        : () => {};
-    const onStateChange = typeof options.onStateChange === "function"
-        ? options.onStateChange
-        : () => {};
+    const onTick =
+        typeof options.onTick === "function" ? options.onTick : () => {};
+    const onStateChange =
+        typeof options.onStateChange === "function"
+            ? options.onStateChange
+            : () => {};
 
     let recorder = null;
     let stream = null;
@@ -38,9 +39,11 @@ function createRecorderInstance(options = {}) {
             return "";
         }
 
-        return PREFERRED_MIME_TYPES.find((type) =>
-            MediaRecorderClass.isTypeSupported(type)
-        ) || "";
+        return (
+            PREFERRED_MIME_TYPES.find((type) =>
+                MediaRecorderClass.isTypeSupported(type)
+            ) || ""
+        );
     }
 
     function getDuration() {
@@ -76,16 +79,14 @@ function createRecorderInstance(options = {}) {
 
     function handleStop() {
         const duration = getDuration();
-        const mimeType = recorder?.mimeType ||
-            chunks[0]?.type ||
-            "audio/webm";
+        const mimeType = recorder?.mimeType || chunks[0]?.type || "audio/webm";
         const result = cancelled
             ? null
             : {
-                blob: new Blob(chunks, { type: mimeType }),
-                duration,
-                mimeType
-            };
+                  blob: new Blob(chunks, { type: mimeType }),
+                  duration,
+                  mimeType
+              };
         const resolve = stopResolve;
 
         stopResolve = null;
@@ -119,7 +120,9 @@ function createRecorderInstance(options = {}) {
         }
 
         if (!mediaDevices?.getUserMedia || !MediaRecorderClass) {
-            throw new Error("Audio recording is not supported by this browser.");
+            throw new Error(
+                "Audio recording is not supported by this browser."
+            );
         }
 
         try {

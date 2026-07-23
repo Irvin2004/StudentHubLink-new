@@ -44,11 +44,7 @@ function requireContainer(container, name) {
     return container;
 }
 
-function createEmptyState({
-    icon,
-    title,
-    message = ""
-}) {
+function createEmptyState({ icon, title, message = "" }) {
     return `
         <div class="dashboard-empty-state">
             <span aria-hidden="true">${icon}</span>
@@ -58,12 +54,7 @@ function createEmptyState({
     `;
 }
 
-function createStatCard({
-    icon,
-    title,
-    value,
-    link
-}) {
+function createStatCard({ icon, title, value, link }) {
     const numericValue = Number(value);
     const displayValue = Number.isFinite(numericValue)
         ? Math.max(0, numericValue)
@@ -141,9 +132,9 @@ function renderAssignments(assignments, container) {
     target.innerHTML = assignmentList.length
         ? assignmentList.map(createAssignmentItem).join("")
         : createEmptyState({
-            icon: "&#128221;",
-            title: "No upcoming assignments."
-        });
+              icon: "&#128221;",
+              title: "No upcoming assignments."
+          });
 }
 
 function renderDashboardNotifications(notifications, container) {
@@ -192,9 +183,9 @@ function renderGroups(groups, container) {
     target.innerHTML = groupList.length
         ? groupList.map(createGroupItem).join("")
         : createEmptyState({
-            icon: "&#128101;",
-            title: "You haven't joined any groups yet."
-        });
+              icon: "&#128101;",
+              title: "You haven't joined any groups yet."
+          });
 }
 
 export function renderDashboard(data = {}, elements = {}) {

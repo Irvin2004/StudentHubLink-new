@@ -44,6 +44,8 @@ emulator-data/
 dist/
 build/
 .cache/
+.vite/
+.eslintcache
 
 # Test output
 coverage/

@@ -13,9 +13,7 @@ function validateTitle(title) {
     }
 
     if (trimmed.length > TITLE_MAX_LENGTH) {
-        throw new Error(
-            `Title cannot exceed ${TITLE_MAX_LENGTH} characters.`
-        );
+        throw new Error(`Title cannot exceed ${TITLE_MAX_LENGTH} characters.`);
     }
 
     return trimmed;
@@ -86,9 +84,7 @@ export function createAssignmentUpdateModel(updates) {
     }
 
     if (Object.hasOwn(updates, "description")) {
-        cleanUpdates.description = validateDescription(
-            updates.description
-        );
+        cleanUpdates.description = validateDescription(updates.description);
     }
 
     if (Object.hasOwn(updates, "dueDate")) {

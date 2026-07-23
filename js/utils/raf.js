@@ -13,9 +13,10 @@ function reducedMotionEnabled() {
         return true;
     }
 
-    return globalThis.matchMedia?.(
-        "(prefers-reduced-motion: reduce)"
-    ).matches === true;
+    return (
+        globalThis.matchMedia?.("(prefers-reduced-motion: reduce)").matches ===
+        true
+    );
 }
 
 function requestFrame(callback) {
@@ -23,10 +24,7 @@ function requestFrame(callback) {
         return globalThis.requestAnimationFrame(callback);
     }
 
-    return globalThis.setTimeout(
-        () => callback(Date.now()),
-        16
-    );
+    return globalThis.setTimeout(() => callback(Date.now()), 16);
 }
 
 function cancelFrameRequest(identifier) {

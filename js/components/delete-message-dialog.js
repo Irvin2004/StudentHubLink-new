@@ -2,9 +2,7 @@ import { activateFocusTrap } from "../utils/focus-trap.js";
 
 let activeDialog = null;
 
-export function openDeleteMessageDialog({
-    canDeleteForEveryone = false
-} = {}) {
+export function openDeleteMessageDialog({ canDeleteForEveryone = false } = {}) {
     activeDialog?.remove();
 
     const dialog = document.createElement("div");
@@ -13,10 +11,7 @@ export function openDeleteMessageDialog({
     dialog.className = "modal-overlay delete-message-dialog";
     dialog.setAttribute("role", "dialog");
     dialog.setAttribute("aria-modal", "true");
-    dialog.setAttribute(
-        "aria-labelledby",
-        "deleteMessageDialogTitle"
-    );
+    dialog.setAttribute("aria-labelledby", "deleteMessageDialogTitle");
 
     dialog.innerHTML = `
         <form class="modal-card delete-message-card">
@@ -26,8 +21,9 @@ export function openDeleteMessageDialog({
                 </h2>
             </div>
 
-            ${canDeleteForEveryone
-                ? `
+            ${
+                canDeleteForEveryone
+                    ? `
                     <fieldset class="delete-message-options">
                         <legend class="sr-only">
                             Choose how to delete this message
@@ -61,7 +57,7 @@ export function openDeleteMessageDialog({
                         </label>
                     </fieldset>
                 `
-                : `
+                    : `
                     <p>
                         Delete for me only?
                     </p>
@@ -107,24 +103,19 @@ export function openDeleteMessageDialog({
             .querySelector("[data-delete-cancel]")
             ?.addEventListener("click", () => finish(null));
 
-        dialog
-            .querySelector("form")
-            ?.addEventListener("submit", (event) => {
-                event.preventDefault();
+        dialog.querySelector("form")?.addEventListener("submit", (event) => {
+            event.preventDefault();
 
-                const selectedScope = dialog.querySelector(
-                    'input[name="deleteScope"]:checked'
-                );
-
-                finish(selectedScope?.value || "me");
-            });
-
-        const initialFocus = (
-            dialog.querySelector(
+            const selectedScope = dialog.querySelector(
                 'input[name="deleteScope"]:checked'
-            ) ||
-            dialog.querySelector("[data-delete-cancel]")
-        );
+            );
+
+            finish(selectedScope?.value || "me");
+        });
+
+        const initialFocus =
+            dialog.querySelector('input[name="deleteScope"]:checked') ||
+            dialog.querySelector("[data-delete-cancel]");
         deactivateFocusTrap = activateFocusTrap(dialog, {
             initialFocus,
             onEscape: () => finish(null)

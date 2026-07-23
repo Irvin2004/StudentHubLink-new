@@ -72,11 +72,8 @@
     .assignment-form input:focus,
     .assignment-form textarea:focus {
         border-color: var(--primary);
-        box-shadow: 0 0 0 3px color-mix(
-            in srgb,
-            var(--primary) 18%,
-            transparent
-        );
+        box-shadow: 0 0 0 3px
+            color-mix(in srgb, var(--primary) 18%, transparent);
     }
 
     .assignment-form small {
@@ -138,6 +135,5 @@
         .assignments-header .btn {
             width: 100%;
         }
-
     }
 }

@@ -1,9 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import {
-    bindContextMenuInteractions
-} from "../js/components/context-menu.js";
+import { bindContextMenuInteractions } from "../js/components/context-menu.js";
 
 const source = readFileSync(
     new URL("../js/components/context-menu.js", import.meta.url),
@@ -35,10 +33,7 @@ test("context menu owns keyboard focus and cleanup", () => {
 });
 
 test("context menu supports pointer and long-press interactions", () => {
-    assert.match(
-        source,
-        /export function bindContextMenuInteractions\(/
-    );
+    assert.match(source, /export function bindContextMenuInteractions\(/);
     assert.match(source, /contextmenu/);
     assert.match(source, /pointerdown/);
     assert.match(source, /\["touch", "pen"\]/);
@@ -64,8 +59,9 @@ test("long press opens the context menu and cleanup removes listeners", async ()
         removeEventListener(type, listener) {
             listeners.set(
                 type,
-                (listeners.get(type) || [])
-                    .filter((handler) => handler !== listener)
+                (listeners.get(type) || []).filter(
+                    (handler) => handler !== listener
+                )
             );
         },
         dispatch(type, details = {}) {
@@ -104,8 +100,7 @@ test("long press opens the context menu and cleanup removes listeners", async ()
     destroy();
 
     assert.equal(
-        [...listeners.values()]
-            .every((handlers) => handlers.length === 0),
+        [...listeners.values()].every((handlers) => handlers.length === 0),
         true
     );
 });

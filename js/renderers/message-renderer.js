@@ -7,33 +7,20 @@ import {
     renderVoiceMessage
 } from "./voice-message-renderer.js?voice=1";
 
-export function renderMessages(
-    messages,
-    currentUserId,
-    options = {}
-) {
-    const container =
-    document.getElementById("messageList");
+export function renderMessages(messages, currentUserId, options = {}) {
+    const container = document.getElementById("messageList");
 
     if (!container) {
         return;
     }
 
-    const visibleMessages = messages
-        .filter((message) =>
-            !message.deletedFor?.includes(currentUserId)
-        );
+    const visibleMessages = messages.filter(
+        (message) => !message.deletedFor?.includes(currentUserId)
+    );
 
     destroyVoiceMessage();
-    container.innerHTML =
-    visibleMessages
-        .map((message) =>
-            createMessageBubble(
-                message,
-                currentUserId,
-                options
-            )
-        )
+    container.innerHTML = visibleMessages
+        .map((message) => createMessageBubble(message, currentUserId, options))
         .join("");
 
     const messageRows = container.querySelectorAll(
@@ -44,9 +31,10 @@ export function renderMessages(
         const message = visibleMessages[index];
 
         if (message) {
-            const senderName = message.senderId === currentUserId
-                ? "You"
-                : message.senderName || "Student";
+            const senderName =
+                message.senderId === currentUserId
+                    ? "You"
+                    : message.senderName || "Student";
 
             messageRow.setAttribute("role", "article");
             messageRow.setAttribute(
@@ -56,14 +44,11 @@ export function renderMessages(
                     : `Message from ${senderName}`
             );
 
-            const sharedImage = messageRow.querySelector(
-                ".chat-image-preview"
-            );
+            const sharedImage = messageRow.querySelector(".chat-image-preview");
 
             if (sharedImage) {
                 const imageDescription =
-                    String(message.text || "").trim() ||
-                    "Shared image";
+                    String(message.text || "").trim() || "Shared image";
 
                 sharedImage.alt = imageDescription;
                 sharedImage
@@ -78,8 +63,7 @@ export function renderMessages(
 
             if (replyPreview && message.reply?.messageId) {
                 replyPreview.classList.add("reply-preview");
-                replyPreview.dataset.replyMessageId =
-                    message.reply.messageId;
+                replyPreview.dataset.replyMessageId = message.reply.messageId;
                 replyPreview.setAttribute("role", "button");
                 replyPreview.setAttribute("tabindex", "0");
                 replyPreview.setAttribute(
@@ -129,9 +113,7 @@ export function renderMessages(
             reactionContainer
         );
 
-        messageRow
-            .querySelector(".message-footer")
-            ?.before(reactionContainer);
+        messageRow.querySelector(".message-footer")?.before(reactionContainer);
 
         const statusContainer = messageRow.querySelector(
             "[data-read-receipt-container]"
@@ -145,9 +127,7 @@ export function renderMessages(
             );
 
             renderReadReceipt(
-                Array.isArray(message.readReceipts)
-                    ? message.readReceipts
-                    : [],
+                Array.isArray(message.readReceipts) ? message.readReceipts : [],
                 currentUserId,
                 {
                     ...message,
@@ -161,6 +141,5 @@ export function renderMessages(
         }
     });
 
-    container.scrollTop =
-    container.scrollHeight;
+    container.scrollTop = container.scrollHeight;
 }

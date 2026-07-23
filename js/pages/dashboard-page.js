@@ -1,11 +1,6 @@
 import { getMonthlyUploads } from "../services/analytics-service.js";
 
-import {
-    onAuthStateChanged,
-    signOut
-}
-from
-"https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+import { onAuthStateChanged, signOut } from "firebase/auth";
 
 import {
     collection,
@@ -15,40 +10,30 @@ import {
     orderBy,
     query,
     where
-}
-from
-"https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+} from "firebase/firestore";
 
-import { auth, db } from "../firebase/firebase-config.js";
+import { auth } from "../../src/firebase/auth.js";
+import { db } from "../../src/firebase/firestore.js";
 import { getUserDocument } from "./auth-page.js";
-import { mountNotificationPanel } from "../components/notification-panel.js";
+import { initializeNotifications } from "../controllers/notification-controller.js";
 import { escapeHtml, setText } from "../utils/dom.js";
 import { formatDate, getTimestampMillis } from "../utils/format-date.js";
 import { formatCurrency } from "../utils/format-price.js";
 import { showSkeleton } from "../renderers/skeleton-renderer.js";
 import { SKELETON_TYPES } from "../config/skeleton-types.js";
 import { error as logError, warn } from "../utils/logger.js";
-import {
-    setUserOffline
-} from "../services/presence-service.js";
+import { setUserOffline } from "../services/presence-service.js";
 import { createStudyGroup } from "../services/group-service.js";
-import {
-    handleError,
-    showToast
-} from "../services/user-feedback-service.js";
+import { handleError, showToast } from "../services/user-feedback-service.js";
 
 function setupCreateGroupModal() {
-    const openButton =
-    document.getElementById("openCreateGroup");
+    const openButton = document.getElementById("openCreateGroup");
 
-    const modal =
-    document.getElementById("createGroupModal");
+    const modal = document.getElementById("createGroupModal");
 
-    const form =
-    document.getElementById("createGroupForm");
+    const form = document.getElementById("createGroupForm");
 
-    const cancelButton =
-    document.getElementById("cancelGroup");
+    const cancelButton = document.getElementById("cancelGroup");
 
     if (!openButton || !modal || !form || !cancelButton) {
         return;
@@ -78,10 +63,7 @@ function setupCreateGroupModal() {
     });
 
     document.addEventListener("keydown", (event) => {
-        if (
-            event.key === "Escape" &&
-            !modal.classList.contains("hidden")
-        ) {
+        if (event.key === "Escape" && !modal.classList.contains("hidden")) {
             closeModal();
         }
     });
@@ -90,14 +72,10 @@ function setupCreateGroupModal() {
         event.preventDefault();
 
         const owner = auth.currentUser;
-        const submitButton =
-        form.querySelector('button[type="submit"]');
+        const submitButton = form.querySelector('button[type="submit"]');
 
         if (!owner) {
-            showToast(
-                "Sign in before creating a group.",
-                "error"
-            );
+            showToast("Sign in before creating a group.", "error");
             return;
         }
 
@@ -106,31 +84,19 @@ function setupCreateGroupModal() {
             submitButton.textContent = "Creating...";
 
             await createStudyGroup({
-                name:
-                    document.getElementById("groupName").value,
-                moduleName:
-                    document.getElementById("moduleName").value,
-                moduleCode:
-                    document.getElementById("moduleCode").value,
-                description:
-                    document.getElementById("groupDescription").value,
-                tags:
-                    document.getElementById("groupTags").value,
-                visibility:
-                    document.getElementById("groupVisibility").value,
+                name: document.getElementById("groupName").value,
+                moduleName: document.getElementById("moduleName").value,
+                moduleCode: document.getElementById("moduleCode").value,
+                description: document.getElementById("groupDescription").value,
+                tags: document.getElementById("groupTags").value,
+                visibility: document.getElementById("groupVisibility").value,
                 owner
             });
 
             closeModal();
-            showToast(
-                "Study group created.",
-                "success"
-            );
+            showToast("Study group created.", "success");
         } catch (error) {
-            handleError(
-                error,
-                "Unable to create the study group."
-            );
+            handleError(error, "Unable to create the study group.");
         } finally {
             submitButton.disabled = false;
             submitButton.textContent = "Create Group";
@@ -138,8 +104,7 @@ function setupCreateGroupModal() {
     });
 }
 function getGreeting(name) {
-    const hour =
-    new Date().getHours();
+    const hour = new Date().getHours();
 
     if (hour < 12) {
         return `Good morning, ${name}`;
@@ -155,22 +120,20 @@ function getGreeting(name) {
 function getActivityIcon(icon) {
     const icons = {
         "user-plus": "+",
-        "upload": "UP",
-        "approval": "OK",
-        "sale": "R",
-        "download": "DL",
-        "info": "i"
+        upload: "UP",
+        approval: "OK",
+        sale: "R",
+        download: "DL",
+        info: "i"
     };
 
     return icons[icon] || "i";
 }
 
 function setupProfileMenu() {
-    const profileButton =
-    document.getElementById("profileButton");
+    const profileButton = document.getElementById("profileButton");
 
-    const profileDropdown =
-    document.getElementById("profileDropdown");
+    const profileDropdown = document.getElementById("profileDropdown");
 
     if (profileButton && profileDropdown) {
         profileButton.addEventListener("click", (event) => {
@@ -192,8 +155,7 @@ function setupProfileMenu() {
 }
 
 function setupLogout() {
-    const logoutBtn =
-    document.getElementById("logoutBtn");
+    const logoutBtn = document.getElementById("logoutBtn");
 
     if (!logoutBtn) {
         return;
@@ -212,14 +174,12 @@ function setupLogout() {
 
         await signOut(auth);
 
-        window.location.href =
-        "login.html";
+        window.location.href = "login.html";
     });
 }
 
 async function loadDashboard(user) {
-    const userData =
-    await loadUserProfile(user);
+    const userData = await loadUserProfile(user);
 
     renderDashboard({
         userData,
@@ -231,17 +191,13 @@ async function loadDashboard(user) {
 
     showDashboardLoading();
 
-    const stats =
-    await loadStats(user, userData);
+    const stats = await loadStats(user, userData);
 
-    const activities =
-    await loadActivities();
+    const activities = await loadActivities();
 
-    const recentlyAdded =
-    await loadRecentlyAdded();
+    const recentlyAdded = await loadRecentlyAdded();
 
-    const chart =
-    await loadChart(user);
+    const chart = await loadChart(user);
 
     renderDashboard({
         userData,
@@ -253,18 +209,17 @@ async function loadDashboard(user) {
 }
 
 async function loadStats(user, userData) {
-    let uploadCount =
-    Number(userData.totalUploads || 0);
+    let uploadCount = Number(userData.totalUploads || 0);
 
     try {
-        const uploadQuery =
-        query(collection(db, "resources"), where("ownerId", "==", user.uid));
+        const uploadQuery = query(
+            collection(db, "resources"),
+            where("ownerId", "==", user.uid)
+        );
 
-        const uploadSnapshot =
-        await getCountFromServer(uploadQuery);
+        const uploadSnapshot = await getCountFromServer(uploadQuery);
 
-        uploadCount =
-        uploadSnapshot.data().count;
+        uploadCount = uploadSnapshot.data().count;
     } catch (error) {
         warn("FIRESTORE", "Could not load dashboard upload count:", error);
     }
@@ -310,8 +265,7 @@ async function loadRecentlyAdded() {
         { count: 3 }
     );
 
-    const approvedResourcesQuery =
-    query(
+    const approvedResourcesQuery = query(
         collection(db, "resources"),
         where("status", "==", "approved"),
         orderBy("createdAt", "desc"),
@@ -319,34 +273,36 @@ async function loadRecentlyAdded() {
     );
 
     try {
-        const snapshot =
-        await getDocs(approvedResourcesQuery);
+        const snapshot = await getDocs(approvedResourcesQuery);
 
         return snapshot.docs.map((resourceDoc) => ({
             id: resourceDoc.id,
             ...resourceDoc.data()
         }));
     } catch (error) {
-        warn("FIRESTORE", "Ordered recently added query failed, retrying without orderBy:", error);
+        warn(
+            "FIRESTORE",
+            "Ordered recently added query failed, retrying without orderBy:",
+            error
+        );
     }
 
-    const fallbackQuery =
-    query(
+    const fallbackQuery = query(
         collection(db, "resources"),
         where("status", "==", "approved")
     );
 
-    const snapshot =
-    await getDocs(fallbackQuery);
+    const snapshot = await getDocs(fallbackQuery);
 
     return snapshot.docs
         .map((resourceDoc) => ({
             id: resourceDoc.id,
             ...resourceDoc.data()
         }))
-        .sort((firstResource, secondResource) =>
-            getTimestampMillis(secondResource.createdAt) -
-            getTimestampMillis(firstResource.createdAt)
+        .sort(
+            (firstResource, secondResource) =>
+                getTimestampMillis(secondResource.createdAt) -
+                getTimestampMillis(firstResource.createdAt)
         )
         .slice(0, 3);
 }
@@ -361,8 +317,18 @@ async function loadChart(user) {
 
         return {
             labels: [
-                "Jan","Feb","Mar","Apr","May","Jun",
-                "Jul","Aug","Sep","Oct","Nov","Dec"
+                "Jan",
+                "Feb",
+                "Mar",
+                "Apr",
+                "May",
+                "Jun",
+                "Jul",
+                "Aug",
+                "Sep",
+                "Oct",
+                "Nov",
+                "Dec"
             ],
             values: new Array(12).fill(0)
         };
@@ -387,20 +353,17 @@ function showDashboardLoading() {
 }
 
 function showStatSkeleton(elementId) {
-    const element =
-    document.getElementById(elementId);
+    const element = document.getElementById(elementId);
 
     if (!element) {
         return;
     }
 
-    element.innerHTML =
-    `<span class="skeleton-line medium stat-skeleton-line"></span>`;
+    element.innerHTML = `<span class="skeleton-line medium stat-skeleton-line"></span>`;
 }
 
 function showChartSkeleton() {
-    const chartPreview =
-    document.querySelector(".chart-preview");
+    const chartPreview = document.querySelector(".chart-preview");
 
     if (!chartPreview || document.getElementById("analyticsSkeleton")) {
         return;
@@ -408,8 +371,7 @@ function showChartSkeleton() {
 
     chartPreview.classList.add("chart-loading");
 
-    const skeleton =
-    document.createElement("div");
+    const skeleton = document.createElement("div");
 
     skeleton.id = "analyticsSkeleton";
     skeleton.className = "chart-skeleton";
@@ -424,11 +386,9 @@ function showChartSkeleton() {
 }
 
 function clearChartSkeleton() {
-    const chartPreview =
-    document.querySelector(".chart-preview");
+    const chartPreview = document.querySelector(".chart-preview");
 
-    const skeleton =
-    document.getElementById("analyticsSkeleton");
+    const skeleton = document.getElementById("analyticsSkeleton");
 
     if (skeleton) {
         skeleton.remove();
@@ -447,7 +407,7 @@ function renderDashboard({
     chart
 }) {
     const displayName =
-    userData.name || userData.fullName || userData.displayName || "Student";
+        userData.name || userData.fullName || userData.displayName || "Student";
 
     setText("greeting", getGreeting(displayName));
     setText("userName", displayName);
@@ -469,29 +429,24 @@ function renderDashboard({
     if (chart) {
         renderChart(chart);
     }
-
 }
 
 function formatRelativeDate(value) {
-    const timestamp =
-    getTimestampMillis(value);
+    const timestamp = getTimestampMillis(value);
 
     if (!timestamp) {
         return "Recently";
     }
 
-    const elapsedMs =
-    Date.now() - timestamp;
+    const elapsedMs = Date.now() - timestamp;
 
-    const elapsedMinutes =
-    Math.max(1, Math.round(elapsedMs / 60000));
+    const elapsedMinutes = Math.max(1, Math.round(elapsedMs / 60000));
 
     if (elapsedMinutes < 60) {
         return `${elapsedMinutes} minute${elapsedMinutes === 1 ? "" : "s"} ago`;
     }
 
-    const elapsedHours =
-    Math.round(elapsedMinutes / 60);
+    const elapsedHours = Math.round(elapsedMinutes / 60);
 
     if (elapsedHours < 24) {
         return `${elapsedHours} hour${elapsedHours === 1 ? "" : "s"} ago`;
@@ -510,55 +465,52 @@ function formatRelativeDate(value) {
 }
 
 function renderRecentlyAdded(resources) {
-    const recentlyAddedList =
-    document.getElementById("recentlyAddedList");
+    const recentlyAddedList = document.getElementById("recentlyAddedList");
 
     if (!recentlyAddedList) {
         return;
     }
 
     if (!resources.length) {
-        recentlyAddedList.innerHTML =
-        `<p class="empty-state">No approved resources yet.</p>`;
+        recentlyAddedList.innerHTML = `<p class="empty-state">No approved resources yet.</p>`;
         return;
     }
 
-    recentlyAddedList.innerHTML =
-    resources.map((resource) => `
+    recentlyAddedList.innerHTML = resources
+        .map(
+            (resource) => `
         <a class="recent-resource-item" href="pages/resource-details.html?id=${encodeURIComponent(resource.id)}">
             <span>${escapeHtml(resource.title || "Untitled Resource")}</span>
             <small>${escapeHtml(formatRelativeDate(resource.createdAt))}</small>
         </a>
-    `).join("");
+    `
+        )
+        .join("");
 }
 
 function renderActivities(activities) {
-    const activityList =
-    document.getElementById("recentActivityList");
+    const activityList = document.getElementById("recentActivityList");
 
     if (!activityList) {
         return;
     }
 
     if (!activities.length) {
-        activityList.innerHTML =
-        `<p class="empty-state">No recent activity yet.</p>`;
+        activityList.innerHTML = `<p class="empty-state">No recent activity yet.</p>`;
         return;
     }
 
-    activityList.innerHTML =
-    activities.map((activity) => {
-        const title =
-        activity.resourceId ?
-        `<a href="pages/resource-details.html?id=${encodeURIComponent(activity.resourceId)}">${escapeHtml(activity.title)}</a>` :
-        escapeHtml(activity.title);
+    activityList.innerHTML = activities
+        .map((activity) => {
+            const title = activity.resourceId
+                ? `<a href="pages/resource-details.html?id=${encodeURIComponent(activity.resourceId)}">${escapeHtml(activity.title)}</a>`
+                : escapeHtml(activity.title);
 
-        const author =
-        activity.ownerId ?
-        `<span> by <a href="pages/user-profile.html?id=${encodeURIComponent(activity.ownerId)}">${escapeHtml(activity.ownerName || "Unknown Author")}</a></span>` :
-        "";
+            const author = activity.ownerId
+                ? `<span> by <a href="pages/user-profile.html?id=${encodeURIComponent(activity.ownerId)}">${escapeHtml(activity.ownerName || "Unknown Author")}</a></span>`
+                : "";
 
-        return `
+            return `
         <div class="activity-item">
             <div class="activity-icon">
                 ${getActivityIcon(activity.icon)}
@@ -570,14 +522,14 @@ function renderActivities(activities) {
             </div>
         </div>
     `;
-    }).join("");
+        })
+        .join("");
 }
 
 let analyticsChartInstance = null;
 
 function renderChart(chart) {
-    const analyticsChart =
-    document.getElementById("analyticsChart");
+    const analyticsChart = document.getElementById("analyticsChart");
 
     if (!analyticsChart) {
         return;
@@ -586,8 +538,7 @@ function renderChart(chart) {
     clearChartSkeleton();
 
     if (!window.Chart) {
-        analyticsChart.dataset.values =
-        JSON.stringify(chart);
+        analyticsChart.dataset.values = JSON.stringify(chart);
 
         warn("ANALYTICS", "Chart.js is not available yet.");
         return;
@@ -640,22 +591,34 @@ setupLogout();
 setupCreateGroupModal();
 
 let unmountNotificationPanel = () => {};
+let notificationInitializationId = 0;
 
 onAuthStateChanged(auth, (user) => {
+    notificationInitializationId += 1;
+    const initializationId = notificationInitializationId;
     unmountNotificationPanel();
+    unmountNotificationPanel = () => {};
 
     if (!user) {
         return;
     }
 
-    unmountNotificationPanel = mountNotificationPanel({
-        recipientId: user.uid,
-        trigger: document.getElementById("notificationBtn"),
-        panel: document.getElementById("notificationDropdown"),
-        list: document.getElementById("notificationList"),
-        badge: document.getElementById("notificationCount"),
-        markAllButton: document.getElementById("markAllNotificationsRead")
-    });
+    initializeNotifications({
+        userId: user.uid,
+        bellButton: document.getElementById("notificationBtn"),
+        panelContainer: document.getElementById("notificationDropdown")
+    })
+        .then((destroyNotifications) => {
+            if (initializationId !== notificationInitializationId) {
+                destroyNotifications();
+                return;
+            }
+
+            unmountNotificationPanel = destroyNotifications;
+        })
+        .catch((error) => {
+            handleError(error, "Unable to initialize notifications.");
+        });
 
     loadDashboard(user);
 });

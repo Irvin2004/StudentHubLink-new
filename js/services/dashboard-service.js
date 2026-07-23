@@ -1,16 +1,11 @@
 import { getAssignments } from "./assignment-service.js";
-import {
-    getStudyGroupMemberships,
-    getStudyGroups
-} from "./group-service.js";
+import { getStudyGroupMemberships, getStudyGroups } from "./group-service.js";
 import { getNotifications } from "./notification-service.js";
 import { getAssignmentStatus } from "../utils/assignment-status.js";
 import { log } from "../utils/logger.js";
 
 function validateUserId(userId) {
-    const cleanUserId = typeof userId === "string"
-        ? userId.trim()
-        : "";
+    const cleanUserId = typeof userId === "string" ? userId.trim() : "";
 
     if (!cleanUserId) {
         throw new Error("User ID is required.");
@@ -22,10 +17,7 @@ function validateUserId(userId) {
 async function getUserGroups(userId) {
     const groups = await getStudyGroups();
     const groupIds = groups.map((group) => group.id);
-    const memberships = await getStudyGroupMemberships(
-        groupIds,
-        userId
-    );
+    const memberships = await getStudyGroupMemberships(groupIds, userId);
 
     return groups.filter((group) => memberships.has(group.id));
 }
@@ -47,9 +39,7 @@ async function getUpcomingAssignments(groups) {
         groups.map((group) => getAssignments(group.id))
     );
 
-    return assignmentLists
-        .flat()
-        .filter(isUpcomingAssignment);
+    return assignmentLists.flat().filter(isUpcomingAssignment);
 }
 
 async function loadWidget(name, loader) {
@@ -57,53 +47,35 @@ async function loadWidget(name, loader) {
         const result = await loader();
         return Array.isArray(result) ? result : [];
     } catch (error) {
-        log(
-            "DASHBOARD",
-            `${name} widget is unavailable:`,
-            error
-        );
+        log("DASHBOARD", `${name} widget is unavailable:`, error);
         return [];
     }
 }
 
 function getUnreadMessageCount(conversations) {
     return conversations.reduce((total, conversation) => {
-        const unreadCount = Number(
-            conversation?.unreadCount || 0
-        );
+        const unreadCount = Number(conversation?.unreadCount || 0);
 
-        return total + (
-            Number.isFinite(unreadCount)
-                ? Math.max(0, unreadCount)
-                : 0
+        return (
+            total +
+            (Number.isFinite(unreadCount) ? Math.max(0, unreadCount) : 0)
         );
     }, 0);
 }
 
 export async function getDashboardData(userId) {
     const cleanUserId = validateUserId(userId);
-    const groupsPromise = loadWidget(
-        "Groups",
-        () => getUserGroups(cleanUserId)
+    const groupsPromise = loadWidget("Groups", () =>
+        getUserGroups(cleanUserId)
     );
-    const assignmentsPromise = groupsPromise.then(
-        (groups) => loadWidget(
-            "Assignments",
-            () => getUpcomingAssignments(groups)
-        )
+    const assignmentsPromise = groupsPromise.then((groups) =>
+        loadWidget("Assignments", () => getUpcomingAssignments(groups))
     );
 
-    const [
-        groups,
-        assignments,
-        notifications
-    ] = await Promise.all([
+    const [groups, assignments, notifications] = await Promise.all([
         groupsPromise,
         assignmentsPromise,
-        loadWidget(
-            "Notifications",
-            () => getNotifications(cleanUserId)
-        )
+        loadWidget("Notifications", () => getNotifications(cleanUserId))
     ]);
 
     /*

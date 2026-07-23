@@ -3,8 +3,7 @@ import { escapeHtml } from "../utils/dom.js";
 import { formatDate } from "../utils/format-date.js";
 
 export function createReviewCard(review, currentUserId = null) {
-    const isOwner =
-    currentUserId === review.userId;
+    const isOwner = currentUserId === review.userId;
 
     return `
         <article class="review-card">
@@ -27,7 +26,7 @@ export function createReviewCard(review, currentUserId = null) {
 
                 ${
                     isOwner
-                    ? `
+                        ? `
                         <div class="review-actions">
                             <button
                                 class="edit-review-btn"
@@ -44,7 +43,7 @@ export function createReviewCard(review, currentUserId = null) {
                             </button>
                         </div>
                     `
-                    : ""
+                        : ""
                 }
             </footer>
         </article>

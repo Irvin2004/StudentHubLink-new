@@ -8,9 +8,9 @@ import {
     serverTimestamp,
     where,
     writeBatch
-} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+} from "firebase/firestore";
 
-import { db } from "../firebase/firebase-config.js";
+import { db } from "../../src/firebase/firestore.js";
 import {
     emitFriendRequestAccepted,
     emitFriendRequestSent
@@ -21,9 +21,7 @@ const FRIEND_REQUESTS_COLLECTION = "friendRequests";
 const FRIENDS_COLLECTION = "friends";
 
 function validateId(value, fieldName) {
-    const cleanValue = typeof value === "string"
-        ? value.trim()
-        : "";
+    const cleanValue = typeof value === "string" ? value.trim() : "";
 
     if (!cleanValue) {
         throw new Error(`${fieldName} is required.`);
@@ -50,9 +48,7 @@ async function getPendingRequest(senderId, recipientId) {
         (requestDocument) => requestDocument.data().status === "pending"
     );
 
-    return pendingRequest
-        ? mapFriendRequest(pendingRequest)
-        : null;
+    return pendingRequest ? mapFriendRequest(pendingRequest) : null;
 }
 
 async function findExistingPendingRequest(senderId, recipientId) {
@@ -144,11 +140,7 @@ export async function acceptFriendRequest(requestId, recipientId) {
     }
 
     const batch = writeBatch(db);
-    const friendReference = doc(
-        db,
-        FRIENDS_COLLECTION,
-        cleanRequestId
-    );
+    const friendReference = doc(db, FRIENDS_COLLECTION, cleanRequestId);
 
     batch.update(requestReference, {
         status: "accepted",
@@ -156,10 +148,7 @@ export async function acceptFriendRequest(requestId, recipientId) {
         updatedAt: serverTimestamp()
     });
     batch.set(friendReference, {
-        participantIds: [
-            friendRequest.senderId,
-            cleanRecipientId
-        ],
+        participantIds: [friendRequest.senderId, cleanRecipientId],
         requestId: cleanRequestId,
         createdAt: serverTimestamp()
     });

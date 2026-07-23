@@ -1,26 +1,18 @@
-import {
-    onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+import { onAuthStateChanged } from "firebase/auth";
 
-import { auth } from "../firebase/firebase-config.js";
+import { auth } from "../../src/firebase/auth.js";
 import {
     getUserProfile as fetchUserProfile,
     subscribeToUserConversations
 } from "../services/conversation-service.js";
-import {
-    subscribeToPresence
-} from "../services/presence-service.js";
+import { subscribeToPresence } from "../services/presence-service.js";
 import { PRESENCE_STATUS } from "../config/presence-status.js";
-import {
-    closeContextMenu
-} from "../components/context-menu.js";
+import { closeContextMenu } from "../components/context-menu.js";
 import {
     initializeConversationPreferences,
     prepareConversations
 } from "./conversation-controller.js?context-menu=1";
-import {
-    initializeConversationViewTabs
-} from "../components/conversation-view-tabs.js";
+import { initializeConversationViewTabs } from "../components/conversation-view-tabs.js";
 import {
     renderConversationError,
     renderConversationList,
@@ -33,12 +25,9 @@ import { throttle } from "../utils/throttle.js";
 const SEARCH_DELAY = 200;
 const PRESENCE_RENDER_INTERVAL = 250;
 
-const conversationList =
-    document.getElementById("conversationList");
-const searchInput =
-    document.getElementById("conversationSearch");
-const conversationViews =
-    document.getElementById("conversationViews");
+const conversationList = document.getElementById("conversationList");
+const searchInput = document.getElementById("conversationSearch");
+const conversationViews = document.getElementById("conversationViews");
 
 const profileCache = new Map();
 let renderedConversations = [];
@@ -60,11 +49,10 @@ async function getUserProfile(userId) {
     if (!profileCache.has(userId)) {
         profileCache.set(
             userId,
-            fetchUserProfile(userId)
-                .catch((error) => {
-                    profileCache.delete(userId);
-                    throw error;
-                })
+            fetchUserProfile(userId).catch((error) => {
+                profileCache.delete(userId);
+                throw error;
+            })
         );
     }
 
@@ -93,13 +81,13 @@ function displayConversations(items, userId) {
         emptyTitle: hasSearch
             ? "No matches found"
             : showingArchived
-                ? "No archived conversations"
-                : "No conversations yet",
+              ? "No archived conversations"
+              : "No conversations yet",
         emptyMessage: hasSearch
             ? "Try searching for a different student."
             : showingArchived
-                ? "Conversations you archive will appear here."
-            : "Follow each other with another student to start messaging."
+              ? "Conversations you archive will appear here."
+              : "Follow each other with another student to start messaging."
     });
 }
 
@@ -120,9 +108,7 @@ function clearPresenceSubscriptions() {
 
 function syncPresenceSubscriptions(items) {
     const activeUserIds = new Set(
-        items
-            .map(({ otherUser }) => otherUser?.id)
-            .filter(Boolean)
+        items.map(({ otherUser }) => otherUser?.id).filter(Boolean)
     );
 
     presenceUnsubscribers.forEach((unsubscribe, userId) => {
@@ -135,29 +121,25 @@ function syncPresenceSubscriptions(items) {
     activeUserIds.forEach((userId) => {
         if (presenceUnsubscribers.has(userId)) return;
 
-        const unsubscribe = subscribeToPresence(
-            userId,
-            (presence) => {
-                let changed = false;
-                const online = (
-                    presence.status === PRESENCE_STATUS.ONLINE ||
-                    presence.status === PRESENCE_STATUS.TYPING
-                );
+        const unsubscribe = subscribeToPresence(userId, (presence) => {
+            let changed = false;
+            const online =
+                presence.status === PRESENCE_STATUS.ONLINE ||
+                presence.status === PRESENCE_STATUS.TYPING;
 
-                renderedConversations.forEach(({ otherUser }) => {
-                    if (otherUser?.id !== userId) return;
+            renderedConversations.forEach(({ otherUser }) => {
+                if (otherUser?.id !== userId) return;
 
-                    if (otherUser.online !== online) {
-                        otherUser.online = online;
-                        changed = true;
-                    }
-                });
-
-                if (changed) {
-                    schedulePresenceRender();
+                if (otherUser.online !== online) {
+                    otherUser.online = online;
+                    changed = true;
                 }
+            });
+
+            if (changed) {
+                schedulePresenceRender();
             }
-        );
+        });
 
         presenceUnsubscribers.set(userId, unsubscribe);
     });
@@ -218,10 +200,7 @@ function filterConversations() {
     displayConversations(filtered, currentUserId);
 }
 
-const scheduleConversationFilter = debounce(
-    filterConversations,
-    SEARCH_DELAY
-);
+const scheduleConversationFilter = debounce(filterConversations, SEARCH_DELAY);
 const schedulePresenceRender = throttle(
     filterConversations,
     PRESENCE_RENDER_INTERVAL
@@ -276,10 +255,9 @@ onAuthStateChanged(auth, (user) => {
             if (conversationLoadFailed) return;
 
             conversationsLoaded = true;
-            renderConversations(conversations, user.uid)
-                .catch((error) => {
-                    handleError(error, "Unable to load conversations.");
-                });
+            renderConversations(conversations, user.uid).catch((error) => {
+                handleError(error, "Unable to load conversations.");
+            });
         },
         (error) => {
             conversationLoadFailed = true;

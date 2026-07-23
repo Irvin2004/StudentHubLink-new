@@ -130,11 +130,8 @@
 
     .groups-search:focus-within {
         border-color: var(--primary);
-        box-shadow: 0 0 0 3px color-mix(
-            in srgb,
-            var(--primary) 18%,
-            transparent
-        );
+        box-shadow: 0 0 0 3px
+            color-mix(in srgb, var(--primary) 18%, transparent);
     }
 
     .groups-search svg {
@@ -204,10 +201,7 @@
 
     .group-grid {
         display: grid;
-        grid-template-columns: repeat(
-            3,
-            minmax(0, 1fr)
-        );
+        grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: var(--space-4);
     }
 
@@ -228,11 +222,7 @@
 
     .group-card:hover {
         transform: translateY(-3px);
-        border-color: color-mix(
-            in srgb,
-            var(--primary) 45%,
-            var(--border)
-        );
+        border-color: color-mix(in srgb, var(--primary) 45%, var(--border));
         box-shadow: var(--shadow);
     }
 
@@ -337,25 +327,13 @@
 
     .group-joined-button {
         cursor: pointer;
-        border: 1px solid color-mix(
-            in srgb,
-            var(--success) 70%,
-            var(--border)
-        );
-        background: color-mix(
-            in srgb,
-            var(--success) 10%,
-            var(--surface)
-        );
+        border: 1px solid color-mix(in srgb, var(--success) 70%, var(--border));
+        background: color-mix(in srgb, var(--success) 10%, var(--surface));
         color: #15803d;
     }
 
     .group-joined-button:hover {
-        background: color-mix(
-            in srgb,
-            var(--success) 16%,
-            var(--surface)
-        );
+        background: color-mix(in srgb, var(--success) 16%, var(--surface));
     }
 
     .group-owner-button {
@@ -565,10 +543,7 @@
 
     @media (max-width: 1180px) {
         .group-grid {
-            grid-template-columns: repeat(
-                2,
-                minmax(0, 1fr)
-            );
+            grid-template-columns: repeat(2, minmax(0, 1fr));
         }
 
         .group-detail-layout {

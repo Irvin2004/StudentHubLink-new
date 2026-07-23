@@ -1,9 +1,6 @@
 "use strict";
 
-import {
-    MESSAGE_TYPES,
-    isValidMessageType
-} from "../config/message-types.js";
+import { MESSAGE_TYPES, isValidMessageType } from "../config/message-types.js";
 
 function normalizeText(value) {
     return String(value ?? "").trim();
@@ -68,8 +65,7 @@ export function validateMessage(message = {}) {
         const voice = normalizeVoice(message.voice);
 
         if (!voice.storagePath) {
-            errors.voiceStoragePath =
-                "Voice message storage path is required.";
+            errors.voiceStoragePath = "Voice message storage path is required.";
         }
 
         if (voice.duration < 0) {
@@ -78,8 +74,7 @@ export function validateMessage(message = {}) {
         }
 
         if (voice.size < 0) {
-            errors.voiceSize =
-                "Voice message size must be zero or greater.";
+            errors.voiceSize = "Voice message size must be zero or greater.";
         }
 
         if (!voice.mimeType.startsWith("audio/")) {
@@ -116,9 +111,10 @@ export function validateMessage(message = {}) {
 
 export function createMessageModel(message = {}) {
     const type = normalizeText(message.type) || MESSAGE_TYPES.TEXT;
-    const reply = message.reply === undefined || message.reply === null
-        ? null
-        : normalizeReply(message.reply);
+    const reply =
+        message.reply === undefined || message.reply === null
+            ? null
+            : normalizeReply(message.reply);
     const normalizedMessage = {
         id: normalizeText(message.id),
         conversationId: normalizeText(message.conversationId),
@@ -127,9 +123,8 @@ export function createMessageModel(message = {}) {
         groupId: normalizeOptionalId(message.groupId),
         type,
         content: normalizeText(message.content ?? message.text),
-        voice: type === MESSAGE_TYPES.VOICE
-            ? normalizeVoice(message.voice)
-            : null,
+        voice:
+            type === MESSAGE_TYPES.VOICE ? normalizeVoice(message.voice) : null,
         ...(reply ? { reply } : {})
     };
     const validation = validateMessage(normalizedMessage);

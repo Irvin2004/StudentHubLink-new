@@ -19,9 +19,7 @@ function requireContainer(container) {
 function renderSearchItem(result = {}) {
     const title = String(result.title || "Search result").trim();
     const subtitle = String(result.subtitle || "").trim();
-    const accessibleLabel = subtitle
-        ? `${title} — ${subtitle}`
-        : title;
+    const accessibleLabel = subtitle ? `${title} — ${subtitle}` : title;
 
     return `
         <a
@@ -38,11 +36,15 @@ function renderSearchItem(result = {}) {
                 <strong class="search-result-title">
                     ${escapeHtml(title)}
                 </strong>
-                ${subtitle ? `
+                ${
+                    subtitle
+                        ? `
                     <span class="search-result-subtitle">
                         ${escapeHtml(subtitle)}
                     </span>
-                ` : ""}
+                `
+                        : ""
+                }
             </span>
         </a>
     `;

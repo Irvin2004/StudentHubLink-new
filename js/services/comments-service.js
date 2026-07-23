@@ -11,33 +11,28 @@ import {
     serverTimestamp,
     updateDoc,
     where
-} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+} from "firebase/firestore";
 
-import { db } from "../firebase/firebase-config.js";
+import { db } from "../../src/firebase/firestore.js";
 import { COLLECTIONS } from "../config/firestore.js";
 import {
     createCommentModel,
     createCommentUpdateModel
 } from "../models/comment.js";
 
-export async function addComment({
-    resourceId,
-    userId,
-    userName,
-    message
-}) {
+export async function addComment({ resourceId, userId, userName, message }) {
     const comment = createCommentModel({
-        resourceId, userId, userName, message
+        resourceId,
+        userId,
+        userName,
+        message
     });
 
-    const commentRef = await addDoc(
-        collection(db, COLLECTIONS.COMMENTS),
-        {
-            ...comment,
-            createdAt: serverTimestamp(),
-            updatedAt: serverTimestamp()
-        }
-    );
+    const commentRef = await addDoc(collection(db, COLLECTIONS.COMMENTS), {
+        ...comment,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+    });
 
     return commentRef.id;
 }
@@ -66,34 +61,25 @@ export function subscribeToComments(resourceId, callback) {
         limit(200)
     );
 
-    return onSnapshot(
-        commentsQuery,
-        (snapshot) => {
-            const comments =
-            snapshot.docs.map((commentDoc) => ({
-                id: commentDoc.id,
-                ...commentDoc.data()
-            }));
+    return onSnapshot(commentsQuery, (snapshot) => {
+        const comments = snapshot.docs.map((commentDoc) => ({
+            id: commentDoc.id,
+            ...commentDoc.data()
+        }));
 
-            callback(comments);
-        }
-    );
+        callback(comments);
+    });
 }
 
 export async function updateComment(commentId, message) {
     const updates = createCommentUpdateModel({ message });
 
-    await updateDoc(
-        doc(db, COLLECTIONS.COMMENTS, commentId),
-        {
-            ...updates,
-            updatedAt: serverTimestamp()
-        }
-    );
+    await updateDoc(doc(db, COLLECTIONS.COMMENTS, commentId), {
+        ...updates,
+        updatedAt: serverTimestamp()
+    });
 }
 
 export async function deleteComment(commentId) {
-    await deleteDoc(
-        doc(db, COLLECTIONS.COMMENTS, commentId)
-    );
+    await deleteDoc(doc(db, COLLECTIONS.COMMENTS, commentId));
 }

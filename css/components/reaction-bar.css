@@ -18,7 +18,8 @@
     cursor: pointer;
     font: inherit;
     font-size: 0.8125rem;
-    transition: border-color var(--transition-fast),
+    transition:
+        border-color var(--transition-fast),
         background-color var(--transition-fast),
         transform var(--transition-fast);
 }

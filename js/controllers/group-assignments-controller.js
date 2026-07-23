@@ -1,19 +1,12 @@
-import {
-    onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+import { onAuthStateChanged } from "firebase/auth";
 
-import { auth } from "../firebase/firebase-config.js";
+import { auth } from "../../src/firebase/auth.js";
 import {
     createAssignmentModal,
     setAssignmentModalMode
 } from "../components/assignment-modal.js";
-import {
-    closeModal,
-    openModal
-} from "../components/modal.js";
-import {
-    openConfirmationDialog
-} from "../components/confirmation-dialog.js";
+import { closeModal, openModal } from "../components/modal.js";
+import { openConfirmationDialog } from "../components/confirmation-dialog.js";
 import {
     initializeAssignmentForm,
     populateAssignmentForm
@@ -29,15 +22,11 @@ import {
     getStudyGroupMemberships
 } from "../services/group-service.js?security=1";
 import { renderAssignments } from "../renderers/assignment-renderer.js?v=20260721-2";
-import {
-    setText
-} from "../utils/dom.js";
+import { setText } from "../utils/dom.js";
 import { handleError } from "../services/user-feedback-service.js";
 import { showSkeleton } from "../renderers/skeleton-renderer.js";
 import { SKELETON_TYPES } from "../config/skeleton-types.js";
-import {
-    hideSkeleton
-} from "../renderers/skeleton-renderer.js";
+import { hideSkeleton } from "../renderers/skeleton-renderer.js";
 import { error as logError } from "../utils/logger.js";
 import { showToast } from "../services/user-feedback-service.js";
 
@@ -58,10 +47,7 @@ function parseLocalDueDate(value) {
         .split("-")
         .map(Number);
 
-    if (
-        parts.length !== 3 ||
-        parts.some((part) => !Number.isInteger(part))
-    ) {
+    if (parts.length !== 3 || parts.some((part) => !Number.isInteger(part))) {
         throw new Error("Choose a valid due date.");
     }
 
@@ -142,11 +128,7 @@ async function confirmDeleteAssignment(assignmentId, deleteButton) {
 
 async function loadAssignments() {
     assignmentsList.setAttribute("aria-busy", "true");
-    showSkeleton(
-        assignmentsList,
-        SKELETON_TYPES.FILE,
-        { count: 3 }
-    );
+    showSkeleton(assignmentsList, SKELETON_TYPES.FILE, { count: 3 });
 
     try {
         const assignments = await getAssignments(groupId);
@@ -218,14 +200,11 @@ async function handleAssignmentClick(event) {
         return;
     }
 
-    const editButton = event.target.closest(
-        '[data-assignment-action="edit"]'
-    );
+    const editButton = event.target.closest('[data-assignment-action="edit"]');
 
     if (editButton) {
-        const assignmentId = editButton
-            .closest("[data-assignment-id]")
-            ?.dataset.assignmentId;
+        const assignmentId = editButton.closest("[data-assignment-id]")?.dataset
+            .assignmentId;
         openEditAssignment(assignmentsById.get(assignmentId));
         return;
     }
@@ -243,10 +222,7 @@ async function handleAssignmentClick(event) {
 assignmentsList?.addEventListener("click", handleAssignmentClick);
 
 if (!document.getElementById("assignmentModal")) {
-    document.body.insertAdjacentHTML(
-        "beforeend",
-        createAssignmentModal()
-    );
+    document.body.insertAdjacentHTML("beforeend", createAssignmentModal());
 }
 
 assignmentFormController = initializeAssignmentForm({
@@ -301,7 +277,8 @@ assignmentFormController = initializeAssignmentForm({
     }
 });
 
-document.getElementById("assignmentModal")
+document
+    .getElementById("assignmentModal")
     ?.addEventListener("modal:closed", resetAssignmentModal);
 
 setAssignmentModalMode("create");

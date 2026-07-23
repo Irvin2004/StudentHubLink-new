@@ -16,9 +16,9 @@ import {
     updateDoc,
     where,
     writeBatch
-} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+} from "firebase/firestore";
 
-import { db } from "../firebase/firebase-config.js";
+import { db } from "../../src/firebase/firestore.js";
 import { COLLECTIONS } from "../config/firestore.js";
 import { MESSAGE_TYPES } from "../config/message-types.js";
 import {
@@ -44,12 +44,14 @@ export function createMessageId() {
 
 function normalizeMessage(messageId, data = {}) {
     const replySource = data.reply || data.replyTo || null;
-    const reply = replySource ? {
-        messageId: replySource.messageId || replySource.id || "",
-        senderId: replySource.senderId || "",
-        preview: replySource.preview || "Message",
-        type: replySource.type || MESSAGE_TYPES.TEXT
-    } : null;
+    const reply = replySource
+        ? {
+              messageId: replySource.messageId || replySource.id || "",
+              senderId: replySource.senderId || "",
+              preview: replySource.preview || "Message",
+              type: replySource.type || MESSAGE_TYPES.TEXT
+          }
+        : null;
 
     return {
         id: messageId,
@@ -64,30 +66,32 @@ function normalizeMessage(messageId, data = {}) {
         fileName: data.fileName || null,
         mimeType: data.mimeType || null,
         fileSize: data.fileSize ?? null,
-        voice: data.voice ? {
-            url: data.voice.url || "",
-            storagePath: data.voice.storagePath || "",
-            duration: Number(data.voice.duration || 0),
-            mimeType: data.voice.mimeType || "",
-            size: Number(data.voice.size || 0)
-        } : null,
+        voice: data.voice
+            ? {
+                  url: data.voice.url || "",
+                  storagePath: data.voice.storagePath || "",
+                  duration: Number(data.voice.duration || 0),
+                  mimeType: data.voice.mimeType || "",
+                  size: Number(data.voice.size || 0)
+              }
+            : null,
         createdAt: data.createdAt || null,
         edited: data.edited === true,
         editedAt: data.editedAt || null,
         deleted: data.deleted === true || Boolean(data.deletedAt),
-        deletedFor: Array.isArray(data.deletedFor)
-            ? data.deletedFor
-            : [],
+        deletedFor: Array.isArray(data.deletedFor) ? data.deletedFor : [],
         deletedAt: data.deletedAt || null,
         deliveredAt: data.deliveredAt || null,
         readAt: data.readAt || null,
         readBy: Array.isArray(data.readBy) ? data.readBy : [],
         reactions: data.reactions || {},
         reply,
-        replyTo: reply ? {
-            ...reply,
-            senderName: replySource.senderName || ""
-        } : null
+        replyTo: reply
+            ? {
+                  ...reply,
+                  senderName: replySource.senderName || ""
+              }
+            : null
     };
 }
 
@@ -118,13 +122,15 @@ function createMessageDocument({
         fileName,
         mimeType,
         fileSize,
-        voice: voice ? {
-            url: voice.url,
-            storagePath: voice.storagePath,
-            duration: voice.duration,
-            mimeType: voice.mimeType,
-            size: voice.size
-        } : null,
+        voice: voice
+            ? {
+                  url: voice.url,
+                  storagePath: voice.storagePath,
+                  duration: voice.duration,
+                  mimeType: voice.mimeType,
+                  size: voice.size
+              }
+            : null,
         createdAt: serverTimestamp(),
         edited: false,
         editedAt: null,
@@ -177,10 +183,7 @@ function getReactionsCollection(conversationId, messageId) {
 }
 
 function getReactionReference(conversationId, messageId, userId) {
-    return doc(
-        getReactionsCollection(conversationId, messageId),
-        userId
-    );
+    return doc(getReactionsCollection(conversationId, messageId), userId);
 }
 
 function normalizeReaction(reactionDocument) {
@@ -202,10 +205,7 @@ function getReadReceiptsCollection(conversationId, messageId) {
 }
 
 function getReadReceiptReference(conversationId, messageId, userId) {
-    return doc(
-        getReadReceiptsCollection(conversationId, messageId),
-        userId
-    );
+    return doc(getReadReceiptsCollection(conversationId, messageId), userId);
 }
 
 function validateReceiptStatus(status) {
@@ -236,14 +236,18 @@ export async function sendMessage(input) {
         messageId = createMessageId()
     } = input;
 
-    const requestedConversationType = input.conversationType ||
+    const requestedConversationType =
+        input.conversationType ||
         (input.type === "group" || input.type === "direct"
             ? input.type
-            : (input.groupId ? "group" : "direct"));
+            : input.groupId
+              ? "group"
+              : "direct");
     const isGroupMessage = requestedConversationType === "group";
-    const messageInput = input.type === "group" || input.type === "direct"
-        ? { ...input, type: MESSAGE_TYPES.TEXT }
-        : input;
+    const messageInput =
+        input.type === "group" || input.type === "direct"
+            ? { ...input, type: MESSAGE_TYPES.TEXT }
+            : input;
 
     if (!conversationId || !senderId) {
         throw new Error("Message information is incomplete.");
@@ -298,11 +302,7 @@ export async function sendMessage(input) {
 
     const batch = writeBatch(db);
     const messageRef = doc(db, COLLECTIONS.MESSAGES, messageId);
-    const conversationRef = doc(
-        db,
-        COLLECTIONS.CONVERSATIONS,
-        conversationId
-    );
+    const conversationRef = doc(db, COLLECTIONS.CONVERSATIONS, conversationId);
 
     batch.set(messageRef, message);
 
@@ -346,18 +346,15 @@ export async function sendReplyMessage({
     reply,
     senderName = "Student"
 } = {}) {
-    const cleanConversationId = validateId(
-        conversationId,
-        "Conversation ID"
-    );
+    const cleanConversationId = validateId(conversationId, "Conversation ID");
     const cleanSenderId = validateId(senderId, "Sender ID");
     const conversation = await getConversationById(cleanConversationId);
     const isGroupMessage = conversation.type === "group";
     const receiverId = isGroupMessage
         ? null
         : conversation.participantIds.find(
-            (participantId) => participantId !== cleanSenderId
-        );
+              (participantId) => participantId !== cleanSenderId
+          );
 
     if (
         (!isGroupMessage &&
@@ -390,14 +387,10 @@ export async function sendVoiceMessage({
     senderName = "Student",
     onProgress = () => {}
 }) {
-    const cleanConversationId = validateId(
-        conversationId,
-        "Conversation ID"
-    );
+    const cleanConversationId = validateId(conversationId, "Conversation ID");
     const cleanSenderId = validateId(senderId, "Sender ID");
-    const cleanMimeType = typeof mimeType === "string"
-        ? mimeType.trim().toLowerCase()
-        : "";
+    const cleanMimeType =
+        typeof mimeType === "string" ? mimeType.trim().toLowerCase() : "";
     const cleanDuration = Number(duration);
 
     if (!(blob instanceof Blob) || blob.size <= 0) {
@@ -421,8 +414,8 @@ export async function sendVoiceMessage({
     const receiverId = isGroupMessage
         ? null
         : conversation.participantIds.find(
-            (participantId) => participantId !== cleanSenderId
-        );
+              (participantId) => participantId !== cleanSenderId
+          );
 
     if (
         (!isGroupMessage &&
@@ -477,11 +470,7 @@ export async function sendVoiceMessage({
     }
 }
 
-export async function editMessage({
-    conversationId,
-    messageId,
-    newText
-}) {
+export async function editMessage({ conversationId, messageId, newText }) {
     const cleanText = newText?.trim();
 
     if (!conversationId || !messageId) {
@@ -496,20 +485,14 @@ export async function editMessage({
         throw new Error("Message cannot exceed 1000 characters.");
     }
 
-    await updateDoc(
-        doc(db, COLLECTIONS.MESSAGES, messageId),
-        {
-            text: cleanText,
-            edited: true,
-            editedAt: serverTimestamp()
-        }
-    );
+    await updateDoc(doc(db, COLLECTIONS.MESSAGES, messageId), {
+        text: cleanText,
+        edited: true,
+        editedAt: serverTimestamp()
+    });
 }
 
-export async function deleteMessageForEveryone({
-    conversationId,
-    messageId
-}) {
+export async function deleteMessageForEveryone({ conversationId, messageId }) {
     if (!conversationId || !messageId) {
         throw new Error("Message information is incomplete.");
     }
@@ -527,26 +510,20 @@ export async function deleteMessageForEveryone({
         throw new Error("Message does not belong to this conversation.");
     }
 
-    if (
-        message.type === MESSAGE_TYPES.VOICE &&
-        message.voice?.storagePath
-    ) {
+    if (message.type === MESSAGE_TYPES.VOICE && message.voice?.storagePath) {
         await deleteVoiceMessage(message.voice.storagePath);
     }
 
-    await updateDoc(
-        messageReference,
-        {
-            text: "This message was deleted.",
-            deleted: true,
-            deletedAt: serverTimestamp(),
-            fileUrl: null,
-            fileName: null,
-            fileSize: null,
-            mimeType: null,
-            voice: null
-        }
-    );
+    await updateDoc(messageReference, {
+        text: "This message was deleted.",
+        deleted: true,
+        deletedAt: serverTimestamp(),
+        fileUrl: null,
+        fileName: null,
+        fileSize: null,
+        mimeType: null,
+        voice: null
+    });
 }
 
 export async function deleteMessageForMe({
@@ -558,19 +535,12 @@ export async function deleteMessageForMe({
         throw new Error("Message information is incomplete.");
     }
 
-    await updateDoc(
-        doc(db, COLLECTIONS.MESSAGES, messageId),
-        {
-            deletedFor: arrayUnion(userId)
-        }
-    );
+    await updateDoc(doc(db, COLLECTIONS.MESSAGES, messageId), {
+        deletedFor: arrayUnion(userId)
+    });
 }
 
-export function subscribeToMessages(
-    conversationId,
-    callback,
-    onError
-) {
+export function subscribeToMessages(conversationId, callback, onError) {
     const messagesQuery = query(
         collection(db, COLLECTIONS.MESSAGES),
         where("conversationId", "==", conversationId),
@@ -581,12 +551,11 @@ export function subscribeToMessages(
     return onSnapshot(
         messagesQuery,
         (snapshot) => {
-            callback(snapshot.docs.map((messageDocument) =>
-                normalizeMessage(
-                    messageDocument.id,
-                    messageDocument.data()
+            callback(
+                snapshot.docs.map((messageDocument) =>
+                    normalizeMessage(messageDocument.id, messageDocument.data())
                 )
-            ));
+            );
         },
         (error) => {
             logError(error, "Message listener failed");
@@ -598,21 +567,17 @@ export function subscribeToMessages(
     );
 }
 
-export async function markMessagesAsDelivered(
-    messages,
-    currentUserId
-) {
-    const undeliveredMessages = messages.filter((message) =>
-        message.receiverId === currentUserId &&
-        !message.deliveredAt
+export async function markMessagesAsDelivered(messages, currentUserId) {
+    const undeliveredMessages = messages.filter(
+        (message) =>
+            message.receiverId === currentUserId && !message.deliveredAt
     );
 
     await Promise.all(
         undeliveredMessages.map((message) =>
-            updateDoc(
-                doc(db, COLLECTIONS.MESSAGES, message.id),
-                { deliveredAt: serverTimestamp() }
-            )
+            updateDoc(doc(db, COLLECTIONS.MESSAGES, message.id), {
+                deliveredAt: serverTimestamp()
+            })
         )
     );
 }
@@ -630,8 +595,10 @@ export async function markConversationMessagesAsRead(
         const snapshot = await getDocs(groupQuery);
         const unreadMessages = snapshot.docs.filter((messageDocument) => {
             const message = messageDocument.data();
-            return message.senderId !== currentUserId
-                && !(message.readBy || []).includes(currentUserId);
+            return (
+                message.senderId !== currentUserId &&
+                !(message.readBy || []).includes(currentUserId)
+            );
         });
 
         if (!unreadMessages.length) return;
@@ -666,16 +633,8 @@ export async function markConversationMessagesAsRead(
     });
     await batch.commit();
 }
-export async function addReaction(
-    conversationId,
-    messageId,
-    userId,
-    reaction
-) {
-    const cleanConversationId = validateId(
-        conversationId,
-        "Conversation ID"
-    );
+export async function addReaction(conversationId, messageId, userId, reaction) {
+    const cleanConversationId = validateId(conversationId, "Conversation ID");
     const model = createReactionModel({
         messageId,
         userId,
@@ -698,30 +657,18 @@ export async function addReaction(
     return model;
 }
 
-export async function removeReaction(
-    conversationId,
-    messageId,
-    userId
-) {
-    const cleanConversationId = validateId(
-        conversationId,
-        "Conversation ID"
-    );
+export async function removeReaction(conversationId, messageId, userId) {
+    const cleanConversationId = validateId(conversationId, "Conversation ID");
     const cleanMessageId = validateId(messageId, "Message ID");
     const cleanUserId = validateId(userId, "User ID");
 
-    await deleteDoc(getReactionReference(
-        cleanConversationId,
-        cleanMessageId,
-        cleanUserId
-    ));
+    await deleteDoc(
+        getReactionReference(cleanConversationId, cleanMessageId, cleanUserId)
+    );
 }
 
 export async function getMessageReactions(conversationId, messageId) {
-    const cleanConversationId = validateId(
-        conversationId,
-        "Conversation ID"
-    );
+    const cleanConversationId = validateId(conversationId, "Conversation ID");
     const cleanMessageId = validateId(messageId, "Message ID");
     const snapshot = await getDocs(
         getReactionsCollection(cleanConversationId, cleanMessageId)
@@ -736,10 +683,7 @@ export function subscribeToReactions(
     callback,
     onError
 ) {
-    const cleanConversationId = validateId(
-        conversationId,
-        "Conversation ID"
-    );
+    const cleanConversationId = validateId(conversationId, "Conversation ID");
     const cleanMessageId = validateId(messageId, "Message ID");
 
     if (typeof callback !== "function") {
@@ -760,15 +704,8 @@ export function subscribeToReactions(
     );
 }
 
-export async function markMessageDelivered(
-    conversationId,
-    messageId,
-    userId
-) {
-    const cleanConversationId = validateId(
-        conversationId,
-        "Conversation ID"
-    );
+export async function markMessageDelivered(conversationId, messageId, userId) {
+    const cleanConversationId = validateId(conversationId, "Conversation ID");
     const receipt = createReadReceiptModel({
         conversationId: cleanConversationId,
         messageId,
@@ -805,15 +742,8 @@ export async function markMessageDelivered(
     });
 }
 
-export async function markMessageRead(
-    conversationId,
-    messageId,
-    userId
-) {
-    const cleanConversationId = validateId(
-        conversationId,
-        "Conversation ID"
-    );
+export async function markMessageRead(conversationId, messageId, userId) {
+    const cleanConversationId = validateId(conversationId, "Conversation ID");
     const receipt = createReadReceiptModel({
         conversationId: cleanConversationId,
         messageId,
@@ -834,10 +764,7 @@ export async function markMessageRead(
             validateReceiptStatus(existingData.status);
         }
 
-        if (
-            snapshot.exists() &&
-            existingData.status === MESSAGE_STATUS.READ
-        ) {
+        if (snapshot.exists() && existingData.status === MESSAGE_STATUS.READ) {
             return normalizeReadReceipt(snapshot);
         }
 
@@ -863,10 +790,7 @@ export async function markMessageRead(
 }
 
 export async function getReadReceipts(conversationId, messageId) {
-    const cleanConversationId = validateId(
-        conversationId,
-        "Conversation ID"
-    );
+    const cleanConversationId = validateId(conversationId, "Conversation ID");
     const cleanMessageId = validateId(messageId, "Message ID");
     const snapshot = await getDocs(
         getReadReceiptsCollection(cleanConversationId, cleanMessageId)
@@ -881,10 +805,7 @@ export function subscribeToReadReceipts(
     callback,
     onError
 ) {
-    const cleanConversationId = validateId(
-        conversationId,
-        "Conversation ID"
-    );
+    const cleanConversationId = validateId(conversationId, "Conversation ID");
     const cleanMessageId = validateId(messageId, "Message ID");
 
     if (typeof callback !== "function") {
@@ -893,9 +814,7 @@ export function subscribeToReadReceipts(
 
     return onSnapshot(
         getReadReceiptsCollection(cleanConversationId, cleanMessageId),
-        (snapshot) => callback(
-            snapshot.docs.map(normalizeReadReceipt)
-        ),
+        (snapshot) => callback(snapshot.docs.map(normalizeReadReceipt)),
         (error) => {
             if (typeof onError === "function") {
                 onError(error);

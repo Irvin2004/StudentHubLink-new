@@ -5,10 +5,7 @@ import {
     MESSAGE_TYPES,
     isValidMessageType
 } from "../js/config/message-types.js";
-import {
-    createMessageModel,
-    validateMessage
-} from "../js/models/message.js";
+import { createMessageModel, validateMessage } from "../js/models/message.js";
 
 test("message types are frozen, unique, and include voice messages", () => {
     const types = Object.values(MESSAGE_TYPES);
@@ -68,16 +65,18 @@ test("message model rejects incomplete voice messages", () => {
         "voiceStoragePath"
     ]);
     assert.throws(
-        () => createMessageModel({
-            conversationId: "conversation-1",
-            senderId: "user-1",
-            type: MESSAGE_TYPES.VOICE,
-            voice: {}
-        }),
-        (error) => Boolean(
-            error.message === "Invalid message data." &&
-            error.validationErrors.voiceStoragePath
-        )
+        () =>
+            createMessageModel({
+                conversationId: "conversation-1",
+                senderId: "user-1",
+                type: MESSAGE_TYPES.VOICE,
+                voice: {}
+            }),
+        (error) =>
+            Boolean(
+                error.message === "Invalid message data." &&
+                error.validationErrors.voiceStoragePath
+            )
     );
 });
 

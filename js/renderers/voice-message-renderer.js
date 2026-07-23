@@ -34,11 +34,7 @@ function destroyRenderer(renderer) {
     renderersByContainer.delete(renderer.container);
 }
 
-export function renderVoiceMessage({
-    message,
-    container,
-    currentUserId
-} = {}) {
+export function renderVoiceMessage({ message, container, currentUserId } = {}) {
     if (!container?.replaceChildren) {
         throw new Error("Voice message container is required.");
     }
@@ -73,14 +69,14 @@ export function renderVoiceMessage({
     ].join(" ");
     wrapper.dataset.messageId = String(message?.id || "");
     playerContainer.className = "voice-message__player";
-    metadata.className = duration > 0
-        ? "voice-message__duration"
-        : "voice-message__loading";
+    metadata.className =
+        duration > 0 ? "voice-message__duration" : "voice-message__loading";
     metadata.setAttribute("role", "status");
     metadata.setAttribute("aria-live", "polite");
-    metadata.textContent = duration > 0
-        ? `Voice message, ${formatDuration(duration)}`
-        : "Loading audio...";
+    metadata.textContent =
+        duration > 0
+            ? `Voice message, ${formatDuration(duration)}`
+            : "Loading audio...";
 
     wrapper.append(playerContainer, metadata);
     container.replaceChildren(wrapper);
@@ -96,8 +92,7 @@ export function renderVoiceMessage({
                 if (renderer.destroyed) return;
 
                 metadata.className = "voice-message__duration";
-                metadata.textContent =
-                    `Voice message, ${formatDuration(loadedDuration)}`;
+                metadata.textContent = `Voice message, ${formatDuration(loadedDuration)}`;
             },
             onError() {
                 if (renderer.destroyed) return;

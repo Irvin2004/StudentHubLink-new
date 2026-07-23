@@ -1,9 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import {
-    renderConversationList
-} from "../js/renderers/conversation-renderer.js";
+import { renderConversationList } from "../js/renderers/conversation-renderer.js";
 
 function item(id, timestamp, name) {
     return {
@@ -21,10 +19,7 @@ test("conversation renderer preserves prepared order and shows a divider", () =>
     const container = { innerHTML: "" };
 
     renderConversationList({
-        items: [
-            item("pinned", 100, "Pinned"),
-            item("recent", 300, "Recent")
-        ],
+        items: [item("pinned", 100, "Pinned"), item("recent", 300, "Recent")],
         currentUserId: "user-1",
         container,
         preferences: new Map([["pinned", { pinned: true }]])
@@ -35,7 +30,7 @@ test("conversation renderer preserves prepared order and shows a divider", () =>
     assert.match(container.innerHTML, /data-conversation-menu-trigger/);
     assert.ok(
         container.innerHTML.indexOf("Pinned") <
-        container.innerHTML.indexOf("Recent")
+            container.innerHTML.indexOf("Recent")
     );
 });
 
@@ -44,9 +39,7 @@ test("muted conversations show their state", () => {
         item("recent", 300, "Recent"),
         item("muted-old", 100, "Muted Old")
     ];
-    const preferences = new Map([
-        ["muted-old", { muted: true }]
-    ]);
+    const preferences = new Map([["muted-old", { muted: true }]]);
     const container = { innerHTML: "" };
 
     renderConversationList({

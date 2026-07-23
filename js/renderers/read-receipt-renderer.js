@@ -54,10 +54,7 @@ function getMessageStatus(receipts = [], message = {}) {
     });
 
     const statuses = Array.from(receiptsByUser.values());
-    const expectedCount = getExpectedRecipientCount(
-        message,
-        statuses.length
-    );
+    const expectedCount = getExpectedRecipientCount(message, statuses.length);
 
     if (statuses.length < expectedCount) {
         return MESSAGE_STATUS.SENT;
@@ -67,10 +64,13 @@ function getMessageStatus(receipts = [], message = {}) {
         return MESSAGE_STATUS.READ;
     }
 
-    if (statuses.every((status) => (
-        status === MESSAGE_STATUS.DELIVERED ||
-        status === MESSAGE_STATUS.READ
-    ))) {
+    if (
+        statuses.every(
+            (status) =>
+                status === MESSAGE_STATUS.DELIVERED ||
+                status === MESSAGE_STATUS.READ
+        )
+    ) {
         return MESSAGE_STATUS.DELIVERED;
     }
 
@@ -98,12 +98,7 @@ export function renderMessageStatus(status) {
     `;
 }
 
-export function renderReadReceipt(
-    receipts,
-    currentUserId,
-    message,
-    container
-) {
+export function renderReadReceipt(receipts, currentUserId, message, container) {
     requireContainer(container);
 
     if (!message || message.senderId !== currentUserId) {

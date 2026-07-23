@@ -1,4 +1,6 @@
-import { app, auth, db } from "../firebase/firebase-config.js";
+import { storage } from "../../src/firebase/storage.js";
+import { auth } from "../../src/firebase/auth.js";
+import { db } from "../../src/firebase/firestore.js";
 import { createNotification } from "../services/notification-service.js";
 import { handleResourceAction } from "../services/marketplace-actions-service.js";
 import {
@@ -10,17 +12,10 @@ import {
 } from "../utils/constants.js";
 import { escapeHtml, setText } from "../utils/dom.js";
 import { formatPrice } from "../utils/format-price.js";
-import {
-    handleError,
-    showToast
-} from "../services/user-feedback-service.js";
+import { handleError } from "../services/user-feedback-service.js";
 import { validateAttachment } from "../utils/file-validator.js?security=1";
 
-import {
-    onAuthStateChanged
-}
-from
-"https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+import { onAuthStateChanged } from "firebase/auth";
 
 import {
     addDoc,
@@ -34,27 +29,14 @@ import {
     serverTimestamp,
     updateDoc,
     where
-}
-from
-"https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+} from "firebase/firestore";
 
-import {
-    getStorage,
-    ref,
-    uploadBytes,
-    getDownloadURL
-}
-from
-"https://www.gstatic.com/firebasejs/10.13.0/firebase-storage.js";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
-const storage = getStorage(app);
-
-const resourceId =
-new URLSearchParams(window.location.search).get("id");
+const resourceId = new URLSearchParams(window.location.search).get("id");
 
 async function getUserProfile(user) {
-    const snapshot =
-    await getDoc(doc(db, "users", user.uid));
+    const snapshot = await getDoc(doc(db, "users", user.uid));
 
     if (!snapshot.exists()) {
         return {
@@ -69,23 +51,19 @@ async function getUserProfile(user) {
 }
 
 async function uploadResource(user) {
-    const title =
-    document.getElementById("resourceTitle").value.trim();
+    const title = document.getElementById("resourceTitle").value.trim();
 
-    const description =
-    document.getElementById("resourceDescription").value.trim();
+    const description = document
+        .getElementById("resourceDescription")
+        .value.trim();
 
-    const category =
-    document.getElementById("resourceCategory").value;
+    const category = document.getElementById("resourceCategory").value;
 
-    const price =
-    Number(document.getElementById("resourcePrice").value || 0);
+    const price = Number(document.getElementById("resourcePrice").value || 0);
 
-    const fileInput =
-    document.getElementById("resourceFile");
+    const fileInput = document.getElementById("resourceFile");
 
-    const message =
-    document.getElementById("uploadMessage");
+    const message = document.getElementById("uploadMessage");
 
     if (!title || !description || !category || !fileInput.files[0]) {
         message.textContent = "Please complete all required fields.";
@@ -97,8 +75,7 @@ async function uploadResource(user) {
         return;
     }
 
-    const file =
-    fileInput.files[0];
+    const file = fileInput.files[0];
 
     try {
         validateAttachment(file);
@@ -107,32 +84,31 @@ async function uploadResource(user) {
         return;
     }
 
-    const uploadBtn =
-    document.getElementById("uploadResourceBtn");
+    const uploadBtn = document.getElementById("uploadResourceBtn");
 
     uploadBtn.disabled = true;
     message.textContent = "Uploading resource...";
 
     try {
-        const userProfile =
-        await getUserProfile(user);
+        const userProfile = await getUserProfile(user);
 
-        const safeFileName =
-        file.name.replace(/[^a-z0-9._-]/gi, "-").toLowerCase();
+        const safeFileName = file.name
+            .replace(/[^a-z0-9._-]/gi, "-")
+            .toLowerCase();
 
-        const filePath =
-        `resources/${user.uid}/${Date.now()}-${safeFileName}`;
+        const filePath = `resources/${user.uid}/${Date.now()}-${safeFileName}`;
 
-        const storageRef =
-        ref(storage, filePath);
+        const storageRef = ref(storage, filePath);
 
         await uploadBytes(storageRef, file);
 
-        const fileUrl =
-        await getDownloadURL(storageRef);
+        const fileUrl = await getDownloadURL(storageRef);
 
         const ownerName =
-        userProfile.name || userProfile.fullName || user.displayName || "Student";
+            userProfile.name ||
+            userProfile.fullName ||
+            user.displayName ||
+            "Student";
 
         await addDoc(collection(db, "resources"), {
             title,
@@ -155,14 +131,18 @@ async function uploadResource(user) {
             updatedAt: serverTimestamp()
         });
 
-        await setDoc(doc(db, "users", user.uid), {
-            uid: user.uid,
-            email: user.email,
-            totalUploads: increment(1),
-            updatedAt: serverTimestamp()
-        }, {
-            merge: true
-        });
+        await setDoc(
+            doc(db, "users", user.uid),
+            {
+                uid: user.uid,
+                email: user.email,
+                totalUploads: increment(1),
+                updatedAt: serverTimestamp()
+            },
+            {
+                merge: true
+            }
+        );
 
         message.textContent = "Resource uploaded for admin approval.";
         document.getElementById("resourceUploadForm").reset();
@@ -176,8 +156,7 @@ async function uploadResource(user) {
 }
 
 async function loadResourceDetails(user) {
-    const details =
-    document.getElementById("resourceDetails");
+    const details = document.getElementById("resourceDetails");
 
     if (!details) {
         return;
@@ -188,8 +167,7 @@ async function loadResourceDetails(user) {
         return;
     }
 
-    const snapshot =
-    await getDoc(doc(db, "resources", resourceId));
+    const snapshot = await getDoc(doc(db, "resources", resourceId));
 
     if (!snapshot.exists()) {
         details.innerHTML = "<p>Resource not found.</p>";
@@ -211,20 +189,22 @@ async function loadResourceDetails(user) {
     setText("detailCategory", resource.category);
     setText("detailUploader", resource.ownerName || "Student");
 
-    const detailUploader =
-    document.getElementById("detailUploader");
+    const detailUploader = document.getElementById("detailUploader");
 
     if (detailUploader && resource.ownerId) {
-        detailUploader.href =
-        `user-profile.html?id=${encodeURIComponent(resource.ownerId)}`;
+        detailUploader.href = `user-profile.html?id=${encodeURIComponent(resource.ownerId)}`;
     }
 
     setText("detailPrice", formatPrice(resource.price));
     setText("detailDownloads", Number(resource.downloadCount || 0));
-    setText("detailStatus", resource.approved ? RESOURCE_STATUS.APPROVED : (resource.status || RESOURCE_STATUS.PENDING));
+    setText(
+        "detailStatus",
+        resource.approved
+            ? RESOURCE_STATUS.APPROVED
+            : resource.status || RESOURCE_STATUS.PENDING
+    );
 
-    const actionBtn =
-    document.getElementById("resourceActionBtn");
+    const actionBtn = document.getElementById("resourceActionBtn");
 
     if (resource.approved !== true) {
         actionBtn.textContent = "Awaiting Approval";
@@ -233,15 +213,15 @@ async function loadResourceDetails(user) {
     }
 
     actionBtn.textContent =
-    Number(resource.price || 0) > 0 ? "Purchase and Download" : "Download";
+        Number(resource.price || 0) > 0 ? "Purchase and Download" : "Download";
 
     actionBtn.addEventListener("click", async () => {
-        const type =
-        getResourceAction(resource);
+        const type = getResourceAction(resource);
 
         if (type === RESOURCE_ACTION.PURCHASE) {
-            const confirmed =
-            window.confirm(`Confirm purchase for ${formatPrice(resource.price)}?`);
+            const confirmed = window.confirm(
+                `Confirm purchase for ${formatPrice(resource.price)}?`
+            );
 
             if (!confirmed) {
                 return;
@@ -282,8 +262,7 @@ function pendingResourceRow(resource) {
 }
 
 async function loadPendingResources(user) {
-    const tableBody =
-    document.getElementById("pendingResourcesTableBody");
+    const tableBody = document.getElementById("pendingResourcesTableBody");
 
     if (!tableBody) {
         return;
@@ -295,11 +274,12 @@ async function loadPendingResources(user) {
         </tr>
     `;
 
-    const pendingQuery =
-    query(collection(db, "resources"), where("status", "==", RESOURCE_STATUS.PENDING));
+    const pendingQuery = query(
+        collection(db, "resources"),
+        where("status", "==", RESOURCE_STATUS.PENDING)
+    );
 
-    const snapshot =
-    await getDocs(pendingQuery);
+    const snapshot = await getDocs(pendingQuery);
 
     const resources = [];
 
@@ -311,27 +291,24 @@ async function loadPendingResources(user) {
     });
 
     tableBody.innerHTML =
-    resources.length > 0 ?
-    resources.map(pendingResourceRow).join("") :
-    `
+        resources.length > 0
+            ? resources.map(pendingResourceRow).join("")
+            : `
         <tr>
             <td colspan="5">No pending resources.</td>
         </tr>
     `;
 
     tableBody.onclick = async (event) => {
-        const button =
-        event.target.closest("button[data-action]");
+        const button = event.target.closest("button[data-action]");
 
         if (!button) {
             return;
         }
 
-        const status =
-        getReviewStatus(button.dataset.action);
+        const status = getReviewStatus(button.dataset.action);
 
-        const approved =
-        button.dataset.action === REVIEW_ACTION.APPROVE;
+        const approved = button.dataset.action === REVIEW_ACTION.APPROVE;
 
         button.disabled = true;
 
@@ -343,15 +320,16 @@ async function loadPendingResources(user) {
             updatedAt: serverTimestamp()
         });
 
-        const reviewedResource =
-        resources.find((resource) => resource.id === button.dataset.id);
+        const reviewedResource = resources.find(
+            (resource) => resource.id === button.dataset.id
+        );
 
         await createNotification(
             reviewedResource?.ownerId,
             approved ? "Resource approved" : "Resource rejected",
-            approved ?
-            `${reviewedResource?.title || "Your resource"} is now available.` :
-            `${reviewedResource?.title || "Your resource"} was not approved.`
+            approved
+                ? `${reviewedResource?.title || "Your resource"} is now available.`
+                : `${reviewedResource?.title || "Your resource"} was not approved.`
         );
 
         await loadPendingResources(user);
@@ -363,12 +341,10 @@ onAuthStateChanged(auth, async (user) => {
         return;
     }
 
-    const pendingTable =
-    document.getElementById("pendingResourcesTableBody");
+    const pendingTable = document.getElementById("pendingResourcesTableBody");
 
     if (pendingTable) {
-        const userProfile =
-        await getUserProfile(user);
+        const userProfile = await getUserProfile(user);
 
         if (userProfile.role === "admin") {
             await loadPendingResources(user);
@@ -377,8 +353,7 @@ onAuthStateChanged(auth, async (user) => {
         return;
     }
 
-    const uploadForm =
-    document.getElementById("resourceUploadForm");
+    const uploadForm = document.getElementById("resourceUploadForm");
 
     if (uploadForm) {
         uploadForm.addEventListener("submit", (event) => {

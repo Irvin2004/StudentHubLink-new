@@ -10,7 +10,9 @@ function requiredText(value, fieldName) {
 function normalizeMessage(value) {
     const message = requiredText(value, "Comment");
     if (message.length > COMMENT_MAX_LENGTH) {
-        throw new Error(`Comment cannot exceed ${COMMENT_MAX_LENGTH} characters.`);
+        throw new Error(
+            `Comment cannot exceed ${COMMENT_MAX_LENGTH} characters.`
+        );
     }
     return message;
 }

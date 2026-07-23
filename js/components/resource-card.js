@@ -1,7 +1,4 @@
-import {
-    RESOURCE_ACTION,
-    getResourceAction
-} from "../utils/constants.js";
+import { RESOURCE_ACTION, getResourceAction } from "../utils/constants.js";
 import { createFavoriteButton } from "./favorite-button.js";
 import { createRatingStars } from "./rating-stars.js";
 import { escapeHtml } from "../utils/dom.js";
@@ -12,12 +9,15 @@ import { sanitizeUrl } from "../utils/validators.js";
 import { getResourceCategoryLabel } from "../config/resource-categories.js";
 
 function createResourceActions(resource, mode) {
-    const resourceId =
-    encodeURIComponent(resource.id || resource.resourceId || "");
+    const resourceId = encodeURIComponent(
+        resource.id || resource.resourceId || ""
+    );
 
     if (mode === "marketplace") {
         const primaryAction =
-        getResourceAction(resource) === RESOURCE_ACTION.PURCHASE ? "Preview" : "Download";
+            getResourceAction(resource) === RESOURCE_ACTION.PURCHASE
+                ? "Preview"
+                : "Download";
 
         return `
             <div class="resource-actions">
@@ -35,26 +35,25 @@ function createResourceActions(resource, mode) {
     }
 
     if (mode === "library") {
-        const fileUrl =
-        sanitizeUrl(resource.fileUrl || resource.downloadUrl || "");
+        const fileUrl = sanitizeUrl(
+            resource.fileUrl || resource.downloadUrl || ""
+        );
 
         const hasFileUrl = fileUrl !== "#";
 
-        const openAction =
-        hasFileUrl ?
-        `<a class="btn-secondary" href="${escapeHtml(fileUrl)}" target="_blank" rel="noopener">
+        const openAction = hasFileUrl
+            ? `<a class="btn-secondary" href="${escapeHtml(fileUrl)}" target="_blank" rel="noopener">
             Open
-        </a>` :
-        `<button class="btn-secondary" type="button">
+        </a>`
+            : `<button class="btn-secondary" type="button">
             Open
         </button>`;
 
-        const downloadAgainAction =
-        hasFileUrl ?
-        `<a class="btn-primary" href="${escapeHtml(fileUrl)}" target="_blank" rel="noopener">
+        const downloadAgainAction = hasFileUrl
+            ? `<a class="btn-primary" href="${escapeHtml(fileUrl)}" target="_blank" rel="noopener">
             Download Again
-        </a>` :
-        `<button class="btn-primary" type="button">
+        </a>`
+            : `<button class="btn-primary" type="button">
             Download Again
         </button>`;
 
@@ -143,67 +142,63 @@ export function createResourceCard(resource, options = {}) {
         statusLabel = ""
     } = options;
 
-    const ownerName =
-    resource.ownerName || "Unknown Author";
+    const ownerName = resource.ownerName || "Unknown Author";
 
-    const ownerId =
-    encodeURIComponent(resource.ownerId || "");
+    const ownerId = encodeURIComponent(resource.ownerId || "");
 
-    const ownerMarkup =
-    showOwner ?
-    `<p class="resource-owner">
+    const ownerMarkup = showOwner
+        ? `<p class="resource-owner">
         Uploaded by
         <a href="user-profile.html?id=${ownerId}">
             ${escapeHtml(ownerName)}
         </a>
-    </p>` :
-    "";
+    </p>`
+        : "";
 
-    const dateMarkup =
-    showDate ?
-    `<p class="resource-date">
+    const dateMarkup = showDate
+        ? `<p class="resource-date">
         Uploaded: ${escapeHtml(formatDate(resource.createdAt))}
-    </p>` :
-    "";
+    </p>`
+        : "";
 
     const priceMarkup =
-    showPrice && showPriceBadge ?
-    `<span class="price-badge">
+        showPrice && showPriceBadge
+            ? `<span class="price-badge">
         ${escapeHtml(formatPrice(resource.price || 0))}
-    </span>` :
-    "";
+    </span>`
+            : "";
 
-    const favoriteMarkup =
-    showFavorite ?
-    createFavoriteButton(resource.id || resource.resourceId || "", isFavorite) :
-    "";
+    const favoriteMarkup = showFavorite
+        ? createFavoriteButton(
+              resource.id || resource.resourceId || "",
+              isFavorite
+          )
+        : "";
 
-    const statusMarkup =
-    statusLabel ?
-    `<p class="library-date">
+    const statusMarkup = statusLabel
+        ? `<p class="library-date">
         ${escapeHtml(statusLabel)}
-    </p>` :
-    "";
+    </p>`
+        : "";
 
-    const downloadMarkup =
-    showDownloadCount ?
-    `<span>
+    const downloadMarkup = showDownloadCount
+        ? `<span>
         ${Number(resource.downloadCount || 0)} downloads
-    </span>` :
-    "";
+    </span>`
+        : "";
 
     const metaMarkup =
-    showMeta || showPrice || showDownloadCount ?
-    `<div class="resource-meta">
+        showMeta || showPrice || showDownloadCount
+            ? `<div class="resource-meta">
         ${showPrice && !showPriceBadge ? `<span>${escapeHtml(formatPrice(resource.price || 0))}</span>` : ""}
         ${downloadMarkup}
-    </div>` :
-    "";
+    </div>`
+            : "";
 
     const actionMarkup =
-    showDetails || actions !== "details" ?
-    createResourceActions(resource, actions) :
-    "";
+        showDetails || actions !== "details"
+            ? createResourceActions(resource, actions)
+            : "";
 
     return `
         <article class="resource-card">

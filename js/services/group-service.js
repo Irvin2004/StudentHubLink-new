@@ -9,9 +9,9 @@ import {
     serverTimestamp,
     where,
     writeBatch
-} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+} from "firebase/firestore";
 
-import { db } from "../firebase/firebase-config.js";
+import { db } from "../../src/firebase/firestore.js";
 import { COLLECTIONS } from "../config/firestore.js";
 
 export const GROUP_VISIBILITY = Object.freeze({
@@ -27,26 +27,20 @@ export const GROUP_ROLES = Object.freeze({
 });
 
 function normalizeGroupTags(tags = []) {
-    const source = Array.isArray(tags)
-        ? tags
-        : String(tags).split(",");
+    const source = Array.isArray(tags) ? tags : String(tags).split(",");
 
     const uniqueTags = [];
     const seenTags = new Set();
 
     source.forEach((value) => {
-        const tag = String(value)
-            .trim()
-            .replace(/^#+/, "");
+        const tag = String(value).trim().replace(/^#+/, "");
 
         if (!tag) {
             return;
         }
 
         if (tag.length > 24) {
-            throw new Error(
-                "Each group tag must be 24 characters or fewer."
-            );
+            throw new Error("Each group tag must be 24 characters or fewer.");
         }
 
         const key = tag.toLowerCase();
@@ -75,8 +69,7 @@ export async function createStudyGroup({
 }) {
     const cleanName = name?.trim();
     const cleanDescription = description?.trim();
-    const cleanModuleCode =
-        moduleCode?.trim().toUpperCase() || "";
+    const cleanModuleCode = moduleCode?.trim().toUpperCase() || "";
     const cleanModuleName = moduleName?.trim();
     const cleanVisibility = visibility?.trim().toLowerCase();
     const cleanTags = normalizeGroupTags(tags);
@@ -91,9 +84,7 @@ export async function createStudyGroup({
     }
 
     if (cleanName.length < 4) {
-        throw new Error(
-            "Group name must be at least 4 characters."
-        );
+        throw new Error("Group name must be at least 4 characters.");
     }
 
     if (!cleanModuleName) {
@@ -109,32 +100,22 @@ export async function createStudyGroup({
     }
 
     if (cleanName.length > 100) {
-        throw new Error(
-            "Group name cannot exceed 100 characters."
-        );
+        throw new Error("Group name cannot exceed 100 characters.");
     }
 
     if ((cleanDescription || "").length > 1000) {
-        throw new Error(
-            "Description cannot exceed 1000 characters."
-        );
+        throw new Error("Description cannot exceed 1000 characters.");
     }
 
     if (cleanModuleCode.length > 30) {
-        throw new Error(
-            "Module code cannot exceed 30 characters."
-        );
+        throw new Error("Module code cannot exceed 30 characters.");
     }
 
     if (cleanModuleName.length > 120) {
-        throw new Error(
-            "Module name cannot exceed 120 characters."
-        );
+        throw new Error("Module name cannot exceed 120 characters.");
     }
 
-    const groupRef = doc(
-        collection(db, COLLECTIONS.GROUPS)
-    );
+    const groupRef = doc(collection(db, COLLECTIONS.GROUPS));
     const ownerMemberRef = doc(
         db,
         COLLECTIONS.GROUPS,
@@ -210,9 +191,7 @@ export async function getStudyGroups() {
 }
 
 export async function getUserGroups(userId) {
-    const cleanUserId = typeof userId === "string"
-        ? userId.trim()
-        : "";
+    const cleanUserId = typeof userId === "string" ? userId.trim() : "";
 
     if (!cleanUserId) {
         throw new Error("User ID is required.");
@@ -232,9 +211,7 @@ export function subscribeToUserStudyGroups(
     onGroups,
     onError = () => {}
 ) {
-    const cleanUserId = typeof userId === "string"
-        ? userId.trim()
-        : "";
+    const cleanUserId = typeof userId === "string" ? userId.trim() : "";
 
     if (!cleanUserId) {
         throw new Error("User ID is required.");
@@ -274,9 +251,7 @@ export function subscribeToUserStudyGroups(
                     return;
                 }
 
-                onGroups(
-                    groups.filter((group) => memberships.has(group.id))
-                );
+                onGroups(groups.filter((group) => memberships.has(group.id)));
             } catch (error) {
                 if (!destroyed) {
                     onError(error);
@@ -297,10 +272,7 @@ export function subscribeToUserStudyGroups(
     };
 }
 
-export async function getStudyGroupMemberships(
-    groupIds,
-    userId
-) {
+export async function getStudyGroupMemberships(groupIds, userId) {
     if (!userId || !Array.isArray(groupIds)) {
         return new Set();
     }
@@ -308,13 +280,7 @@ export async function getStudyGroupMemberships(
     const membershipChecks = await Promise.all(
         groupIds.map(async (groupId) => {
             const snapshot = await getDoc(
-                doc(
-                    db,
-                    COLLECTIONS.GROUPS,
-                    groupId,
-                    "members",
-                    userId
-                )
+                doc(db, COLLECTIONS.GROUPS, groupId, "members", userId)
             );
 
             return snapshot.exists() ? groupId : null;
@@ -330,12 +296,7 @@ export async function getStudyGroupMembers(groupId) {
     }
 
     const snapshot = await getDocs(
-        collection(
-            db,
-            COLLECTIONS.GROUPS,
-            groupId,
-            "members"
-        )
+        collection(db, COLLECTIONS.GROUPS, groupId, "members")
     );
 
     return snapshot.docs.map((memberDocument) => ({
@@ -344,10 +305,7 @@ export async function getStudyGroupMembers(groupId) {
     }));
 }
 
-export async function joinStudyGroup({
-    groupId,
-    user
-}) {
+export async function joinStudyGroup({ groupId, user }) {
     if (!groupId) {
         throw new Error("Group ID is required.");
     }
@@ -356,23 +314,12 @@ export async function joinStudyGroup({
         throw new Error("Sign in before joining a group.");
     }
 
-    const groupRef = doc(
-        db,
-        COLLECTIONS.GROUPS,
-        groupId
-    );
+    const groupRef = doc(db, COLLECTIONS.GROUPS, groupId);
 
-    const memberRef = doc(
-        db,
-        COLLECTIONS.GROUPS,
-        groupId,
-        "members",
-        user.uid
-    );
+    const memberRef = doc(db, COLLECTIONS.GROUPS, groupId, "members", user.uid);
 
     return runTransaction(db, async (transaction) => {
-        const [groupSnapshot, memberSnapshot] =
-        await Promise.all([
+        const [groupSnapshot, memberSnapshot] = await Promise.all([
             transaction.get(groupRef),
             transaction.get(memberRef)
         ]);
@@ -388,36 +335,28 @@ export async function joinStudyGroup({
         const group = groupSnapshot.data();
 
         if (group.visibility !== GROUP_VISIBILITY.PUBLIC) {
-            throw new Error(
-                "Private groups require an invitation."
-            );
+            throw new Error("Private groups require an invitation.");
         }
 
         transaction.set(memberRef, {
             userId: user.uid,
-            displayName: (
-                user.displayName ||
-                user.email ||
-                "Student"
-            ).trim().slice(0, 120),
+            displayName: (user.displayName || user.email || "Student")
+                .trim()
+                .slice(0, 120),
             photoURL: user.photoURL || "",
             role: GROUP_ROLES.MEMBER,
             joinedAt: serverTimestamp()
         });
 
         transaction.update(groupRef, {
-            memberCount:
-                Number(group.memberCount || 0) + 1,
+            memberCount: Number(group.memberCount || 0) + 1,
             updatedAt: serverTimestamp()
         });
 
         return true;
     });
 }
-export async function leaveStudyGroup({
-    groupId,
-    userId
-}) {
+export async function leaveStudyGroup({ groupId, userId }) {
     if (!groupId) {
         throw new Error("Group ID is required.");
     }
@@ -426,23 +365,12 @@ export async function leaveStudyGroup({
         throw new Error("A signed-in member is required.");
     }
 
-    const groupRef = doc(
-        db,
-        COLLECTIONS.GROUPS,
-        groupId
-    );
+    const groupRef = doc(db, COLLECTIONS.GROUPS, groupId);
 
-    const memberRef = doc(
-        db,
-        COLLECTIONS.GROUPS,
-        groupId,
-        "members",
-        userId
-    );
+    const memberRef = doc(db, COLLECTIONS.GROUPS, groupId, "members", userId);
 
     return runTransaction(db, async (transaction) => {
-        const [groupSnapshot, memberSnapshot] =
-        await Promise.all([
+        const [groupSnapshot, memberSnapshot] = await Promise.all([
             transaction.get(groupRef),
             transaction.get(memberRef)
         ]);
@@ -458,22 +386,14 @@ export async function leaveStudyGroup({
         const group = groupSnapshot.data();
         const member = memberSnapshot.data();
 
-        if (
-            group.ownerId === userId ||
-            member.role === GROUP_ROLES.OWNER
-        ) {
-            throw new Error(
-                "Group owners cannot leave their own group."
-            );
+        if (group.ownerId === userId || member.role === GROUP_ROLES.OWNER) {
+            throw new Error("Group owners cannot leave their own group.");
         }
 
-        const memberCount =
-            Number(group.memberCount || 0);
+        const memberCount = Number(group.memberCount || 0);
 
         if (memberCount <= 1) {
-            throw new Error(
-                "The group membership count is invalid."
-            );
+            throw new Error("The group membership count is invalid.");
         }
 
         transaction.delete(memberRef);

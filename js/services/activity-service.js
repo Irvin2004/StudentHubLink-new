@@ -10,9 +10,9 @@ import {
     orderBy,
     query,
     serverTimestamp
-} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+} from "firebase/firestore";
 
-import { db } from "../firebase/firebase-config.js";
+import { db } from "../../src/firebase/firestore.js";
 import { createActivityModel } from "../models/activity.js";
 
 function cleanText(value) {
@@ -40,12 +40,7 @@ function validateActivityId(activityId) {
 }
 
 function getActivitiesCollection(groupId) {
-    return collection(
-        db,
-        "groups",
-        groupId,
-        "activities"
-    );
+    return collection(db, "groups", groupId, "activities");
 }
 
 function getActivityReference(groupId, activityId) {
@@ -60,8 +55,7 @@ function mapActivityDocument(activityDocument) {
 }
 
 function normalizeFirestoreError(error) {
-    const code = String(error?.code || "")
-        .replace(/^firestore\//, "");
+    const code = String(error?.code || "").replace(/^firestore\//, "");
 
     if (code === "permission-denied") {
         const permissionError = new Error("Permission denied.", {

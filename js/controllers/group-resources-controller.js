@@ -1,7 +1,6 @@
-import { onAuthStateChanged } from
-    "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+import { onAuthStateChanged } from "firebase/auth";
 
-import { auth } from "../firebase/firebase-config.js";
+import { auth } from "../../src/firebase/auth.js";
 import { RESOURCE_CATEGORY_OPTIONS } from "../config/resource-categories.js";
 import { renderResources } from "../renderers/resource-renderer.js";
 import {
@@ -22,16 +21,9 @@ import { searchResources } from "../utils/search.js";
 import { sortResources } from "../utils/sort-resources.js";
 import { debounce } from "../utils/debounce.js";
 import { appendNodes } from "../utils/dom-batch.js";
-import {
-    createEmptyState
-} from "../components/empty-state.js?refinement=1";
-import {
-    SKELETON_TYPES
-} from "../config/skeleton-types.js";
-import {
-    hideSkeleton,
-    showSkeleton
-} from "../renderers/skeleton-renderer.js";
+import { createEmptyState } from "../components/empty-state.js?refinement=1";
+import { SKELETON_TYPES } from "../config/skeleton-types.js";
+import { hideSkeleton, showSkeleton } from "../renderers/skeleton-renderer.js";
 
 const SEARCH_DELAY = 200;
 
@@ -142,10 +134,7 @@ resourceList?.addEventListener("click", (event) => {
     if (!action) return;
 
     const resource = getResourceById(action.dataset.id);
-    openResource(
-        resource,
-        action.classList.contains("download-resource")
-    );
+    openResource(resource, action.classList.contains("download-resource"));
 });
 
 const scheduleResourceView = debounce(applyResourceView, SEARCH_DELAY);
@@ -176,8 +165,7 @@ form?.addEventListener("submit", async (event) => {
         await createGroupResource({
             groupId,
             title: document.getElementById("resourceTitle").value,
-            description:
-                document.getElementById("resourceDescription").value,
+            description: document.getElementById("resourceDescription").value,
             category: categorySelect.value,
             fileURL: uploaded.url,
             storagePath: uploaded.storagePath,
@@ -209,7 +197,7 @@ async function initializePage(user) {
     try {
         if (resourceList) {
             showSkeleton(resourceList, SKELETON_TYPES.FILE, {
-                count: 4,
+                count: 4
             });
         }
 
@@ -243,9 +231,7 @@ async function initializePage(user) {
         handleError(error, "Unable to load group resources.");
         accessMessage.textContent =
             "Group resources are unavailable right now.";
-        if (
-            resourceList?.querySelector("[data-skeleton-root]")
-        ) {
+        if (resourceList?.querySelector("[data-skeleton-root]")) {
             hideSkeleton(resourceList);
         }
         if (resourceList) {

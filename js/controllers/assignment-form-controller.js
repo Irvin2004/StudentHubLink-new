@@ -27,10 +27,8 @@ function updateCounterValues({
     titleCounter,
     descriptionCounter
 }) {
-    titleCounter.textContent =
-        `${title.value.length} / ${TITLE_LIMIT}`;
-    descriptionCounter.textContent =
-        `${description.value.length} / ${DESCRIPTION_LIMIT}`;
+    titleCounter.textContent = `${title.value.length} / ${TITLE_LIMIT}`;
+    descriptionCounter.textContent = `${description.value.length} / ${DESCRIPTION_LIMIT}`;
 }
 
 export function populateAssignmentForm(assignment) {
@@ -57,18 +55,10 @@ export function populateAssignmentForm(assignment) {
     updateCounterValues(fields);
 }
 
-export function initializeAssignmentForm({
-    onSubmit,
-    onError
-} = {}) {
+export function initializeAssignmentForm({ onSubmit, onError } = {}) {
     const form = document.getElementById("assignmentForm");
-    const {
-        title,
-        description,
-        dueDate,
-        titleCounter,
-        descriptionCounter
-    } = getAssignmentFormFields();
+    const { title, description, dueDate, titleCounter, descriptionCounter } =
+        getAssignmentFormFields();
     const createButton = document.getElementById("createAssignmentButton");
 
     if (

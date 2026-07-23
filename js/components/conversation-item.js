@@ -61,34 +61,47 @@ export function createConversationItem(
                 <div class="conversation-content">
                     <div class="conversation-top">
                         <h3>
-                            ${preference.pinned ? `
+                            ${
+                                preference.pinned
+                                    ? `
                                 <span
                                     class="conversation-pin"
                                     aria-label="Pinned conversation"
                                     title="Pinned"
                                 >&#128204;</span>
-                            ` : ""}
-                            ${preference.muted ? `
+                            `
+                                    : ""
+                            }
+                            ${
+                                preference.muted
+                                    ? `
                                 <span
                                     class="conversation-muted"
                                     aria-label="Conversation muted"
                                     title="Conversation muted"
                                 >&#128263;</span>
-                            ` : ""}
-                            ${preference.archived ? `
+                            `
+                                    : ""
+                            }
+                            ${
+                                preference.archived
+                                    ? `
                                 <span
                                     class="conversation-archived"
                                     aria-label="Archived conversation"
                                     title="Archived"
                                 >&#128230;</span>
-                            ` : ""}
+                            `
+                                    : ""
+                            }
                             ${escapeHtml(name)}
                         </h3>
                         <small>
-                            ${escapeHtml(formatDate(
-                                conversation.lastMessageAt,
-                                { fallback: "" }
-                            ))}
+                            ${escapeHtml(
+                                formatDate(conversation.lastMessageAt, {
+                                    fallback: ""
+                                })
+                            )}
                         </small>
                     </div>
 

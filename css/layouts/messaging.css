@@ -1,3 +1,27 @@
-.messaging-layout { display: grid; grid-template-columns: minmax(280px, 360px) minmax(0, 1fr); width: min(100% - 32px, 1200px); min-height: calc(100vh - 96px); margin: var(--space-6) auto; overflow: hidden; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface); }
-.messaging-list { border-right: 1px solid var(--border); }
-@media (max-width: 767px) { .messaging-layout { grid-template-columns: 1fr; width: 100%; min-height: calc(100vh - 64px); margin: 0; border: 0; border-radius: 0; } .messaging-list { border-right: 0; } }
+.messaging-layout {
+    display: grid;
+    grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
+    width: min(100% - 32px, 1200px);
+    min-height: calc(100vh - 96px);
+    margin: var(--space-6) auto;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+}
+.messaging-list {
+    border-right: 1px solid var(--border);
+}
+@media (max-width: 767px) {
+    .messaging-layout {
+        grid-template-columns: 1fr;
+        width: 100%;
+        min-height: calc(100vh - 64px);
+        margin: 0;
+        border: 0;
+        border-radius: 0;
+    }
+    .messaging-list {
+        border-right: 0;
+    }
+}

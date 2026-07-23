@@ -1,67 +1,66 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StudentHub Author Profile</title>
-    <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
-    <link rel="stylesheet" href="../css/studenthub.css?v=20260723-10">
-</head>
-<body data-page="user-profile">
-<main class="profile-page">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>StudentHub Author Profile</title>
+        <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
+    </head>
+    <body data-page="user-profile">
+        <main class="profile-page">
+            <section class="public-profile-header">
+                <div class="profile-avatar" id="profileAvatar">S</div>
 
-    <section class="public-profile-header">
-        <div class="profile-avatar" id="profileAvatar">S</div>
+                <div>
+                    <h1 id="profileName">Student</h1>
+                    <p id="profileBio">No bio yet.</p>
+                    <p id="profileMeta">Member of StudentHub</p>
 
-        <div>
-            <h1 id="profileName">Student</h1>
-            <p id="profileBio">No bio yet.</p>
-            <p id="profileMeta">Member of StudentHub</p>
+                    <div class="profile-actions">
+                        <button
+                            id="followButton"
+                            class="primary-btn"
+                            type="button"
+                        >
+                            Follow
+                        </button>
 
-            <div class="profile-actions">
-                <button
-                    id="followButton"
-                    class="primary-btn"
-                    type="button">
-                    Follow
-                </button>
+                        <button
+                            id="messageButton"
+                            class="secondary-btn"
+                            type="button"
+                            hidden
+                        >
+                            Message
+                        </button>
+                    </div>
+                </div>
+            </section>
 
-                <button
-                    id="messageButton"
-                    class="secondary-btn"
-                    type="button"
-                    hidden>
-                    Message
-                </button>
-            </div>
-        </div>
-    </section>
+            <section class="profile-stats">
+                <div class="stat-box">
+                    <p>Resources</p>
+                    <h2 id="profileResourceCount">0</h2>
+                </div>
 
-    <section class="profile-stats">
-        <div class="stat-box">
-            <p>Resources</p>
-            <h2 id="profileResourceCount">0</h2>
-        </div>
+                <div class="stat-box">
+                    <p>Downloads</p>
+                    <h2 id="profileDownloadCount">0</h2>
+                </div>
 
-        <div class="stat-box">
-            <p>Downloads</p>
-            <h2 id="profileDownloadCount">0</h2>
-        </div>
+                <div class="stat-box">
+                    <p>Earnings</p>
+                    <h2 id="profileEarnings">R0</h2>
+                </div>
+            </section>
 
-        <div class="stat-box">
-            <p>Earnings</p>
-            <h2 id="profileEarnings">R0</h2>
-        </div>
-    </section>
+            <section>
+                <h2>Uploaded Resources</h2>
+                <div id="profileResources" class="resource-grid"></div>
+            </section>
+        </main>
 
-    <section>
-        <h2>Uploaded Resources</h2>
-        <div id="profileResources" class="resource-grid"></div>
-    </section>
-
-</main>
-
-<script type="module" src="../js/pages/user-profile-page.js"></script>
-<script type="module" src="../js/theme.js"></script>
-</body>
+        <script type="module" src="../js/pages/user-profile-page.js"></script>
+        <script type="module" src="/src/main.js"></script>
+    </body>
 </html>

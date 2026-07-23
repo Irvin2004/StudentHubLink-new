@@ -55,10 +55,7 @@ function getDisplayPreview(replyTarget) {
     }
 }
 
-export function createReplyComposer({
-    container,
-    onCancel = () => {}
-} = {}) {
+export function createReplyComposer({ container, onCancel = () => {} } = {}) {
     if (!container?.ownerDocument?.createElement) {
         throw new Error("Reply composer container is required.");
     }
@@ -111,9 +108,7 @@ export function createReplyComposer({
     }
 
     function getReplyTarget() {
-        return currentReplyTarget
-            ? { ...currentReplyTarget }
-            : null;
+        return currentReplyTarget ? { ...currentReplyTarget } : null;
     }
 
     function handleCancel() {

@@ -12,10 +12,7 @@ import { createEmptyState } from "../components/empty-state.js";
  */
 export function renderCommentCards(
     comments = [],
-    {
-        container,
-        currentUserId = ""
-    } = {}
+    { container, currentUserId = "" } = {}
 ) {
     if (!container || !("innerHTML" in container)) {
         throw new TypeError("Comment container is required.");
@@ -24,15 +21,13 @@ export function renderCommentCards(
     const commentList = Array.isArray(comments) ? comments : [];
     const html = commentList.length
         ? commentList
-            .map((comment) =>
-                createCommentCard(comment, currentUserId)
-            )
-            .join("")
+              .map((comment) => createCommentCard(comment, currentUserId))
+              .join("")
         : createEmptyState(
-            "No comments yet",
-            "Ask the first question or start a discussion.",
-            ""
-        );
+              "No comments yet",
+              "Ask the first question or start a discussion.",
+              ""
+          );
 
     container.innerHTML = html;
     return html;

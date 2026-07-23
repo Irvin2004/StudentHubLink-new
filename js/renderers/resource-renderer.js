@@ -1,10 +1,6 @@
 import { createResourceCard } from "../components/resource-card.js";
-import {
-    createEmptyState
-} from "../components/empty-state.js?refinement=1";
-import {
-    hideSkeleton
-} from "./skeleton-renderer.js";
+import { createEmptyState } from "../components/empty-state.js?refinement=1";
+import { hideSkeleton } from "./skeleton-renderer.js";
 
 export function renderResources(resources, container) {
     if (!container) return;
@@ -26,9 +22,8 @@ export function renderResources(resources, container) {
     }
 
     container.innerHTML = resources
-        .map((resource) => createResourceCard(
-            resource,
-            { variant: "group-library" }
-        ))
+        .map((resource) =>
+            createResourceCard(resource, { variant: "group-library" })
+        )
         .join("");
 }

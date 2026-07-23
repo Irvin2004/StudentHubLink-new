@@ -1,48 +1,30 @@
-import {
-    getAuth,
-    onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "../../src/firebase/auth.js";
 
 import { createGroupCard } from "../components/group-card.js";
 import { openLeaveGroupDialog } from "../components/leave-group-dialog.js";
-import {
-    createEmptyState
-} from "../components/empty-state.js?refinement=1";
-import {
-    SKELETON_TYPES
-} from "../config/skeleton-types.js";
-import {
-    hideSkeleton,
-    showSkeleton
-} from "../renderers/skeleton-renderer.js";
+import { createEmptyState } from "../components/empty-state.js?refinement=1";
+import { SKELETON_TYPES } from "../config/skeleton-types.js";
+import { hideSkeleton, showSkeleton } from "../renderers/skeleton-renderer.js";
 import {
     getStudyGroupMemberships,
     getStudyGroups,
     joinStudyGroup,
     leaveStudyGroup
 } from "../services/group-service.js?security=1";
-import {
-    handleError,
-    showToast
-} from "../services/user-feedback-service.js";
+import { handleError, showToast } from "../services/user-feedback-service.js";
 import { debounce } from "../utils/debounce.js";
 import { appendNodes } from "../utils/dom-batch.js";
 
 const SEARCH_DELAY = 200;
 
-const auth = getAuth();
+const groupList = document.getElementById("groupList");
 
-const groupList =
-document.getElementById("groupList");
+const searchInput = document.getElementById("groupSearch");
 
-const searchInput =
-document.getElementById("groupSearch");
+const moduleFilter = document.getElementById("moduleFilter");
 
-const moduleFilter =
-document.getElementById("moduleFilter");
-
-const resultCount =
-document.getElementById("groupResultCount");
+const resultCount = document.getElementById("groupResultCount");
 
 let currentUser = null;
 let groups = [];
@@ -54,17 +36,12 @@ function populateModuleFilter(items) {
     }
 
     const modules = Array.from(
-        new Set(
-            items
-                .map((group) => group.moduleName?.trim())
-                .filter(Boolean)
-        )
+        new Set(items.map((group) => group.moduleName?.trim()).filter(Boolean))
     ).sort((firstModule, secondModule) =>
         firstModule.localeCompare(secondModule)
     );
 
-    moduleFilter.innerHTML =
-        '<option value="">All subjects</option>';
+    moduleFilter.innerHTML = '<option value="">All subjects</option>';
 
     const options = modules.map((moduleName) => {
         const option = document.createElement("option");
@@ -105,8 +82,7 @@ function renderGroups(items) {
     }
 
     if (resultCount) {
-        resultCount.textContent =
-            `${items.length} ${items.length === 1 ? "group" : "groups"}`;
+        resultCount.textContent = `${items.length} ${items.length === 1 ? "group" : "groups"}`;
     }
 
     groupList.setAttribute("aria-busy", "false");
@@ -139,11 +115,9 @@ function renderGroups(items) {
 }
 
 function applyFilters() {
-    const term =
-        searchInput?.value.trim().toLowerCase() || "";
+    const term = searchInput?.value.trim().toLowerCase() || "";
 
-    const selectedModule =
-        moduleFilter?.value || "";
+    const selectedModule = moduleFilter?.value || "";
 
     const filteredGroups = groups.filter((group) => {
         const matchesModule =
@@ -164,8 +138,7 @@ async function loadGroups(user) {
     try {
         groups = await getStudyGroups();
 
-        joinedGroupIds =
-        await getStudyGroupMemberships(
+        joinedGroupIds = await getStudyGroupMemberships(
             groups.map((group) => group.id),
             user.uid
         );
@@ -173,10 +146,7 @@ async function loadGroups(user) {
         populateModuleFilter(groups);
         applyFilters();
     } catch (error) {
-        handleError(
-            error,
-            "Unable to load study groups."
-        );
+        handleError(error, "Unable to load study groups.");
 
         if (groupList) {
             if (groupList.querySelector("[data-skeleton-root]")) {
@@ -197,19 +167,16 @@ searchInput?.addEventListener("input", scheduleGroupFilter);
 moduleFilter?.addEventListener("change", applyFilters);
 
 groupList?.addEventListener("click", async (event) => {
-    const button =
-        event.target.closest(
-            '[data-action="toggle-group-membership"]'
-        );
+    const button = event.target.closest(
+        '[data-action="toggle-group-membership"]'
+    );
 
     if (!button || !currentUser || button.disabled) {
         return;
     }
 
     const groupId = button.dataset.groupId;
-    const group = groups.find(
-        (item) => item.id === groupId
-    );
+    const group = groups.find((item) => item.id === groupId);
 
     if (!group) {
         return;
@@ -220,8 +187,7 @@ groupList?.addEventListener("click", async (event) => {
     if (joined) {
         button.disabled = true;
 
-        const confirmed =
-        await openLeaveGroupDialog(group.name);
+        const confirmed = await openLeaveGroupDialog(group.name);
 
         if (!confirmed) {
             button.disabled = false;
@@ -245,15 +211,9 @@ groupList?.addEventListener("click", async (event) => {
                 );
             }
 
-            showToast(
-                `You left ${group.name}.`,
-                "success"
-            );
+            showToast(`You left ${group.name}.`, "success");
         } catch (error) {
-            handleError(
-                error,
-                "Unable to leave this group."
-            );
+            handleError(error, "Unable to leave this group.");
         } finally {
             applyFilters();
         }
@@ -265,8 +225,7 @@ groupList?.addEventListener("click", async (event) => {
     button.textContent = "Joining...";
 
     try {
-        const membershipCreated =
-        await joinStudyGroup({
+        const membershipCreated = await joinStudyGroup({
             groupId,
             user: currentUser
         });
@@ -274,8 +233,7 @@ groupList?.addEventListener("click", async (event) => {
         joinedGroupIds.add(groupId);
 
         if (membershipCreated) {
-            group.memberCount =
-                Number(group.memberCount || 0) + 1;
+            group.memberCount = Number(group.memberCount || 0) + 1;
         }
 
         showToast(
@@ -285,10 +243,7 @@ groupList?.addEventListener("click", async (event) => {
             "success"
         );
     } catch (error) {
-        handleError(
-            error,
-            "Unable to join this group."
-        );
+        handleError(error, "Unable to join this group.");
     } finally {
         applyFilters();
     }

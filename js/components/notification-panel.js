@@ -1,10 +1,5 @@
-import {
-    hideSkeleton,
-    showSkeleton
-} from "../renderers/skeleton-renderer.js";
-import {
-    SKELETON_TYPES
-} from "../config/skeleton-types.js";
+import { hideSkeleton, showSkeleton } from "../renderers/skeleton-renderer.js";
+import { SKELETON_TYPES } from "../config/skeleton-types.js";
 
 const panelStates = new WeakMap();
 let panelId = 0;
@@ -64,10 +59,7 @@ function ensureBadge(bellButton) {
     return badge;
 }
 
-export function createNotificationPanel({
-    bellButton,
-    panelContainer
-} = {}) {
+export function createNotificationPanel({ bellButton, panelContainer } = {}) {
     if (!bellButton) {
         throw new Error("Notification bell button is required.");
     }
@@ -104,9 +96,7 @@ export function createNotificationPanel({
     bellButton.setAttribute("aria-expanded", "false");
     bellButton.setAttribute("aria-haspopup", "true");
 
-    const list = panelContainer.querySelector(
-        "[data-notification-list]"
-    );
+    const list = panelContainer.querySelector("[data-notification-list]");
     const markAllButton = panelContainer.querySelector(
         "[data-notification-mark-all]"
     );

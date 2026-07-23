@@ -51,11 +51,12 @@ test("reaction model reports invalid fields", () => {
     ]);
     assert.throws(
         () => createReactionModel({}),
-        (error) => Boolean(
-            error.message === "Invalid reaction data." &&
-            error.validationErrors.messageId &&
-            error.validationErrors.userId &&
-            error.validationErrors.reaction
-        )
+        (error) =>
+            Boolean(
+                error.message === "Invalid reaction data." &&
+                error.validationErrors.messageId &&
+                error.validationErrors.userId &&
+                error.validationErrors.reaction
+            )
     );
 });

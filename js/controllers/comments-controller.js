@@ -1,17 +1,12 @@
 "use strict";
 
-import { auth } from "../firebase/firebase-config.js";
+import { auth } from "../../src/firebase/auth.js";
 import {
     addComment,
     subscribeToComments
 } from "../services/comments-service.js";
-import {
-    renderCommentCards
-} from "../renderers/comment-renderer.js";
-import {
-    handleError,
-    showToast
-} from "../services/user-feedback-service.js";
+import { renderCommentCards } from "../renderers/comment-renderer.js";
+import { handleError, showToast } from "../services/user-feedback-service.js";
 
 /**
  * Creates the comments controller for a resource.

@@ -1,10 +1,7 @@
 import { NOTIFICATION_TYPES } from "../config/notification-types.js";
 import { createNotification } from "../services/notification-service.js";
 import { error as logError } from "../utils/logger.js";
-import {
-    cleanEventId,
-    getGroupEventRecipients
-} from "./recipient-utils.js";
+import { cleanEventId, getGroupEventRecipients } from "./recipient-utils.js";
 
 export async function emitAssignmentCreated({
     assignment,
@@ -28,8 +25,7 @@ export async function emitAssignmentCreated({
                         groupId: cleanGroupId,
                         referenceId: assignment.id,
                         title: "New Assignment",
-                        message:
-                            `${assignment.title} was added to your group.`
+                        message: `${assignment.title} was added to your group.`
                     });
 
                     return true;

@@ -1,9 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import {
-    CONVERSATION_PREFERENCES
-} from "../js/config/conversation-preference-types.js";
+import { CONVERSATION_PREFERENCES } from "../js/config/conversation-preference-types.js";
 import {
     createConversationPreferenceModel,
     validateConversationPreference

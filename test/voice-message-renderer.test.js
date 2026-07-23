@@ -73,15 +73,9 @@ test("voice renderer creates an aligned player with duration metadata", () => {
 
     assert.match(wrapper.className, /voice-message--outgoing/);
     assert.equal(wrapper.dataset.messageId, "message-1");
-    assert.equal(
-        wrapper.children[1].textContent,
-        "Voice message, 00:18"
-    );
+    assert.equal(wrapper.children[1].textContent, "Voice message, 00:18");
     assert.equal(wrapper.children[1].className, "voice-message__duration");
-    assert.equal(
-        wrapper.children[0].children[0].className,
-        "voice-player"
-    );
+    assert.equal(wrapper.children[0].children[0].className, "voice-player");
 
     destroyVoiceMessage();
     assert.equal(container.children.length, 0);
@@ -118,7 +112,10 @@ test("voice renderer shows loading and invalid-audio states", () => {
     });
 
     assert.equal(invalid.children[1].className, "voice-message__error");
-    assert.equal(invalid.children[1].textContent, "\u26a0 Unable to load audio");
+    assert.equal(
+        invalid.children[1].textContent,
+        "\u26a0 Unable to load audio"
+    );
 
     destroyVoiceMessage();
 });

@@ -10,9 +10,9 @@ import {
     setDoc,
     updateDoc,
     where
-} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+} from "firebase/firestore";
 
-import { db } from "../firebase/firebase-config.js";
+import { db } from "../../src/firebase/firestore.js";
 import { COLLECTIONS } from "../config/firestore.js";
 import {
     createReviewModel,
@@ -27,11 +27,14 @@ export async function addReview({
     review
 }) {
     const reviewData = createReviewModel({
-        resourceId, userId, userName, rating, review
+        resourceId,
+        userId,
+        userName,
+        rating,
+        review
     });
 
-    const existingReview =
-        await getUserReview(resourceId, userId);
+    const existingReview = await getUserReview(resourceId, userId);
 
     if (existingReview) {
         throw new Error("You have already reviewed this resource.");
@@ -42,14 +45,11 @@ export async function addReview({
         COLLECTIONS.REVIEWS,
         `${reviewData.resourceId}_${reviewData.userId}`
     );
-    await setDoc(
-        reviewRef,
-        {
-            ...reviewData,
-            createdAt: serverTimestamp(),
-            updatedAt: serverTimestamp()
-        }
-    );
+    await setDoc(reviewRef, {
+        ...reviewData,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+    });
 
     return reviewRef.id;
 }
@@ -91,23 +91,14 @@ export async function getUserReview(resourceId, userId) {
     };
 }
 
-export async function updateReview({
-    reviewId,
-    rating,
-    review
-}) {
+export async function updateReview({ reviewId, rating, review }) {
     const updates = createReviewUpdateModel({ rating, review });
-    await updateDoc(
-        doc(db, COLLECTIONS.REVIEWS, reviewId),
-        {
-            ...updates,
-            updatedAt: serverTimestamp()
-        }
-    );
+    await updateDoc(doc(db, COLLECTIONS.REVIEWS, reviewId), {
+        ...updates,
+        updatedAt: serverTimestamp()
+    });
 }
 
 export async function deleteReview(reviewId) {
-    await deleteDoc(
-        doc(db, COLLECTIONS.REVIEWS, reviewId)
-    );
+    await deleteDoc(doc(db, COLLECTIONS.REVIEWS, reviewId));
 }

@@ -2,12 +2,8 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
 
-import {
-    createEmptyState
-} from "../js/components/empty-state.js";
-import {
-    EMPTY_STATE_TYPES
-} from "../js/config/empty-state-types.js";
+import { createEmptyState } from "../js/components/empty-state.js";
+import { EMPTY_STATE_TYPES } from "../js/config/empty-state-types.js";
 import {
     hideEmptyState,
     showEmptyState

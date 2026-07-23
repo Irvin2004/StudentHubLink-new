@@ -4,15 +4,17 @@ let activeContextMenu = null;
 let contextMenuId = 0;
 
 function normalizeItems(items = []) {
-    return items.map((item) => ({
-        id: String(item.id || "").trim(),
-        label: String(item.label || "").trim(),
-        icon: String(item.icon || "").trim(),
-        danger: item.danger === true,
-        disabled: item.disabled === true,
-        separatorBefore: item.separatorBefore === true,
-        title: String(item.title || "").trim()
-    })).filter((item) => item.id && item.label);
+    return items
+        .map((item) => ({
+            id: String(item.id || "").trim(),
+            label: String(item.label || "").trim(),
+            icon: String(item.icon || "").trim(),
+            danger: item.danger === true,
+            disabled: item.disabled === true,
+            separatorBefore: item.separatorBefore === true,
+            title: String(item.title || "").trim()
+        }))
+        .filter((item) => item.id && item.label);
 }
 
 function positionMenu(menu, anchor, coordinates = {}) {
@@ -110,7 +112,10 @@ export function createContextMenu({
     };
 
     const handleOutsidePointer = (event) => {
-        if (!menu.contains(event.target) && !trigger?.contains?.(event.target)) {
+        if (
+            !menu.contains(event.target) &&
+            !trigger?.contains?.(event.target)
+        ) {
             close({ restoreFocus: false });
         }
     };
@@ -130,30 +135,29 @@ export function createContextMenu({
         if (event.key === "ArrowDown" || event.key === "ArrowUp") {
             event.preventDefault();
             const direction = event.key === "ArrowDown" ? 1 : -1;
-            const nextIndex = currentIndex < 0
-                ? 0
-                : (currentIndex + direction + buttons.length) % buttons.length;
+            const nextIndex =
+                currentIndex < 0
+                    ? 0
+                    : (currentIndex + direction + buttons.length) %
+                      buttons.length;
             buttons[nextIndex].focus();
             return;
         }
 
         if (event.key === "Home" || event.key === "End") {
             event.preventDefault();
-            buttons[event.key === "Home" ? 0 : buttons.length - 1]
-                .focus();
+            buttons[event.key === "Home" ? 0 : buttons.length - 1].focus();
             return;
         }
 
         if (event.key === "Tab") {
             event.preventDefault();
             const direction = event.shiftKey ? -1 : 1;
-            const nextIndex = currentIndex < 0
-                ? 0
-                : (
-                    currentIndex +
-                    direction +
-                    buttons.length
-                ) % buttons.length;
+            const nextIndex =
+                currentIndex < 0
+                    ? 0
+                    : (currentIndex + direction + buttons.length) %
+                      buttons.length;
             buttons[nextIndex].focus();
         }
     };
@@ -292,10 +296,8 @@ export function bindContextMenuInteractions({
         if (!pointerStart) return;
 
         if (
-            Math.abs(event.clientX - pointerStart.x) >
-                movementTolerance ||
-            Math.abs(event.clientY - pointerStart.y) >
-                movementTolerance
+            Math.abs(event.clientX - pointerStart.x) > movementTolerance ||
+            Math.abs(event.clientY - pointerStart.y) > movementTolerance
         ) {
             clearLongPress();
         }
@@ -318,27 +320,11 @@ export function bindContextMenuInteractions({
 
     return function destroyContextMenuInteractions() {
         clearLongPress();
-        container.removeEventListener(
-            "contextmenu",
-            handleContextMenu
-        );
-        container.removeEventListener(
-            "pointerdown",
-            handlePointerDown
-        );
-        container.removeEventListener(
-            "pointermove",
-            handlePointerMove
-        );
+        container.removeEventListener("contextmenu", handleContextMenu);
+        container.removeEventListener("pointerdown", handlePointerDown);
+        container.removeEventListener("pointermove", handlePointerMove);
         container.removeEventListener("pointerup", clearLongPress);
-        container.removeEventListener(
-            "pointercancel",
-            clearLongPress
-        );
-        container.removeEventListener(
-            "click",
-            handleClickCapture,
-            true
-        );
+        container.removeEventListener("pointercancel", clearLongPress);
+        container.removeEventListener("click", handleClickCapture, true);
     };
 }

@@ -18,7 +18,9 @@ function normalizeRating(value) {
 function normalizeReview(value) {
     const review = requiredText(value, "Review");
     if (review.length > REVIEW_MAX_LENGTH) {
-        throw new Error(`Review cannot exceed ${REVIEW_MAX_LENGTH} characters.`);
+        throw new Error(
+            `Review cannot exceed ${REVIEW_MAX_LENGTH} characters.`
+        );
     }
     return review;
 }

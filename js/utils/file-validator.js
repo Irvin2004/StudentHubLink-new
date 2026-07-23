@@ -44,22 +44,15 @@ export function validateAttachment(file) {
     }
 
     const lowerName = file.name.toLowerCase();
-    const hasAllowedExtension = ALLOWED_EXTENSIONS.some(
-        (extension) => lowerName.endsWith(extension)
+    const hasAllowedExtension = ALLOWED_EXTENSIONS.some((extension) =>
+        lowerName.endsWith(extension)
     );
 
-    if (
-        !ALLOWED_TYPES.includes(file.type) ||
-        !hasAllowedExtension
-    ) {
+    if (!ALLOWED_TYPES.includes(file.type) || !hasAllowedExtension) {
         throw new Error("Unsupported file type.");
     }
 
     return true;
 }
 
-export {
-    ALLOWED_EXTENSIONS,
-    ALLOWED_TYPES,
-    MAX_FILE_SIZE
-};
+export { ALLOWED_EXTENSIONS, ALLOWED_TYPES, MAX_FILE_SIZE };

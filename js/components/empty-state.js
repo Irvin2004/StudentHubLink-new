@@ -87,24 +87,14 @@ function getDefaults(type) {
  * @param {string} [icon]
  * @returns {string}
  */
-export function createEmptyState(
-    titleOrOptions,
-    description,
-    icon = "📭"
-) {
-    const options = normalizeOptions(
-        titleOrOptions,
-        description,
-        icon
-    );
+export function createEmptyState(titleOrOptions, description, icon = "📭") {
+    const options = normalizeOptions(titleOrOptions, description, icon);
     const defaults = getDefaults(options.type);
     const resolvedType = options.type || "custom";
     const resolvedIcon = options.icon || defaults.icon;
     const resolvedTitle = options.title || defaults.title;
     const resolvedDescription =
-        options.description ||
-        options.message ||
-        defaults.description;
+        options.description || options.message || defaults.description;
     const action = options.action;
     const actionMarkup = action?.label
         ? `
@@ -112,9 +102,7 @@ export function createEmptyState(
                 class="empty-state__action btn btn-primary"
                 type="button"
                 data-empty-state-action
-                aria-label="${escapeHtml(
-                    action.ariaLabel || action.label
-                )}">
+                aria-label="${escapeHtml(action.ariaLabel || action.label)}">
                 ${escapeHtml(action.label)}
             </button>
         `

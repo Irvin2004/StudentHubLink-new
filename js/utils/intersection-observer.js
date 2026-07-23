@@ -38,11 +38,16 @@ export function createIntersectionObserver(
             if (!element || observedElements.has(element)) return;
 
             observedElements.add(element);
-            callback([{
-                target: element,
-                isIntersecting: true,
-                intersectionRatio: 1
-            }], this);
+            callback(
+                [
+                    {
+                        target: element,
+                        isIntersecting: true,
+                        intersectionRatio: 1
+                    }
+                ],
+                this
+            );
         },
         unobserve(element) {
             observedElements.delete(element);
@@ -64,11 +69,7 @@ export function createIntersectionObserver(
  * @param {IntersectionObserverInit} options
  * @returns {IntersectionObserver|object}
  */
-export function observeElements(
-    elements,
-    callback,
-    options = {}
-) {
+export function observeElements(elements, callback, options = {}) {
     const observer = createIntersectionObserver(callback, options);
 
     [...elements].forEach((element) => observer.observe(element));

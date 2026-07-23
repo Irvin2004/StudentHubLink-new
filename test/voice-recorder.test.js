@@ -110,9 +110,8 @@ test("voice recorder exposes microphone permission failures", async () => {
         MediaRecorder: FakeMediaRecorder
     });
 
-    await assert.rejects(
-        recorder.startRecording(),
-        (error) => Boolean(
+    await assert.rejects(recorder.startRecording(), (error) =>
+        Boolean(
             error.message ===
                 "Microphone access is required to send voice messages." &&
             error.cause === denied

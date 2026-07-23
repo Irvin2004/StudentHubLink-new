@@ -19,9 +19,7 @@ test("conversation sorter places pinned conversations first", () => {
         conversation("recent", 300),
         conversation("pinned", 100)
     ];
-    const preferences = [
-        { conversationId: "pinned", pinned: true }
-    ];
+    const preferences = [{ conversationId: "pinned", pinned: true }];
 
     assert.deepEqual(
         sortConversations(conversations, preferences).map(({ id }) => id),
@@ -90,9 +88,7 @@ test("conversation sorter can disable pin priority for archived views", () => {
         conversation("recent", 300),
         conversation("pinned-old", 100)
     ];
-    const preferences = new Map([
-        ["pinned-old", { pinned: true }]
-    ]);
+    const preferences = new Map([["pinned-old", { pinned: true }]]);
 
     assert.deepEqual(
         sortConversations(conversations, preferences, {

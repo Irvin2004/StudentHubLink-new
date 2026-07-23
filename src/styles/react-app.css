@@ -1,0 +1,742 @@
+.brand-mark {
+    display: inline-grid;
+    width: 2.2rem;
+    height: 2.2rem;
+    place-items: center;
+    border-radius: var(--radius-md);
+    background: var(--primary);
+    color: var(--color-white);
+    font-weight: 800;
+}
+
+.logo,
+.auth-brand,
+.react-sidebar__brand {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-3);
+    color: inherit;
+    font-weight: 800;
+    text-decoration: none;
+}
+
+#root .btn {
+    min-height: 2.75rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 var(--space-5);
+    border: 1px solid transparent;
+    border-radius: var(--radius-md);
+    font-size: 0.95rem;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+#root .btn-primary {
+    background: var(--primary);
+    box-shadow: 0 10px 20px color-mix(in srgb, var(--primary) 22%, transparent);
+    color: var(--color-white);
+}
+
+#root .btn-outline {
+    border-color: var(--border);
+    background: var(--surface);
+    color: var(--text);
+}
+
+body[data-page="landing"] .nav-links a,
+body[data-page="landing"] .hero-actions a,
+body[data-page="landing"] .marketplace-section a {
+    text-decoration: none;
+}
+
+body[data-page="landing"] .theme-toggle {
+    width: 2.75rem;
+    height: 2.75rem;
+    display: grid;
+    place-items: center;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface);
+    color: var(--text);
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+body[data-page="landing"] {
+    background: var(--background);
+    color: var(--text);
+}
+
+body[data-page="landing"] .hero {
+    width: min(75rem, 100%);
+    margin-inline: auto;
+    padding: clamp(4rem, 8vw, 6rem) var(--space-6);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(28rem, 1fr);
+    align-items: center;
+    gap: clamp(2.5rem, 5vw, 4rem);
+}
+
+body[data-page="landing"] .hero h1 {
+    margin-bottom: var(--space-6);
+    color: var(--text);
+    font-size: clamp(3rem, 5.5vw, 4.75rem);
+    line-height: 1.02;
+    letter-spacing: -0.055em;
+}
+
+body[data-page="landing"] .hero-left > p {
+    max-width: 36rem;
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+    line-height: 1.75;
+}
+
+body[data-page="landing"] .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-top: var(--space-8);
+}
+
+body[data-page="landing"] .hero-right {
+    min-width: 0;
+    padding: var(--space-6);
+    border-radius: 2rem;
+    background: linear-gradient(135deg, var(--color-slate-900), var(--primary));
+    box-shadow: var(--shadow-lg);
+}
+
+body[data-page="landing"] .dashboard-mockup {
+    min-height: 24rem;
+    display: grid;
+    grid-template-columns: 10.5rem minmax(0, 1fr);
+    overflow: hidden;
+    border-radius: 1.5rem;
+    background: var(--surface);
+}
+
+body[data-page="landing"] .dashboard-mockup aside {
+    padding: var(--space-6);
+    background: var(--color-slate-900);
+    color: var(--color-white);
+}
+
+body[data-page="landing"] .dashboard-mockup aside h3 {
+    margin-bottom: var(--space-6);
+}
+
+body[data-page="landing"] .dashboard-mockup aside p {
+    margin-bottom: var(--space-2);
+    padding: var(--space-3);
+    border-radius: var(--radius-sm);
+    color: var(--color-slate-400);
+}
+
+body[data-page="landing"] .dashboard-mockup aside .active {
+    background: var(--color-blue-600);
+    color: var(--color-white);
+}
+
+body[data-page="landing"] .mock-content {
+    min-width: 0;
+    padding: var(--space-6);
+}
+
+body[data-page="landing"] .mock-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-3);
+    margin-bottom: var(--space-6);
+}
+
+body[data-page="landing"] .mock-top h3 {
+    color: var(--text);
+}
+
+body[data-page="landing"] .mock-top p {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+body[data-page="landing"] .mock-top .status {
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-pill);
+    background: color-mix(in srgb, var(--success) 14%, transparent);
+    color: var(--success);
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+body[data-page="landing"] .mock-stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-3);
+}
+
+body[data-page="landing"] .mock-stats article {
+    padding: var(--space-4);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface-muted);
+}
+
+body[data-page="landing"] .mock-stats span {
+    display: block;
+    margin-bottom: var(--space-2);
+    color: var(--text-secondary);
+    font-size: 0.78rem;
+}
+
+body[data-page="landing"] .mock-stats strong {
+    color: var(--text);
+    font-size: 1.5rem;
+}
+
+body[data-page="landing"] .features-section {
+    padding: clamp(4rem, 8vw, 7rem) var(--space-6);
+    background: var(--surface);
+}
+
+body[data-page="landing"] .section-heading {
+    width: min(42rem, 100%);
+    margin: 0 auto var(--space-10);
+    text-align: center;
+}
+
+body[data-page="landing"] .section-heading h2,
+body[data-page="landing"] .marketplace-section h2 {
+    margin-bottom: var(--space-4);
+    color: var(--text);
+    font-size: clamp(2rem, 4vw, 3rem);
+    letter-spacing: -0.035em;
+}
+
+body[data-page="landing"] .section-heading p,
+body[data-page="landing"] .marketplace-section p {
+    color: var(--text-secondary);
+}
+
+body[data-page="landing"] .features-grid {
+    width: min(68rem, 100%);
+    margin-inline: auto;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-5);
+}
+
+body[data-page="landing"] .feature-card {
+    padding: var(--space-6);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--background);
+    box-shadow: var(--shadow-sm);
+}
+
+body[data-page="landing"] .feature-card h3 {
+    margin-bottom: var(--space-3);
+    color: var(--text);
+}
+
+body[data-page="landing"] .feature-card p {
+    color: var(--text-secondary);
+}
+
+body[data-page="landing"] .marketplace-section {
+    width: min(68rem, calc(100% - 3rem));
+    margin: clamp(4rem, 8vw, 7rem) auto;
+    padding: clamp(2rem, 5vw, 4rem);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-8);
+    border-radius: 2rem;
+    background: var(--color-slate-900);
+}
+
+body[data-page="landing"] .marketplace-section h2 {
+    color: var(--color-white);
+}
+
+body[data-page="landing"] .marketplace-section p {
+    max-width: 42rem;
+    color: var(--color-slate-400);
+}
+
+body[data-page="landing"] > #root > footer {
+    padding: var(--space-6);
+    border-top: 1px solid var(--border);
+    color: var(--text-secondary);
+    text-align: center;
+}
+
+body:is([data-page="login"], [data-page="register"]) .auth-page {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(28rem, 1fr);
+    background:
+        radial-gradient(
+            circle at top left,
+            color-mix(in srgb, var(--primary) 14%, transparent),
+            transparent 35%
+        ),
+        var(--background);
+}
+
+body:is([data-page="login"], [data-page="register"]) .auth-left {
+    padding: clamp(3rem, 7vw, 5.5rem);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background: var(--color-slate-900);
+    color: var(--color-white);
+}
+
+body:is([data-page="login"], [data-page="register"]) .auth-brand {
+    width: fit-content;
+    margin-bottom: clamp(2.5rem, 7vw, 4.5rem);
+    color: var(--color-white);
+    font-size: 1.5rem;
+}
+
+body:is([data-page="login"], [data-page="register"]) .auth-left h1 {
+    max-width: 42rem;
+    margin-bottom: var(--space-6);
+    color: var(--color-white);
+    font-size: clamp(2.6rem, 5vw, 4rem);
+    line-height: 1.05;
+    letter-spacing: -0.045em;
+}
+
+body:is([data-page="login"], [data-page="register"]) .auth-left > p {
+    max-width: 34rem;
+    color: var(--color-slate-400);
+    font-size: 1.05rem;
+    line-height: 1.7;
+}
+
+body:is([data-page="login"], [data-page="register"]) .auth-features {
+    max-width: 34rem;
+    margin-top: var(--space-8);
+    display: grid;
+    gap: var(--space-3);
+}
+
+body:is([data-page="login"], [data-page="register"]) .auth-features div {
+    padding: var(--space-4);
+    border: 1px solid rgb(255 255 255 / 0.12);
+    border-radius: var(--radius-lg);
+    background: rgb(255 255 255 / 0.07);
+}
+
+body:is([data-page="login"], [data-page="register"]) .auth-right {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: clamp(1.5rem, 5vw, 4rem);
+}
+
+body:is([data-page="login"], [data-page="register"]) .auth-card {
+    width: min(27rem, 100%);
+    padding: clamp(1.75rem, 4vw, 2.5rem);
+    border: 1px solid var(--border);
+    border-radius: 1.75rem;
+    background: var(--surface);
+    box-shadow: var(--shadow-lg);
+}
+
+body:is([data-page="login"], [data-page="register"]) .auth-card h2 {
+    margin-bottom: var(--space-2);
+    color: var(--text);
+    font-size: 2.25rem;
+    text-align: center;
+}
+
+body:is([data-page="login"], [data-page="register"]) .auth-card .subtitle {
+    margin-bottom: var(--space-8);
+    color: var(--text-secondary);
+    text-align: center;
+}
+
+body:is([data-page="login"], [data-page="register"]) .auth-card .form-group {
+    margin-bottom: var(--space-5);
+}
+
+body:is([data-page="login"], [data-page="register"]) .auth-card label {
+    display: block;
+    margin-bottom: var(--space-2);
+    color: var(--text);
+    font-weight: 700;
+}
+
+body:is([data-page="login"], [data-page="register"]) .auth-card input {
+    width: 100%;
+    min-height: 3rem;
+    padding: 0 var(--space-4);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--background);
+    color: var(--text);
+}
+
+body:is([data-page="login"], [data-page="register"]) .auth-card input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--primary) 18%, transparent);
+    outline: 0;
+}
+
+body:is([data-page="login"], [data-page="register"]) .auth-card button {
+    width: 100%;
+    margin-top: var(--space-2);
+}
+
+body:is([data-page="login"], [data-page="register"])
+    .auth-card
+    .auth-link-button {
+    width: auto;
+    display: block;
+    margin: calc(var(--space-2) * -1) 0 var(--space-3) auto;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+    color: var(--primary);
+    font: inherit;
+    font-weight: 700;
+}
+
+body:is([data-page="login"], [data-page="register"]) .form-message {
+    min-height: 1.25rem;
+    margin: var(--space-3) 0 0;
+    color: var(--danger);
+    font-size: 0.875rem;
+    text-align: center;
+}
+
+body:is([data-page="login"], [data-page="register"]) .auth-switch {
+    margin-top: var(--space-5);
+    color: var(--text-secondary);
+    text-align: center;
+}
+
+body:is([data-page="login"], [data-page="register"]) .auth-switch a {
+    color: var(--primary);
+    font-weight: 800;
+}
+
+.loading-screen,
+.react-not-found {
+    min-height: 100vh;
+    display: grid;
+    place-content: center;
+    justify-items: center;
+    gap: var(--space-4);
+    padding: var(--space-6);
+    background: var(--background);
+    color: var(--text);
+    text-align: center;
+}
+
+.loading-screen__mark {
+    display: grid;
+    width: 3.5rem;
+    height: 3.5rem;
+    place-items: center;
+    border-radius: var(--radius-lg);
+    background: var(--primary);
+    color: var(--color-white);
+    font-size: 1.5rem;
+    font-weight: 800;
+}
+
+.form-help {
+    display: block;
+    margin-top: var(--space-2);
+    color: var(--text-secondary);
+}
+
+.react-toast-viewport {
+    position: fixed;
+    z-index: 1000;
+    top: var(--space-4);
+    right: var(--space-4);
+    display: grid;
+    width: min(24rem, calc(100vw - 2rem));
+    gap: var(--space-3);
+    pointer-events: none;
+}
+
+.react-toast {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-4);
+    padding: var(--space-4);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--primary);
+    border-radius: var(--radius-md);
+    background: var(--surface);
+    box-shadow: var(--shadow);
+    color: var(--text);
+    pointer-events: auto;
+}
+
+.react-toast--success {
+    border-left-color: var(--success);
+}
+
+.react-toast--error {
+    border-left-color: var(--danger);
+}
+
+.react-toast p {
+    margin: var(--space-1) 0 0;
+}
+
+.react-toast button {
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+    border: 0;
+    background: transparent;
+    color: currentColor;
+    font-size: 1.5rem;
+}
+
+.react-app-shell {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 17rem minmax(0, 1fr);
+    background: var(--background);
+    color: var(--text);
+}
+
+.react-sidebar {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-8);
+    padding: var(--space-6);
+    border-right: 1px solid var(--border);
+    background: var(--surface);
+}
+
+.react-sidebar nav {
+    display: grid;
+    gap: var(--space-2);
+}
+
+.react-sidebar nav a {
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    font-weight: 650;
+    text-decoration: none;
+}
+
+.react-sidebar nav a:hover,
+.react-sidebar nav a.active {
+    background: var(--primary-soft);
+    color: var(--primary);
+}
+
+.react-sidebar > button {
+    margin-top: auto;
+}
+
+.react-app-main {
+    min-width: 0;
+}
+
+.react-app-header {
+    display: flex;
+    min-height: 4.5rem;
+    align-items: center;
+    justify-content: flex-end;
+    padding: var(--space-3) var(--space-8);
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+}
+
+.react-app-header div {
+    display: grid;
+    text-align: right;
+}
+
+.react-app-header span {
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+}
+
+.react-page {
+    width: min(72rem, 100%);
+    margin-inline: auto;
+    padding: var(--space-10);
+}
+
+.react-page__heading {
+    margin-bottom: var(--space-8);
+}
+
+.react-page__heading h1 {
+    margin-bottom: var(--space-2);
+    color: var(--text);
+    font-size: clamp(2rem, 4vw, 3rem);
+}
+
+.react-page__heading p {
+    color: var(--text-secondary);
+}
+
+.react-action-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-4);
+}
+
+.react-action-grid article,
+.react-empty-panel,
+.react-settings-panel {
+    padding: var(--space-6);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    box-shadow: var(--shadow-sm);
+}
+
+.react-action-grid h2,
+.react-empty-panel h2 {
+    margin-bottom: var(--space-2);
+    color: var(--text);
+    font-size: 1.15rem;
+}
+
+.react-action-grid p,
+.react-empty-panel p {
+    margin-bottom: var(--space-4);
+    color: var(--text-secondary);
+}
+
+.react-action-grid a {
+    color: var(--primary);
+    font-weight: 700;
+}
+
+.react-empty-panel {
+    max-width: 42rem;
+}
+
+.react-settings-panel {
+    display: grid;
+    max-width: 36rem;
+    gap: var(--space-3);
+}
+
+.react-settings-panel select {
+    min-height: 2.75rem;
+    padding: 0 var(--space-3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface);
+    color: var(--text);
+}
+
+.react-setting-toggle {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin-top: var(--space-3);
+}
+
+.react-not-found > span {
+    color: var(--primary);
+    font-size: clamp(4rem, 12vw, 8rem);
+    font-weight: 800;
+    line-height: 1;
+}
+
+@media (max-width: 850px) {
+    body[data-page="landing"] .hero {
+        grid-template-columns: 1fr;
+    }
+
+    body[data-page="landing"] .features-grid {
+        grid-template-columns: 1fr;
+    }
+
+    body[data-page="landing"] .marketplace-section {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    body:is([data-page="login"], [data-page="register"]) .auth-page {
+        grid-template-columns: 1fr;
+    }
+
+    body:is([data-page="login"], [data-page="register"]) .auth-left {
+        padding: 3rem 1.5rem;
+    }
+
+    body:is([data-page="login"], [data-page="register"]) .auth-features {
+        display: none;
+    }
+
+    .react-app-shell {
+        grid-template-columns: 1fr;
+    }
+
+    .react-sidebar {
+        position: static;
+        height: auto;
+        gap: var(--space-4);
+        border-right: 0;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .react-sidebar nav {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .react-sidebar > button {
+        margin-top: 0;
+    }
+
+    .react-page {
+        padding: var(--space-6);
+    }
+
+    .react-action-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 600px) {
+    body[data-page="landing"] .hero {
+        padding: 3.5rem 1rem;
+    }
+
+    body[data-page="landing"] .hero h1 {
+        font-size: clamp(2.5rem, 13vw, 3.5rem);
+    }
+
+    body[data-page="landing"] .hero-right {
+        padding: var(--space-4);
+    }
+
+    body[data-page="landing"] .dashboard-mockup {
+        min-height: auto;
+        grid-template-columns: 1fr;
+    }
+
+    body[data-page="landing"] .dashboard-mockup aside {
+        display: none;
+    }
+
+    body[data-page="landing"] .mock-stats {
+        grid-template-columns: 1fr;
+    }
+}

@@ -19,14 +19,6 @@ export const SETTINGS_DEFAULTS = Object.freeze({
     highContrast: false
 });
 
-export const ALLOWED_THEMES = Object.freeze([
-    "light",
-    "dark",
-    "system"
-]);
+export const ALLOWED_THEMES = Object.freeze(["light", "dark", "system"]);
 
-export const ALLOWED_FONT_SIZES = Object.freeze([
-    "small",
-    "medium",
-    "large"
-]);
+export const ALLOWED_FONT_SIZES = Object.freeze(["small", "medium", "large"]);

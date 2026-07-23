@@ -15,15 +15,15 @@ function isUpcomingAssignment(assignment) {
 
 function getUnreadMessageCount(conversations, userId) {
     return conversations.reduce((total, conversation) => {
-        const value = conversation?.unreadCount ??
+        const value =
+            conversation?.unreadCount ??
             conversation?.unreadCounts?.[userId] ??
             0;
         const unreadCount = Number(value);
 
-        return total + (
-            Number.isFinite(unreadCount)
-                ? Math.max(0, unreadCount)
-                : 0
+        return (
+            total +
+            (Number.isFinite(unreadCount) ? Math.max(0, unreadCount) : 0)
         );
     }, 0);
 }
@@ -46,15 +46,11 @@ export function createDashboardRefreshManager({
             ...state.stats,
             ...nextStats
         };
-        renderDashboard(
-            { stats: state.stats },
-            { stats: elements.stats }
-        );
+        renderDashboard({ stats: state.stats }, { stats: elements.stats });
     }
 
     function refreshAssignments(assignments) {
-        state.assignments = asArray(assignments)
-            .filter(isUpcomingAssignment);
+        state.assignments = asArray(assignments).filter(isUpcomingAssignment);
         state.stats.assignments = state.assignments.length;
         renderDashboard(
             {

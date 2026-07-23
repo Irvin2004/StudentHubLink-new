@@ -12,9 +12,9 @@ import {
     serverTimestamp,
     Timestamp,
     updateDoc
-} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+} from "firebase/firestore";
 
-import { db } from "../firebase/firebase-config.js";
+import { db } from "../../src/firebase/firestore.js";
 import { COLLECTIONS } from "../config/firestore.js";
 import {
     createAssignmentModel,
@@ -26,9 +26,7 @@ import { getAssignmentStatus } from "../utils/assignment-status.js";
 import { getUserGroups } from "./group-service.js?unified-search=1";
 
 function cleanText(value) {
-    return typeof value === "string"
-        ? value.trim()
-        : "";
+    return typeof value === "string" ? value.trim() : "";
 }
 
 function validateGroupId(groupId) {
@@ -52,19 +50,11 @@ function validateAssignmentId(assignmentId) {
 }
 
 function getAssignmentsCollection(groupId) {
-    return collection(
-        db,
-        COLLECTIONS.GROUPS,
-        groupId,
-        "assignments"
-    );
+    return collection(db, COLLECTIONS.GROUPS, groupId, "assignments");
 }
 
 function getAssignmentReference(groupId, assignmentId) {
-    return doc(
-        getAssignmentsCollection(groupId),
-        assignmentId
-    );
+    return doc(getAssignmentsCollection(groupId), assignmentId);
 }
 
 function convertDueDate(dueDate) {
@@ -72,8 +62,7 @@ function convertDueDate(dueDate) {
 }
 
 function normalizeFirestoreError(error) {
-    const code = String(error?.code || "")
-        .replace(/^firestore\//, "");
+    const code = String(error?.code || "").replace(/^firestore\//, "");
 
     if (code === "permission-denied") {
         const permissionError = new Error("Permission denied.", {
@@ -94,17 +83,10 @@ async function runFirestoreOperation(operation) {
     }
 }
 
-export async function createAssignment(
-    groupId,
-    assignmentData = {}
-) {
+export async function createAssignment(groupId, assignmentData = {}) {
     const cleanGroupId = validateGroupId(groupId);
-    const {
-        title,
-        description,
-        dueDate,
-        createdBy
-    } = createAssignmentModel(assignmentData);
+    const { title, description, dueDate, createdBy } =
+        createAssignmentModel(assignmentData);
 
     const assignment = await runFirestoreOperation(async () => {
         const assignmentRef = await addDoc(
@@ -222,10 +204,7 @@ export async function getAssignment(groupId, assignmentId) {
     const cleanAssignmentId = validateAssignmentId(assignmentId);
     return runFirestoreOperation(async () => {
         const snapshot = await getDoc(
-            getAssignmentReference(
-                cleanGroupId,
-                cleanAssignmentId
-            )
+            getAssignmentReference(cleanGroupId, cleanAssignmentId)
         );
 
         if (!snapshot.exists()) {
@@ -240,11 +219,7 @@ export async function getAssignment(groupId, assignmentId) {
     });
 }
 
-export async function updateAssignment(
-    groupId,
-    assignmentId,
-    updates = {}
-) {
+export async function updateAssignment(groupId, assignmentId, updates = {}) {
     const cleanGroupId = validateGroupId(groupId);
     const cleanAssignmentId = validateAssignmentId(assignmentId);
     const validatedUpdates = createAssignmentUpdateModel(updates);
@@ -255,15 +230,15 @@ export async function updateAssignment(
     };
 
     if (validatedUpdates.dueDate) {
-        firestoreUpdates.dueDate = convertDueDate(
-            validatedUpdates.dueDate
-        );
+        firestoreUpdates.dueDate = convertDueDate(validatedUpdates.dueDate);
     }
 
-    await runFirestoreOperation(() => updateDoc(
-        getAssignmentReference(cleanGroupId, cleanAssignmentId),
-        firestoreUpdates
-    ));
+    await runFirestoreOperation(() =>
+        updateDoc(
+            getAssignmentReference(cleanGroupId, cleanAssignmentId),
+            firestoreUpdates
+        )
+    );
 
     return getAssignment(cleanGroupId, cleanAssignmentId);
 }
@@ -272,7 +247,7 @@ export async function deleteAssignment(groupId, assignmentId) {
     const cleanGroupId = validateGroupId(groupId);
     const cleanAssignmentId = validateAssignmentId(assignmentId);
 
-    await runFirestoreOperation(() => deleteDoc(
-        getAssignmentReference(cleanGroupId, cleanAssignmentId)
-    ));
+    await runFirestoreOperation(() =>
+        deleteDoc(getAssignmentReference(cleanGroupId, cleanAssignmentId))
+    );
 }

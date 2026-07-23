@@ -44,21 +44,26 @@ export function openConfirmationDialog({
     return new Promise((resolve) => {
         let confirmed = false;
 
-        dialog.querySelector("[data-confirm-dialog]")
+        dialog
+            .querySelector("[data-confirm-dialog]")
             ?.addEventListener("click", () => {
                 confirmed = true;
                 closeModal(dialog);
             });
 
-        dialog.addEventListener("modal:closed", () => {
-            dialog.remove();
+        dialog.addEventListener(
+            "modal:closed",
+            () => {
+                dialog.remove();
 
-            if (activeDialog === dialog) {
-                activeDialog = null;
-            }
+                if (activeDialog === dialog) {
+                    activeDialog = null;
+                }
 
-            resolve(confirmed);
-        }, { once: true });
+                resolve(confirmed);
+            },
+            { once: true }
+        );
 
         openModal(dialog);
     });

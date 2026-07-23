@@ -1,191 +1,23 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StudentHub | Learn Smarter</title>
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-
-    <link rel="stylesheet" href="css/studenthub.css?v=20260723-10">
-</head>
-<body data-page="landing">
-<header class="site-header">
-    <nav class="nav">
-        <a href="index.html" class="logo">
-            <img src="assets/logos/studenthub-logo.svg?v=20260711-2" alt="StudentHub Logo">
-        </a>
-
-        <div class="nav-links">
-            <a href="#features">Features</a>
-            <a href="#marketplace">Marketplace</a>
-            <a href="#ai">AI Assistant</a>
-            <a href="login.html">Login</a>
-            <a href="register.html" class="btn btn-primary">Get Started</a>
-            <button
-                class="theme-toggle"
-                type="button"
-                data-theme-toggle
-                aria-label="Switch to dark mode"
-                title="Switch to dark mode">
-                Dark
-            </button>
-        </div>
-    </nav>
-</header>
-
-<main>
-    <section class="hero">
-        <div class="hero-left">
-           <!-- <div class="pill">Built for South African students</div>-->
-
-            <h1>Learn smarter. Share knowledge. Build your future.</h1>
-
-            <p>
-                StudentHub helps students access trusted resources, upload notes,
-                earn from their knowledge, and get support with important
-                document processes.
-            </p>
-
-            <div class="hero-actions">
-                <a href="register.html" class="btn btn-primary">Start Free</a>
-                <a href="#features" class="btn btn-outline">Explore Platform</a>
-            </div>
-        </div>
-
-        <div class="hero-right">
-            <div class="dashboard-mockup">
-                <aside>
-                    <h3>StudentHub</h3>
-                    <p class="active">Dashboard</p>
-                    <p>Resources</p>
-                    <p>Uploads</p>
-                    <p>Earnings</p>
-                </aside>
-
-                <div class="mock-content">
-                    <div class="mock-top">
-                        <div>
-                            <h3>Welcome back</h3>
-                            <p>Your learning activity this week</p>
-                        </div>
-                        <span>Online</span>
-                    </div>
-
-                    <div class="mock-stats">
-                        <div><small>Resources</small><strong>128</strong></div>
-                        <div><small>Earnings</small><strong>R850</strong></div>
-                        <div><small>Downloads</small><strong>42</strong></div>
-                    </div>
-
-                    <div class="mock-card">
-                        <div>
-                            <h4>Engineering Graphics Notes</h4>
-                            <p>PDF | Approved | R25</p>
-                        </div>
-                        <button>View</button>
-                    </div>
-
-                    <div class="mock-bars">
-                        <span></span><span></span><span></span><span></span><span></span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section class="stats-section">
-        <div><h2>1,200+</h2><p>Resources shared</p></div>
-        <div><h2>500+</h2><p>Students supported</p></div>
-        <div><h2>80/20</h2><p>Student earnings model</p></div>
-        <div><h2>24/7</h2><p>Digital access</p></div>
-    </section>
-
-    <section class="section" id="features">
-        <div class="section-heading">
-            <p>Core Features</p>
-            <h2>Everything students need in one place</h2>
-        </div>
-
-        <div class="feature-grid">
-            <div class="feature-card">
-                <span>RES</span>
-                <h3>Study Resources</h3>
-                <p>Access approved PDFs, images, guides, and ZIP resource packs.</p>
-            </div>
-
-            <div class="feature-card">
-                <span>R</span>
-                <h3>Upload & Earn</h3>
-                <p>Students can sell quality resources and keep 80% of earnings.</p>
-            </div>
-
-            <div class="feature-card">
-                <span>DOC</span>
-                <h3>Document Assistant</h3>
-                <p>Get guidance for IDs, applications, and student document processes.</p>
-            </div>
-
-            <div class="feature-card">
-                <span>OK</span>
-                <h3>Admin Approval</h3>
-                <p>Resources are reviewed before being published to keep quality high.</p>
-            </div>
-        </div>
-    </section>
-
-    <section class="marketplace-section" id="marketplace">
-        <div class="market-text">
-            <p class="section-label">Marketplace</p>
-            <h2>Turn knowledge into income.</h2>
-            <p>
-                Students can upload notes, set prices, and earn whenever other
-                students purchase their resources.
-            </p>
-        </div>
-
-        <div class="resource-card-preview">
-            <div class="resource-badge">PDF</div>
-            <h3>Python Programming Guide</h3>
-            <p>Beginner-friendly notes with exercises and examples.</p>
-
-            <div class="resource-bottom">
-                <strong>R35</strong>
-                <button>Purchase</button>
-            </div>
-        </div>
-    </section>
-
-    <section class="ai-section" id="ai">
-        <div class="ai-card">
-            <div>
-                <p class="section-label">Coming Next</p>
-                <h2>AI Study Assistant</h2>
-                <p>
-                    StudentHub will help students summarise notes, generate quizzes,
-                    create flashcards, and understand difficult topics faster.
-                </p>
-            </div>
-
-            <div class="ai-box">
-                <p><strong>Student:</strong> Summarise this chapter.</p>
-                <p><strong>AI:</strong> Here are the key points and possible exam questions.</p>
-            </div>
-        </div>
-    </section>
-
-    <section class="cta">
-        <h2>Ready to simplify student life?</h2>
-        <p>Join StudentHub and become part of a smarter student community.</p>
-        <a href="register.html" class="btn btn-primary">Create Account</a>
-    </section>
-</main>
-
-<footer class="footer">
-    <p>&copy; 2026 StudentHub. Built to empower students.</p>
-</footer>
-<script type="module" src="js/theme.js"></script>
-</body>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta
+            name="description"
+            content="StudentHub brings student communities, trusted academic resources, and collaboration into one platform."
+        />
+        <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+            rel="stylesheet"
+        />
+        <title>StudentHub | Learn Smarter</title>
+    </head>
+    <body>
+        <div id="root"></div>
+        <script type="module" src="/src/main.jsx"></script>
+    </body>
 </html>

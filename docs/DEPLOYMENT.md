@@ -1,93 +1,112 @@
 # Deployment
 
-## Overview
+StudentHub uses Vite to create a multi-page production bundle and Firebase
+Hosting to publish the generated `dist/` directory.
 
-StudentHub is designed to deploy on Firebase.
+## Prerequisites
 
-## Frontend
-
-Frontend hosting target:
-
-- Firebase Hosting
-
-Current frontend stack:
-
-- Static HTML
-- CSS
-- JavaScript ES Modules
-
-## Backend
-
-Backend services:
-
-- Firebase Cloud Functions
-- Cloud Firestore
-- Firebase Authentication
-- Firebase Storage planned
-
-## Requirements
-
-- Node.js
+- Node.js 20 or newer
 - npm
 - Firebase CLI
-- Firebase project access
-- Blaze plan for Cloud Functions deployment
+- access to the target Firebase project
+- production `VITE_FIREBASE_*` values
+- a billing-enabled project when deploying Cloud Functions that require it
 
-## Install Firebase CLI
+## Validate a release
 
-```powershell
-npm install -g firebase-tools
+Install exact locked dependencies:
+
+```bash
+npm ci
+npm --prefix functions ci
 ```
 
-## Login
+Create `.env.production.local` with the production Firebase web configuration.
+Do not commit that file.
 
-```powershell
+Run the complete gate:
+
+```bash
+npm run check
+npm --prefix functions run lint
+```
+
+`npm run check` runs ESLint, Prettier verification, syntax validation, tests,
+and the Vite production build.
+
+Preview the generated application:
+
+```bash
+npm run preview
+```
+
+Open [http://127.0.0.1:4173](http://127.0.0.1:4173).
+
+## Manual GitHub deployment
+
+`.github/workflows/deploy.yml` provides a manually dispatched production
+workflow. Configure a protected GitHub environment named `production` with:
+
+- `FIREBASE_SERVICE_ACCOUNT`
+- `VITE_FIREBASE_API_KEY`
+- `VITE_FIREBASE_AUTH_DOMAIN`
+- `VITE_FIREBASE_PROJECT_ID`
+- `VITE_FIREBASE_STORAGE_BUCKET`
+- `VITE_FIREBASE_MESSAGING_SENDER_ID`
+- `VITE_FIREBASE_APP_ID`
+- `VITE_FIREBASE_MEASUREMENT_ID`
+
+`FIREBASE_SERVICE_ACCOUNT` contains the complete service-account JSON used by
+the official Firebase Hosting action. Limit repository and environment access,
+require deployment approval, and rotate the credential if it is exposed.
+
+The workflow is intentionally `workflow_dispatch` only. Automatic production
+deployment should be enabled only after branch protection, required checks, and
+rollback procedures are verified.
+
+## Firebase CLI deployment
+
+```bash
+npm install --global firebase-tools
 firebase login
+firebase use --add
+npm run build
+firebase deploy --only hosting
 ```
 
-## Select Project
+Deploy Firestore and Storage configuration:
 
-```powershell
-firebase use studenthub-c9bc0
+```bash
+firebase deploy --only firestore:rules,firestore:indexes,storage
 ```
 
-## Deploy Firestore Rules
+Deploy Cloud Functions:
 
-```powershell
-firebase deploy --only firestore:rules
-```
-
-## Install Functions Dependencies
-
-```powershell
-cd functions
-npm install
-```
-
-## Deploy Functions
-
-Cloud Functions require the Blaze pay-as-you-go plan.
-
-```powershell
+```bash
+npm --prefix functions ci
+npm --prefix functions run lint
 firebase deploy --only functions
 ```
 
-## Local Frontend Preview
+## Release checklist
 
-Serve the project over HTTP because JavaScript modules do not work reliably from direct file access.
+- CI is green for the release commit.
+- Production environment variables are complete.
+- No secret appears in Git history or build output.
+- Firestore and Storage Rules match the deployed data model.
+- Required indexes exist.
+- The production bundle was smoke-tested.
+- Authentication redirects work on the production origin.
+- Private conversations and files reject unauthorized users.
+- Error reporting does not expose private information.
+- A rollback target is known.
+- `CHANGELOG.md` reflects the release.
 
-```powershell
-python -m http.server 8000 --bind 127.0.0.1
-```
+## Rollback
 
-Open:
+Firebase Hosting retains release history. If a frontend deployment fails, use
+the Firebase console or CLI to restore the last known-good Hosting release.
 
-```text
-http://127.0.0.1:8000/index.html
-```
-
-## Deployment Notes
-
-- Firestore rules are live for `studenthub-c9bc0`.
-- Functions are prepared locally but should not be deployed until the project is upgraded to Blaze.
-- Frontend workflows should avoid direct writes to derived backend-owned fields.
+Rule and function rollbacks require redeploying a reviewed earlier version.
+Avoid destructive schema changes that cannot run safely with both the previous
+and next frontend release.

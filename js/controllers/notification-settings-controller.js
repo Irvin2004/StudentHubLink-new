@@ -19,10 +19,7 @@ export function createNotificationSettingsController({
     settingsController,
     onError = console.error
 } = {}) {
-    if (
-        !container?.addEventListener ||
-        !("innerHTML" in container)
-    ) {
+    if (!container?.addEventListener || !("innerHTML" in container)) {
         throw new Error("Notification settings container is required.");
     }
 
@@ -30,13 +27,10 @@ export function createNotificationSettingsController({
         typeof settingsController?.getSettings !== "function" ||
         typeof settingsController?.updateSettings !== "function"
     ) {
-        throw new Error(
-            "Notification settings require a settings controller."
-        );
+        throw new Error("Notification settings require a settings controller.");
     }
 
-    const documentReference =
-        container.ownerDocument || globalThis.document;
+    const documentReference = container.ownerDocument || globalThis.document;
     let notifications = null;
     let initialized = false;
     let destroyed = false;
@@ -88,16 +82,10 @@ export function createNotificationSettingsController({
     }
 
     async function handleChange(event) {
-        const checkbox = event.target?.closest?.(
-            "[data-notification-setting]"
-        );
+        const checkbox = event.target?.closest?.("[data-notification-setting]");
         const field = checkbox?.dataset?.notificationSetting;
 
-        if (
-            destroyed ||
-            !NOTIFICATION_FIELDS.has(field) ||
-            checkbox.disabled
-        ) {
+        if (destroyed || !NOTIFICATION_FIELDS.has(field) || checkbox.disabled) {
             return;
         }
 
@@ -111,10 +99,9 @@ export function createNotificationSettingsController({
         syncNotifications(nextNotifications);
 
         try {
-            const updatedSettings =
-                await settingsController.updateSettings({
-                    notifications: nextNotifications
-                });
+            const updatedSettings = await settingsController.updateSettings({
+                notifications: nextNotifications
+            });
 
             if (destroyed || sequence !== updateSequence) {
                 return;

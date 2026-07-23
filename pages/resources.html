@@ -1,133 +1,191 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-<title>StudentHub Marketplace</title>
-<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="../css/studenthub.css?v=20260723-11">
-</head>
-<body data-page="resources">
+        <title>StudentHub Marketplace</title>
+        <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
+    </head>
+    <body data-page="resources">
+        <nav class="navbar">
+            <div class="logo">
+                <h2>StudentHub</h2>
+            </div>
 
-<nav class="navbar">
-    <div class="logo">
-        <h2>StudentHub</h2>
-    </div>
+            <ul class="nav-links">
+                <li><a href="../dashboard.html">Dashboard</a></li>
+                <li><a href="resources.html">Marketplace</a></li>
+                <li><a href="library.html">My Library</a></li>
+                <li><a href="messages.html">Messages</a></li>
+                <li><a href="favorites.html">&#10084; Favorites</a></li>
+                <li><a href="achievements.html">Achievements</a></li>
+                <li><a href="leaderboard.html">Leaderboard</a></li>
+                <li><a href="upload.html">Upload</a></li>
+                <li><a href="documents.html">Documents</a></li>
+                <li><a href="profile.html">Profile</a></li>
+                <li>
+                    <button
+                        class="theme-toggle"
+                        type="button"
+                        data-theme-toggle
+                        aria-label="Switch to dark mode"
+                        title="Switch to dark mode"
+                    >
+                        Dark
+                    </button>
+                </li>
+            </ul>
+        </nav>
 
-    <ul class="nav-links">
-        <li><a href="../dashboard.html">Dashboard</a></li>
-        <li><a href="resources.html">Marketplace</a></li>
-        <li><a href="library.html">My Library</a></li>
-        <li><a href="messages.html">Messages</a></li>
-        <li><a href="favorites.html">&#10084; Favorites</a></li>
-        <li><a href="achievements.html">Achievements</a></li>
-        <li><a href="leaderboard.html">Leaderboard</a></li>
-        <li><a href="upload.html">Upload</a></li>
-        <li><a href="documents.html">Documents</a></li>
-        <li><a href="profile.html">Profile</a></li>
-        <li>
-            <button
-                class="theme-toggle"
-                type="button"
-                data-theme-toggle
-                aria-label="Switch to dark mode"
-                title="Switch to dark mode">
-                Dark
-            </button>
-        </li>
-    </ul>
-</nav>
+        <main class="marketplace-page">
+            <section class="marketplace-header">
+                <div>
+                    <p class="eyebrow">Student resources</p>
+                    <h1>Marketplace</h1>
+                    <p>
+                        Discover, buy and share quality study resources made for
+                        focused student learning.
+                    </p>
+                </div>
+            </section>
 
-<main class="marketplace-page">
-    <section class="marketplace-header">
-        <div>
-            <p class="eyebrow">Student resources</p>
-            <h1>Marketplace</h1>
-            <p>
-                Discover, buy and share quality study resources made for
-                focused student learning.
-            </p>
+            <section class="marketplace-controls">
+                <input
+                    id="resourceSearch"
+                    type="search"
+                    placeholder="Search resources, categories or authors..."
+                    autocomplete="off"
+                />
+
+                <select id="priceFilter" aria-label="Filter by price">
+                    <option value="all">All prices</option>
+                    <option value="free">Free</option>
+                    <option value="paid">Paid</option>
+                </select>
+
+                <select id="sortResources" aria-label="Sort resources">
+                    <option value="newest">Newest</option>
+                    <option value="oldest">Oldest</option>
+                    <option value="downloads">Most downloaded</option>
+                    <option value="price-low">Price: low to high</option>
+                    <option value="price-high">Price: high to low</option>
+                    <option value="title">Title: A-Z</option>
+                </select>
+            </section>
+
+            <section
+                class="marketplace-toolbar"
+                aria-label="Marketplace categories"
+            >
+                <button
+                    class="filter-btn active"
+                    type="button"
+                    data-category="All"
+                >
+                    All
+                </button>
+
+                <button
+                    class="filter-btn"
+                    type="button"
+                    data-category="Programming"
+                >
+                    Programming
+                </button>
+
+                <button
+                    class="filter-btn"
+                    type="button"
+                    data-category="Engineering"
+                >
+                    Engineering
+                </button>
+
+                <button
+                    class="filter-btn"
+                    type="button"
+                    data-category="Robotics"
+                >
+                    Robotics
+                </button>
+
+                <button
+                    class="filter-btn"
+                    type="button"
+                    data-category="Business"
+                >
+                    Business
+                </button>
+
+                <button
+                    class="filter-btn"
+                    type="button"
+                    data-category="Science"
+                >
+                    Science
+                </button>
+            </section>
+
+            <section
+                id="resourceGrid"
+                class="resource-grid"
+                aria-label="Marketplace resources"
+            ></section>
+        </main>
+
+        <div class="modal-overlay" id="resourceModal">
+            <div class="modal-card">
+                <button
+                    class="modal-close"
+                    id="closeResourceModal"
+                    type="button"
+                >
+                    &times;
+                </button>
+
+                <span class="resource-category" id="modalCategory"
+                    >Category</span
+                >
+
+                <h2 id="modalTitle">Resource title</h2>
+
+                <p id="modalDescription">Description</p>
+
+                <div class="modal-meta">
+                    <p>
+                        <strong>Author:</strong>
+                        <span id="modalOwner">Unknown</span>
+                    </p>
+                    <p>
+                        <strong>Price:</strong>
+                        <span id="modalPrice">FREE</span>
+                    </p>
+                    <p>
+                        <strong>Downloads:</strong>
+                        <span id="modalDownloads">0</span>
+                    </p>
+                </div>
+
+                <div class="modal-actions">
+                    <button
+                        class="btn-secondary"
+                        id="modalCancel"
+                        type="button"
+                    >
+                        Close
+                    </button>
+                    <button class="btn-primary" id="modalAction" type="button">
+                        Download
+                    </button>
+                </div>
+            </div>
         </div>
-    </section>
 
-    <section class="marketplace-controls">
-        <input
-            id="resourceSearch"
-            type="search"
-            placeholder="Search resources, categories or authors..."
-            autocomplete="off"
-        >
-
-        <select id="priceFilter" aria-label="Filter by price">
-            <option value="all">All prices</option>
-            <option value="free">Free</option>
-            <option value="paid">Paid</option>
-        </select>
-
-        <select id="sortResources" aria-label="Sort resources">
-            <option value="newest">Newest</option>
-            <option value="oldest">Oldest</option>
-            <option value="downloads">Most downloaded</option>
-            <option value="price-low">Price: low to high</option>
-            <option value="price-high">Price: high to low</option>
-            <option value="title">Title: A-Z</option>
-        </select>
-    </section>
-
-    <section class="marketplace-toolbar" aria-label="Marketplace categories">
-        <button class="filter-btn active" type="button" data-category="All">
-            All
-        </button>
-
-        <button class="filter-btn" type="button" data-category="Programming">
-            Programming
-        </button>
-
-        <button class="filter-btn" type="button" data-category="Engineering">
-            Engineering
-        </button>
-
-        <button class="filter-btn" type="button" data-category="Robotics">
-            Robotics
-        </button>
-
-        <button class="filter-btn" type="button" data-category="Business">
-            Business
-        </button>
-
-        <button class="filter-btn" type="button" data-category="Science">
-            Science
-        </button>
-    </section>
-
-    <section id="resourceGrid" class="resource-grid" aria-label="Marketplace resources"></section>
-</main>
-
-<div class="modal-overlay" id="resourceModal">
-    <div class="modal-card">
-        <button class="modal-close" id="closeResourceModal" type="button">&times;</button>
-
-        <span class="resource-category" id="modalCategory">Category</span>
-
-        <h2 id="modalTitle">Resource title</h2>
-
-        <p id="modalDescription">Description</p>
-
-        <div class="modal-meta">
-            <p><strong>Author:</strong> <span id="modalOwner">Unknown</span></p>
-            <p><strong>Price:</strong> <span id="modalPrice">FREE</span></p>
-            <p><strong>Downloads:</strong> <span id="modalDownloads">0</span></p>
-        </div>
-
-        <div class="modal-actions">
-            <button class="btn-secondary" id="modalCancel" type="button">Close</button>
-            <button class="btn-primary" id="modalAction" type="button">Download</button>
-        </div>
-    </div>
-</div>
-
-<script type="module" src="../js/pages/marketplace-page.js?refinement=1"></script>
-<script type="module" src="../js/theme.js"></script>
-</body>
+        <script
+            type="module"
+            src="../js/pages/marketplace-page.js?refinement=1"
+        ></script>
+        <script type="module" src="/src/main.js"></script>
+    </body>
 </html>

@@ -56,9 +56,7 @@ export function throttle(callback, interval = 250) {
         lastInvocation = 0;
     };
 
-    throttled.flush = () => (
-        timer ? invoke() : undefined
-    );
+    throttled.flush = () => (timer ? invoke() : undefined);
 
     return throttled;
 }

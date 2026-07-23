@@ -81,7 +81,10 @@
 
     .resource-toolbar {
         display: grid;
-        grid-template-columns: minmax(220px, 1fr) repeat(2, minmax(160px, 220px));
+        grid-template-columns: minmax(220px, 1fr) repeat(
+                2,
+                minmax(160px, 220px)
+            );
         gap: var(--space-3);
         margin-bottom: var(--space-5);
     }

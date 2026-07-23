@@ -34,11 +34,9 @@ function getToastHost(documentReference) {
 }
 
 function getSignature(notification) {
-    return [
-        notification.type,
-        notification.title,
-        notification.message
-    ].join("\u0000");
+    return [notification.type, notification.title, notification.message].join(
+        "\u0000"
+    );
 }
 
 export function createToast(
@@ -73,14 +71,13 @@ export function createToast(
     const title = documentReference.createElement("strong");
     const message = documentReference.createElement("p");
     const closeButton = documentReference.createElement("button");
-    const assertive = (
+    const assertive =
         notification.type === ERROR_TYPES.ERROR ||
-        notification.type === ERROR_TYPES.WARNING
-    );
-    const duration = notification.duration ?? (
+        notification.type === ERROR_TYPES.WARNING;
+    const duration =
+        notification.duration ??
         DEFAULT_DURATIONS[notification.type] ??
-        DEFAULT_DURATIONS[ERROR_TYPES.INFO]
-    );
+        DEFAULT_DURATIONS[ERROR_TYPES.INFO];
     let removalTimer = null;
     let removalFallbackTimer = null;
 
@@ -104,10 +101,7 @@ export function createToast(
 
     closeButton.className = "toast__close";
     closeButton.type = "button";
-    closeButton.setAttribute(
-        "aria-label",
-        `Dismiss ${notification.title}`
-    );
+    closeButton.setAttribute("aria-label", `Dismiss ${notification.title}`);
     closeButton.textContent = "\u00d7";
 
     function dismiss() {
@@ -119,11 +113,9 @@ export function createToast(
         });
 
         if (
-            documentReference.documentElement?.dataset
-                ?.reducedMotion === "true" ||
-            globalThis.matchMedia?.(
-                "(prefers-reduced-motion: reduce)"
-            ).matches
+            documentReference.documentElement?.dataset?.reducedMotion ===
+                "true" ||
+            globalThis.matchMedia?.("(prefers-reduced-motion: reduce)").matches
         ) {
             toast.remove();
             return;
@@ -148,9 +140,7 @@ export function createToast(
     };
 }
 
-export function destroyToasts(
-    documentReference = globalThis.document
-) {
+export function destroyToasts(documentReference = globalThis.document) {
     const host = toastHosts.get(documentReference);
     host?.remove();
     toastHosts.delete(documentReference);

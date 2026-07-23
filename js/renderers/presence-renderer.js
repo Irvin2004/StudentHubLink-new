@@ -3,14 +3,13 @@
 import { PRESENCE_STATUS } from "../config/presence-status.js";
 
 function isActiveTypingPresence(presence, currentConversationId) {
-    const activeConversationId = String(
-        currentConversationId || ""
-    ).trim();
+    const activeConversationId = String(currentConversationId || "").trim();
 
-    return presence?.status === PRESENCE_STATUS.TYPING &&
+    return (
+        presence?.status === PRESENCE_STATUS.TYPING &&
         activeConversationId !== "" &&
-        String(presence?.conversationId || "").trim() ===
-            activeConversationId;
+        String(presence?.conversationId || "").trim() === activeConversationId
+    );
 }
 
 function getPresenceDisplay(presence = {}, currentConversationId = "") {
@@ -50,10 +49,7 @@ export function renderPresence(
 ) {
     requireContainer(container);
 
-    const html = isActiveTypingPresence(
-        presence,
-        currentConversationId
-    )
+    const html = isActiveTypingPresence(presence, currentConversationId)
         ? renderTypingIndicator(presence, currentConversationId)
         : renderPresenceBadge(presence, currentConversationId);
 
@@ -61,14 +57,8 @@ export function renderPresence(
     return html;
 }
 
-export function renderPresenceBadge(
-    presence = {},
-    currentConversationId = ""
-) {
-    const display = getPresenceDisplay(
-        presence,
-        currentConversationId
-    );
+export function renderPresenceBadge(presence = {}, currentConversationId = "") {
+    const display = getPresenceDisplay(presence, currentConversationId);
 
     if (display.cssClass === PRESENCE_STATUS.TYPING) {
         return renderTypingIndicator(presence, currentConversationId);

@@ -7,11 +7,11 @@ import {
     serverTimestamp,
     setDoc,
     where
-} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+} from "firebase/firestore";
 
 import { COLLECTIONS } from "../config/firestore.js";
 import { PRESENCE_STATUS } from "../config/presence-status.js";
-import { db } from "../firebase/firebase-config.js";
+import { db } from "../../src/firebase/firestore.js";
 import { createPresenceModel } from "../models/presence.js";
 import { error as logError } from "../utils/logger.js";
 
@@ -43,18 +43,11 @@ function validateConversationId(conversationId) {
 }
 
 function getPresenceReference(userId) {
-    return doc(
-        db,
-        COLLECTIONS.USERS,
-        userId,
-        COLLECTIONS.PRESENCE,
-        "status"
-    );
+    return doc(db, COLLECTIONS.USERS, userId, COLLECTIONS.PRESENCE, "status");
 }
 
 function normalizeFirestoreError(error) {
-    const code = String(error?.code || "")
-        .replace(/^firestore\//, "");
+    const code = String(error?.code || "").replace(/^firestore\//, "");
 
     if (code === "permission-denied") {
         const permissionError = new Error("Permission denied.", {
@@ -84,11 +77,7 @@ function restartTypingTimer(userId, session) {
 
     session.timer = setTimeout(() => {
         stopTyping(userId).catch((error) => {
-            logError(
-                "PRESENCE",
-                "Automatic typing reset failed:",
-                error
-            );
+            logError("PRESENCE", "Automatic typing reset failed:", error);
         });
     }, TYPING_TIMEOUT);
 }
@@ -106,11 +95,7 @@ function mapPresence(userId, data = {}) {
 
 async function writePresence(userId, presence) {
     try {
-        await setDoc(
-            getPresenceReference(userId),
-            presence,
-            { merge: true }
-        );
+        await setDoc(getPresenceReference(userId), presence, { merge: true });
     } catch (error) {
         throw normalizeFirestoreError(error);
     }
@@ -128,12 +113,9 @@ async function writePresenceWithInitialLastSeen(userId, presence) {
 
     await writePresence(userId, {
         ...presence,
-        ...(
-            !snapshot.exists() ||
-            !("lastSeen" in snapshot.data())
-                ? { lastSeen: null }
-                : {}
-        )
+        ...(!snapshot.exists() || !("lastSeen" in snapshot.data())
+            ? { lastSeen: null }
+            : {})
     });
 }
 
@@ -156,10 +138,7 @@ export async function setUserOnline(userId) {
         updatedAt: serverTimestamp()
     };
 
-    if (
-        !snapshot.exists() ||
-        !("lastSeen" in snapshot.data())
-    ) {
+    if (!snapshot.exists() || !("lastSeen" in snapshot.data())) {
         updates.lastSeen = null;
     }
 
@@ -187,11 +166,7 @@ export async function setUserOffline(userId) {
     });
 }
 
-export async function setUserTyping(
-    userId,
-    conversationId,
-    userName = ""
-) {
+export async function setUserTyping(userId, conversationId, userName = "") {
     const cleanUserId = validateUserId(userId);
     const cleanConversationId = validateConversationId(conversationId);
     const existingSession = typingSessions.get(cleanUserId);
@@ -261,9 +236,7 @@ export async function getPresence(userId) {
     const cleanUserId = validateUserId(userId);
 
     try {
-        const snapshot = await getDoc(
-            getPresenceReference(cleanUserId)
-        );
+        const snapshot = await getDoc(getPresenceReference(cleanUserId));
 
         return mapPresence(
             cleanUserId,
@@ -274,11 +247,7 @@ export async function getPresence(userId) {
     }
 }
 
-export function subscribeToPresence(
-    userId,
-    callback,
-    onError = () => {}
-) {
+export function subscribeToPresence(userId, callback, onError = () => {}) {
     const cleanUserId = validateUserId(userId);
 
     if (typeof callback !== "function") {
@@ -288,10 +257,12 @@ export function subscribeToPresence(
     return onSnapshot(
         getPresenceReference(cleanUserId),
         (snapshot) => {
-            callback(mapPresence(
-                cleanUserId,
-                snapshot.exists() ? snapshot.data() : {}
-            ));
+            callback(
+                mapPresence(
+                    cleanUserId,
+                    snapshot.exists() ? snapshot.data() : {}
+                )
+            );
         },
         (error) => onError(normalizeFirestoreError(error))
     );
@@ -331,22 +302,24 @@ export function subscribeToTypingStatus(
     return onSnapshot(
         typingQuery,
         (snapshot) => {
-            callback(snapshot.docs.map((presenceDocument) => {
-                const userId = presenceDocument.ref.parent.parent?.id || "";
-                const presence = mapPresence(
-                    userId,
-                    presenceDocument.data()
-                );
+            callback(
+                snapshot.docs.map((presenceDocument) => {
+                    const userId = presenceDocument.ref.parent.parent?.id || "";
+                    const presence = mapPresence(
+                        userId,
+                        presenceDocument.data()
+                    );
 
-                return {
-                    id: userId,
-                    userId,
-                    displayName: presence.userName || "Student",
-                    conversationId: presence.conversationId,
-                    typing: true,
-                    updatedAt: presence.updatedAt
-                };
-            }));
+                    return {
+                        id: userId,
+                        userId,
+                        displayName: presence.userName || "Student",
+                        conversationId: presence.conversationId,
+                        typing: true,
+                        updatedAt: presence.updatedAt
+                    };
+                })
+            );
         },
         (error) => onError(normalizeFirestoreError(error))
     );

@@ -1,4 +1,4 @@
-import { auth } from "../firebase/firebase-config.js";
+import { auth } from "../../src/firebase/auth.js";
 import {
     getConversationById,
     getUserProfile
@@ -18,9 +18,7 @@ import {
     setTypingStatus,
     subscribeToTypingStatus
 } from "../services/presence-service.js";
-import {
-    uploadChatAttachment
-} from "../services/storage-service.js?security=1";
+import { uploadChatAttachment } from "../services/storage-service.js?security=1";
 import { renderMessages } from "../renderers/message-renderer.js?messaging=20";
 import { getTypingIndicatorText } from "../components/typing-indicator.js";
 import { getStudyGroup } from "../services/group-service.js?security=1";
@@ -30,15 +28,9 @@ import {
     showMessageMenu
 } from "../components/message-menu.js?messaging=15";
 import { initializeReactions } from "./reaction-controller.js?reactions=1";
-import {
-    initializeReadReceipts
-} from "./read-receipt-controller.js?receipts=2";
-import {
-    openDeleteMessageDialog
-} from "../components/delete-message-dialog.js?messaging=15";
-import {
-    bindContextMenuInteractions
-} from "../components/context-menu.js";
+import { initializeReadReceipts } from "./read-receipt-controller.js?receipts=2";
+import { openDeleteMessageDialog } from "../components/delete-message-dialog.js?messaging=15";
+import { bindContextMenuInteractions } from "../components/context-menu.js";
 
 import { handleError } from "../services/user-feedback-service.js";
 import { validateAttachment } from "../utils/file-validator.js?security=1";
@@ -46,67 +38,46 @@ import { showToast } from "../services/user-feedback-service.js";
 import { debounce } from "../utils/debounce.js";
 import { warn as logWarning } from "../utils/logger.js";
 import { logError } from "../services/error-service.js";
-import {
-    hideSkeleton,
-    showSkeleton
-} from "../renderers/skeleton-renderer.js";
-import {
-    SKELETON_TYPES
-} from "../config/skeleton-types.js";
+import { hideSkeleton, showSkeleton } from "../renderers/skeleton-renderer.js";
+import { SKELETON_TYPES } from "../config/skeleton-types.js";
 
-import {
-    onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+import { onAuthStateChanged } from "firebase/auth";
 
-const params =
-new URLSearchParams(window.location.search);
+const params = new URLSearchParams(window.location.search);
 
-const conversationId =
-params.get("id");
+const conversationId = params.get("id");
 
-const targetMessageId =
-params.get("message");
+const targetMessageId = params.get("message");
 
 let targetMessageLocated = false;
 
-const messageList =
-document.getElementById("messageList");
+const messageList = document.getElementById("messageList");
 
-const messageForm =
-document.getElementById("messageForm");
+const messageForm = document.getElementById("messageForm");
 
-const messageInput =
-document.getElementById("messageInput");
+const messageInput = document.getElementById("messageInput");
 
-const attachButton =
-document.getElementById("attachButton");
+const attachButton = document.getElementById("attachButton");
 
-const attachmentInput =
-document.getElementById("attachmentInput");
+const attachmentInput = document.getElementById("attachmentInput");
 
-const uploadProgressContainer =
-document.getElementById("uploadProgressContainer");
+const uploadProgressContainer = document.getElementById(
+    "uploadProgressContainer"
+);
 
-const uploadProgressBar =
-document.getElementById("uploadProgressBar");
+const uploadProgressBar = document.getElementById("uploadProgressBar");
 
-const replyPreview =
-document.getElementById("replyPreview");
+const replyPreview = document.getElementById("replyPreview");
 
-const replySender =
-document.getElementById("replySender");
+const replySender = document.getElementById("replySender");
 
-const replyText =
-document.getElementById("replyText");
+const replyText = document.getElementById("replyText");
 
-const cancelReply =
-document.getElementById("cancelReply");
+const cancelReply = document.getElementById("cancelReply");
 
-let unsubscribeMessages =
-null;
+let unsubscribeMessages = null;
 
-let unsubscribeTyping =
-null;
+let unsubscribeTyping = null;
 
 let latestMessages = [];
 let pendingMessages = [];
@@ -152,8 +123,9 @@ function getReplySenderName(message) {
 }
 
 function getMessageById(messageId) {
-    return [...latestMessages, ...pendingMessages]
-        .find((message) => message.id === messageId);
+    return [...latestMessages, ...pendingMessages].find(
+        (message) => message.id === messageId
+    );
 }
 
 function openReply(message) {
@@ -181,9 +153,7 @@ messageList?.addEventListener("click", (event) => {
         return;
     }
 
-    const replyButton = event.target.closest(
-        '[data-message-action="reply"]'
-    );
+    const replyButton = event.target.closest('[data-message-action="reply"]');
 
     if (replyButton) {
         const messageId = replyButton.dataset.messageId;
@@ -202,38 +172,28 @@ messageList?.addEventListener("click", (event) => {
         return;
     }
 
-    openImageViewer(
-        image.dataset.image,
-        image.alt
-    );
+    openImageViewer(image.dataset.image, image.alt);
 });
 
 const destroyMessageContextInteractions = messageList
     ? bindContextMenuInteractions({
-        container: messageList,
-        targetSelector: ".message-row[data-message-id]",
-        onOpen({ target: message, x, y }) {
-            const messageObject = getMessageById(
-                message.dataset.messageId
-            );
+          container: messageList,
+          targetSelector: ".message-row[data-message-id]",
+          onOpen({ target: message, x, y }) {
+              const messageObject = getMessageById(message.dataset.messageId);
 
-            if (!messageObject) {
-                return;
-            }
+              if (!messageObject) {
+                  return;
+              }
 
-            selectedMessage = {
-                ...messageObject,
-                senderName: getReplySenderName(messageObject)
-            };
+              selectedMessage = {
+                  ...messageObject,
+                  senderName: getReplySenderName(messageObject)
+              };
 
-            showMessageMenu(
-                x,
-                y,
-                selectedMessage,
-                currentChatUser?.uid
-            );
-        }
-    })
+              showMessageMenu(x, y, selectedMessage, currentChatUser?.uid);
+          }
+      })
     : () => {};
 
 document.addEventListener("click", async (event) => {
@@ -243,9 +203,7 @@ document.addEventListener("click", async (event) => {
         return;
     }
 
-    const actionButton = event.target.closest(
-        "#messageMenu [data-action]"
-    );
+    const actionButton = event.target.closest("#messageMenu [data-action]");
 
     if (actionButton && selectedMessage) {
         const action = actionButton.dataset.action;
@@ -260,10 +218,7 @@ document.addEventListener("click", async (event) => {
                     await copyMessage(actionMessage.text || "");
                     showToast("Message copied.", "success");
                 } catch (error) {
-                    handleError(
-                        error,
-                        "Unable to copy message."
-                    );
+                    handleError(error, "Unable to copy message.");
                 }
                 break;
             case "copy-link":
@@ -271,10 +226,7 @@ document.addEventListener("click", async (event) => {
                     await copyMessage(actionMessage.fileUrl || "");
                     showToast("Link copied.", "success");
                 } catch (error) {
-                    handleError(
-                        error,
-                        "Unable to copy link."
-                    );
+                    handleError(error, "Unable to copy link.");
                 }
                 break;
             case "edit":
@@ -290,10 +242,7 @@ document.addEventListener("click", async (event) => {
                 }
 
                 if (actionMessage.type !== MESSAGE_TYPES.TEXT) {
-                    showToast(
-                        "Only text messages can be edited.",
-                        "warning"
-                    );
+                    showToast("Only text messages can be edited.", "warning");
                     break;
                 }
 
@@ -316,24 +265,15 @@ document.addEventListener("click", async (event) => {
                             newText
                         });
 
-                        showToast(
-                            "Message updated.",
-                            "success"
-                        );
+                        showToast("Message updated.", "success");
                     } catch (error) {
-                        handleError(
-                            error,
-                            "Unable to update message."
-                        );
+                        handleError(error, "Unable to update message.");
                     }
                 }
                 break;
             case "delete":
                 if (!currentChatUser) {
-                    showToast(
-                        "The conversation is not ready yet.",
-                        "warning"
-                    );
+                    showToast("The conversation is not ready yet.", "warning");
                     break;
                 }
 
@@ -341,14 +281,12 @@ document.addEventListener("click", async (event) => {
 
                 {
                     const canDeleteForEveryone =
-                        actionMessage.senderId ===
-                            currentChatUser.uid &&
+                        actionMessage.senderId === currentChatUser.uid &&
                         !actionMessage.deleted &&
                         !actionMessage.deletedAt;
-                    const deleteScope =
-                        await openDeleteMessageDialog({
-                            canDeleteForEveryone
-                        });
+                    const deleteScope = await openDeleteMessageDialog({
+                        canDeleteForEveryone
+                    });
 
                     if (!deleteScope) {
                         break;
@@ -375,20 +313,14 @@ document.addEventListener("click", async (event) => {
                                 userId: currentChatUser.uid
                             });
 
-                            showToast(
-                                "Message deleted for you.",
-                                "success"
-                            );
+                            showToast("Message deleted for you.", "success");
                         }
 
                         if (replyingTo?.id === actionMessage.id) {
                             clearReply();
                         }
                     } catch (error) {
-                        handleError(
-                            error,
-                            "Unable to delete message."
-                        );
+                        handleError(error, "Unable to delete message.");
                     }
                 }
                 break;
@@ -420,19 +352,13 @@ attachmentInput?.addEventListener("change", async () => {
         !conversationId ||
         (!activeReceiverId && activeConversation?.type !== "group")
     ) {
-        showToast(
-            "The conversation is not ready yet.",
-            "error"
-        );
+        showToast("The conversation is not ready yet.", "error");
         attachmentInput.value = "";
         return;
     }
 
     if (attachmentUploading) {
-        showToast(
-            "Please wait for the current upload to finish.",
-            "warning"
-        );
+        showToast("Please wait for the current upload to finish.", "warning");
         attachmentInput.value = "";
         return;
     }
@@ -450,9 +376,7 @@ attachmentInput?.addEventListener("change", async () => {
         attachmentUploading = true;
         validateAttachment(file);
 
-        const attachmentReply = replyingTo
-            ? { ...replyingTo }
-            : null;
+        const attachmentReply = replyingTo ? { ...replyingTo } : null;
 
         attachButton?.setAttribute("disabled", "");
         uploadProgressContainer.classList.remove("hidden");
@@ -500,16 +424,11 @@ attachmentInput?.addEventListener("change", async () => {
         }
 
         showToast(
-            messageType === MESSAGE_TYPES.IMAGE
-                ? "Image sent."
-                : "File sent.",
+            messageType === MESSAGE_TYPES.IMAGE ? "Image sent." : "File sent.",
             "success"
         );
     } catch (error) {
-        handleError(
-            error,
-            "Unable to send attachment."
-        );
+        handleError(error, "Unable to send attachment.");
     } finally {
         attachmentUploading = false;
         attachButton?.removeAttribute("disabled");
@@ -521,9 +440,7 @@ attachmentInput?.addEventListener("change", async () => {
 });
 
 function renderChatMessages(currentUserId) {
-    const persistedIds = new Set(
-        latestMessages.map((message) => message.id)
-    );
+    const persistedIds = new Set(latestMessages.map((message) => message.id));
 
     const visiblePendingMessages = pendingMessages.filter(
         (message) => !persistedIds.has(message.id)
@@ -571,22 +488,16 @@ function getParticipantName(profile) {
 
 async function initializeChat(currentUser) {
     if (!conversationId) {
-        showToast(
-            "Conversation could not be found.",
-            "error"
-        );
+        showToast("Conversation could not be found.", "error");
         renderChatMessage("Conversation not found.");
         return;
     }
 
     showSkeleton(messageList, SKELETON_TYPES.MESSAGE);
 
-    const conversation =
-    await getConversationById(conversationId);
+    const conversation = await getConversationById(conversationId);
     const isGroup = conversation.type === "group";
-    const group = isGroup
-        ? await getStudyGroup(conversation.groupId)
-        : null;
+    const group = isGroup ? await getStudyGroup(conversation.groupId) : null;
 
     if (group) {
         conversation.title = group.name;
@@ -601,9 +512,9 @@ async function initializeChat(currentUser) {
 
     const receiverId = isGroup
         ? null
-        : participantIds.find((participantId) =>
-            participantId !== currentUser.uid
-        );
+        : participantIds.find(
+              (participantId) => participantId !== currentUser.uid
+          );
 
     if (!isGroup && !receiverId) {
         throw new Error("Conversation participant is missing.");
@@ -613,9 +524,7 @@ async function initializeChat(currentUser) {
     activeReceiverId = receiverId;
     currentChatUser = currentUser;
 
-    const otherUser = receiverId
-        ? await getUserProfile(receiverId)
-        : null;
+    const otherUser = receiverId ? await getUserProfile(receiverId) : null;
     const otherUserName = getParticipantName(otherUser);
     activeOtherUserName = otherUserName;
 
@@ -659,40 +568,32 @@ async function initializeChat(currentUser) {
         logError(error, "Failed to initialize read receipts");
     }
 
-    unsubscribeMessages =
-    subscribeToMessages(
-        conversationId,
-        (messages) => {
-            latestMessages = messages;
-            renderChatMessages(currentUser.uid);
+    unsubscribeMessages = subscribeToMessages(conversationId, (messages) => {
+        latestMessages = messages;
+        renderChatMessages(currentUser.uid);
 
-            if (targetMessageId && !targetMessageLocated) {
-                const targetMessage = Array.from(
-                    messageList?.querySelectorAll("[data-message-id]") || []
-                ).find((element) => (
-                    element.dataset.messageId === targetMessageId
-                ));
+        if (targetMessageId && !targetMessageLocated) {
+            const targetMessage = Array.from(
+                messageList?.querySelectorAll("[data-message-id]") || []
+            ).find((element) => element.dataset.messageId === targetMessageId);
 
-                if (targetMessage) {
-                    targetMessageLocated = true;
-                    targetMessage.classList.add("message-targeted");
-                    targetMessage.setAttribute("tabindex", "-1");
-                    targetMessage.scrollIntoView({
-                        behavior: "smooth",
-                        block: "center"
-                    });
-                    targetMessage.focus({ preventScroll: true });
-                }
+            if (targetMessage) {
+                targetMessageLocated = true;
+                targetMessage.classList.add("message-targeted");
+                targetMessage.setAttribute("tabindex", "-1");
+                targetMessage.scrollIntoView({
+                    behavior: "smooth",
+                    block: "center"
+                });
+                targetMessage.focus({ preventScroll: true });
             }
         }
-    );
+    });
 
-    unsubscribeTyping =
-    subscribeToTypingStatus(
+    unsubscribeTyping = subscribeToTypingStatus(
         conversationId,
         (statuses) => {
-            const indicator =
-            document.getElementById("typingIndicator");
+            const indicator = document.getElementById("typingIndicator");
 
             if (!indicator) return;
 
@@ -708,25 +609,16 @@ async function initializeChat(currentUser) {
             indicator.textContent = typingText;
         },
         (error) => {
-            handleError(
-                error,
-                "Unable to load typing status."
-            );
+            handleError(error, "Unable to load typing status.");
         }
     );
 
-    initializeMessageForm(
-        currentUser,
-        receiverId
-    );
+    initializeMessageForm(currentUser, receiverId);
 
     initializeTypingIndicator(currentUser);
 }
 
-function initializeMessageForm(
-    user,
-    receiverId
-) {
+function initializeMessageForm(user, receiverId) {
     if (!messageForm || !messageInput) {
         return;
     }
@@ -745,9 +637,7 @@ function initializeMessageForm(
         }
 
         const messageId = createMessageId();
-        const replyMetadata = replyingTo
-            ? { ...replyingTo }
-            : null;
+        const replyMetadata = replyingTo ? { ...replyingTo } : null;
 
         pendingMessages.push({
             id: messageId,
@@ -804,10 +694,7 @@ function initializeMessageForm(
                 messageInput.value = text;
             }
 
-            handleError(
-                error,
-                "Unable to send message."
-            );
+            handleError(error, "Unable to send message.");
         } finally {
             pendingMessages = pendingMessages.filter(
                 (message) => message.id !== messageId
@@ -823,8 +710,7 @@ function initializeTypingIndicator(user) {
     }
 
     messageInput.oninput = async () => {
-        const hasText =
-        messageInput.value.trim().length > 0;
+        const hasText = messageInput.value.trim().length > 0;
 
         try {
             await setTypingStatus(
@@ -850,10 +736,7 @@ onAuthStateChanged(auth, async (currentUser) => {
     try {
         await initializeChat(currentUser);
     } catch (error) {
-        handleError(
-            error,
-            "Unable to load conversation."
-        );
+        handleError(error, "Unable to load conversation.");
         renderChatMessage("Unable to load conversation.");
     }
 });

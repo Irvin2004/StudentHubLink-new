@@ -134,10 +134,7 @@ test("voice players share audio and support playback controls", async () => {
 
         audio.currentTime = 8;
         audio.dispatch("timeupdate");
-        assert.equal(
-            firstRoot.children[3].children[0].textContent,
-            "00:08"
-        );
+        assert.equal(firstRoot.children[3].children[0].textContent, "00:08");
 
         firstProgress.value = "12";
         firstProgress.dispatch("input");

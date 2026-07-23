@@ -66,44 +66,27 @@ export function createMessageMenu() {
     return menu;
 }
 
-export function showMessageMenu(
-    x,
-    y,
-    message,
-    currentUserId
-) {
+export function showMessageMenu(x, y, message, currentUserId) {
     const messageMenu = createMessageMenu();
     const viewportInset = 8;
-    const isOwn =
-        message?.senderId === currentUserId;
-    const isText =
-        !message?.type || message.type === "text";
-    const isAttachment =
-        message?.type === "image" ||
-        message?.type === "file";
-    const isDeleted =
-        message?.deleted === true ||
-        Boolean(message?.deletedAt);
+    const isOwn = message?.senderId === currentUserId;
+    const isText = !message?.type || message.type === "text";
+    const isAttachment = message?.type === "image" || message?.type === "file";
+    const isDeleted = message?.deleted === true || Boolean(message?.deletedAt);
 
-    messageMenu
-        .querySelectorAll("button")
-        .forEach((button) => {
-            const visibility = button.dataset.visible;
+    messageMenu.querySelectorAll("button").forEach((button) => {
+        const visibility = button.dataset.visible;
 
-            button.hidden = isDeleted
-                ? button.dataset.action !== "delete"
-                : !(
-                visibility === "always" ||
-                (visibility === "text" && isText) ||
-                (visibility === "attachment" && isAttachment) ||
-                (visibility === "own" && isOwn) ||
-                (
-                    visibility === "own-text" &&
-                    isOwn &&
-                    isText
-                )
-            );
-        });
+        button.hidden = isDeleted
+            ? button.dataset.action !== "delete"
+            : !(
+                  visibility === "always" ||
+                  (visibility === "text" && isText) ||
+                  (visibility === "attachment" && isAttachment) ||
+                  (visibility === "own" && isOwn) ||
+                  (visibility === "own-text" && isOwn && isText)
+              );
+    });
 
     messageMenu.classList.remove("hidden");
     messageMenu.dataset.messageId = message?.id || "";
@@ -117,26 +100,17 @@ export function showMessageMenu(
         viewportInset,
         window.innerHeight - menuRect.height - viewportInset
     );
-    const left = Math.min(
-        Math.max(x, viewportInset),
-        maxLeft
-    );
-    const top = Math.min(
-        Math.max(y, viewportInset),
-        maxTop
-    );
+    const left = Math.min(Math.max(x, viewportInset), maxLeft);
+    const top = Math.min(Math.max(y, viewportInset), maxTop);
 
     messageMenu.style.left = `${left}px`;
     messageMenu.style.top = `${top}px`;
 
-    messageMenu
-        .querySelector("button:not([hidden])")
-        ?.focus();
+    messageMenu.querySelector("button:not([hidden])")?.focus();
 }
 
 export function hideMessageMenu() {
-    const messageMenu =
-        document.getElementById("messageMenu");
+    const messageMenu = document.getElementById("messageMenu");
 
     messageMenu?.classList.add("hidden");
 }

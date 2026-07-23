@@ -9,13 +9,16 @@ export function cleanEventId(value) {
 
 export function uniqueEventRecipients(recipientIds, excludedId) {
     const cleanExcludedId = cleanEventId(excludedId);
-    return Array.from(new Set(
-        recipientIds
-            .map(cleanEventId)
-            .filter((recipientId) => (
-                recipientId && recipientId !== cleanExcludedId
-            ))
-    ));
+    return Array.from(
+        new Set(
+            recipientIds
+                .map(cleanEventId)
+                .filter(
+                    (recipientId) =>
+                        recipientId && recipientId !== cleanExcludedId
+                )
+        )
+    );
 }
 
 export async function getGroupEventRecipients(groupId, excludedId) {

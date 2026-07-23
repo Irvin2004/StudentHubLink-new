@@ -15,9 +15,7 @@ function requireDocument(documentReference) {
 
 function requireContainer(container) {
     if (!container || typeof container.appendChild !== "function") {
-        throw new TypeError(
-            "A container with appendChild() is required."
-        );
+        throw new TypeError("A container with appendChild() is required.");
     }
 
     return container;
@@ -29,12 +27,8 @@ function requireContainer(container) {
  * @param {Document} documentReference
  * @returns {DocumentFragment}
  */
-export function createFragment(
-    documentReference = globalThis.document
-) {
-    return requireDocument(
-        documentReference
-    ).createDocumentFragment();
+export function createFragment(documentReference = globalThis.document) {
+    return requireDocument(documentReference).createDocumentFragment();
 }
 
 /**

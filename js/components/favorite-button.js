@@ -1,8 +1,7 @@
 import { escapeHtml } from "../utils/dom.js";
 
 export function createFavoriteButton(resourceId, isFavorite = false) {
-    const label =
-    isFavorite ? "Remove from favorites" : "Add to favorites";
+    const label = isFavorite ? "Remove from favorites" : "Add to favorites";
 
     return `
         <button

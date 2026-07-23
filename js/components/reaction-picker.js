@@ -1,9 +1,6 @@
 "use strict";
 
-import {
-    REACTION_TYPES,
-    isValidReaction
-} from "../config/reaction-types.js";
+import { REACTION_TYPES, isValidReaction } from "../config/reaction-types.js";
 
 const REACTIONS = Object.freeze([
     {
@@ -39,9 +36,7 @@ let selectCallback = () => {};
 let closeCallback = () => {};
 
 function getButtons() {
-    return Array.from(
-        picker?.querySelectorAll(".reaction-option") || []
-    );
+    return Array.from(picker?.querySelectorAll(".reaction-option") || []);
 }
 
 function updateSelection(nextIndex, focusButton = false) {
@@ -49,9 +44,7 @@ function updateSelection(nextIndex, focusButton = false) {
 
     if (!buttons.length) return;
 
-    selectedIndex = (
-        nextIndex + buttons.length
-    ) % buttons.length;
+    selectedIndex = (nextIndex + buttons.length) % buttons.length;
 
     buttons.forEach((button, index) => {
         const isKeyboardSelected = index === selectedIndex;
@@ -89,8 +82,7 @@ function positionPicker() {
     );
     const left = Math.min(
         Math.max(
-            anchorRect.left +
-                ((anchorRect.width - pickerRect.width) / 2),
+            anchorRect.left + (anchorRect.width - pickerRect.width) / 2,
             VIEWPORT_INSET
         ),
         maxLeft
@@ -101,10 +93,9 @@ function positionPicker() {
     );
 
     picker.style.left = `${Math.round(left)}px`;
-    picker.style.top = `${Math.round(Math.min(
-        Math.max(desiredTop, VIEWPORT_INSET),
-        maxTop
-    ))}px`;
+    picker.style.top = `${Math.round(
+        Math.min(Math.max(desiredTop, VIEWPORT_INSET), maxTop)
+    )}px`;
     picker.dataset.placement = showAbove ? "top" : "bottom";
 }
 
@@ -163,19 +154,13 @@ function handlePickerKeydown(event) {
             break;
         case "Tab":
             event.preventDefault();
-            updateSelection(
-                selectedIndex + (event.shiftKey ? -1 : 1),
-                true
-            );
+            updateSelection(selectedIndex + (event.shiftKey ? -1 : 1), true);
             break;
     }
 }
 
 function handleOutsideClick(event) {
-    if (
-        picker?.contains(event.target) ||
-        anchor?.contains?.(event.target)
-    ) {
+    if (picker?.contains(event.target) || anchor?.contains?.(event.target)) {
         return;
     }
 
@@ -204,12 +189,10 @@ export function createReactionPicker(options = {}) {
     currentReaction = isValidReaction(options.currentReaction)
         ? options.currentReaction
         : "";
-    selectCallback = typeof options.onSelect === "function"
-        ? options.onSelect
-        : () => {};
-    closeCallback = typeof options.onClose === "function"
-        ? options.onClose
-        : () => {};
+    selectCallback =
+        typeof options.onSelect === "function" ? options.onSelect : () => {};
+    closeCallback =
+        typeof options.onClose === "function" ? options.onClose : () => {};
     selectedIndex = Math.max(
         0,
         REACTIONS.findIndex(({ value }) => value === currentReaction)
@@ -220,7 +203,8 @@ export function createReactionPicker(options = {}) {
     picker.setAttribute("role", "toolbar");
     picker.setAttribute("aria-label", "Choose a reaction");
     picker.setAttribute("aria-orientation", "horizontal");
-    picker.innerHTML = REACTIONS.map(({ value, label }, index) => `
+    picker.innerHTML = REACTIONS.map(
+        ({ value, label }, index) => `
         <button
             class="reaction-option${
                 value === currentReaction ? " selected" : ""
@@ -232,7 +216,8 @@ export function createReactionPicker(options = {}) {
             aria-pressed="${value === currentReaction}"
             tabindex="${index === selectedIndex ? "0" : "-1"}"
         >${value}</button>
-    `).join("");
+    `
+    ).join("");
 
     picker.addEventListener("click", handlePickerClick);
     picker.addEventListener("keydown", handlePickerKeydown);

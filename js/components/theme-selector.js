@@ -78,11 +78,10 @@ export function createThemeSelector({
         select.disabled = true;
 
         try {
-            const updatedSettings =
-                await settingsController.updateSetting(
-                    "theme",
-                    nextTheme
-                );
+            const updatedSettings = await settingsController.updateSetting(
+                "theme",
+                nextTheme
+            );
 
             if (!destroyed) {
                 setTheme(updatedSettings?.theme || nextTheme);

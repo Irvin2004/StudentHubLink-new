@@ -8,10 +8,12 @@ function createPreferenceMap(preferences) {
     if (preferences instanceof Map) return preferences;
 
     if (Array.isArray(preferences)) {
-        return new Map(preferences.map((preference) => [
-            preference.conversationId,
-            preference
-        ]));
+        return new Map(
+            preferences.map((preference) => [
+                preference.conversationId,
+                preference
+            ])
+        );
     }
 
     return new Map(Object.entries(preferences || {}));
@@ -36,12 +38,12 @@ function getTitle(value) {
 
     return String(
         displayUser.fullName ||
-        displayUser.name ||
-        displayUser.displayName ||
-        conversation.title ||
-        conversation.name ||
-        conversation.id ||
-        ""
+            displayUser.name ||
+            displayUser.displayName ||
+            conversation.title ||
+            conversation.name ||
+            conversation.id ||
+            ""
     ).trim();
 }
 
@@ -62,8 +64,8 @@ export function compareConversations(
         if (firstPinned !== secondPinned) return firstPinned ? -1 : 1;
     }
 
-    const activityDifference = getActivityTime(conversationB) -
-        getActivityTime(conversationA);
+    const activityDifference =
+        getActivityTime(conversationB) - getActivityTime(conversationA);
 
     if (activityDifference !== 0) return activityDifference;
 

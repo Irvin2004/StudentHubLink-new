@@ -1,21 +1,28 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { createDashboardRefreshManager } from
-    "../js/controllers/dashboard-refresh.js";
-import { renderDashboard } from
-    "../js/renderers/dashboard-renderer.js";
+import { createDashboardRefreshManager } from "../js/controllers/dashboard-refresh.js";
+import { renderDashboard } from "../js/renderers/dashboard-renderer.js";
 
 const read = (path) => readFileSync(path, "utf8");
 
 test("notification service and rules use the same nested path", () => {
-    assert.match(read("js/services/notification-service.js"), /COLLECTIONS\.USERS/);
+    assert.match(
+        read("js/services/notification-service.js"),
+        /COLLECTIONS\.USERS/
+    );
     assert.match(read("firestore.rules"), /users\/\{userId\}\/notifications/);
 });
 
 test("message deep links include conversation and message context", () => {
-    assert.match(read("js/events/message-events.js"), /conversationId: cleanChatId/);
-    assert.match(read("js/controllers/notification-controller.js"), /&message=/);
+    assert.match(
+        read("js/events/message-events.js"),
+        /conversationId: cleanChatId/
+    );
+    assert.match(
+        read("js/controllers/notification-controller.js"),
+        /&message=/
+    );
 });
 
 test("message replies use validated lightweight metadata", () => {
@@ -119,7 +126,7 @@ test("voice messages upload before Firestore writes and remain deletable", () =>
     assert.match(messages, /export async function sendVoiceMessage\(/);
     assert.ok(
         messages.indexOf("await uploadVoiceMessage(") <
-        messages.indexOf("return await sendMessage({")
+            messages.indexOf("return await sendMessage({")
     );
     assert.match(messages, /voice: voiceMessage\.voice/);
     assert.match(messages, /await deleteVoiceMessage\(uploaded\.storagePath\)/);
@@ -202,10 +209,7 @@ test("conversation preferences remain user-scoped and presentation-only", () => 
     assert.match(controller, /toggleMuteConversation\(/);
     assert.match(controller, /toggleArchiveConversation\(/);
     assert.match(controller, /unsubscribe\(\)/);
-    assert.match(
-        messagesController,
-        /initializeConversationPreferences\(/
-    );
+    assert.match(messagesController, /initializeConversationPreferences\(/);
     assert.doesNotMatch(
         messagesController,
         /pinConversation\(|unpinConversation\(|toggleMuteConversation\(|toggleArchiveConversation\(/
@@ -340,8 +344,7 @@ test("reaction controller owns chat reaction orchestration", () => {
     assert.match(controller, /new MutationObserver/);
     assert.match(controller, /subscriptions\.forEach/);
     assert.equal(
-        (controller.match(/messageContainer\.addEventListener/g) || [])
-            .length,
+        (controller.match(/messageContainer\.addEventListener/g) || []).length,
         1
     );
     assert.match(chat, /initializeReactions\(/);
@@ -354,7 +357,10 @@ test("reaction controller owns chat reaction orchestration", () => {
 
 test("custom dialogs use the shared focus trap", () => {
     assert.match(read("js/components/image-viewer.js"), /activateFocusTrap/);
-    assert.match(read("js/components/delete-message-dialog.js"), /activateFocusTrap/);
+    assert.match(
+        read("js/components/delete-message-dialog.js"),
+        /activateFocusTrap/
+    );
 });
 
 test("dashboard listeners stay behind service boundaries", () => {
@@ -399,21 +405,25 @@ test("dashboard refresh manager updates only affected widgets", () => {
         userId: "user-1"
     });
 
-    manager.refreshAssignments([{
-        id: "a1",
-        groupId: "g1",
-        title: "Practical",
-        dueDate: new Date(Date.now() + 86_400_000).toISOString()
-    }]);
+    manager.refreshAssignments([
+        {
+            id: "a1",
+            groupId: "g1",
+            title: "Practical",
+            dueDate: new Date(Date.now() + 86_400_000).toISOString()
+        }
+    ]);
 
     assert.match(elements.assignments.innerHTML, /Practical/);
     assert.match(elements.stats.innerHTML, /Assignments: 1/);
     assert.equal(elements.notifications.innerHTML, notificationsBefore);
     assert.equal(elements.groups.innerHTML, groupsBefore);
 
-    manager.refreshConversations([{
-        unreadCounts: { "user-1": 3 }
-    }]);
+    manager.refreshConversations([
+        {
+            unreadCounts: { "user-1": 3 }
+        }
+    ]);
     assert.match(elements.stats.innerHTML, /Messages: 3/);
 });
 
@@ -425,10 +435,7 @@ test("activity service and rules use the group-scoped path", () => {
         service,
         /collection\(\s*db,\s*"groups",\s*groupId,\s*"activities"/s
     );
-    assert.match(
-        service,
-        /orderBy\("createdAt",\s*"desc"\)/
-    );
+    assert.match(service, /orderBy\("createdAt",\s*"desc"\)/);
     assert.match(service, /onSnapshot/);
     assert.match(service, /createActivityModel/);
     assert.match(service, /serverTimestamp\(\)/);
@@ -437,10 +444,7 @@ test("activity service and rules use the group-scoped path", () => {
         rules,
         /match \/groups\/\{groupId\}[\s\S]*match \/activities\/\{activityId\}/
     );
-    assert.doesNotMatch(
-        rules,
-        /^\s{4}match \/activities\/\{activityId\}/m
-    );
+    assert.doesNotMatch(rules, /^\s{4}match \/activities\/\{activityId\}/m);
 });
 
 test("activity controller coordinates service and renderer boundaries", () => {
@@ -452,10 +456,16 @@ test("activity controller coordinates service and renderer boundaries", () => {
     assert.match(controller, /renderActivityLoading/);
     assert.match(controller, /renderActivityFeed/);
     assert.match(controller, /renderActivityError/);
-    assert.doesNotMatch(controller, /onSnapshot|firebase-firestore|innerHTML\s*=/);
+    assert.doesNotMatch(
+        controller,
+        /onSnapshot|firebase-firestore|innerHTML\s*=/
+    );
     assert.match(controller, /destroy\(\)/);
     assert.match(dashboard, /initializeActivityFeed/);
-    assert.doesNotMatch(dashboard, /getGroupActivities|subscribeToGroupActivities/);
+    assert.doesNotMatch(
+        dashboard,
+        /getGroupActivities|subscribeToGroupActivities/
+    );
 });
 
 test("presence service uses user-scoped status documents", () => {
@@ -472,10 +482,7 @@ test("presence service uses user-scoped status documents", () => {
     assert.match(service, /const TYPING_TIMEOUT = 2000/);
     assert.match(service, /subscribeToPresence/);
     assert.doesNotMatch(service, /document\.|window\.|innerHTML/);
-    assert.match(
-        rules,
-        /match \/users\/\{userId\}\/presence\/\{presenceId\}/
-    );
+    assert.match(rules, /match \/users\/\{userId\}\/presence\/\{presenceId\}/);
     assert.doesNotMatch(
         rules,
         /match \/presence\/\{legacyPresenceId\}[\s\S]*allow create, update: if/

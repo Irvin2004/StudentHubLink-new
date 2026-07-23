@@ -35,28 +35,21 @@ export function createPresenceModel(presence = {}) {
 
         userName: normalizeText(presence.userName),
 
-        status:
-            normalizeText(presence.status) ||
-            PRESENCE_STATUS.OFFLINE,
+        status: normalizeText(presence.status) || PRESENCE_STATUS.OFFLINE,
 
-        conversationId:
-            normalizeText(presence.conversationId),
+        conversationId: normalizeText(presence.conversationId),
 
         lastSeen: presence.lastSeen || null,
 
         updatedAt: presence.updatedAt || null
     };
 
-    const validation =
-        validatePresence(normalizedPresence);
+    const validation = validatePresence(normalizedPresence);
 
     if (!validation.isValid) {
-        const error = new Error(
-            "Invalid presence data."
-        );
+        const error = new Error("Invalid presence data.");
 
-        error.validationErrors =
-            validation.errors;
+        error.validationErrors = validation.errors;
 
         throw error;
     }

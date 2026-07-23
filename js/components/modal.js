@@ -21,9 +21,9 @@ function getModal(modalOrId) {
 }
 
 function getFocusableElements(modal) {
-    return Array.from(
-        modal.querySelectorAll(FOCUSABLE_SELECTOR)
-    ).filter((element) => !element.hidden);
+    return Array.from(modal.querySelectorAll(FOCUSABLE_SELECTOR)).filter(
+        (element) => !element.hidden
+    );
 }
 
 export function createModal({
@@ -86,19 +86,16 @@ export function openModal(modalOrId) {
         return;
     }
 
-    const previouslyFocusedElement =
-        document.activeElement;
+    const previouslyFocusedElement = document.activeElement;
 
     function close() {
         closeModal(modal);
     }
 
     function handleClick(event) {
-        const clickedCloseButton =
-            event.target.closest("[data-modal-close]");
+        const clickedCloseButton = event.target.closest("[data-modal-close]");
 
-        const clickedBackdrop =
-            event.target === modal;
+        const clickedBackdrop = event.target === modal;
 
         if (clickedCloseButton || clickedBackdrop) {
             close();
@@ -115,32 +112,21 @@ export function openModal(modalOrId) {
             return;
         }
 
-        const focusableElements =
-            getFocusableElements(modal);
+        const focusableElements = getFocusableElements(modal);
 
         if (!focusableElements.length) {
             event.preventDefault();
             return;
         }
 
-        const firstElement =
-            focusableElements[0];
+        const firstElement = focusableElements[0];
 
-        const lastElement =
-            focusableElements[
-                focusableElements.length - 1
-            ];
+        const lastElement = focusableElements[focusableElements.length - 1];
 
-        if (
-            event.shiftKey &&
-            document.activeElement === firstElement
-        ) {
+        if (event.shiftKey && document.activeElement === firstElement) {
             event.preventDefault();
             lastElement.focus();
-        } else if (
-            !event.shiftKey &&
-            document.activeElement === lastElement
-        ) {
+        } else if (!event.shiftKey && document.activeElement === lastElement) {
             event.preventDefault();
             firstElement.focus();
         }
@@ -156,17 +142,13 @@ export function openModal(modalOrId) {
     modalState.set(modal, state);
 
     modal.addEventListener("click", handleClick);
-    document.addEventListener(
-        "keydown",
-        handleKeydown
-    );
+    document.addEventListener("keydown", handleKeydown);
 
     modal.hidden = false;
     document.body.classList.add("modal-open");
 
     state.cancelFocus = scheduleFrame(() => {
-        const firstFocusable =
-            getFocusableElements(modal)[0];
+        const firstFocusable = getFocusableElements(modal)[0];
 
         firstFocusable?.focus();
     });
@@ -184,15 +166,9 @@ export function closeModal(modalOrId) {
     if (state) {
         state.cancelFocus?.();
 
-        modal.removeEventListener(
-            "click",
-            state.handleClick
-        );
+        modal.removeEventListener("click", state.handleClick);
 
-        document.removeEventListener(
-            "keydown",
-            state.handleKeydown
-        );
+        document.removeEventListener("keydown", state.handleKeydown);
     }
 
     modal.hidden = true;

@@ -6,9 +6,9 @@ import {
     setDoc,
     onSnapshot,
     serverTimestamp
-} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+} from "firebase/firestore";
 
-import { db } from "../firebase/firebase-config.js";
+import { db } from "../../src/firebase/firestore.js";
 import {
     createUserSettings,
     mergeUserSettings
@@ -19,13 +19,7 @@ function getSettingsReference(userId) {
         throw new Error("A user ID is required.");
     }
 
-    return doc(
-        db,
-        "users",
-        userId,
-        "preferences",
-        "settings"
-    );
+    return doc(db, "users", userId, "preferences", "settings");
 }
 
 export async function getUserSettings(userId) {
@@ -57,10 +51,7 @@ export async function saveUserSettings(userId, settings) {
 
 export async function updateUserSettings(userId, updates) {
     const currentSettings = await getUserSettings(userId);
-    const updatedSettings = mergeUserSettings(
-        currentSettings,
-        updates
-    );
+    const updatedSettings = mergeUserSettings(currentSettings, updates);
 
     return saveUserSettings(userId, updatedSettings);
 }

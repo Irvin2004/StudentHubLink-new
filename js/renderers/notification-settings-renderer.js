@@ -7,20 +7,17 @@ const NOTIFICATION_GROUPS = Object.freeze([
             {
                 key: "directMessages",
                 label: "Direct Messages",
-                description:
-                    "Notify me when someone sends me a direct message."
+                description: "Notify me when someone sends me a direct message."
             },
             {
                 key: "groupMessages",
                 label: "Group Messages",
-                description:
-                    "Notify me about new messages in my study groups."
+                description: "Notify me about new messages in my study groups."
             },
             {
                 key: "mentions",
                 label: "Mentions",
-                description:
-                    "Notify me when someone mentions me in a message."
+                description: "Notify me when someone mentions me in a message."
             }
         ]
     },
@@ -30,14 +27,12 @@ const NOTIFICATION_GROUPS = Object.freeze([
             {
                 key: "reactions",
                 label: "Reactions",
-                description:
-                    "Notify me when someone reacts to my message."
+                description: "Notify me when someone reacts to my message."
             },
             {
                 key: "readReceipts",
                 label: "Read Receipts",
-                description:
-                    "Notify me when someone reads my direct message."
+                description: "Notify me when someone reads my direct message."
             }
         ]
     }
@@ -50,8 +45,7 @@ function requireContainer(container) {
 }
 
 function renderCheckbox(option, checked, disabled = false) {
-    const descriptionId =
-        `notification-${option.key}-description`;
+    const descriptionId = `notification-${option.key}-description`;
 
     return `
         <div class="notification-setting">
@@ -75,14 +69,12 @@ function renderCheckbox(option, checked, disabled = false) {
     `;
 }
 
-export function renderNotificationSettings(
-    notifications = {},
-    container
-) {
+export function renderNotificationSettings(notifications = {}, container) {
     requireContainer(container);
 
     const dependentsDisabled = notifications.enabled !== true;
-    const groups = NOTIFICATION_GROUPS.map((group) => `
+    const groups = NOTIFICATION_GROUPS.map(
+        (group) => `
         <section
             class="notification-settings__group"
             aria-labelledby="notification-${group.title.toLowerCase()}"
@@ -90,13 +82,18 @@ export function renderNotificationSettings(
             <h3 id="notification-${group.title.toLowerCase()}">
                 ${group.title}
             </h3>
-            ${group.options.map((option) => renderCheckbox(
-                option,
-                notifications[option.key] === true,
-                dependentsDisabled
-            )).join("")}
+            ${group.options
+                .map((option) =>
+                    renderCheckbox(
+                        option,
+                        notifications[option.key] === true,
+                        dependentsDisabled
+                    )
+                )
+                .join("")}
         </section>
-    `).join("");
+    `
+    ).join("");
 
     const html = `
         <section
@@ -108,8 +105,7 @@ export function renderNotificationSettings(
                 {
                     key: "enabled",
                     label: "Enable Notifications",
-                    description:
-                        "Turn all StudentHub notifications on or off."
+                    description: "Turn all StudentHub notifications on or off."
                 },
                 notifications.enabled === true
             )}

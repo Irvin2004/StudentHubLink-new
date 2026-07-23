@@ -1,6 +1,6 @@
 "use strict";
 
-import { auth } from "../firebase/firebase-config.js";
+import { auth } from "../../src/firebase/auth.js";
 import {
     closeSearchDropdown,
     createSearchDropdown,
@@ -12,9 +12,7 @@ import {
     renderSearchLoading,
     renderSearchResults
 } from "../renderers/search-renderer.js?global-search=1";
-import {
-    searchEverything
-} from "../services/search-service.js?global-search=1";
+import { searchEverything } from "../services/search-service.js?global-search=1";
 import { normalizeSearchQuery } from "../utils/search.js";
 import { error as logError } from "../utils/logger.js";
 import { debounce } from "../utils/debounce.js";
@@ -22,12 +20,7 @@ import { debounce } from "../utils/debounce.js";
 const DEBOUNCE_DELAY = 300;
 const searchControllers = new WeakMap();
 
-function renderDropdownState({
-    dropdown,
-    input,
-    render,
-    value
-}) {
+function renderDropdownState({ dropdown, input, render, value }) {
     const stagingContainer = input.ownerDocument.createElement("div");
 
     render(value, stagingContainer);
@@ -130,9 +123,7 @@ export function createSearchController({ input, dropdown } = {}) {
         if (dropdownState.input !== input) {
             dropdownState.destroy();
             dropdownState = null;
-            throw new Error(
-                "Search dropdown must contain the search input."
-            );
+            throw new Error("Search dropdown must contain the search input.");
         }
 
         input.addEventListener("input", handleInput);

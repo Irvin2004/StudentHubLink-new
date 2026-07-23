@@ -6,18 +6,10 @@ import {
     getUserFriendlyErrorMessage,
     normalizeError
 } from "../js/services/error-service.js";
-import {
-    ERROR_TYPES
-} from "../js/config/error-types.js";
-import {
-    AppError
-} from "../js/models/app-error.js";
-import {
-    createSkeleton
-} from "../js/components/skeleton.js";
-import {
-    SKELETON_TYPES
-} from "../js/config/skeleton-types.js";
+import { ERROR_TYPES } from "../js/config/error-types.js";
+import { AppError } from "../js/models/app-error.js";
+import { createSkeleton } from "../js/components/skeleton.js";
+import { SKELETON_TYPES } from "../js/config/skeleton-types.js";
 import { debounce } from "../js/utils/debounce.js";
 import {
     createIntersectionObserver,
@@ -28,10 +20,7 @@ import {
     appendNodes,
     createFragment
 } from "../js/utils/dom-batch.js";
-import {
-    cancelScheduledFrames,
-    scheduleFrame
-} from "../js/utils/raf.js";
+import { cancelScheduledFrames, scheduleFrame } from "../js/utils/raf.js";
 import { throttle } from "../js/utils/throttle.js";
 
 function read(path) {
@@ -87,10 +76,7 @@ test("error service stays DOM-free and toast component owns rendering", () => {
         "logError",
         "handleError"
     ].forEach((apiName) => {
-        assert.match(
-            service,
-            new RegExp(`export function ${apiName}\\(`)
-        );
+        assert.match(service, new RegExp(`export function ${apiName}\\(`));
     });
 });
 
@@ -115,18 +101,12 @@ test("AppError preserves safe structured error metadata", () => {
 
 test("skeleton loader exposes accessible list and message variants", () => {
     const list = createSkeleton(SKELETON_TYPES.USER, { count: 2 });
-    const messages = createSkeleton(
-        SKELETON_TYPES.MESSAGE,
-        { count: 2 }
-    );
+    const messages = createSkeleton(SKELETON_TYPES.MESSAGE, { count: 2 });
 
     assert.match(list, /aria-hidden="true"/);
     assert.match(list, /data-skeleton-type="user"/);
     assert.equal((list.match(/skeleton__avatar/g) || []).length, 2);
-    assert.equal(
-        (messages.match(/skeleton-message(?: |")/g) || []).length,
-        2
-    );
+    assert.equal((messages.match(/skeleton-message(?: |")/g) || []).length, 2);
 });
 
 test("debounce coalesces calls and supports cancellation", async () => {
@@ -249,11 +229,7 @@ test("frame helper batches callbacks and supports cancellation", async () => {
     assert.deepEqual(values, ["first", "second", "immediate"]);
 
     if (documentDescriptor) {
-        Object.defineProperty(
-            globalThis,
-            "document",
-            documentDescriptor
-        );
+        Object.defineProperty(globalThis, "document", documentDescriptor);
     } else {
         delete globalThis.document;
     }

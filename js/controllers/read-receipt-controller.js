@@ -6,12 +6,8 @@ import {
     subscribeToReadReceipts
 } from "../services/message-service.js?receipts=2";
 import { MESSAGE_STATUS } from "../config/message-status.js";
-import {
-    renderReadReceipt
-} from "../renderers/read-receipt-renderer.js?receipts=1";
-import {
-    createObserver
-} from "../utils/intersection-observer.js";
+import { renderReadReceipt } from "../renderers/read-receipt-renderer.js?receipts=1";
+import { createObserver } from "../utils/intersection-observer.js";
 import { logError } from "../services/error-service.js";
 
 const READ_VISIBILITY_THRESHOLD = 0.6;
@@ -153,26 +149,21 @@ export function initializeReadReceipts({
         intersectionObserver.observe(row);
     }
 
-    const intersectionObserver = createObserver(
-        {
-            root: messagesContainer,
-            threshold: READ_VISIBILITY_THRESHOLD,
-            onEnter(row, entry) {
-                if (
-                    entry.intersectionRatio <
-                    READ_VISIBILITY_THRESHOLD
-                ) {
-                    return;
-                }
+    const intersectionObserver = createObserver({
+        root: messagesContainer,
+        threshold: READ_VISIBILITY_THRESHOLD,
+        onEnter(row, entry) {
+            if (entry.intersectionRatio < READ_VISIBILITY_THRESHOLD) {
+                return;
+            }
 
-                const messageId = cleanId(row?.dataset?.messageId);
+            const messageId = cleanId(row?.dataset?.messageId);
 
-                if (messageId) {
-                    markVisibleMessageRead(messageId);
-                }
+            if (messageId) {
+                markVisibleMessageRead(messageId);
             }
         }
-    );
+    });
 
     function updateMessage(subscription, receipts) {
         const currentReceipt = getCurrentUserReceipt(
@@ -261,19 +252,11 @@ export function initializeReadReceipts({
                 existing.row = row;
                 existing.outgoing = outgoing;
                 existing.statusContainer = statusContainer;
-                updateMessage(
-                    existing,
-                    receiptsByMessage.get(messageId) || []
-                );
+                updateMessage(existing, receiptsByMessage.get(messageId) || []);
                 return;
             }
 
-            subscribeToMessage(
-                messageId,
-                row,
-                outgoing,
-                statusContainer
-            );
+            subscribeToMessage(messageId, row, outgoing, statusContainer);
         });
 
         subscriptions.forEach((subscription, messageId) => {

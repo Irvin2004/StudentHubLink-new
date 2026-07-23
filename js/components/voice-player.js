@@ -225,16 +225,14 @@ export function createVoicePlayer({
 
     const cleanUrl = normalizeUrl(url);
     const reportError = typeof onError === "function" ? onError : () => {};
-    const reportMetadata = typeof onMetadata === "function"
-        ? onMetadata
-        : () => {};
+    const reportMetadata =
+        typeof onMetadata === "function" ? onMetadata : () => {};
     let totalDurationMs = normalizeDuration(duration);
     let currentTimeMs = 0;
     let playbackRateIndex = 0;
     let playing = false;
     let destroyed = false;
-    const instructionsId =
-        `voice-player-instructions-${++voicePlayerId}`;
+    const instructionsId = `voice-player-instructions-${++voicePlayerId}`;
 
     playersByContainer.get(container)?.destroy();
 
@@ -287,9 +285,8 @@ export function createVoicePlayer({
     });
     const totalTime = createElement(documentReference, "span", {
         className: "voice-player-duration",
-        text: totalDurationMs > 0
-            ? formatDuration(totalDurationMs)
-            : "Loading..."
+        text:
+            totalDurationMs > 0 ? formatDuration(totalDurationMs) : "Loading..."
     });
     const speedButton = createElement(documentReference, "button", {
         className: "voice-player-speed",
@@ -330,7 +327,10 @@ export function createVoicePlayer({
     function updateProgress(milliseconds) {
         currentTimeMs = Math.max(
             0,
-            Math.min(normalizeDuration(milliseconds), totalDurationMs || Infinity)
+            Math.min(
+                normalizeDuration(milliseconds),
+                totalDurationMs || Infinity
+            )
         );
         progress.value = String(currentTimeMs / 1000);
         progress.setAttribute(
@@ -413,10 +413,7 @@ export function createVoicePlayer({
         const rate = PLAYBACK_SPEEDS[playbackRateIndex];
 
         speedButton.textContent = `${rate}\u00d7`;
-        speedButton.setAttribute(
-            "aria-label",
-            `Playback speed, ${rate} times`
-        );
+        speedButton.setAttribute("aria-label", `Playback speed, ${rate} times`);
         sharedAudioManager.setPlaybackRate(player, rate);
     }
 
@@ -432,10 +429,10 @@ export function createVoicePlayer({
             togglePlayback();
         } else if (event.key === "ArrowLeft") {
             event.preventDefault();
-            seekTo((currentTimeMs / 1000) - SEEK_STEP_SECONDS);
+            seekTo(currentTimeMs / 1000 - SEEK_STEP_SECONDS);
         } else if (event.key === "ArrowRight") {
             event.preventDefault();
-            seekTo((currentTimeMs / 1000) + SEEK_STEP_SECONDS);
+            seekTo(currentTimeMs / 1000 + SEEK_STEP_SECONDS);
         } else if (event.key === "Escape") {
             event.preventDefault();
             stopPlayback();

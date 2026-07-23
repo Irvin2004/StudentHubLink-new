@@ -1,5 +1,27 @@
-.table-wrap { width: 100%; overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface); }
-.table { width: 100%; border-collapse: collapse; }
-.table th, .table td { padding: var(--space-3) var(--space-4); border-bottom: 1px solid var(--border); text-align: left; }
-.table th { background: var(--surface-muted); color: var(--text-secondary); font-size: 0.75rem; letter-spacing: 0.04em; text-transform: uppercase; }
-.table tr:last-child td { border-bottom: 0; }
+.table-wrap {
+    width: 100%;
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+}
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+.table th,
+.table td {
+    padding: var(--space-3) var(--space-4);
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+}
+.table th {
+    background: var(--surface-muted);
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+.table tr:last-child td {
+    border-bottom: 0;
+}

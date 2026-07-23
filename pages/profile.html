@@ -1,97 +1,114 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-<title>StudentHub Profile</title>
- <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
- <link rel="stylesheet" href="../css/studenthub.css?v=20260723-13">
-</head>
-<body data-page="profile">
+        <title>StudentHub Profile</title>
+        <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
+    </head>
+    <body data-page="profile">
+        <nav class="navbar">
+            <div class="logo">
+                <h2>StudentHub</h2>
+            </div>
 
-<nav class="navbar">
-    <div class="logo">
-        <h2>StudentHub</h2>
-    </div>
+            <ul class="nav-links">
+                <li><a href="../dashboard.html">Dashboard</a></li>
+                <li><a href="resources.html">Marketplace</a></li>
+                <li><a href="library.html">My Library</a></li>
+                <li><a href="messages.html">Messages</a></li>
+                <li><a href="achievements.html">Achievements</a></li>
+                <li><a href="leaderboard.html">Leaderboard</a></li>
+                <li><a href="upload.html">Upload</a></li>
+                <li><a href="documents.html">Documents</a></li>
+                <li><a href="profile.html">Profile</a></li>
+            </ul>
+        </nav>
 
-    <ul class="nav-links">
-        <li><a href="../dashboard.html">Dashboard</a></li>
-        <li><a href="resources.html">Marketplace</a></li>
-        <li><a href="library.html">My Library</a></li>
-        <li><a href="messages.html">Messages</a></li>
-        <li><a href="achievements.html">Achievements</a></li>
-        <li><a href="leaderboard.html">Leaderboard</a></li>
-        <li><a href="upload.html">Upload</a></li>
-        <li><a href="documents.html">Documents</a></li>
-        <li><a href="profile.html">Profile</a></li>
-    </ul>
-</nav>
+        <div class="container">
+            <div class="profile-card">
+                <div id="profileSummaryLoading" aria-busy="true"></div>
+                <div id="profileSummaryContent" hidden>
+                    <h1 id="userName">Student</h1>
+                    <p id="userEmail"></p>
+                    <p id="profileVerification"></p>
+                    <button
+                        id="resendVerificationBtn"
+                        class="btn-secondary"
+                        type="button"
+                        hidden
+                    >
+                        Resend verification email
+                    </button>
+                    <p id="profileMemberSince"></p>
+                    <p>Role: <span id="profileRole">student</span></p>
+                    <p>Institution: <span id="profileInstitution"></span></p>
+                    <p>Course: <span id="profileCourse"></span></p>
+                    <p>Year of study: <span id="profileYear"></span></p>
+                    <p id="profileBio"></p>
+                </div>
+            </div>
 
-<div class="container">
+            <form class="profile-card profile-edit-form" id="profileForm">
+                <h2>Update profile</h2>
 
-<div class="profile-card">
-<div id="profileSummaryLoading" aria-busy="true"></div>
-<div id="profileSummaryContent" hidden>
-<h1 id="userName">Student</h1>
-<p id="userEmail"></p>
-<p id="profileVerification"></p>
-<button id="resendVerificationBtn" class="btn-secondary" type="button" hidden>
-Resend verification email
-</button>
-<p id="profileMemberSince"></p>
-<p>Role: <span id="profileRole">student</span></p>
-<p>Institution: <span id="profileInstitution"></span></p>
-<p>Course: <span id="profileCourse"></span></p>
-<p>Year of study: <span id="profileYear"></span></p>
-<p id="profileBio"></p>
-</div>
-</div>
+                <label for="profileFullName">Full name</label>
+                <input
+                    id="profileFullName"
+                    type="text"
+                    maxlength="120"
+                    required
+                />
 
-<form class="profile-card profile-edit-form" id="profileForm">
-<h2>Update profile</h2>
+                <label for="profileInstitutionInput">Institution</label>
+                <input
+                    id="profileInstitutionInput"
+                    type="text"
+                    maxlength="160"
+                />
 
-<label for="profileFullName">Full name</label>
-<input id="profileFullName" type="text" maxlength="120" required>
+                <label for="profileCourseInput">Course</label>
+                <input id="profileCourseInput" type="text" maxlength="160" />
 
-<label for="profileInstitutionInput">Institution</label>
-<input id="profileInstitutionInput" type="text" maxlength="160">
+                <label for="profileYearInput">Year of study</label>
+                <input id="profileYearInput" type="text" maxlength="40" />
 
-<label for="profileCourseInput">Course</label>
-<input id="profileCourseInput" type="text" maxlength="160">
+                <label for="profileBioInput">Bio</label>
+                <textarea
+                    id="profileBioInput"
+                    rows="4"
+                    maxlength="500"
+                ></textarea>
 
-<label for="profileYearInput">Year of study</label>
-<input id="profileYearInput" type="text" maxlength="40">
+                <button id="saveProfileBtn" class="btn-primary" type="submit">
+                    Save profile
+                </button>
+                <p id="profileMessage" class="form-message" role="status"></p>
+            </form>
 
-<label for="profileBioInput">Bio</label>
-<textarea id="profileBioInput" rows="4" maxlength="500"></textarea>
+            <div class="stats">
+                <div class="stat">
+                    <h2 id="profileDownloads">0</h2>
+                    <p>Downloads</p>
+                </div>
 
-<button id="saveProfileBtn" class="btn-primary" type="submit">Save profile</button>
-<p id="profileMessage" class="form-message" role="status"></p>
-</form>
+                <div class="stat">
+                    <h2 id="profileUploads">0</h2>
+                    <p>Uploaded Notes</p>
+                </div>
 
-<div class="stats">
+                <div class="stat">
+                    <h2 id="profileEarnings">R0</h2>
+                    <p>Earnings</p>
+                </div>
+            </div>
+        </div>
 
-<div class="stat">
-<h2 id="profileDownloads">0</h2>
-<p>Downloads</p>
-</div>
-
-<div class="stat">
-<h2 id="profileUploads">0</h2>
-<p>Uploaded Notes</p>
-</div>
-
-<div class="stat">
-<h2 id="profileEarnings">R0</h2>
-<p>Earnings</p>
-</div>
-
-</div>
-
-</div>
-
-<script type="module" src="../js/pages/auth-page.js?skeletons=1"></script>
-<script type="module" src="../js/theme.js"></script>
-</body>
+        <script
+            type="module"
+            src="../js/pages/auth-page.js?skeletons=1"
+        ></script>
+        <script type="module" src="/src/main.js"></script>
+    </body>
 </html>

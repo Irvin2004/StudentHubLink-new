@@ -1,18 +1,9 @@
 "use strict";
 
-import {
-    createConversationItem
-} from "../components/conversation-item.js?context-menu=1";
-import {
-    createEmptyState
-} from "../components/empty-state.js?empty-states=1";
-import {
-    hideSkeleton,
-    showSkeleton
-} from "./skeleton-renderer.js";
-import {
-    SKELETON_TYPES
-} from "../config/skeleton-types.js";
+import { createConversationItem } from "../components/conversation-item.js?context-menu=1";
+import { createEmptyState } from "../components/empty-state.js?empty-states=1";
+import { hideSkeleton, showSkeleton } from "./skeleton-renderer.js";
+import { SKELETON_TYPES } from "../config/skeleton-types.js";
 
 function getPreference(preferences, conversationId) {
     if (preferences instanceof Map) {
@@ -29,8 +20,7 @@ export function renderConversationList({
     preferences = new Map(),
     showPinnedDivider = true,
     emptyTitle = "No conversations yet",
-    emptyMessage =
-        "Follow each other with another student to start messaging."
+    emptyMessage = "Follow each other with another student to start messaging."
 } = {}) {
     if (!container || !("innerHTML" in container)) {
         throw new Error("Conversation list container is required.");
@@ -53,23 +43,25 @@ export function renderConversationList({
     container.setAttribute?.("aria-busy", "false");
     let previousPinned = null;
 
-    container.innerHTML = items.map(({ conversation, otherUser }) => {
-        const preference = getPreference(preferences, conversation.id);
-        const pinned = preference.pinned === true;
-        const divider = showPinnedDivider &&
-            previousPinned === true && !pinned
-            ? '<div class="conversation-section-divider" aria-hidden="true"></div>'
-            : "";
+    container.innerHTML = items
+        .map(({ conversation, otherUser }) => {
+            const preference = getPreference(preferences, conversation.id);
+            const pinned = preference.pinned === true;
+            const divider =
+                showPinnedDivider && previousPinned === true && !pinned
+                    ? '<div class="conversation-section-divider" aria-hidden="true"></div>'
+                    : "";
 
-        previousPinned = pinned;
+            previousPinned = pinned;
 
-        return `${divider}${createConversationItem(
-            conversation,
-            currentUserId,
-            otherUser,
-            preference
-        )}`;
-    }).join("");
+            return `${divider}${createConversationItem(
+                conversation,
+                currentUserId,
+                otherUser,
+                preference
+            )}`;
+        })
+        .join("");
 }
 
 export function renderConversationLoading(container) {

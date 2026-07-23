@@ -14,10 +14,7 @@ import { error as logError } from "../utils/logger.js";
 
 const activityControllers = new WeakMap();
 
-export function initializeActivityFeed({
-    container,
-    groupId
-} = {}) {
+export function initializeActivityFeed({ container, groupId } = {}) {
     if (!container || !("innerHTML" in container)) {
         throw new Error("Activity feed container is required.");
     }
@@ -40,9 +37,7 @@ export function initializeActivityFeed({
 
     activityControllers.set(container, controller);
 
-    const cleanGroupId = typeof groupId === "string"
-        ? groupId.trim()
-        : "";
+    const cleanGroupId = typeof groupId === "string" ? groupId.trim() : "";
 
     if (!cleanGroupId) {
         renderActivityEmpty(container);

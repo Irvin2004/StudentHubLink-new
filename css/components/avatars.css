@@ -13,10 +13,27 @@
     font-weight: 700;
     line-height: 1;
 }
-.avatar img { width: 100%; height: 100%; border-radius: inherit; object-fit: cover; }
-.avatar-sm { width: 32px; height: 32px; font-size: 0.75rem; }
-.avatar-lg { width: 56px; height: 56px; font-size: 1.25rem; }
-.avatar-xl { width: 80px; height: 80px; font-size: 1.75rem; }
+.avatar img {
+    width: 100%;
+    height: 100%;
+    border-radius: inherit;
+    object-fit: cover;
+}
+.avatar-sm {
+    width: 32px;
+    height: 32px;
+    font-size: 0.75rem;
+}
+.avatar-lg {
+    width: 56px;
+    height: 56px;
+    font-size: 1.25rem;
+}
+.avatar-xl {
+    width: 80px;
+    height: 80px;
+    font-size: 1.75rem;
+}
 .avatar-status,
 .online-dot {
     position: absolute;

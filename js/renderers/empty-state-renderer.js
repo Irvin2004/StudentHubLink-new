@@ -42,9 +42,7 @@ export function showEmptyState({
     });
 
     const root = target.querySelector?.("[data-empty-state-root]") || null;
-    const actionButton = root?.querySelector?.(
-        "[data-empty-state-action]"
-    );
+    const actionButton = root?.querySelector?.("[data-empty-state-action]");
 
     if (actionButton && typeof action?.onClick === "function") {
         const handleClick = (event) => {

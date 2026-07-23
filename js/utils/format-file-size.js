@@ -10,7 +10,7 @@ export function formatFileSize(bytes, decimals = 1) {
         Math.floor(Math.log(size) / Math.log(1024)),
         units.length - 1
     );
-    const value = size / (1024 ** unitIndex);
+    const value = size / 1024 ** unitIndex;
 
     return `${value.toFixed(unitIndex === 0 ? 0 : decimals)} ${units[unitIndex]}`;
 }

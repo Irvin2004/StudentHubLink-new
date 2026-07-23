@@ -9,9 +9,7 @@ function cleanId(value) {
 }
 
 function escapeAttributeValue(value) {
-    return value
-        .replaceAll("\\", "\\\\")
-        .replaceAll('"', '\\"');
+    return value.replaceAll("\\", "\\\\").replaceAll('"', '\\"');
 }
 
 export function initializeReplyNavigation({
@@ -33,13 +31,11 @@ export function initializeReplyNavigation({
     }
 
     let container = messageContainer;
-    let missingMessageCallback = typeof onMessageNotFound === "function"
-        ? onMessageNotFound
-        : () => {};
+    let missingMessageCallback =
+        typeof onMessageNotFound === "function" ? onMessageNotFound : () => {};
     let destroyed = false;
     const highlightTimers = new Map();
-    const timerHost =
-        messageContainer.ownerDocument?.defaultView || globalThis;
+    const timerHost = messageContainer.ownerDocument?.defaultView || globalThis;
 
     function findMessage(messageId) {
         const cleanMessageId = cleanId(messageId);
@@ -104,11 +100,7 @@ export function initializeReplyNavigation({
         element.focus?.({ preventScroll: true });
 
         const timer = timerHost.setTimeout(() => {
-            restoreElement(
-                element,
-                previousTabIndex,
-                previousAriaLabel
-            );
+            restoreElement(element, previousTabIndex, previousAriaLabel);
             highlightTimers.delete(cleanMessageId);
         }, HIGHLIGHT_DURATION);
 
@@ -157,7 +149,7 @@ export function initializeReplyNavigation({
     function getReplyMessageId(replyPreview) {
         return cleanId(
             replyPreview?.dataset?.replyMessageId ||
-            replyPreview?.dataset?.messageId
+                replyPreview?.dataset?.messageId
         );
     }
 
@@ -165,15 +157,17 @@ export function initializeReplyNavigation({
         const documentReference = container?.ownerDocument;
 
         if (
-            documentReference?.documentElement?.dataset
-                ?.reducedMotion === "true"
+            documentReference?.documentElement?.dataset?.reducedMotion ===
+            "true"
         ) {
             return true;
         }
 
-        return documentReference?.defaultView
-            ?.matchMedia?.("(prefers-reduced-motion: reduce)")
-            ?.matches === true;
+        return (
+            documentReference?.defaultView?.matchMedia?.(
+                "(prefers-reduced-motion: reduce)"
+            )?.matches === true
+        );
     }
 
     function handleClick(event) {
@@ -202,9 +196,7 @@ export function initializeReplyNavigation({
         }
 
         event.preventDefault();
-        void scrollToMessage(
-            getReplyMessageId(replyPreview)
-        ).catch((error) => {
+        void scrollToMessage(getReplyMessageId(replyPreview)).catch((error) => {
             logError(error, "Unable to navigate to original message");
         });
     }

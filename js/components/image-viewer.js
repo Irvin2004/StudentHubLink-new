@@ -62,8 +62,7 @@ export function openImageViewer(imageUrl, imageName = "Image") {
     }
 
     const viewer =
-        document.getElementById("imageViewer") ||
-        createImageViewer();
+        document.getElementById("imageViewer") || createImageViewer();
 
     const image = viewer.querySelector(".image-viewer-image");
     const closeButton = viewer.querySelector(".image-viewer-close");

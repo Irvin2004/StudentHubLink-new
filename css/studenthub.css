@@ -15,6 +15,10 @@
 @import url("./components/navbar.css");
 @import url("./components/sidebar.css?v=20260723-1");
 @import url("./components/toast.css?central-errors=1");
+@import url("./components/notification-card.css");
+@import url("./components/notification-panel.css");
+@import url("./components/search-dropdown.css");
+@import url("./components/activity-feed.css");
 @import url("./components/chat.css?v=20260723-3");
 @import url("./components/reaction-bar.css?v=20260723-1");
 @import url("./components/read-receipt.css?v=20260723-1");

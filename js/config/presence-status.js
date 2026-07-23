@@ -10,14 +10,8 @@ export function isValidPresenceStatus(status) {
     return Object.values(PRESENCE_STATUS).includes(status);
 }
 
-export function getPresenceLabel(
-    status,
-    isCurrentConversation = false
-) {
-    if (
-        status === PRESENCE_STATUS.TYPING &&
-        isCurrentConversation
-    ) {
+export function getPresenceLabel(status, isCurrentConversation = false) {
+    if (status === PRESENCE_STATUS.TYPING && isCurrentConversation) {
         return "Typing...";
     }
 

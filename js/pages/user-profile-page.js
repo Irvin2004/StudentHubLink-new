@@ -1,4 +1,5 @@
-import { auth, db } from "../firebase/firebase-config.js";
+import { auth } from "../../src/firebase/auth.js";
+import { db } from "../../src/firebase/firestore.js";
 import { createResourceCard } from "../components/resource-card.js";
 import {
     areMutuals,
@@ -6,9 +7,7 @@ import {
     isFollowing,
     unfollowUser
 } from "../services/follows-service.js";
-import {
-    createOrGetConversation
-} from "../services/conversation-service.js";
+import { createOrGetConversation } from "../services/conversation-service.js";
 import { RESOURCE_STATUS } from "../utils/constants.js";
 import { setText } from "../utils/dom.js";
 import { handleError } from "../services/user-feedback-service.js";
@@ -22,17 +21,13 @@ import {
     getDocs,
     query,
     where
-} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+} from "firebase/firestore";
 
-import {
-    onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+import { onAuthStateChanged } from "firebase/auth";
 
-const params =
-new URLSearchParams(window.location.search);
+const params = new URLSearchParams(window.location.search);
 
-const userId =
-params.get("id");
+const userId = params.get("id");
 
 async function loadUserProfile() {
     if (!userId) {
@@ -40,16 +35,14 @@ async function loadUserProfile() {
         return;
     }
 
-    const userSnap =
-    await getDoc(doc(db, "users", userId));
+    const userSnap = await getDoc(doc(db, "users", userId));
 
     if (!userSnap.exists()) {
         document.body.innerHTML = "<p>User does not exist.</p>";
         return;
     }
 
-    const userData =
-    userSnap.data();
+    const userData = userSnap.data();
 
     renderProfile(userData);
     setupFollowControls(userId);
@@ -57,8 +50,7 @@ async function loadUserProfile() {
 }
 
 function renderProfile(userData) {
-    const name =
-    userData.fullName || userData.name || "Student";
+    const name = userData.fullName || userData.name || "Student";
 
     setText("profileName", name);
     setText("profileBio", userData.bio || "No bio yet.");
@@ -69,18 +61,15 @@ function renderProfile(userData) {
 }
 
 async function loadUserResources(profileUserId) {
-    const userResourcesQuery =
-    query(
+    const userResourcesQuery = query(
         collection(db, "resources"),
         where("ownerId", "==", profileUserId),
         where("status", "==", RESOURCE_STATUS.APPROVED)
     );
 
-    const snapshot =
-    await getDocs(userResourcesQuery);
+    const snapshot = await getDocs(userResourcesQuery);
 
-    const resources =
-    snapshot.docs.map((resourceDoc) => ({
+    const resources = snapshot.docs.map((resourceDoc) => ({
         id: resourceDoc.id,
         ...resourceDoc.data()
     }));
@@ -90,8 +79,7 @@ async function loadUserResources(profileUserId) {
 }
 
 function renderResources(resources) {
-    const container =
-    document.getElementById("profileResources");
+    const container = document.getElementById("profileResources");
 
     if (!container) {
         return;
@@ -107,8 +95,7 @@ function renderResources(resources) {
         return;
     }
 
-    container.innerHTML =
-    resources
+    container.innerHTML = resources
         .map((resource) =>
             createResourceCard(resource, {
                 actions: "details",
@@ -121,11 +108,9 @@ function renderResources(resources) {
 }
 
 async function setupFollowControls(profileUserId) {
-    const followButton =
-    document.getElementById("followButton");
+    const followButton = document.getElementById("followButton");
 
-    const messageButton =
-    document.getElementById("messageButton");
+    const messageButton = document.getElementById("messageButton");
 
     if (!followButton || !messageButton) {
         return;
@@ -139,10 +124,7 @@ async function setupFollowControls(profileUserId) {
             messageButton.hidden = true;
 
             followButton.onclick = () => {
-                showToast(
-                    "Please log in first.",
-                    "warning"
-                );
+                showToast("Please log in first.", "warning");
             };
 
             return;
@@ -155,25 +137,13 @@ async function setupFollowControls(profileUserId) {
         }
 
         async function refreshControls() {
-            const following =
-            await isFollowing(
-                currentUser.uid,
-                profileUserId
-            );
+            const following = await isFollowing(currentUser.uid, profileUserId);
 
-            const mutual =
-            await areMutuals(
-                currentUser.uid,
-                profileUserId
-            );
+            const mutual = await areMutuals(currentUser.uid, profileUserId);
 
-            followButton.textContent =
-            following ? "Following" : "Follow";
+            followButton.textContent = following ? "Following" : "Follow";
 
-            followButton.classList.toggle(
-                "active",
-                following
-            );
+            followButton.classList.toggle("active", following);
 
             messageButton.hidden = !mutual;
         }
@@ -182,40 +152,24 @@ async function setupFollowControls(profileUserId) {
             try {
                 followButton.disabled = true;
 
-                const following =
-                await isFollowing(
+                const following = await isFollowing(
                     currentUser.uid,
                     profileUserId
                 );
 
                 if (following) {
-                    await unfollowUser(
-                        currentUser.uid,
-                        profileUserId
-                    );
+                    await unfollowUser(currentUser.uid, profileUserId);
 
-                    showToast(
-                        "User unfollowed.",
-                        "success"
-                    );
+                    showToast("User unfollowed.", "success");
                 } else {
-                    await followUser(
-                        currentUser.uid,
-                        profileUserId
-                    );
+                    await followUser(currentUser.uid, profileUserId);
 
-                    showToast(
-                        "User followed.",
-                        "success"
-                    );
+                    showToast("User followed.", "success");
                 }
 
                 await refreshControls();
             } catch (error) {
-                handleError(
-                    error,
-                    "Unable to update follow status."
-                );
+                handleError(error, "Unable to update follow status.");
             } finally {
                 followButton.disabled = false;
             }
@@ -224,26 +178,19 @@ async function setupFollowControls(profileUserId) {
         messageButton.onclick = async () => {
             try {
                 messageButton.disabled = true;
-                messageButton.textContent =
-                "Opening...";
+                messageButton.textContent = "Opening...";
 
-                const conversation =
-                await createOrGetConversation(
+                const conversation = await createOrGetConversation(
                     currentUser.uid,
                     profileUserId
                 );
 
-                window.location.href =
-                `chat.html?id=${conversation.id}`;
+                window.location.href = `chat.html?id=${conversation.id}`;
             } catch (error) {
-                handleError(
-                    error,
-                    "Unable to open conversation."
-                );
+                handleError(error, "Unable to open conversation.");
 
                 messageButton.disabled = false;
-                messageButton.textContent =
-                "Message";
+                messageButton.textContent = "Message";
             }
         };
 

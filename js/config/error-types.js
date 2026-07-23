@@ -7,6 +7,4 @@ export const ERROR_TYPES = Object.freeze({
     ERROR: "error"
 });
 
-export const ALLOWED_ERROR_TYPES = Object.freeze(
-    Object.values(ERROR_TYPES)
-);
+export const ALLOWED_ERROR_TYPES = Object.freeze(Object.values(ERROR_TYPES));

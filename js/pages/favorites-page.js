@@ -4,30 +4,25 @@ import {
     getDocs,
     query,
     where
-} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+} from "firebase/firestore";
 
-import {
-    onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+import { onAuthStateChanged } from "firebase/auth";
 
-import { auth, db } from "../firebase/firebase-config.js";
+import { auth } from "../../src/firebase/auth.js";
+import { db } from "../../src/firebase/firestore.js";
 import { createEmptyState } from "../components/empty-state.js";
 import { createResourceCard } from "../components/resource-card.js";
 import { COLLECTIONS } from "../config/firestore.js";
 import { getFavoriteIds } from "../services/favorites-service.js";
-import {
-    createFavoritesController
-} from "../controllers/favorites-controller.js";
+import { createFavoritesController } from "../controllers/favorites-controller.js";
 import { showSkeleton } from "../renderers/skeleton-renderer.js";
 import { SKELETON_TYPES } from "../config/skeleton-types.js";
 import { handleError } from "../services/user-feedback-service.js";
 
-const FIRESTORE_IN_LIMIT =
-10;
+const FIRESTORE_IN_LIMIT = 10;
 
 function chunkIds(ids) {
-    const chunks =
-    [];
+    const chunks = [];
 
     for (let index = 0; index < ids.length; index += FIRESTORE_IN_LIMIT) {
         chunks.push(ids.slice(index, index + FIRESTORE_IN_LIMIT));
@@ -37,17 +32,14 @@ function chunkIds(ids) {
 }
 
 async function getFavoriteResources(favoriteIds) {
-    const resourceBatches =
-    await Promise.all(
+    const resourceBatches = await Promise.all(
         chunkIds(favoriteIds).map(async (ids) => {
-            const favoritesQuery =
-            query(
+            const favoritesQuery = query(
                 collection(db, COLLECTIONS.RESOURCES),
                 where(documentId(), "in", ids)
             );
 
-            const snapshot =
-            await getDocs(favoritesQuery);
+            const snapshot = await getDocs(favoritesQuery);
 
             return snapshot.docs.map((resourceDoc) => ({
                 id: resourceDoc.id,
@@ -56,8 +48,7 @@ async function getFavoriteResources(favoriteIds) {
         })
     );
 
-    const resources =
-    resourceBatches.flat();
+    const resources = resourceBatches.flat();
 
     return favoriteIds
         .map((favoriteId) =>
@@ -67,36 +58,31 @@ async function getFavoriteResources(favoriteIds) {
 }
 
 async function renderFavorites(favoriteIds) {
-    const grid =
-    document.getElementById("favoritesGrid");
+    const grid = document.getElementById("favoritesGrid");
 
     if (!grid) {
         return;
     }
 
     if (!favoriteIds.length) {
-        grid.innerHTML =
-        createEmptyState(
+        grid.innerHTML = createEmptyState(
             "No favorites yet",
-            "Save resources to see them here.",
+            "Save resources to see them here."
         );
         return;
     }
 
-    const resources =
-    await getFavoriteResources(favoriteIds);
+    const resources = await getFavoriteResources(favoriteIds);
 
     if (!resources.length) {
-        grid.innerHTML =
-        createEmptyState(
+        grid.innerHTML = createEmptyState(
             "No favorites found",
-            "Saved resources may no longer be available.",
+            "Saved resources may no longer be available."
         );
         return;
     }
 
-    grid.innerHTML =
-    resources
+    grid.innerHTML = resources
         .map((resource) =>
             createResourceCard(resource, {
                 isFavorite: true,
@@ -109,35 +95,35 @@ async function renderFavorites(favoriteIds) {
 const favoritesController = createFavoritesController();
 favoritesController.initialize();
 
-window.addEventListener("pagehide", (event) => {
-    if (!event.persisted) {
-        favoritesController.destroy();
-    }
-}, { once: true });
+window.addEventListener(
+    "pagehide",
+    (event) => {
+        if (!event.persisted) {
+            favoritesController.destroy();
+        }
+    },
+    { once: true }
+);
 
 onAuthStateChanged(auth, async (user) => {
-    const grid =
-    document.getElementById("favoritesGrid");
+    const grid = document.getElementById("favoritesGrid");
 
     if (!user) {
-        window.location.href =
-        "../login.html";
+        window.location.href = "../login.html";
         return;
     }
 
     try {
         showSkeleton(grid, SKELETON_TYPES.FILE);
 
-        const favoriteIds =
-        await getFavoriteIds(user.uid);
+        const favoriteIds = await getFavoriteIds(user.uid);
 
         await renderFavorites(favoriteIds);
     } catch (error) {
         handleError(error, "Unable to load favorites.");
 
         if (grid) {
-            grid.innerHTML =
-            createEmptyState(
+            grid.innerHTML = createEmptyState(
                 "Could not load favorites",
                 "Please try again.",
                 "&#9888;"

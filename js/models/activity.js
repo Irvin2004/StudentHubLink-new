@@ -1,9 +1,6 @@
 "use strict";
 
-import {
-    ACTIVITY_TYPES,
-    isValidActivityType
-} from "../config/activity-types.js";
+import { isValidActivityType } from "../config/activity-types.js";
 
 function normalizeText(value) {
     return String(value || "").trim();
@@ -29,8 +26,7 @@ export function validateActivity(activity = {}) {
     }
 
     if (title.length > 160) {
-        errors.title =
-            "Activity title cannot exceed 160 characters.";
+        errors.title = "Activity title cannot exceed 160 characters.";
     }
 
     return {
@@ -59,8 +55,7 @@ export function createActivityModel(activity = {}) {
         groupId: normalizeText(activity.groupId),
         referenceId: normalizeText(activity.referenceId),
 
-        visibility:
-            normalizeText(activity.visibility) || "group",
+        visibility: normalizeText(activity.visibility) || "group",
 
         metadata: {
             ...(activity.metadata || {})

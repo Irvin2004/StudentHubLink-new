@@ -49,11 +49,7 @@
     display: grid;
     place-items: center;
     border-radius: 50%;
-    background: color-mix(
-        in srgb,
-        var(--toast-accent) 16%,
-        var(--surface)
-    );
+    background: color-mix(in srgb, var(--toast-accent) 16%, var(--surface));
     color: var(--toast-accent);
     font-size: 1.15rem;
     font-weight: 800;

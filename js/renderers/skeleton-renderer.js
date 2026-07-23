@@ -39,11 +39,7 @@ function getResponsiveCount(container, type, requestedCount) {
 export function showSkeleton(container, type, options = {}) {
     const target = requireContainer(container);
     const normalizedType = String(type || "").toLowerCase();
-    const count = getResponsiveCount(
-        target,
-        normalizedType,
-        options.count
-    );
+    const count = getResponsiveCount(target, normalizedType, options.count);
 
     target.setAttribute("aria-busy", "true");
     target.innerHTML = createSkeleton(

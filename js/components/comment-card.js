@@ -2,8 +2,7 @@ import { escapeHtml } from "../utils/dom.js";
 import { formatDate } from "../utils/format-date.js";
 
 export function createCommentCard(comment, currentUserId = null) {
-    const isOwner =
-    comment.userId === currentUserId;
+    const isOwner = comment.userId === currentUserId;
 
     return `
         <article class="comment-card">

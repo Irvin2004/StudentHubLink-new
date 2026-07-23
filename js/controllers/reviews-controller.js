@@ -1,15 +1,12 @@
 "use strict";
 
-import { auth } from "../firebase/firebase-config.js";
+import { auth } from "../../src/firebase/auth.js";
 import {
     addReview,
     getReviewsForResource
 } from "../services/reviews-service.js";
 import { renderReviews } from "../renderers/review-renderer.js";
-import {
-    handleError,
-    showToast
-} from "../services/user-feedback-service.js";
+import { handleError, showToast } from "../services/user-feedback-service.js";
 
 /**
  * Creates the reviews controller for a resource.
@@ -40,9 +37,7 @@ export function createReviewsController({
             ...updatedResource
         };
 
-        const reviews = await getReviewsForResource(
-            currentResource.id
-        );
+        const reviews = await getReviewsForResource(currentResource.id);
 
         return renderReviews({
             resource: currentResource,
@@ -68,10 +63,8 @@ export function createReviewsController({
                 resourceId: currentResource.id,
                 userId: user.uid,
                 userName: user.displayName || "Student",
-                rating:
-                    document.getElementById("ratingSelect")?.value,
-                review:
-                    document.getElementById("reviewInput")?.value
+                rating: document.getElementById("ratingSelect")?.value,
+                review: document.getElementById("reviewInput")?.value
             });
 
             form?.reset();

@@ -43,9 +43,7 @@ export function debounce(callback, delay = 250) {
         latestContext = null;
     };
 
-    debounced.flush = () => (
-        timer ? invoke() : undefined
-    );
+    debounced.flush = () => (timer ? invoke() : undefined);
 
     debounced.pending = () => timer !== null;
 

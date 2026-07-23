@@ -1,11 +1,6 @@
-import {
-    doc,
-    increment,
-    serverTimestamp,
-    updateDoc
-} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+import { doc, increment, serverTimestamp, updateDoc } from "firebase/firestore";
 
-import { db } from "../firebase/firebase-config.js";
+import { db } from "../../src/firebase/firestore.js";
 import { addToLibrary } from "../pages/library-page.js";
 import { awardAchievement } from "./achievement-service.js";
 import { createNotification } from "./notification-service.js";

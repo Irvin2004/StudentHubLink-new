@@ -10,15 +10,14 @@ export function initializeConversationViewTabs(
         throw new Error("Conversation view tabs are required.");
     }
 
-    let currentView = VALID_VIEWS.has(initialView)
-        ? initialView
-        : "inbox";
+    let currentView = VALID_VIEWS.has(initialView) ? initialView : "inbox";
 
     const updateTabs = () => {
-        container.querySelectorAll("[data-conversation-view]")
+        container
+            .querySelectorAll("[data-conversation-view]")
             .forEach((button) => {
-                const selected = button.dataset.conversationView ===
-                    currentView;
+                const selected =
+                    button.dataset.conversationView === currentView;
                 button.setAttribute("aria-selected", String(selected));
                 button.tabIndex = selected ? 0 : -1;
             });

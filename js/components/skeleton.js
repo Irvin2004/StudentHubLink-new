@@ -57,9 +57,10 @@ function createMessageItem(index) {
 }
 
 function createListItem(type) {
-    const iconClass = type === SKELETON_TYPES.CHANNEL
-        ? "skeleton__icon skeleton__icon--square"
-        : "skeleton__avatar";
+    const iconClass =
+        type === SKELETON_TYPES.CHANNEL
+            ? "skeleton__icon skeleton__icon--square"
+            : "skeleton__avatar";
 
     return `
         <div class="skeleton-item skeleton-list-item">
@@ -140,9 +141,8 @@ export function createSkeleton(type, options = {}) {
     const normalizedType = normalizeType(type);
     const count = normalizeCount(normalizedType, options.count);
     const layoutClass = normalizedType;
-    const items = Array.from(
-        { length: count },
-        (_, index) => createItem(normalizedType, index)
+    const items = Array.from({ length: count }, (_, index) =>
+        createItem(normalizedType, index)
     ).join("");
 
     return `

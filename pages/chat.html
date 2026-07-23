@@ -1,125 +1,119 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StudentHub Chat</title>
-    <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
-    <link rel="stylesheet" href="../css/studenthub.css?v=20260723-13">
-</head>
-<body data-page="chat">
-<main class="chat-page">
-    <section class="chat-card">
-        <header class="chat-header">
-            <a href="javascript:history.back()">
-                &larr; Back
-            </a>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>StudentHub Chat</title>
+        <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
+    </head>
+    <body data-page="chat">
+        <main class="chat-page">
+            <section class="chat-card">
+                <header class="chat-header">
+                    <a href="javascript:history.back()"> &larr; Back </a>
 
-            <a
-                id="chatHeaderLink"
-                class="chat-header-details"
-                href="#"
-                aria-label="Conversation details">
-                <h1 id="chatUserName">
-                    Conversation
-                </h1>
+                    <a
+                        id="chatHeaderLink"
+                        class="chat-header-details"
+                        href="#"
+                        aria-label="Conversation details"
+                    >
+                        <h1 id="chatUserName">Conversation</h1>
 
-                <p id="chatStatus">
-                    Mutual connection
-                </p>
-            </a>
-        </header>
+                        <p id="chatStatus">Mutual connection</p>
+                    </a>
+                </header>
 
-        <div
-            id="messageList"
-            class="message-list">
-        </div>
+                <div id="messageList" class="message-list"></div>
 
-        <p
-            id="typingIndicator"
-            class="typing-indicator"
-            role="status"
-            aria-live="polite"
-            aria-atomic="true"
-            hidden>
-            Someone is typing...
-        </p>
-
-        <div class="chat-composer">
-            <div
-                id="replyPreview"
-                class="reply-preview hidden">
-                <div class="reply-content">
-                    <strong id="replySender"></strong>
-                    <p id="replyText"></p>
-                </div>
-
-                <button
-                    id="cancelReply"
-                    type="button"
-                    aria-label="Cancel reply">
-                    &#10005;
-                </button>
-            </div>
-
-            <form
-                id="messageForm"
-                class="message-form chat-input">
-                <button
-                    id="attachButton"
-                    class="icon-button"
-                    type="button"
-                    title="Attach file"
-                    aria-label="Attach file">
-                    &#128206;
-                </button>
-
-                <input
-                    id="attachmentInput"
-                    type="file"
+                <p
+                    id="typingIndicator"
+                    class="typing-indicator"
+                    role="status"
+                    aria-live="polite"
+                    aria-atomic="true"
                     hidden
-                    accept="image/*,.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.zip">
+                >
+                    Someone is typing...
+                </p>
 
-                <textarea
-                    id="messageInput"
-                    rows="2"
-                    maxlength="1000"
-                    placeholder="Type a message..."
-                    required></textarea>
+                <div class="chat-composer">
+                    <div id="replyPreview" class="reply-preview hidden">
+                        <div class="reply-content">
+                            <strong id="replySender"></strong>
+                            <p id="replyText"></p>
+                        </div>
 
-                <label
-                    class="visually-hidden"
-                    for="messageInput">
-                    Message
-                </label>
+                        <button
+                            id="cancelReply"
+                            type="button"
+                            aria-label="Cancel reply"
+                        >
+                            &#10005;
+                        </button>
+                    </div>
 
-                <button
-                    id="sendButton"
-                    class="primary-btn primary-button"
-                    type="submit">
-                    Send
-                </button>
-            </form>
+                    <form id="messageForm" class="message-form chat-input">
+                        <button
+                            id="attachButton"
+                            class="icon-button"
+                            type="button"
+                            title="Attach file"
+                            aria-label="Attach file"
+                        >
+                            &#128206;
+                        </button>
 
-            <div
-                id="uploadProgressContainer"
-                class="upload-progress hidden"
-                role="progressbar"
-                aria-label="Attachment upload progress"
-                aria-valuemin="0"
-                aria-valuemax="100"
-                aria-valuenow="0">
-                <div
-                    id="uploadProgressBar"
-                    class="upload-progress-bar">
+                        <input
+                            id="attachmentInput"
+                            type="file"
+                            hidden
+                            accept="image/*,.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.zip"
+                        />
+
+                        <textarea
+                            id="messageInput"
+                            rows="2"
+                            maxlength="1000"
+                            placeholder="Type a message..."
+                            required
+                        ></textarea>
+
+                        <label class="visually-hidden" for="messageInput">
+                            Message
+                        </label>
+
+                        <button
+                            id="sendButton"
+                            class="primary-btn primary-button"
+                            type="submit"
+                        >
+                            Send
+                        </button>
+                    </form>
+
+                    <div
+                        id="uploadProgressContainer"
+                        class="upload-progress hidden"
+                        role="progressbar"
+                        aria-label="Attachment upload progress"
+                        aria-valuemin="0"
+                        aria-valuemax="100"
+                        aria-valuenow="0"
+                    >
+                        <div
+                            id="uploadProgressBar"
+                            class="upload-progress-bar"
+                        ></div>
+                    </div>
                 </div>
-            </div>
-        </div>
-    </section>
-</main>
+            </section>
+        </main>
 
-<script
-    type="module"
-    src="../js/controllers/chat-controller.js?skeletons=1"></script>
-</body>
+        <script
+            type="module"
+            src="../js/controllers/chat-controller.js?skeletons=1"
+        ></script>
+        <script type="module" src="/src/main.js"></script>
+    </body>
 </html>

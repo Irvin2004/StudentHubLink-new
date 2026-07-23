@@ -8,8 +8,7 @@ export function escapeHtml(value) {
 }
 
 export function setText(id, value) {
-    const element =
-    document.getElementById(id);
+    const element = document.getElementById(id);
 
     if (element) {
         element.textContent = value;
@@ -17,8 +16,7 @@ export function setText(id, value) {
 }
 
 export function setMessage(id, value, type = "") {
-    const element =
-    document.getElementById(id);
+    const element = document.getElementById(id);
 
     if (!element) {
         return;
@@ -38,11 +36,9 @@ export function setButtonLoading(button, isLoading, loadingText) {
     }
 
     if (!button.dataset.defaultText) {
-        button.dataset.defaultText =
-        button.textContent.trim();
+        button.dataset.defaultText = button.textContent.trim();
     }
 
     button.disabled = isLoading;
-    button.textContent =
-    isLoading ? loadingText : button.dataset.defaultText;
+    button.textContent = isLoading ? loadingText : button.dataset.defaultText;
 }

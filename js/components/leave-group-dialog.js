@@ -12,10 +12,7 @@ export function openLeaveGroupDialog(groupName) {
     dialog.className = "modal-overlay leave-group-dialog";
     dialog.setAttribute("role", "dialog");
     dialog.setAttribute("aria-modal", "true");
-    dialog.setAttribute(
-        "aria-labelledby",
-        "leaveGroupDialogTitle"
-    );
+    dialog.setAttribute("aria-labelledby", "leaveGroupDialogTitle");
 
     dialog.innerHTML = `
         <form class="modal-card leave-group-card">
@@ -58,10 +55,7 @@ export function openLeaveGroupDialog(groupName) {
             }
 
             finished = true;
-            document.removeEventListener(
-                "keydown",
-                onKeydown
-            );
+            document.removeEventListener("keydown", onKeydown);
             dialog.remove();
             activeDialog = null;
 
@@ -86,22 +80,15 @@ export function openLeaveGroupDialog(groupName) {
 
         dialog
             .querySelector("[data-leave-cancel]")
-            ?.addEventListener(
-                "click",
-                () => finish(false)
-            );
+            ?.addEventListener("click", () => finish(false));
 
-        dialog
-            .querySelector("form")
-            ?.addEventListener("submit", (event) => {
-                event.preventDefault();
-                finish(true);
-            });
+        dialog.querySelector("form")?.addEventListener("submit", (event) => {
+            event.preventDefault();
+            finish(true);
+        });
 
         document.addEventListener("keydown", onKeydown);
 
-        dialog
-            .querySelector("[data-leave-cancel]")
-            ?.focus();
+        dialog.querySelector("[data-leave-cancel]")?.focus();
     });
 }

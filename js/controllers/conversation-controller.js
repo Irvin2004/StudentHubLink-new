@@ -7,9 +7,7 @@ import {
     toggleMuteConversation,
     unpinConversation
 } from "../services/conversation-service.js?preferences=5";
-import {
-    CONVERSATION_PREFERENCES
-} from "../config/conversation-preference-types.js";
+import { CONVERSATION_PREFERENCES } from "../config/conversation-preference-types.js";
 import {
     bindContextMenuInteractions,
     createContextMenu,
@@ -30,18 +28,20 @@ export function prepareConversations({
     preferences = new Map(),
     view = "inbox"
 } = {}) {
-    const preferenceMap = preferences instanceof Map
-        ? preferences
-        : new Map(Object.entries(preferences || {}));
-    const visibleConversations = view === "search"
-        ? [...conversations]
-        : conversations.filter((item) => {
-            const conversation = item.conversation || item;
-            const archived = Boolean(
-                preferenceMap.get(conversation.id)?.archived
-            );
-            return archived === (view === "archived");
-        });
+    const preferenceMap =
+        preferences instanceof Map
+            ? preferences
+            : new Map(Object.entries(preferences || {}));
+    const visibleConversations =
+        view === "search"
+            ? [...conversations]
+            : conversations.filter((item) => {
+                  const conversation = item.conversation || item;
+                  const archived = Boolean(
+                      preferenceMap.get(conversation.id)?.archived
+                  );
+                  return archived === (view === "archived");
+              });
 
     return sortConversations(visibleConversations, preferenceMap, {
         prioritizePinned: view !== "archived"
@@ -106,9 +106,7 @@ export function initializeConversationPreferences({
             },
             {
                 id: isGroup ? "leave" : "delete",
-                label: isGroup
-                    ? "Leave conversation"
-                    : "Delete conversation",
+                label: isGroup ? "Leave conversation" : "Delete conversation",
                 icon: "🗑️",
                 danger: true,
                 disabled: !isGroup,
@@ -125,7 +123,10 @@ export function initializeConversationPreferences({
         try {
             if (action === CONVERSATION_PREFERENCES.PINNED) {
                 if (preference?.pinned) {
-                    await unpinConversation(cleanUserId, context.conversationId);
+                    await unpinConversation(
+                        cleanUserId,
+                        context.conversationId
+                    );
                 } else {
                     await pinConversation(cleanUserId, context.conversationId);
                 }
@@ -149,9 +150,10 @@ export function initializeConversationPreferences({
             }
 
             if (action === "details") {
-                const page = context.type === "group"
-                    ? `group-details.html?id=${encodeURIComponent(context.groupId)}`
-                    : `user-profile.html?id=${encodeURIComponent(context.otherUserId)}`;
+                const page =
+                    context.type === "group"
+                        ? `group-details.html?id=${encodeURIComponent(context.groupId)}`
+                        : `user-profile.html?id=${encodeURIComponent(context.otherUserId)}`;
                 window.location.href = page;
                 return;
             }
@@ -167,15 +169,15 @@ export function initializeConversationPreferences({
             }
         } catch (error) {
             const messages = {
-                [CONVERSATION_PREFERENCES.PINNED]:
-                    `Unable to ${preference?.pinned ? "unpin" : "pin"} conversation.`,
-                [CONVERSATION_PREFERENCES.MUTED]:
-                    `Unable to ${preference?.muted ? "unmute" : "mute"} conversation.`,
-                [CONVERSATION_PREFERENCES.ARCHIVED]:
-                    `Unable to ${preference?.archived ? "restore" : "archive"} conversation.`,
+                [CONVERSATION_PREFERENCES.PINNED]: `Unable to ${preference?.pinned ? "unpin" : "pin"} conversation.`,
+                [CONVERSATION_PREFERENCES.MUTED]: `Unable to ${preference?.muted ? "unmute" : "mute"} conversation.`,
+                [CONVERSATION_PREFERENCES.ARCHIVED]: `Unable to ${preference?.archived ? "restore" : "archive"} conversation.`,
                 leave: "Unable to leave conversation."
             };
-            reportError(error, messages[action] || "Unable to update conversation.");
+            reportError(
+                error,
+                messages[action] || "Unable to update conversation."
+            );
         }
     };
 
@@ -199,27 +201,28 @@ export function initializeConversationPreferences({
         openMenu(trigger.closest("[data-conversation-entry]"), trigger);
     };
 
-    const destroyContextMenuInteractions =
-        bindContextMenuInteractions({
-            container,
-            targetSelector: "[data-conversation-entry]",
-            onOpen({ target: entry, x, y }) {
-                const trigger = entry.querySelector(
-                    "[data-conversation-menu-trigger]"
-                );
-                openMenu(entry, trigger, { x, y });
-            }
-        });
+    const destroyContextMenuInteractions = bindContextMenuInteractions({
+        container,
+        targetSelector: "[data-conversation-entry]",
+        onOpen({ target: entry, x, y }) {
+            const trigger = entry.querySelector(
+                "[data-conversation-menu-trigger]"
+            );
+            openMenu(entry, trigger, { x, y });
+        }
+    });
 
     container.addEventListener("click", handleClick);
 
     const unsubscribe = subscribeToConversationPreferences(
         cleanUserId,
         (items) => {
-            preferences = new Map(items.map((preference) => [
-                preference.conversationId,
-                preference
-            ]));
+            preferences = new Map(
+                items.map((preference) => [
+                    preference.conversationId,
+                    preference
+                ])
+            );
             onPreferencesChange(new Map(preferences));
         },
         (error) => {

@@ -8,14 +8,12 @@ const FOCUSABLE_SELECTOR = [
 ].join(",");
 
 function getFocusableElements(container) {
-    return Array.from(container.querySelectorAll(FOCUSABLE_SELECTOR))
-        .filter((element) => !element.hidden);
+    return Array.from(container.querySelectorAll(FOCUSABLE_SELECTOR)).filter(
+        (element) => !element.hidden
+    );
 }
 
-export function activateFocusTrap(container, {
-    initialFocus,
-    onEscape
-} = {}) {
+export function activateFocusTrap(container, { initialFocus, onEscape } = {}) {
     const previousFocus = document.activeElement;
     const activeRoot = Array.from(document.body.children).find(
         (element) => element === container || element.contains(container)

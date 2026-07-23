@@ -1,10 +1,9 @@
-import { auth, db } from "../firebase/firebase-config.js";
+import { auth } from "../../src/firebase/auth.js";
+import { db } from "../../src/firebase/firestore.js";
 import { createEmptyState } from "../components/empty-state.js";
 import { createResourceCard } from "../components/resource-card.js";
 import { filterResources } from "../utils/filter-resources.js";
-import {
-    createFavoritesController
-} from "../controllers/favorites-controller.js";
+import { createFavoritesController } from "../controllers/favorites-controller.js";
 import { handleResourceAction } from "../services/marketplace-actions-service.js";
 import { searchResources } from "../utils/search.js";
 import { sortResources } from "../utils/sort-resources.js";
@@ -15,10 +14,7 @@ import {
 } from "../utils/constants.js";
 import { setText } from "../utils/dom.js";
 import { formatPrice } from "../utils/format-price.js";
-import {
-    hideSkeleton,
-    showSkeleton
-} from "../renderers/skeleton-renderer.js";
+import { hideSkeleton, showSkeleton } from "../renderers/skeleton-renderer.js";
 import { SKELETON_TYPES } from "../config/skeleton-types.js";
 import { warn, error as logError } from "../utils/logger.js";
 import { showToast } from "../services/user-feedback-service.js";
@@ -33,12 +29,9 @@ import {
     orderBy,
     query,
     where
-}
-from
-"https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+} from "firebase/firestore";
 
-const resourceGrid =
-document.getElementById("resourceGrid");
+const resourceGrid = document.getElementById("resourceGrid");
 
 const marketplaceState = {
     allResources: [],
@@ -49,8 +42,7 @@ const marketplaceState = {
 };
 
 async function getApprovedResources() {
-    const approvedResourcesQuery =
-    query(
+    const approvedResourcesQuery = query(
         collection(db, "resources"),
         where("status", "==", RESOURCE_STATUS.APPROVED),
         orderBy("createdAt", "desc"),
@@ -58,37 +50,37 @@ async function getApprovedResources() {
     );
 
     try {
-        const snapshot =
-        await getDocs(approvedResourcesQuery);
+        const snapshot = await getDocs(approvedResourcesQuery);
 
         return snapshot.docs.map((resourceDoc) => ({
             id: resourceDoc.id,
             ...resourceDoc.data()
         }));
     } catch (error) {
-        warn("FIRESTORE", "Ordered marketplace query failed, retrying without orderBy:", error);
+        warn(
+            "FIRESTORE",
+            "Ordered marketplace query failed, retrying without orderBy:",
+            error
+        );
     }
 
-    const fallbackQuery =
-    query(
+    const fallbackQuery = query(
         collection(db, "resources"),
         where("status", "==", RESOURCE_STATUS.APPROVED),
         limit(100)
     );
 
-    const snapshot =
-    await getDocs(fallbackQuery);
+    const snapshot = await getDocs(fallbackQuery);
 
-    return snapshot.docs.map((resourceDoc) => ({
-        id: resourceDoc.id,
-        ...resourceDoc.data()
-    }))
+    return snapshot.docs
+        .map((resourceDoc) => ({
+            id: resourceDoc.id,
+            ...resourceDoc.data()
+        }))
         .sort((firstResource, secondResource) => {
-            const firstCreatedAt =
-            firstResource.createdAt?.toMillis?.() || 0;
+            const firstCreatedAt = firstResource.createdAt?.toMillis?.() || 0;
 
-            const secondCreatedAt =
-            secondResource.createdAt?.toMillis?.() || 0;
+            const secondCreatedAt = secondResource.createdAt?.toMillis?.() || 0;
 
             return secondCreatedAt - firstCreatedAt;
         });
@@ -100,8 +92,7 @@ function renderMarketplace(resources) {
     }
 
     if (resources.length === 0) {
-        resourceGrid.innerHTML =
-        createEmptyState(
+        resourceGrid.innerHTML = createEmptyState(
             "No resources found",
             "Try changing your search or filters.",
             "&#128269;"
@@ -110,8 +101,7 @@ function renderMarketplace(resources) {
         return;
     }
 
-    resourceGrid.innerHTML =
-    resources
+    resourceGrid.innerHTML = resources
         .map((resource) =>
             createResourceCard(resource, {
                 actions: "marketplace",
@@ -125,27 +115,20 @@ function renderMarketplace(resources) {
 }
 
 function updateMarketplace() {
-    let results =
-    searchResources(
+    let results = searchResources(
         marketplaceState.allResources,
         marketplaceState.search
     );
 
-    results =
-    filterResources(results, {
+    results = filterResources(results, {
         category: marketplaceState.category,
         price: marketplaceState.price
     });
 
-    results =
-    sortResources(
-        results,
-        marketplaceState.sort
-    );
+    results = sortResources(results, marketplaceState.sort);
 
     if (!results.length) {
-        resourceGrid.innerHTML =
-        createEmptyState(
+        resourceGrid.innerHTML = createEmptyState(
             "No resources found",
             "Try changing your search term or filters.",
             "&#128269;"
@@ -164,16 +147,14 @@ async function loadMarketplace() {
     showSkeleton(resourceGrid, SKELETON_TYPES.FILE);
 
     try {
-        marketplaceState.allResources =
-        await getApprovedResources();
+        marketplaceState.allResources = await getApprovedResources();
 
         hideSkeleton(resourceGrid);
         updateMarketplace();
     } catch (error) {
         logError("FIRESTORE", "Marketplace load failed:", error);
 
-        resourceGrid.innerHTML =
-        createEmptyState(
+        resourceGrid.innerHTML = createEmptyState(
             "Could not load resources",
             "Please try again.",
             "&#9888;"
@@ -184,8 +165,9 @@ async function loadMarketplace() {
 let selectedResource = null;
 
 function openResourceModal(resourceId) {
-    selectedResource =
-        marketplaceState.allResources.find(resource => resource.id === resourceId);
+    selectedResource = marketplaceState.allResources.find(
+        (resource) => resource.id === resourceId
+    );
 
     if (!selectedResource) return;
 
@@ -193,7 +175,10 @@ function openResourceModal(resourceId) {
 
     setText("modalTitle", selectedResource.title || "Untitled resource");
 
-    setText("modalDescription", selectedResource.description || "No description available.");
+    setText(
+        "modalDescription",
+        selectedResource.description || "No description available."
+    );
 
     setText("modalOwner", selectedResource.ownerName || "Unknown Author");
 
@@ -203,9 +188,9 @@ function openResourceModal(resourceId) {
 
     setText(
         "modalAction",
-        getResourceAction(selectedResource) === RESOURCE_ACTION.PURCHASE ?
-        "Buy Resource" :
-        "Download"
+        getResourceAction(selectedResource) === RESOURCE_ACTION.PURCHASE
+            ? "Buy Resource"
+            : "Download"
     );
 
     document.getElementById("resourceModal").classList.add("show");
@@ -224,14 +209,17 @@ document.addEventListener("click", (event) => {
     }
 });
 
-document.getElementById("closeResourceModal")?.addEventListener("click", closeResourceModal);
-document.getElementById("modalCancel")?.addEventListener("click", closeResourceModal);
+document
+    .getElementById("closeResourceModal")
+    ?.addEventListener("click", closeResourceModal);
+document
+    .getElementById("modalCancel")
+    ?.addEventListener("click", closeResourceModal);
 
 document.getElementById("modalAction")?.addEventListener("click", async () => {
     if (!selectedResource) return;
 
-    const user =
-    auth.currentUser;
+    const user = auth.currentUser;
 
     if (!user) {
         showToast("Please login first.", "warning");
@@ -241,9 +229,9 @@ document.getElementById("modalAction")?.addEventListener("click", async () => {
     await handleResourceAction(selectedResource, user);
 
     showToast(
-        getResourceAction(selectedResource) === RESOURCE_ACTION.PURCHASE ?
-        "Demo purchase complete." :
-        "Demo download recorded.",
+        getResourceAction(selectedResource) === RESOURCE_ACTION.PURCHASE
+            ? "Demo purchase complete."
+            : "Demo download recorded.",
         "success"
     );
 
@@ -251,22 +239,17 @@ document.getElementById("modalAction")?.addEventListener("click", async () => {
 });
 
 function bindMarketplaceControls() {
-    const searchInput =
-    document.getElementById("resourceSearch");
+    const searchInput = document.getElementById("resourceSearch");
 
-    const sortSelect =
-    document.getElementById("sortResources");
+    const sortSelect = document.getElementById("sortResources");
 
-    const priceSelect =
-    document.getElementById("priceFilter");
+    const priceSelect = document.getElementById("priceFilter");
 
-    const categoryButtons =
-    document.querySelectorAll(".filter-btn");
+    const categoryButtons = document.querySelectorAll(".filter-btn");
 
     if (searchInput) {
         const scheduleSearch = debounce((value) => {
-            marketplaceState.search =
-            value;
+            marketplaceState.search = value;
 
             updateMarketplace();
         }, SEARCH_DELAY);
@@ -274,15 +257,18 @@ function bindMarketplaceControls() {
         searchInput.addEventListener("input", (event) => {
             scheduleSearch(event.target.value);
         });
-        window.addEventListener("pagehide", () => {
-            scheduleSearch.cancel();
-        }, { once: true });
+        window.addEventListener(
+            "pagehide",
+            () => {
+                scheduleSearch.cancel();
+            },
+            { once: true }
+        );
     }
 
     if (priceSelect) {
         priceSelect.addEventListener("change", (event) => {
-            marketplaceState.price =
-            event.target.value;
+            marketplaceState.price = event.target.value;
 
             updateMarketplace();
         });
@@ -290,8 +276,7 @@ function bindMarketplaceControls() {
 
     if (sortSelect) {
         sortSelect.addEventListener("change", (event) => {
-            marketplaceState.sort =
-            event.target.value;
+            marketplaceState.sort = event.target.value;
 
             updateMarketplace();
         });
@@ -299,14 +284,11 @@ function bindMarketplaceControls() {
 
     categoryButtons.forEach((button) => {
         button.addEventListener("click", () => {
-            categoryButtons.forEach((item) =>
-                item.classList.remove("active")
-            );
+            categoryButtons.forEach((item) => item.classList.remove("active"));
 
             button.classList.add("active");
 
-            marketplaceState.category =
-            button.dataset.category || "All";
+            marketplaceState.category = button.dataset.category || "All";
 
             updateMarketplace();
         });
@@ -318,10 +300,14 @@ if (resourceGrid) {
     const favoritesController = createFavoritesController();
     favoritesController.initialize();
 
-    window.addEventListener("pagehide", (event) => {
-        if (!event.persisted) {
-            favoritesController.destroy();
-        }
-    }, { once: true });
+    window.addEventListener(
+        "pagehide",
+        (event) => {
+            if (!event.persisted) {
+                favoritesController.destroy();
+            }
+        },
+        { once: true }
+    );
     loadMarketplace();
 }

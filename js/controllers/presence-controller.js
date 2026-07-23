@@ -1,10 +1,8 @@
 "use strict";
 
-import {
-    onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+import { onAuthStateChanged } from "firebase/auth";
 
-import { auth } from "../firebase/firebase-config.js";
+import { auth } from "../../src/firebase/auth.js";
 import { PRESENCE_STATUS } from "../config/presence-status.js";
 import {
     setUserOffline,
@@ -81,10 +79,7 @@ function initializeApplicationPresence() {
             destroyed = true;
 
             unsubscribeAuth();
-            window.removeEventListener(
-                "beforeunload",
-                handleBeforeUnload
-            );
+            window.removeEventListener("beforeunload", handleBeforeUnload);
             applicationController = null;
         }
     };
@@ -118,18 +113,18 @@ function initializeConversationPresence({
     renderPresence(
         {
             userId: observedUserId,
-            status: observedUserId === cleanCurrentUserId
-                ? PRESENCE_STATUS.ONLINE
-                : PRESENCE_STATUS.OFFLINE,
+            status:
+                observedUserId === cleanCurrentUserId
+                    ? PRESENCE_STATUS.ONLINE
+                    : PRESENCE_STATUS.OFFLINE,
             conversationId: ""
         },
         container,
         cleanConversationId
     );
 
-    runPresenceUpdate(
-        "mark user online",
-        () => setUserOnline(cleanCurrentUserId)
+    runPresenceUpdate("mark user online", () =>
+        setUserOnline(cleanCurrentUserId)
     ).catch(() => {});
 
     const unsubscribe = subscribeToPresence(
@@ -137,11 +132,7 @@ function initializeConversationPresence({
         (presence) => {
             if (destroyed) return;
 
-            renderPresence(
-                presence,
-                container,
-                cleanConversationId
-            );
+            renderPresence(presence, container, cleanConversationId);
         },
         (error) => {
             reportPresenceError("load presence", error);
@@ -156,9 +147,8 @@ function initializeConversationPresence({
         }
 
         isTyping = false;
-        return runPresenceUpdate(
-            "stop typing",
-            () => stopTyping(cleanCurrentUserId)
+        return runPresenceUpdate("stop typing", () =>
+            stopTyping(cleanCurrentUserId)
         ).catch(() => {});
     }
 
@@ -176,12 +166,11 @@ function initializeConversationPresence({
         }
 
         isTyping = true;
-        setUserTyping(
-            cleanCurrentUserId,
-            cleanConversationId
-        ).catch((error) => {
-            reportPresenceError("set typing status", error);
-        });
+        setUserTyping(cleanCurrentUserId, cleanConversationId).catch(
+            (error) => {
+                reportPresenceError("set typing status", error);
+            }
+        );
         scheduleTypingStopped();
     }
 
@@ -210,10 +199,7 @@ function initializeConversationPresence({
 
             scheduleTypingStopped.cancel();
             unsubscribe();
-            messageInput?.removeEventListener?.(
-                "input",
-                handleMessageInput
-            );
+            messageInput?.removeEventListener?.("input", handleMessageInput);
             window.removeEventListener("pagehide", handlePageHide);
 
             if (isTyping) {

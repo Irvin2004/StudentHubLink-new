@@ -37,9 +37,7 @@ export function createConversationPreferenceModel(preference = {}) {
         createdAt: preference.createdAt || null,
         updatedAt: preference.updatedAt || null
     };
-    const validation = validateConversationPreference(
-        normalizedPreference
-    );
+    const validation = validateConversationPreference(normalizedPreference);
 
     if (!validation.isValid) {
         const error = new Error("Invalid conversation preference data.");

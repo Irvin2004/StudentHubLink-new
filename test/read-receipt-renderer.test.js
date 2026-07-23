@@ -41,21 +41,34 @@ test("read receipt renderer requires all group recipients", () => {
         expectedRecipientCount: 2
     };
 
-    renderReadReceipt([
-        { userId: "alice", status: MESSAGE_STATUS.READ }
-    ], "sender", message, container);
+    renderReadReceipt(
+        [{ userId: "alice", status: MESSAGE_STATUS.READ }],
+        "sender",
+        message,
+        container
+    );
     assert.match(container.innerHTML, /message-status sent/);
 
-    renderReadReceipt([
-        { userId: "alice", status: MESSAGE_STATUS.READ },
-        { userId: "john", status: MESSAGE_STATUS.DELIVERED }
-    ], "sender", message, container);
+    renderReadReceipt(
+        [
+            { userId: "alice", status: MESSAGE_STATUS.READ },
+            { userId: "john", status: MESSAGE_STATUS.DELIVERED }
+        ],
+        "sender",
+        message,
+        container
+    );
     assert.match(container.innerHTML, /message-status delivered/);
 
-    renderReadReceipt([
-        { userId: "alice", status: MESSAGE_STATUS.READ },
-        { userId: "john", status: MESSAGE_STATUS.READ }
-    ], "sender", message, container);
+    renderReadReceipt(
+        [
+            { userId: "alice", status: MESSAGE_STATUS.READ },
+            { userId: "john", status: MESSAGE_STATUS.READ }
+        ],
+        "sender",
+        message,
+        container
+    );
     assert.match(container.innerHTML, /message-status read/);
 });
 
@@ -64,10 +77,15 @@ test("read receipt renderer clears status for incoming messages", () => {
     container.innerHTML = "old";
 
     assert.equal(
-        renderReadReceipt([], "recipient", {
-            senderId: "sender",
-            receiverId: "recipient"
-        }, container),
+        renderReadReceipt(
+            [],
+            "recipient",
+            {
+                senderId: "sender",
+                receiverId: "recipient"
+            },
+            container
+        ),
         ""
     );
     assert.equal(container.innerHTML, "");

@@ -26,10 +26,7 @@ export { getUserFriendlyErrorMessage };
  * @param {string} fallbackMessage
  * @returns {object}
  */
-export function handleError(
-    error,
-    fallbackMessage = "Something went wrong."
-) {
+export function handleError(error, fallbackMessage = "Something went wrong.") {
     return handleAppError(error, {
         message: fallbackMessage
     });
@@ -43,11 +40,7 @@ export function handleError(
  * @param {string} title
  * @returns {object}
  */
-export function showToast(
-    message,
-    type = ERROR_TYPES.SUCCESS,
-    title = ""
-) {
+export function showToast(message, type = ERROR_TYPES.SUCCESS, title = "") {
     const display = DISPLAYERS[type] || showInfo;
 
     return display({

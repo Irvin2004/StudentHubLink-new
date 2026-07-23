@@ -8,10 +8,8 @@ import {
     isTabletViewport
 } from "../js/utils/breakpoints.js";
 
-const read = (path) => readFileSync(
-    new URL(`../${path}`, import.meta.url),
-    "utf8"
-);
+const read = (path) =>
+    readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
 
 test("responsive breakpoints are centralized and immutable", () => {
     assert.deepEqual(BREAKPOINTS, {
@@ -47,10 +45,7 @@ test("navigation drawer owns state, focus, and cleanup only", () => {
 test("responsive CSS covers tablet, mobile, touch, and bottom sheets", () => {
     const responsive = read("css/layout/responsive.css");
 
-    assert.match(
-        responsive,
-        /min-width: 768px\) and \(max-width: 1023px/
-    );
+    assert.match(responsive, /min-width: 768px\) and \(max-width: 1023px/);
     assert.match(responsive, /max-width: 767px/);
     assert.match(responsive, /grid-template-columns: 80px/);
     assert.match(responsive, /translateX\(-105%\)/);

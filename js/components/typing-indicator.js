@@ -14,8 +14,8 @@ export function createTypingIndicator(userName, isTyping = false) {
     `;
 }
 export function getTypingIndicatorText(statuses = [], currentUserId) {
-    const typingUsers = statuses.filter((status) =>
-        status.userId !== currentUserId && status.typing === true
+    const typingUsers = statuses.filter(
+        (status) => status.userId !== currentUserId && status.typing === true
     );
 
     if (!typingUsers.length) return "";
@@ -24,9 +24,7 @@ export function getTypingIndicatorText(statuses = [], currentUserId) {
         return `${typingUsers.length} people are typing...`;
     }
 
-    const names = typingUsers.map((status) =>
-        status.displayName || "Student"
-    );
+    const names = typingUsers.map((status) => status.displayName || "Student");
 
     return `${names.join(" and ")} ${
         names.length === 1 ? "is" : "are"

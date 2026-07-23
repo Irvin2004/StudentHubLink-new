@@ -4,13 +4,8 @@ import { ACTIVITY_TYPES } from "../config/activity-types.js";
 import { escapeHtml } from "../utils/dom.js";
 import { toDate } from "../utils/format-date.js";
 import { formatTimeAgo } from "../utils/time-ago.js";
-import {
-    hideSkeleton,
-    showSkeleton
-} from "./skeleton-renderer.js";
-import {
-    SKELETON_TYPES
-} from "../config/skeleton-types.js";
+import { hideSkeleton, showSkeleton } from "./skeleton-renderer.js";
+import { SKELETON_TYPES } from "../config/skeleton-types.js";
 
 const ACTIVITY_ICONS = Object.freeze({
     [ACTIVITY_TYPES.ASSIGNMENT_CREATED]: "📝",
@@ -121,10 +116,12 @@ function renderActivity(activity = {}) {
 }
 
 function renderActivitySection(label, activities, sectionId) {
-    const headingId = `${sectionId}-${String(label)
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/(^-|-$)/g, "") || "recent"}`;
+    const headingId = `${sectionId}-${
+        String(label)
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, "-")
+            .replace(/(^-|-$)/g, "") || "recent"
+    }`;
 
     return `
         <section class="activity-date-section" aria-labelledby="${headingId}">
@@ -154,9 +151,11 @@ export function renderActivityFeed(activities = [], container) {
     const groups = groupActivitiesByDate(activities);
     const html = `
         <div class="activity-feed">
-            ${[...groups.entries()].map(([label, groupActivities]) =>
-                renderActivitySection(label, groupActivities, sectionId)
-            ).join("")}
+            ${[...groups.entries()]
+                .map(([label, groupActivities]) =>
+                    renderActivitySection(label, groupActivities, sectionId)
+                )
+                .join("")}
         </div>
     `;
 

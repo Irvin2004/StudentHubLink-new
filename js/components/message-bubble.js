@@ -13,9 +13,7 @@ function renderMessageContent(message) {
         `;
     }
 
-    const caption = message.text
-        ? `<p>${escapeHtml(message.text)}</p>`
-        : "";
+    const caption = message.text ? `<p>${escapeHtml(message.text)}</p>` : "";
 
     if (message.type === MESSAGE_TYPES.IMAGE) {
         return `${createImagePreview(message)}${caption}`;
@@ -51,63 +49,91 @@ export function createMessageBubble(message, currentUserId, options = {}) {
         <div class="message-row ${mine ? "mine" : "theirs"}"
             data-message-id="${escapeHtml(message.id)}">
             <div class="message-bubble">
-                ${options.conversationType === "group" && !mine ? `
+                ${
+                    options.conversationType === "group" && !mine
+                        ? `
                     <div class="message-sender">
                         ${escapeHtml(message.senderName || "Student")}
                     </div>
-                ` : ""}
+                `
+                        : ""
+                }
 
-                ${!deleted && reply ? `
+                ${
+                    !deleted && reply
+                        ? `
                     <div class="reply-block">
                         <strong>${escapeHtml(
                             reply.senderName ||
-                            (reply.senderId === currentUserId ? "You" : "Student")
+                                (reply.senderId === currentUserId
+                                    ? "You"
+                                    : "Student")
                         )}</strong>
                         <p>${escapeHtml(reply.preview || "Message")}</p>
                     </div>
-                ` : ""}
+                `
+                        : ""
+                }
 
                 ${renderMessageContent(message)}
 
                 <div class="message-footer">
-                    ${!deleted ? `<button
+                    ${
+                        !deleted
+                            ? `<button
                         class="message-reaction-button"
                         type="button"
                         data-message-action="react"
                         data-message-id="${escapeHtml(message.id)}"
                         aria-label="React to message">
                         &#128512; React
-                    </button>` : ""}
+                    </button>`
+                            : ""
+                    }
 
-                    ${!deleted ? `<button
+                    ${
+                        !deleted
+                            ? `<button
                         class="message-reply-button"
                         type="button"
                         data-message-action="reply"
                         data-message-id="${escapeHtml(message.id)}"
                         aria-label="Reply to message">
                         &#8617; Reply
-                    </button>` : ""}
+                    </button>`
+                            : ""
+                    }
 
                     <span class="message-time">
                         ${escapeHtml(formatTime(message.createdAt))}
-                        ${!deleted && (message.edited || message.editedAt)
-                            ? '<span class="edited-label">&bull; edited</span>'
-                            : ""}
+                        ${
+                            !deleted && (message.edited || message.editedAt)
+                                ? '<span class="edited-label">&bull; edited</span>'
+                                : ""
+                        }
                     </span>
 
-                    ${mine && message.status === "sending" ? `
+                    ${
+                        mine && message.status === "sending"
+                            ? `
                         <span class="sending" aria-label="Sending">
                             &#128339; Sending...
                         </span>
-                    ` : ""}
+                    `
+                            : ""
+                    }
 
-                    ${mine && message.status !== "sending" ? `
+                    ${
+                        mine && message.status !== "sending"
+                            ? `
                         <div
                             class="read-receipt-container"
                             data-read-receipt-container
                             data-message-id="${escapeHtml(message.id)}">
                         </div>
-                    ` : ""}
+                    `
+                            : ""
+                    }
                 </div>
             </div>
         </div>

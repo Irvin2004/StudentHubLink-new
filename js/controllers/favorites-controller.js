@@ -1,16 +1,11 @@
 "use strict";
 
-import { auth } from "../firebase/firebase-config.js";
+import { auth } from "../../src/firebase/auth.js";
 import { toggleFavorite } from "../services/favorites-service.js";
-import {
-    handleError,
-    showToast
-} from "../services/user-feedback-service.js";
+import { handleError, showToast } from "../services/user-feedback-service.js";
 
 function updateFavoriteButton(button, isFavorite) {
-    const label = isFavorite
-        ? "Remove from favorites"
-        : "Add to favorites";
+    const label = isFavorite ? "Remove from favorites" : "Add to favorites";
 
     button.classList.toggle("active", isFavorite);
     button.innerHTML = isFavorite ? "&hearts;" : "&#9825;";
@@ -53,10 +48,7 @@ export function createFavoritesController({
         button.disabled = true;
 
         try {
-            const result = await toggleFavorite(
-                user.uid,
-                resourceId
-            );
+            const result = await toggleFavorite(user.uid, resourceId);
 
             updateFavoriteButton(button, result.isFavorite);
             showToast(result.message, "success");

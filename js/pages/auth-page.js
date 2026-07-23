@@ -1,24 +1,14 @@
-import { auth, db } from "../firebase/firebase-config.js";
+import { auth } from "../../src/firebase/auth.js";
+import { db } from "../../src/firebase/firestore.js";
 import { RESOURCE_STATUS, TRANSACTION_STATUS } from "../utils/constants.js";
-import {
-    setButtonLoading,
-    setMessage,
-    setText
-} from "../utils/dom.js";
+import { setButtonLoading, setMessage, setText } from "../utils/dom.js";
 import { formatLongDate } from "../utils/format-date.js";
 import { formatCurrency } from "../utils/format-price.js";
-import {
-    getUserFriendlyErrorMessage
-} from "../services/user-feedback-service.js";
+import { getUserFriendlyErrorMessage } from "../services/user-feedback-service.js";
 import { error as logError, warn } from "../utils/logger.js";
 import { showToast } from "../services/user-feedback-service.js";
-import {
-    hideSkeleton,
-    showSkeleton
-} from "../renderers/skeleton-renderer.js";
-import {
-    SKELETON_TYPES
-} from "../config/skeleton-types.js";
+import { hideSkeleton, showSkeleton } from "../renderers/skeleton-renderer.js";
+import { SKELETON_TYPES } from "../config/skeleton-types.js";
 
 import {
     createUserWithEmailAndPassword,
@@ -27,9 +17,7 @@ import {
     signInWithEmailAndPassword,
     updateProfile,
     onAuthStateChanged
-}
-from
-"https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+} from "firebase/auth";
 
 import {
     doc,
@@ -41,52 +29,36 @@ import {
     getDocs,
     getCountFromServer,
     serverTimestamp
-}
-from
-"https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+} from "firebase/firestore";
 
 const pagePrefix =
-window.location.pathname.includes("/pages/") ||
-window.location.pathname.includes("/Admin/") ? "../" : "";
+    window.location.pathname.includes("/pages/") ||
+    window.location.pathname.includes("/Admin/")
+        ? "../"
+        : "";
 
-const publicPages = [
-    "/index.html",
-    "/login.html",
-    "/register.html",
-    "/"
-];
+const publicPages = ["/index.html", "/login.html", "/register.html", "/"];
 
-const currentPath =
-window.location.pathname;
+const currentPath = window.location.pathname;
 
-const isPublicPage =
-publicPages.some((page) => currentPath.endsWith(page));
+const isPublicPage = publicPages.some((page) => currentPath.endsWith(page));
 
-const isDashboardPage =
-currentPath.endsWith("/dashboard.html");
+const isDashboardPage = currentPath.endsWith("/dashboard.html");
 
-const isProfilePage =
-currentPath.endsWith("/pages/profile.html");
+const isProfilePage = currentPath.endsWith("/pages/profile.html");
 
-const isAdminPage =
-currentPath.includes("/Admin/");
+const isAdminPage = currentPath.includes("/Admin/");
 
-const profileSummaryLoading =
-document.getElementById("profileSummaryLoading");
+const profileSummaryLoading = document.getElementById("profileSummaryLoading");
 
 if (isProfilePage && profileSummaryLoading) {
-    showSkeleton(
-        profileSummaryLoading,
-        SKELETON_TYPES.PROFILE
-    );
+    showSkeleton(profileSummaryLoading, SKELETON_TYPES.PROFILE);
 }
 
 export async function getUserDocument(user) {
-    const userRef =
-    doc(db, "users", user.uid);
+    const userRef = doc(db, "users", user.uid);
 
-    const snapshot =
-    await getDoc(userRef);
+    const snapshot = await getDoc(userRef);
 
     if (snapshot.exists()) {
         return {
@@ -121,14 +93,18 @@ export async function getUserDocument(user) {
 
 async function updateLastLogin(user) {
     try {
-        await setDoc(doc(db, "users", user.uid), {
-            uid: user.uid,
-            email: user.email,
-            lastLoginAt: serverTimestamp(),
-            updatedAt: serverTimestamp()
-        }, {
-            merge: true
-        });
+        await setDoc(
+            doc(db, "users", user.uid),
+            {
+                uid: user.uid,
+                email: user.email,
+                lastLoginAt: serverTimestamp(),
+                updatedAt: serverTimestamp()
+            },
+            {
+                merge: true
+            }
+        );
     } catch (error) {
         warn("AUTH", "Could not update last login:", error);
     }
@@ -139,27 +115,24 @@ function redirectToDashboard() {
 }
 
 async function loadProfileStats(user, userData) {
-    let uploadCount =
-    Number(userData.totalUploads || 0);
+    let uploadCount = Number(userData.totalUploads || 0);
 
     try {
-        const uploadQuery =
-        query(collection(db, "resources"), where("ownerId", "==", user.uid));
+        const uploadQuery = query(
+            collection(db, "resources"),
+            where("ownerId", "==", user.uid)
+        );
 
-        const uploadSnapshot =
-        await getCountFromServer(uploadQuery);
+        const uploadSnapshot = await getCountFromServer(uploadQuery);
 
-        uploadCount =
-        uploadSnapshot.data().count;
+        uploadCount = uploadSnapshot.data().count;
     } catch (error) {
         warn("FIRESTORE", "Could not load upload count:", error);
     }
 
-    const downloads =
-    Number(userData.totalDownloads || 0);
+    const downloads = Number(userData.totalDownloads || 0);
 
-    const earnings =
-    Number(userData.totalEarnings || 0);
+    const earnings = Number(userData.totalEarnings || 0);
 
     setText("profileDownloads", downloads);
     setText("profileUploads", uploadCount);
@@ -172,12 +145,14 @@ function setInputValue(id, value) {
 }
 
 function renderUserProfile(userData, user) {
-    const displayName =
-    userData.name || userData.fullName || "Student";
+    const displayName = userData.name || userData.fullName || "Student";
 
     setText("userName", displayName);
     setText("userEmail", userData.email || "");
-    setText("profileMemberSince", `Member since ${formatLongDate(userData.joinedAt || userData.createdAt)}`);
+    setText(
+        "profileMemberSince",
+        `Member since ${formatLongDate(userData.joinedAt || userData.createdAt)}`
+    );
     setText("profileRole", userData.role || "student");
     setText("profileInstitution", userData.institution || "Not added yet");
     setText("profileCourse", userData.course || "Not added yet");
@@ -202,8 +177,9 @@ function renderUserProfile(userData, user) {
         profileSummaryLoading.hidden = true;
     }
 
-    const profileSummaryContent =
-    document.getElementById("profileSummaryContent");
+    const profileSummaryContent = document.getElementById(
+        "profileSummaryContent"
+    );
 
     if (profileSummaryContent) {
         profileSummaryContent.hidden = false;
@@ -219,14 +195,26 @@ function bindProfileActions(user, userData) {
         profileForm.onsubmit = async (event) => {
             event.preventDefault();
 
-            const fullName = document.getElementById("profileFullName").value.trim();
-            const institution = document.getElementById("profileInstitutionInput").value.trim();
-            const course = document.getElementById("profileCourseInput").value.trim();
-            const yearOfStudy = document.getElementById("profileYearInput").value.trim();
+            const fullName = document
+                .getElementById("profileFullName")
+                .value.trim();
+            const institution = document
+                .getElementById("profileInstitutionInput")
+                .value.trim();
+            const course = document
+                .getElementById("profileCourseInput")
+                .value.trim();
+            const yearOfStudy = document
+                .getElementById("profileYearInput")
+                .value.trim();
             const bio = document.getElementById("profileBioInput").value.trim();
 
             if (!fullName) {
-                setMessage("profileMessage", "Please enter your full name.", "error");
+                setMessage(
+                    "profileMessage",
+                    "Please enter your full name.",
+                    "error"
+                );
                 return;
             }
 
@@ -235,16 +223,20 @@ function bindProfileActions(user, userData) {
 
             try {
                 await updateProfile(user, { displayName: fullName });
-                await setDoc(doc(db, "users", user.uid), {
-                    name: fullName,
-                    fullName,
-                    displayName: fullName,
-                    institution,
-                    course,
-                    yearOfStudy,
-                    bio,
-                    updatedAt: serverTimestamp()
-                }, { merge: true });
+                await setDoc(
+                    doc(db, "users", user.uid),
+                    {
+                        name: fullName,
+                        fullName,
+                        displayName: fullName,
+                        institution,
+                        course,
+                        yearOfStudy,
+                        bio,
+                        updatedAt: serverTimestamp()
+                    },
+                    { merge: true }
+                );
 
                 Object.assign(userData, {
                     name: fullName,
@@ -256,12 +248,19 @@ function bindProfileActions(user, userData) {
                     bio
                 });
                 renderUserProfile(userData, user);
-                setMessage("profileMessage", "Profile updated successfully.", "success");
+                setMessage(
+                    "profileMessage",
+                    "Profile updated successfully.",
+                    "success"
+                );
             } catch (error) {
                 logError("AUTH", "Profile update failed.", error);
                 setMessage(
                     "profileMessage",
-                    getUserFriendlyErrorMessage(error, "Unable to update your profile."),
+                    getUserFriendlyErrorMessage(
+                        error,
+                        "Unable to update your profile."
+                    ),
                     "error"
                 );
             } finally {
@@ -286,7 +285,10 @@ function bindProfileActions(user, userData) {
                 logError("AUTH", "Verification email failed.", error);
                 setMessage(
                     "profileMessage",
-                    getUserFriendlyErrorMessage(error, "Unable to send a verification email."),
+                    getUserFriendlyErrorMessage(
+                        error,
+                        "Unable to send a verification email."
+                    ),
                     "error"
                 );
             } finally {
@@ -297,29 +299,30 @@ function bindProfileActions(user, userData) {
 }
 
 async function loadAdminStats() {
-    const usersSnapshot =
-    await getCountFromServer(collection(db, "users"));
+    const usersSnapshot = await getCountFromServer(collection(db, "users"));
 
-    const resourcesSnapshot =
-    await getCountFromServer(collection(db, "resources"));
+    const resourcesSnapshot = await getCountFromServer(
+        collection(db, "resources")
+    );
 
-    const pendingQuery =
-    query(collection(db, "resources"), where("status", "==", RESOURCE_STATUS.PENDING));
+    const pendingQuery = query(
+        collection(db, "resources"),
+        where("status", "==", RESOURCE_STATUS.PENDING)
+    );
 
-    const pendingSnapshot =
-    await getCountFromServer(pendingQuery);
+    const pendingSnapshot = await getCountFromServer(pendingQuery);
 
-    const transactionsQuery =
-    query(collection(db, "transactions"), where("status", "==", TRANSACTION_STATUS.COMPLETED));
+    const transactionsQuery = query(
+        collection(db, "transactions"),
+        where("status", "==", TRANSACTION_STATUS.COMPLETED)
+    );
 
-    const completedTransactions =
-    await getDocs(transactionsQuery);
+    const completedTransactions = await getDocs(transactionsQuery);
 
     let revenue = 0;
 
     completedTransactions.forEach((transaction) => {
-        const data =
-        transaction.data();
+        const data = transaction.data();
 
         revenue += Number(data.amount || data.amountPaid || 0);
     });
@@ -330,211 +333,207 @@ async function loadAdminStats() {
     setText("adminTotalRevenue", formatCurrency(revenue));
 }
 
-const registerForm =
-document.getElementById("registerForm");
+const registerForm = document.getElementById("registerForm");
 
 if (registerForm) {
-registerForm.addEventListener("submit", async (event) => {
+    registerForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
 
-    event.preventDefault();
+        const registerBtn = document.getElementById("registerBtn");
 
-    const registerBtn =
-    document.getElementById("registerBtn");
+        setButtonLoading(registerBtn, true, "Creating account...");
+        setMessage("registerMessage", "Creating your account...");
 
-    setButtonLoading(registerBtn, true, "Creating account...");
-    setMessage("registerMessage", "Creating your account...");
+        const fullName = document.getElementById("fullName").value.trim();
 
-    const fullName =
-    document.getElementById("fullName").value.trim();
+        const email = document.getElementById("registerEmail").value.trim();
 
-    const email =
-    document.getElementById("registerEmail").value.trim();
-
-    const password =
-    document.getElementById("registerPassword").value;
-
-    try {
-
-        const userCredential =
-        await createUserWithEmailAndPassword(
-            auth,
-            email,
-            password
-        );
-
-        if (fullName) {
-            await updateProfile(userCredential.user, {
-                displayName: fullName
-            });
-        }
+        const password = document.getElementById("registerPassword").value;
 
         try {
-            await sendEmailVerification(userCredential.user);
-        } catch (error) {
-            warn("AUTH", "Account created, but verification email could not be sent:", error);
-        }
-
-        try {
-            await setDoc(doc(db, "users", userCredential.user.uid), {
-                uid: userCredential.user.uid,
-                name: fullName,
-                fullName: fullName,
-                displayName: fullName,
-                email: userCredential.user.email,
-                role: "student",
-                profileVisibility: "public",
-                photoURL: "",
-                institution: "",
-                course: "",
-                yearOfStudy: "",
-                bio: "",
-
-                totalUploads: 0,
-                totalDownloads: 0,
-                totalEarnings: 0,
-                
-                joinedAt: serverTimestamp(),
-                createdAt: serverTimestamp(),
-                updatedAt: serverTimestamp(),
-                lastLoginAt: serverTimestamp()
-            });
-
-            setMessage(
-            "registerMessage",
-            "Account created successfully. Opening dashboard...",
-            "success"
+            const userCredential = await createUserWithEmailAndPassword(
+                auth,
+                email,
+                password
             );
 
+            if (fullName) {
+                await updateProfile(userCredential.user, {
+                    displayName: fullName
+                });
+            }
+
+            try {
+                await sendEmailVerification(userCredential.user);
+            } catch (error) {
+                warn(
+                    "AUTH",
+                    "Account created, but verification email could not be sent:",
+                    error
+                );
+            }
+
+            try {
+                await setDoc(doc(db, "users", userCredential.user.uid), {
+                    uid: userCredential.user.uid,
+                    name: fullName,
+                    fullName: fullName,
+                    displayName: fullName,
+                    email: userCredential.user.email,
+                    role: "student",
+                    profileVisibility: "public",
+                    photoURL: "",
+                    institution: "",
+                    course: "",
+                    yearOfStudy: "",
+                    bio: "",
+
+                    totalUploads: 0,
+                    totalDownloads: 0,
+                    totalEarnings: 0,
+
+                    joinedAt: serverTimestamp(),
+                    createdAt: serverTimestamp(),
+                    updatedAt: serverTimestamp(),
+                    lastLoginAt: serverTimestamp()
+                });
+
+                setMessage(
+                    "registerMessage",
+                    "Account created successfully. Opening dashboard...",
+                    "success"
+                );
+            } catch (error) {
+                warn(
+                    "FIRESTORE",
+                    "Account was created, but the profile could not be saved:",
+                    error
+                );
+            }
+
+            setMessage(
+                "registerMessage",
+                "Account created. Opening dashboard...",
+                "success"
+            );
+
+            redirectToDashboard();
         } catch (error) {
-            warn("FIRESTORE", "Account was created, but the profile could not be saved:", error);
+            logError("AUTH", "Registration failed.", error);
+            setMessage(
+                "registerMessage",
+                getUserFriendlyErrorMessage(
+                    error,
+                    "Unable to create your account. Please try again."
+                ),
+                "error"
+            );
+            setButtonLoading(registerBtn, false);
         }
-
-        setMessage("registerMessage", "Account created. Opening dashboard...", "success");
-
-        redirectToDashboard();
-
-    } catch(error){
-
-        logError("AUTH", "Registration failed.", error);
-        setMessage(
-            "registerMessage",
-            getUserFriendlyErrorMessage(
-                error,
-                "Unable to create your account. Please try again."
-            ),
-            "error"
-        );
-        setButtonLoading(registerBtn, false);
-
-    }
-
-});
+    });
 }
 
-const resetPasswordButton =
-document.getElementById("resetPasswordBtn");
+const resetPasswordButton = document.getElementById("resetPasswordBtn");
 
 if (resetPasswordButton) {
-resetPasswordButton.addEventListener("click", async () => {
-    const email = document.getElementById("loginEmail").value.trim();
+    resetPasswordButton.addEventListener("click", async () => {
+        const email = document.getElementById("loginEmail").value.trim();
 
-    if (!email) {
-        setMessage("loginMessage", "Enter your email address first.", "error");
-        document.getElementById("loginEmail").focus();
-        return;
-    }
+        if (!email) {
+            setMessage(
+                "loginMessage",
+                "Enter your email address first.",
+                "error"
+            );
+            document.getElementById("loginEmail").focus();
+            return;
+        }
 
-    setButtonLoading(resetPasswordButton, true, "Sending reset link...");
-    setMessage("loginMessage", "Requesting a password reset...");
+        setButtonLoading(resetPasswordButton, true, "Sending reset link...");
+        setMessage("loginMessage", "Requesting a password reset...");
 
-    try {
-        await sendPasswordResetEmail(auth, email);
-        setMessage(
-            "loginMessage",
-            "If an account exists for that email, a password reset link has been sent.",
-            "success"
-        );
-    } catch (error) {
-        if (error?.code === "auth/user-not-found") {
+        try {
+            await sendPasswordResetEmail(auth, email);
             setMessage(
                 "loginMessage",
                 "If an account exists for that email, a password reset link has been sent.",
                 "success"
             );
-            return;
-        }
+        } catch (error) {
+            if (error?.code === "auth/user-not-found") {
+                setMessage(
+                    "loginMessage",
+                    "If an account exists for that email, a password reset link has been sent.",
+                    "success"
+                );
+                return;
+            }
 
-        logError("AUTH", "Password reset failed.", error);
-        setMessage(
-            "loginMessage",
-            getUserFriendlyErrorMessage(error, "Unable to send a password reset link."),
-            "error"
-        );
-    } finally {
-        setButtonLoading(resetPasswordButton, false);
-    }
-});
+            logError("AUTH", "Password reset failed.", error);
+            setMessage(
+                "loginMessage",
+                getUserFriendlyErrorMessage(
+                    error,
+                    "Unable to send a password reset link."
+                ),
+                "error"
+            );
+        } finally {
+            setButtonLoading(resetPasswordButton, false);
+        }
+    });
 }
 
-const loginForm =
-document.getElementById("loginForm");
+const loginForm = document.getElementById("loginForm");
 
 if (loginForm) {
-loginForm.addEventListener("submit", async (event) => {
+    loginForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
 
-    event.preventDefault();
+        const loginBtn = document.getElementById("loginBtn");
 
-    const loginBtn =
-    document.getElementById("loginBtn");
+        setButtonLoading(loginBtn, true, "Logging in...");
+        setMessage("loginMessage", "Checking your details...");
 
-    setButtonLoading(loginBtn, true, "Logging in...");
-    setMessage("loginMessage", "Checking your details...");
+        const email = document.getElementById("loginEmail").value.trim();
 
-    const email =
-    document.getElementById("loginEmail").value.trim();
+        const password = document.getElementById("loginPassword").value;
 
-    const password =
-    document.getElementById("loginPassword").value;
+        try {
+            const userCredential = await signInWithEmailAndPassword(
+                auth,
+                email,
+                password
+            );
 
-    try {
+            setMessage(
+                "loginMessage",
+                "Login successful. Opening dashboard...",
+                "success"
+            );
 
-        const userCredential =
-        await signInWithEmailAndPassword(
-            auth,
-            email,
-            password
-        );
+            window.location.href = "dashboard.html";
 
-        setMessage("loginMessage", "Login successful. Opening dashboard...", "success");
-
-        window.location.href = "dashboard.html";
-
-        updateLastLogin(userCredential.user);
-
-    } catch(error) {
-
-        logError("AUTH", "Sign-in failed.", error);
-        setMessage(
-            "loginMessage",
-            getUserFriendlyErrorMessage(
-                error,
-                "Unable to sign in. Check your details and try again."
-            ),
-            "error"
-        );
-        setButtonLoading(loginBtn, false);
-
-    }
-
-});
+            updateLastLogin(userCredential.user);
+        } catch (error) {
+            logError("AUTH", "Sign-in failed.", error);
+            setMessage(
+                "loginMessage",
+                getUserFriendlyErrorMessage(
+                    error,
+                    "Unable to sign in. Check your details and try again."
+                ),
+                "error"
+            );
+            setButtonLoading(loginBtn, false);
+        }
+    });
 }
 
 onAuthStateChanged(auth, async (user) => {
-
     if (!user) {
         if (!isPublicPage) {
-            window.location.href =
-            pagePrefix + "login.html";
+            window.location.href = pagePrefix + "login.html";
         }
         return;
     }
@@ -550,8 +549,7 @@ onAuthStateChanged(auth, async (user) => {
     let userData;
 
     try {
-        userData =
-        await getUserDocument(user);
+        userData = await getUserDocument(user);
     } catch (error) {
         logError("AUTH", "Could not load user profile:", error);
 
@@ -568,8 +566,7 @@ onAuthStateChanged(auth, async (user) => {
 
     if (isAdminPage && userData.role !== "admin") {
         showToast("Admin access only.", "warning");
-        window.location.href =
-        pagePrefix + "dashboard.html";
+        window.location.href = pagePrefix + "dashboard.html";
         return;
     }
 
@@ -580,5 +577,4 @@ onAuthStateChanged(auth, async (user) => {
     if (isAdminPage) {
         await loadAdminStats();
     }
-
 });

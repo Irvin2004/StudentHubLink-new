@@ -12,15 +12,13 @@ import {
     serverTimestamp,
     setDoc,
     where
-} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+} from "firebase/firestore";
 
-import { db } from "../firebase/firebase-config.js";
+import { db } from "../../src/firebase/firestore.js";
 import { COLLECTIONS } from "../config/firestore.js?preferences=2";
 import { areMutuals } from "./follows-service.js";
 import { log } from "../utils/logger.js";
-import {
-    createConversationPreferenceModel
-} from "../models/conversation-preference.js";
+import { createConversationPreferenceModel } from "../models/conversation-preference.js";
 import { sortConversations } from "../utils/conversation-sorter.js";
 
 function validatePreferenceId(value, fieldName) {
@@ -57,11 +55,7 @@ function normalizeConversationPreference(snapshot, userId) {
     });
 }
 
-async function updateConversationPreference(
-    userId,
-    conversationId,
-    updates
-) {
+async function updateConversationPreference(userId, conversationId, updates) {
     const cleanUserId = validatePreferenceId(userId, "User ID");
     const cleanConversationId = validatePreferenceId(
         conversationId,
@@ -75,9 +69,8 @@ async function updateConversationPreference(
     return runTransaction(db, async (transaction) => {
         const snapshot = await transaction.get(preferenceReference);
         const existing = snapshot.exists() ? snapshot.data() : {};
-        const resolvedUpdates = typeof updates === "function"
-            ? updates(existing)
-            : updates;
+        const resolvedUpdates =
+            typeof updates === "function" ? updates(existing) : updates;
         const preference = createConversationPreferenceModel({
             ...existing,
             ...resolvedUpdates,
@@ -100,9 +93,7 @@ async function updateConversationPreference(
 }
 
 export function getConversationKey(firstUserId, secondUserId) {
-    return [firstUserId, secondUserId]
-        .sort()
-        .join("_");
+    return [firstUserId, secondUserId].sort().join("_");
 }
 
 function normalizeConversation(conversationId, data = {}) {
@@ -127,9 +118,7 @@ function normalizeConversation(conversationId, data = {}) {
 export async function getUserProfile(userId) {
     if (!userId) return null;
 
-    const snapshot = await getDoc(
-        doc(db, COLLECTIONS.USERS, userId)
-    );
+    const snapshot = await getDoc(doc(db, COLLECTIONS.USERS, userId));
 
     if (!snapshot.exists()) return null;
 
@@ -139,10 +128,7 @@ export async function getUserProfile(userId) {
     };
 }
 
-export async function getConversation(
-    firstUserId,
-    secondUserId
-) {
+export async function getConversation(firstUserId, secondUserId) {
     const conversationQuery = query(
         collection(db, COLLECTIONS.CONVERSATIONS),
         where(
@@ -208,7 +194,7 @@ export function toggleMuteConversation(userId, conversationId) {
     return updateConversationPreference(
         userId,
         conversationId,
-        (preference) => ({ muted: !Boolean(preference.muted) })
+        (preference) => ({ muted: !preference.muted })
     );
 }
 
@@ -228,7 +214,7 @@ export function toggleArchiveConversation(userId, conversationId) {
     return updateConversationPreference(
         userId,
         conversationId,
-        (preference) => ({ archived: !Boolean(preference.archived) })
+        (preference) => ({ archived: !preference.archived })
     );
 }
 
@@ -252,11 +238,7 @@ export async function getConversationPreference(userId, conversationId) {
     return normalizeConversationPreference(snapshot, cleanUserId);
 }
 
-export function subscribeToConversationPreferences(
-    userId,
-    callback,
-    onError
-) {
+export function subscribeToConversationPreferences(userId, callback, onError) {
     const cleanUserId = validatePreferenceId(userId, "User ID");
 
     if (typeof callback !== "function") {
@@ -272,12 +254,14 @@ export function subscribeToConversationPreferences(
         getConversationPreferencesCollection(cleanUserId),
         (snapshot) => {
             try {
-                callback(snapshot.docs.map((preferenceDocument) =>
-                    normalizeConversationPreference(
-                        preferenceDocument,
-                        cleanUserId
+                callback(
+                    snapshot.docs.map((preferenceDocument) =>
+                        normalizeConversationPreference(
+                            preferenceDocument,
+                            cleanUserId
+                        )
                     )
-                ));
+                );
             } catch (error) {
                 reportError(error);
             }
@@ -286,11 +270,7 @@ export function subscribeToConversationPreferences(
     );
 }
 
-export function subscribeToUserConversations(
-    userId,
-    callback,
-    onError
-) {
+export function subscribeToUserConversations(userId, callback, onError) {
     const directConversations = new Map();
     const groupConversations = new Map();
     let groupUnsubscribers = [];
@@ -343,9 +323,16 @@ export function subscribeToUserConversations(
             groupUnsubscribers = [];
             groupConversations.clear();
 
-            const groupIds = [...new Set(snapshot.docs.map(
-                (memberDocument) => memberDocument.ref.parent.parent?.id
-            ).filter(Boolean))];
+            const groupIds = [
+                ...new Set(
+                    snapshot.docs
+                        .map(
+                            (memberDocument) =>
+                                memberDocument.ref.parent.parent?.id
+                        )
+                        .filter(Boolean)
+                )
+            ];
 
             if (!groupIds.length) {
                 emit();
@@ -359,25 +346,32 @@ export function subscribeToUserConversations(
                     where("groupId", "in", groupIdChunk)
                 );
 
-                groupUnsubscribers.push(onSnapshot(
-                    groupQuery,
-                    (groupSnapshot) => {
-                        groupIdChunk.forEach((groupId) => {
-                            const conversationId = `group_${groupId}`;
-                            groupConversations.delete(conversationId);
-                        });
+                groupUnsubscribers.push(
+                    onSnapshot(
+                        groupQuery,
+                        (groupSnapshot) => {
+                            groupIdChunk.forEach((groupId) => {
+                                const conversationId = `group_${groupId}`;
+                                groupConversations.delete(conversationId);
+                            });
 
-                        groupSnapshot.docs.forEach((conversationDocument) => {
-                            const conversation = normalizeConversation(
-                                conversationDocument.id,
-                                conversationDocument.data()
+                            groupSnapshot.docs.forEach(
+                                (conversationDocument) => {
+                                    const conversation = normalizeConversation(
+                                        conversationDocument.id,
+                                        conversationDocument.data()
+                                    );
+                                    groupConversations.set(
+                                        conversation.id,
+                                        conversation
+                                    );
+                                }
                             );
-                            groupConversations.set(conversation.id, conversation);
-                        });
-                        emit();
-                    },
-                    reportError
-                ));
+                            emit();
+                        },
+                        reportError
+                    )
+                );
             }
         },
         reportError
@@ -389,10 +383,7 @@ export function subscribeToUserConversations(
         groupUnsubscribers.forEach((unsubscribe) => unsubscribe());
     };
 }
-export async function createOrGetConversation(
-    firstUserId,
-    secondUserId
-) {
+export async function createOrGetConversation(firstUserId, secondUserId) {
     if (!firstUserId || !secondUserId) {
         throw new Error("Conversation users are missing.");
     }
@@ -401,7 +392,7 @@ export async function createOrGetConversation(
         throw new Error("You cannot message yourself.");
     }
 
-    if (!await areMutuals(firstUserId, secondUserId)) {
+    if (!(await areMutuals(firstUserId, secondUserId))) {
         throw new Error("You can only message mutual followers.");
     }
 
@@ -413,10 +404,7 @@ export async function createOrGetConversation(
     if (existingConversation) return existingConversation;
 
     const participantIds = [firstUserId, secondUserId].sort();
-    const conversationKey = getConversationKey(
-        firstUserId,
-        secondUserId
-    );
+    const conversationKey = getConversationKey(firstUserId, secondUserId);
     const unreadCounts = Object.fromEntries(
         participantIds.map((userId) => [userId, 0])
     );

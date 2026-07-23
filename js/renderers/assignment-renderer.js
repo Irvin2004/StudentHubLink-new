@@ -43,9 +43,13 @@ export function renderAssignmentCard(assignment) {
                         <span aria-hidden="true">&#128218;</span>
                         ${escapeHtml(assignment.title)}
                     </h3>
-                    ${assignment.description ? `
+                    ${
+                        assignment.description
+                            ? `
                         <p>${escapeHtml(assignment.description)}</p>
-                    ` : ""}
+                    `
+                            : ""
+                    }
                 </div>
 
                 <span class="badge assignment-status ${statusDetails.badgeClass}">

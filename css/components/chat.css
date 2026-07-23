@@ -1,12 +1,53 @@
-.message-row { display: flex; margin-block: var(--space-2); }
-.message-row.outgoing { justify-content: flex-end; }
-.message-bubble { width: fit-content; max-width: min(76%, 560px); padding: var(--space-3) var(--space-4); border-radius: var(--radius-lg); background: var(--surface); color: var(--text-primary); box-shadow: var(--shadow-sm); }
-.message-row.outgoing .message-bubble { background: var(--primary); color: #fff; border-bottom-right-radius: var(--space-1); }
-.message-row.incoming .message-bubble { border-bottom-left-radius: var(--space-1); }
-.message-footer { display: flex; align-items: center; justify-content: flex-end; gap: var(--space-2); margin-top: var(--space-1); font-size: 0.8rem; color: currentColor; opacity: 0.76; }
-.message-time { display: inline-flex; align-items: center; gap: var(--space-1); font-size: 12px; }
-.sending { color: var(--text-secondary); }
-.typing-indicator { min-height: 20px; margin: var(--space-2) var(--space-4); color: var(--text-secondary); font-size: 0.85rem; font-style: italic; }
+.message-row {
+    display: flex;
+    margin-block: var(--space-2);
+}
+.message-row.outgoing {
+    justify-content: flex-end;
+}
+.message-bubble {
+    width: fit-content;
+    max-width: min(76%, 560px);
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    color: var(--text-primary);
+    box-shadow: var(--shadow-sm);
+}
+.message-row.outgoing .message-bubble {
+    background: var(--primary);
+    color: #fff;
+    border-bottom-right-radius: var(--space-1);
+}
+.message-row.incoming .message-bubble {
+    border-bottom-left-radius: var(--space-1);
+}
+.message-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--space-2);
+    margin-top: var(--space-1);
+    font-size: 0.8rem;
+    color: currentColor;
+    opacity: 0.76;
+}
+.message-time {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    font-size: 12px;
+}
+.sending {
+    color: var(--text-secondary);
+}
+.typing-indicator {
+    min-height: 20px;
+    margin: var(--space-2) var(--space-4);
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    font-style: italic;
+}
 
 .message-text {
     margin: 0;
@@ -243,7 +284,8 @@
     background: none;
     cursor: pointer;
     font-size: 20px;
-    transition: background var(--transition-fast),
+    transition:
+        background var(--transition-fast),
         transform var(--transition-fast);
 }
 

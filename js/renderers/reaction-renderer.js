@@ -1,9 +1,6 @@
 "use strict";
 
-import {
-    REACTION_TYPES,
-    isValidReaction
-} from "../config/reaction-types.js";
+import { REACTION_TYPES, isValidReaction } from "../config/reaction-types.js";
 import { escapeHtml } from "../utils/dom.js";
 
 const REACTION_LABELS = Object.freeze({
@@ -57,9 +54,7 @@ function getReactionLabel(emoji, count, selected) {
         }`;
     }
 
-    return `${count} ${name} ${
-        count === 1 ? "reaction" : "reactions"
-    }`;
+    return `${count} ${name} ${count === 1 ? "reaction" : "reactions"}`;
 }
 
 export function renderReactionChip(
@@ -81,9 +76,7 @@ export function renderReactionChip(
             data-message-id="${escapeHtml(messageId)}"
             data-reaction="${escapeHtml(emoji)}"
             data-emoji="${escapeHtml(emoji)}"
-            aria-label="${escapeHtml(
-                getReactionLabel(emoji, count, mine)
-            )}"
+            aria-label="${escapeHtml(getReactionLabel(emoji, count, mine))}"
             aria-pressed="${mine}"
         >
             <span class="reaction-emoji" aria-hidden="true">
@@ -94,11 +87,7 @@ export function renderReactionChip(
     `;
 }
 
-export function renderReactionBar(
-    reactions,
-    currentUserId,
-    container
-) {
+export function renderReactionBar(reactions, currentUserId, container) {
     requireContainer(container);
 
     const groups = groupReactions(reactions);
@@ -110,12 +99,16 @@ export function renderReactionBar(
 
     const cleanCurrentUserId = String(currentUserId || "").trim();
     const messageId = String(container.dataset?.messageId || "").trim();
-    const html = groups.map((group) => renderReactionChip(
-        group.emoji,
-        group.count,
-        group.users.includes(cleanCurrentUserId),
-        messageId
-    )).join("");
+    const html = groups
+        .map((group) =>
+            renderReactionChip(
+                group.emoji,
+                group.count,
+                group.users.includes(cleanCurrentUserId),
+                messageId
+            )
+        )
+        .join("");
 
     container.classList?.add("reaction-bar");
     container.removeAttribute?.("hidden");

@@ -15,18 +15,12 @@ import {
 async function getPrivateRecipients(chatId, senderId) {
     const conversation = await getConversationById(chatId);
 
-    return uniqueEventRecipients(
-        conversation.participantIds || [],
-        senderId
-    );
+    return uniqueEventRecipients(conversation.participantIds || [], senderId);
 }
 
 async function prepareRecipient({ recipientId, chatId }) {
     try {
-        const preference = await getConversationPreference(
-            recipientId,
-            chatId
-        );
+        const preference = await getConversationPreference(recipientId, chatId);
 
         if (preference.archived) {
             await unarchiveConversation(recipientId, chatId);
@@ -56,17 +50,17 @@ export async function emitMessageSent({
         const cleanChatId = cleanEventId(chatId);
         const cleanSenderId = cleanEventId(senderId);
         const isGroupChat = chatType === "group";
-        const cleanGroupId = isGroupChat
-            ? cleanEventId(message?.groupId)
-            : "";
+        const cleanGroupId = isGroupChat ? cleanEventId(message?.groupId) : "";
         const recipients = isGroupChat
             ? await getGroupEventRecipients(cleanGroupId, cleanSenderId)
             : await getPrivateRecipients(cleanChatId, cleanSenderId);
         const eligibility = await Promise.all(
-            recipients.map((recipientId) => prepareRecipient({
-                recipientId,
-                chatId: cleanChatId
-            }))
+            recipients.map((recipientId) =>
+                prepareRecipient({
+                    recipientId,
+                    chatId: cleanChatId
+                })
+            )
         );
         const eligibleRecipients = eligibility
             .filter(({ shouldNotify }) => shouldNotify)
@@ -104,11 +98,7 @@ export async function emitMessageSent({
             failed: deliveries.filter((delivered) => !delivered).length
         };
     } catch (error) {
-        logError(
-            "NOTIFICATIONS",
-            "Message notification event failed:",
-            error
-        );
+        logError("NOTIFICATIONS", "Message notification event failed:", error);
 
         return {
             recipients: 0,

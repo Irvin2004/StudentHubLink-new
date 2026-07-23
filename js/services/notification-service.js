@@ -13,16 +13,14 @@ import {
     updateDoc,
     where,
     writeBatch
-} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+} from "firebase/firestore";
 
-import { db } from "../firebase/firebase-config.js";
+import { db } from "../../src/firebase/firestore.js";
 import { COLLECTIONS } from "../config/firestore.js";
 import { createNotificationModel } from "../models/notification.js";
 
 function cleanText(value) {
-    return typeof value === "string"
-        ? value.trim()
-        : "";
+    return typeof value === "string" ? value.trim() : "";
 }
 
 function validateUserId(userId) {
@@ -46,19 +44,11 @@ function validateNotificationId(notificationId) {
 }
 
 function getNotificationsCollection(userId) {
-    return collection(
-        db,
-        COLLECTIONS.USERS,
-        userId,
-        COLLECTIONS.NOTIFICATIONS
-    );
+    return collection(db, COLLECTIONS.USERS, userId, COLLECTIONS.NOTIFICATIONS);
 }
 
 function getNotificationReference(userId, notificationId) {
-    return doc(
-        getNotificationsCollection(userId),
-        notificationId
-    );
+    return doc(getNotificationsCollection(userId), notificationId);
 }
 
 function mapNotificationDocument(notificationDocument) {
@@ -69,8 +59,7 @@ function mapNotificationDocument(notificationDocument) {
 }
 
 function normalizeFirestoreError(error) {
-    const code = String(error?.code || "")
-        .replace(/^firestore\//, "");
+    const code = String(error?.code || "").replace(/^firestore\//, "");
 
     if (code === "permission-denied") {
         const permissionError = new Error("Permission denied.", {
@@ -143,10 +132,7 @@ export async function getNotification(userId, notificationId) {
 
     return runFirestoreOperation(async () => {
         const snapshot = await getDoc(
-            getNotificationReference(
-                cleanUserId,
-                cleanNotificationId
-            )
+            getNotificationReference(cleanUserId, cleanNotificationId)
         );
 
         if (!snapshot.exists()) {
@@ -250,9 +236,7 @@ export function subscribeToNotifications(
     return onSnapshot(
         notificationsQuery,
         (snapshot) => {
-            onNotifications(
-                snapshot.docs.map(mapNotificationDocument)
-            );
+            onNotifications(snapshot.docs.map(mapNotificationDocument));
         },
         (error) => {
             onError(normalizeFirestoreError(error));

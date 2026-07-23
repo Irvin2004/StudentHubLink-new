@@ -8,9 +8,7 @@ const STATUS_PRIORITY = Object.freeze({
 });
 
 export function sortAssignments(assignments, now = new Date()) {
-    const assignmentList = Array.isArray(assignments)
-        ? assignments
-        : [];
+    const assignmentList = Array.isArray(assignments) ? assignments : [];
 
     return [...assignmentList].sort((first, second) => {
         const firstStatus = getAssignmentStatus(first.dueDate, now);

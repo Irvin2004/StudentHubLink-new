@@ -18,17 +18,13 @@ function updateNotificationBadge(
         (notification) => !notification.read
     ).length;
 
-    badge.textContent = unreadCount > 99
-        ? "99+"
-        : String(unreadCount);
+    badge.textContent = unreadCount > 99 ? "99+" : String(unreadCount);
     badge.hidden = unreadCount === 0;
     markAllButton.disabled = unreadCount === 0;
 
     bellButton.setAttribute(
         "aria-label",
-        unreadCount
-            ? `Notifications, ${unreadCount} unread`
-            : "Notifications"
+        unreadCount ? `Notifications, ${unreadCount} unread` : "Notifications"
     );
 }
 
@@ -49,9 +45,7 @@ function getPagesPrefix() {
 function getNotificationDestination(notification) {
     const pagesPrefix = getPagesPrefix();
     const groupId = encodeURIComponent(notification.groupId || "");
-    const referenceId = encodeURIComponent(
-        notification.referenceId || ""
-    );
+    const referenceId = encodeURIComponent(notification.referenceId || "");
     const senderId = encodeURIComponent(notification.senderId || "");
     const conversationId = encodeURIComponent(
         notification.conversationId || ""
@@ -68,9 +62,9 @@ function getNotificationDestination(notification) {
         case NOTIFICATION_TYPES.MENTION:
             return notification.conversationId
                 ? `${pagesPrefix}chat.html?id=${conversationId}` +
-                    (notification.referenceId
-                        ? `&message=${referenceId}`
-                        : "")
+                      (notification.referenceId
+                          ? `&message=${referenceId}`
+                          : "")
                 : `${pagesPrefix}messages.html`;
 
         case NOTIFICATION_TYPES.NEW_RESOURCE:
@@ -201,14 +195,8 @@ export async function initializeNotifications({
 
         destroyed = true;
         unsubscribe();
-        panel.markAllButton.removeEventListener(
-            "click",
-            handleMarkAllClick
-        );
-        panel.list.removeEventListener(
-            "click",
-            handleNotificationClick
-        );
+        panel.markAllButton.removeEventListener("click", handleMarkAllClick);
+        panel.list.removeEventListener("click", handleNotificationClick);
         window.removeEventListener("pagehide", destroy);
         panel.destroy();
     };

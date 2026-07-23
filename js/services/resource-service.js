@@ -8,12 +8,10 @@ import {
     orderBy,
     query,
     serverTimestamp
-} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+} from "firebase/firestore";
 
-import { db } from "../firebase/firebase-config.js";
-import {
-    isValidResourceCategory
-} from "../config/resource-categories.js";
+import { db } from "../../src/firebase/firestore.js";
+import { isValidResourceCategory } from "../config/resource-categories.js";
 import {
     ALLOWED_EXTENSIONS,
     ALLOWED_TYPES,
@@ -75,21 +73,16 @@ function validateResourceData({
     }
 
     const lowerFileName = fileName.toLowerCase();
-    const hasAllowedExtension = ALLOWED_EXTENSIONS.some(
-        (extension) => lowerFileName.endsWith(extension)
+    const hasAllowedExtension = ALLOWED_EXTENSIONS.some((extension) =>
+        lowerFileName.endsWith(extension)
     );
 
-    if (
-        !ALLOWED_TYPES.includes(mimeType) ||
-        !hasAllowedExtension
-    ) {
+    if (!ALLOWED_TYPES.includes(mimeType) || !hasAllowedExtension) {
         throw new Error("Unsupported file type.");
     }
 
     if (!uploader?.uid) {
-        throw new Error(
-            "A signed-in user is required to upload resources."
-        );
+        throw new Error("A signed-in user is required to upload resources.");
     }
 }
 
@@ -137,8 +130,7 @@ export async function createGroupResource({
             fileSize,
             mimeType,
             uploaderId: uploader.uid,
-            uploaderName:
-                uploader.displayName || uploader.email || "Student",
+            uploaderName: uploader.displayName || uploader.email || "Student",
             uploaderPhotoURL: uploader.photoURL || "",
             downloadCount: 0,
             verificationCount: 0,

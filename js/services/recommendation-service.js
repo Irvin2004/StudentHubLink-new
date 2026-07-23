@@ -1,28 +1,20 @@
-import {
-    collection,
-    getDocs,
-    limit,
-    query,
-    where
-} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+import { collection, getDocs, limit, query, where } from "firebase/firestore";
 
-import { db } from "../firebase/firebase-config.js";
+import { db } from "../../src/firebase/firestore.js";
 
 export async function getRelatedResources(resource) {
     if (!resource?.category) {
         return [];
     }
 
-    const relatedResourcesQuery =
-    query(
+    const relatedResourcesQuery = query(
         collection(db, "resources"),
         where("status", "==", "approved"),
         where("category", "==", resource.category),
         limit(6)
     );
 
-    const snapshot =
-    await getDocs(relatedResourcesQuery);
+    const snapshot = await getDocs(relatedResourcesQuery);
 
     return snapshot.docs
         .map((resourceDoc) => ({

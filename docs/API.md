@@ -1,14 +1,18 @@
-# Services
+# StudentHub service API
 
-StudentHub uses Firebase directly from frontend service modules and Cloud Functions for sensitive backend workflows. This document lists the main application-facing APIs.
+This document summarizes application-facing service APIs. Source JSDoc is
+authoritative for exact parameters and return values.
 
-## Authentication
+## Authentication and users
 
-- `getUserDocument(user)`
-- `login()`
+- `login(email, password)`
+- `register({ fullName, email, password })`
 - `logout()`
-- `register()`
-- `updateLastLogin(user)`
+- `resetPassword(email)`
+- `onAuthStateChanged(callback, onError)`
+- `updateProfile({ displayName, photoURL })`
+- `createUserProfileDocument(user, data)`
+- `getUserProfile(userId)`
 
 ## Resources
 
@@ -28,107 +32,90 @@ StudentHub uses Firebase directly from frontend service modules and Cloud Functi
 - `toggleFavorite(userId, resourceId)`
 - `getFavoriteIds(userId)`
 
-## Reviews
+## Reviews and comments
 
 - `addReview({ resourceId, userId, userName, rating, review })`
 - `getReviewsForResource(resourceId)`
-- `getUserReview(resourceId, userId)`
 - `updateReview({ reviewId, rating, review })`
 - `deleteReview(reviewId)`
-
-Rating aggregation is handled by the Cloud Function `updateResourceRating`.
-
-## Comments
-
 - `addComment({ resourceId, userId, userName, message })`
-- `getCommentsForResource(resourceId)`
 - `subscribeToComments(resourceId, callback)`
 - `updateComment(commentId, message)`
 - `deleteComment(commentId)`
 
-## Follows
+Rating aggregation is handled by the `updateResourceRating` Cloud Function.
 
-- `getFollowRecord(followerId, followingId)`
-- `followUser(followerId, followingId)`
-- `unfollowUser(followerId, followingId)`
-- `isFollowing(followerId, followingId)`
-- `areMutuals(firstUserId, secondUserId)`
-
-## Conversations
-
-`conversation-service.js` owns conversation creation, loading, and real-time conversation lists.
+## Conversations and messages
 
 - `createOrGetConversation(firstUserId, secondUserId)`
 - `createOrGetGroupConversation({ groupId, title, memberCount })`
-- `getConversation(firstUserId, secondUserId)`
-- `getConversationById(conversationId)`
 - `subscribeToUserConversations(userId, callback, onError)`
-
-## Messages
-
-`message-service.js` owns message delivery, edits, deletion, replies, reactions, and receipts.
-
-- `sendMessage({ conversationId, senderId, receiverId, groupId, conversationType, senderName, type, text })`
+- `sendMessage(messageData)`
+- `sendReplyMessage(messageData)`
+- `sendVoiceMessage(messageData)`
 - `subscribeToMessages(conversationId, callback, onError)`
 - `editMessage(...)`
 - `deleteMessageForEveryone(...)`
 - `deleteMessageForMe(...)`
-- `reactToMessage(...)`
-- `startReply(message)`
+- `addReaction(...)`
+- `removeReaction(...)`
+- `markMessageDelivered(...)`
+- `markMessageRead(...)`
 
 ## Presence
-
-`presence-service.js` owns online presence and typing state.
 
 - `setUserOnline(userId)`
 - `setUserOffline(userId)`
 - `subscribeToPresence(userId, callback, onError)`
-- `setTypingStatus(conversationId, userId, isTyping, displayName)`
-- `subscribeToTypingStatus(conversationId, callback, onError)`
+- `setUserTyping(userId, conversationId)`
+- `stopTyping(userId)`
 
-## Group Resources
+## Groups and assignments
 
-- `uploadGroupResource(file, groupId, onProgress)`
-- `createGroupResource(resourceData)`
-- `getGroupResources(groupId)`
-- `getGroupResource({ groupId, resourceId })`
+- `createStudyGroup(groupData)`
+- `getStudyGroups()`
+- `joinStudyGroup(groupId, userId)`
+- `leaveStudyGroup(groupId, userId)`
+- `subscribeToUserStudyGroups(userId, callback, onError)`
+- `createAssignment(assignmentData)`
+- `subscribeToAssignments(groupId, callback, onError)`
+- `uploadGroupResource(file, groupId, uploaderId, onProgress)`
+
 ## Notifications
 
 - `createNotification(notificationData)`
 - `getNotifications(userId)`
-- `getNotification(userId, notificationId)`
 - `markAsRead(userId, notificationId)`
 - `markAllAsRead(userId)`
 - `deleteNotification(userId, notificationId)`
 - `subscribeToNotifications(userId, callback, onError)`
 
-Cross-user writes are authorized only when Firestore can verify the referenced
-assignment, message, resource, or friend request.
+Cross-user writes are authorized only when Firestore can verify the source
+assignment, message, resource, membership, or friend request.
 
-## Domain Events
+## Settings
 
-- `emitAssignmentCreated({ assignment, groupId, creatorId })`
-- `emitMessageSent({ message, chatId, senderId, chatType })`
-- `emitFriendRequestSent({ senderId, recipientId, requestId })`
-- `emitFriendRequestAccepted({ senderId, recipientId, requestId })`
+- `getUserSettings(userId)`
+- `saveUserSettings(userId, settings)`
+- `updateUserSettings(userId, updates)`
+- `subscribeToUserSettings(userId, onSettingsChange, onError)`
 
-## Friends
+## Storage
 
-- `sendFriendRequest(senderId, recipientId)`
-- `acceptFriendRequest(requestId, recipientId)`
+- `uploadChatAttachment(file, conversationId, senderId, onProgress)`
+- `uploadVoiceMessage(conversationId, userId, blob, onProgress)`
+- `deleteVoiceMessage(storagePath)`
 
-## Achievements
+Storage operations do not write Firestore message documents.
 
-- `awardAchievement(userId, achievement)`
+## Error and feedback
 
-Achievement awarding should move to Cloud Functions.
+- `showError(options)`
+- `showWarning(options)`
+- `showSuccess(options)`
+- `showInfo(options)`
+- `handleError(error, options)`
+- `logError(error, context)`
 
-## Analytics
-
-- `getMonthlyUploads(userId)`
-- Dashboard stats and chart rendering modules
-- Leaderboard loading modules
-
-## Cloud Functions
-
-- `updateResourceRating`: recalculates `averageRating` and `reviewCount` whenever a review document is created, updated, or deleted.
+Services throw errors. Controllers decide whether to show feedback, recover, or
+rethrow.

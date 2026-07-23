@@ -12,9 +12,7 @@ function validateTitle(title) {
     const cleanTitle = title.trim();
 
     if (cleanTitle.length > TITLE_MAX_LENGTH) {
-        throw new Error(
-            `Title cannot exceed ${TITLE_MAX_LENGTH} characters.`
-        );
+        throw new Error(`Title cannot exceed ${TITLE_MAX_LENGTH} characters.`);
     }
 
     return cleanTitle;
@@ -82,10 +80,7 @@ export function validateNotification(data) {
             data.conversationId,
             "Conversation ID"
         ),
-        referenceId: normalizeOptionalId(
-            data.referenceId,
-            "Reference ID"
-        )
+        referenceId: normalizeOptionalId(data.referenceId, "Reference ID")
     };
 }
 

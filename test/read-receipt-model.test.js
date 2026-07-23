@@ -50,11 +50,12 @@ test("read receipt validation reports every missing ID", () => {
     ]);
     assert.throws(
         () => createReadReceiptModel({}),
-        (error) => Boolean(
-            error.message === "Invalid read receipt data." &&
-            error.validationErrors.conversationId &&
-            error.validationErrors.messageId &&
-            error.validationErrors.userId
-        )
+        (error) =>
+            Boolean(
+                error.message === "Invalid read receipt data." &&
+                error.validationErrors.conversationId &&
+                error.validationErrors.messageId &&
+                error.validationErrors.userId
+            )
     );
 });

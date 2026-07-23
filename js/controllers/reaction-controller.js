@@ -24,7 +24,7 @@ function cleanId(value) {
 function getMessageId(element) {
     return cleanId(
         element?.dataset?.messageId ||
-        element?.closest?.("[data-message-id]")?.dataset?.messageId
+            element?.closest?.("[data-message-id]")?.dataset?.messageId
     );
 }
 
@@ -57,9 +57,12 @@ export function initializeReactions({
     }
 
     function getCurrentReaction(messageId) {
-        return reactionsByMessage.get(messageId)?.find(
-            ({ userId }) => userId === cleanCurrentUserId
-        )?.reaction || "";
+        return (
+            reactionsByMessage
+                .get(messageId)
+                ?.find(({ userId }) => userId === cleanCurrentUserId)
+                ?.reaction || ""
+        );
     }
 
     async function updateReaction(messageId, reaction) {
@@ -101,21 +104,14 @@ export function initializeReactions({
     function handleMessageClick(event) {
         if (!(event.target instanceof Element)) return;
 
-        const chip = event.target.closest(
-            ".reaction-chip[data-reaction]"
-        );
+        const chip = event.target.closest(".reaction-chip[data-reaction]");
 
         if (chip && messageContainer.contains(chip)) {
-            updateReaction(
-                getMessageId(chip),
-                chip.dataset.reaction
-            );
+            updateReaction(getMessageId(chip), chip.dataset.reaction);
             return;
         }
 
-        const trigger = event.target.closest(
-            '[data-message-action="react"]'
-        );
+        const trigger = event.target.closest('[data-message-action="react"]');
 
         if (trigger && messageContainer.contains(trigger)) {
             showPicker(getMessageId(trigger), trigger);
@@ -141,11 +137,7 @@ export function initializeReactions({
         if (!container?.isConnected) return;
 
         if (reactions.length) {
-            renderReactionBar(
-                reactions,
-                cleanCurrentUserId,
-                container
-            );
+            renderReactionBar(reactions, cleanCurrentUserId, container);
             return;
         }
 
@@ -237,10 +229,7 @@ export function initializeReactions({
             destroyed = true;
 
             observer.disconnect();
-            messageContainer.removeEventListener(
-                "click",
-                handleMessageClick
-            );
+            messageContainer.removeEventListener("click", handleMessageClick);
             document.removeEventListener("click", handleMenuClick, true);
             subscriptions.forEach(({ unsubscribe }) => unsubscribe());
             subscriptions.clear();

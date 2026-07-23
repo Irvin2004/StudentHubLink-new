@@ -1,16 +1,14 @@
 import {
     deleteObject,
     getDownloadURL,
-    getStorage,
     ref,
     uploadBytesResumable
-} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-storage.js";
+} from "firebase/storage";
 
-import { app } from "../firebase/firebase-config.js";
+import { storage } from "../../src/firebase/storage.js";
 import { validateAttachment } from "../utils/file-validator.js?security=1";
 import { logError } from "./error-service.js";
 
-const storage = getStorage(app);
 const MAX_VOICE_MESSAGE_SIZE = 25 * 1024 * 1024;
 
 function validateStorageId(value, fieldName) {
@@ -64,26 +62,22 @@ export function uploadChatAttachment(
         const safeFileName = file.name
             .replace(/[^a-zA-Z0-9._-]/g, "_")
             .toLowerCase();
-        const storedFileName =
-            `${Date.now()}_${uniqueId}_${safeFileName}`;
+        const storedFileName = `${Date.now()}_${uniqueId}_${safeFileName}`;
 
         const storageRef = ref(
             storage,
             `messages/${conversationId}/${senderId}/${storedFileName}`
         );
 
-        const uploadTask = uploadBytesResumable(
-            storageRef,
-            file,
-            { contentType: file.type }
-        );
+        const uploadTask = uploadBytesResumable(storageRef, file, {
+            contentType: file.type
+        });
 
         uploadTask.on(
             "state_changed",
             (snapshot) => {
                 const progress = Math.round(
-                    (snapshot.bytesTransferred /
-                        snapshot.totalBytes) * 100
+                    (snapshot.bytesTransferred / snapshot.totalBytes) * 100
                 );
 
                 onProgress(progress);
@@ -91,9 +85,7 @@ export function uploadChatAttachment(
             reject,
             async () => {
                 try {
-                    const url = await getDownloadURL(
-                        uploadTask.snapshot.ref
-                    );
+                    const url = await getDownloadURL(uploadTask.snapshot.ref);
 
                     resolve({
                         url,
@@ -159,27 +151,26 @@ export async function uploadVoiceMessage(
 
     const extension = getVoiceExtension(blob.type.toLowerCase());
     const fileName = `${Date.now()}_${crypto.randomUUID()}.${extension}`;
-    const storagePath =
-        `voice/${cleanConversationId}/${cleanUserId}/${fileName}`;
+    const storagePath = `voice/${cleanConversationId}/${cleanUserId}/${fileName}`;
     const voiceReference = ref(storage, storagePath);
-    const uploadTask = uploadBytesResumable(
-        voiceReference,
-        blob,
-        { contentType: blob.type }
-    );
-    const reportProgress = typeof onProgress === "function"
-        ? onProgress
-        : () => {};
+    const uploadTask = uploadBytesResumable(voiceReference, blob, {
+        contentType: blob.type
+    });
+    const reportProgress =
+        typeof onProgress === "function" ? onProgress : () => {};
 
     return new Promise((resolve, reject) => {
         uploadTask.on(
             "state_changed",
             (snapshot) => {
-                const progress = snapshot.totalBytes > 0
-                    ? Math.round(
-                        (snapshot.bytesTransferred / snapshot.totalBytes) * 100
-                    )
-                    : 0;
+                const progress =
+                    snapshot.totalBytes > 0
+                        ? Math.round(
+                              (snapshot.bytesTransferred /
+                                  snapshot.totalBytes) *
+                                  100
+                          )
+                        : 0;
                 reportProgress(progress);
             },
             reject,
@@ -198,10 +189,7 @@ export async function uploadVoiceMessage(
                     try {
                         await deleteObject(uploadTask.snapshot.ref);
                     } catch (cleanupError) {
-                        logError(
-                            cleanupError,
-                            "Voice upload cleanup failed"
-                        );
+                        logError(cleanupError, "Voice upload cleanup failed");
                     }
 
                     reject(error);
@@ -212,17 +200,14 @@ export async function uploadVoiceMessage(
 }
 
 export async function deleteVoiceMessage(storagePath) {
-    const cleanStoragePath = typeof storagePath === "string"
-        ? storagePath.trim()
-        : "";
+    const cleanStoragePath =
+        typeof storagePath === "string" ? storagePath.trim() : "";
 
     if (!cleanStoragePath) {
         throw new Error("Voice message storage path is required.");
     }
 
-    if (!/^voice\/[^/]+\/[^/]+\/[^/]+\.(webm|ogg)$/.test(
-        cleanStoragePath
-    )) {
+    if (!/^voice\/[^/]+\/[^/]+\/[^/]+\.(webm|ogg)$/.test(cleanStoragePath)) {
         throw new Error("Invalid voice message storage path.");
     }
 

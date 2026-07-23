@@ -1,33 +1,21 @@
 "use strict";
 
-import {
-    onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+import { onAuthStateChanged } from "firebase/auth";
 
-import { auth } from "../firebase/firebase-config.js";
-import { initializeActivityFeed } from
-    "./activity-controller.js?activity-feed=1";
+import { auth } from "../../src/firebase/auth.js";
+import { initializeActivityFeed } from "./activity-controller.js?activity-feed=1";
 import { createDashboardRefreshManager } from "./dashboard-refresh.js?live=1";
-import {
-    createSearchController
-} from "./search-controller.js?global-search=1";
+import { createSearchController } from "./search-controller.js?global-search=1";
 import { renderDashboard } from "../renderers/dashboard-renderer.js?live=1";
 import { subscribeToAssignments } from "../services/assignment-service.js?dashboard-live=1";
 import { subscribeToUserConversations } from "../services/conversation-service.js?dashboard-live=1";
 import { getDashboardData } from "../services/dashboard-service.js";
 import { subscribeToUserStudyGroups } from "../services/group-service.js?dashboard-live=1";
 import { subscribeToNotifications } from "../services/notification-service.js";
-import {
-    getUserFriendlyErrorMessage
-} from "../services/user-feedback-service.js";
+import { getUserFriendlyErrorMessage } from "../services/user-feedback-service.js";
 import { error as logError, log } from "../utils/logger.js";
-import {
-    hideSkeleton,
-    showSkeleton
-} from "../renderers/skeleton-renderer.js";
-import {
-    SKELETON_TYPES
-} from "../config/skeleton-types.js";
+import { hideSkeleton, showSkeleton } from "../renderers/skeleton-renderer.js";
+import { SKELETON_TYPES } from "../config/skeleton-types.js";
 
 let currentUser = null;
 let loadSequence = 0;
@@ -71,9 +59,7 @@ function getDashboardElements() {
 function setViewState(elements, state) {
     if (state === "loading") {
         showSkeleton(elements.loading, SKELETON_TYPES.PROFILE);
-    } else if (
-        elements.loading.querySelector("[data-skeleton-root]")
-    ) {
+    } else if (elements.loading.querySelector("[data-skeleton-root]")) {
         hideSkeleton(elements.loading);
     }
 
@@ -81,10 +67,7 @@ function setViewState(elements, state) {
     elements.error.hidden = state !== "error";
     elements.content.hidden = state !== "success";
 
-    elements.page?.setAttribute(
-        "aria-busy",
-        String(state === "loading")
-    );
+    elements.page?.setAttribute("aria-busy", String(state === "loading"));
 }
 
 function setRefreshState(button, isLoading) {
@@ -252,9 +235,7 @@ function asAssignmentGroups(assignments) {
     return groupedAssignments;
 }
 
-async function loadDashboard(elements, {
-    preserveContent = false
-} = {}) {
+async function loadDashboard(elements, { preserveContent = false } = {}) {
     if (!currentUser || destroyed) {
         return;
     }
@@ -318,9 +299,10 @@ async function loadDashboard(elements, {
 
 async function initializeDashboard() {
     const elements = getDashboardElements();
-    const refresh = () => loadDashboard(elements, {
-        preserveContent: !elements.content.hidden
-    });
+    const refresh = () =>
+        loadDashboard(elements, {
+            preserveContent: !elements.content.hidden
+        });
 
     elements.retryButton.addEventListener("click", refresh);
     elements.refreshButton.addEventListener("click", refresh);
@@ -369,11 +351,10 @@ async function initializeDashboard() {
                 "Authentication state could not be loaded:",
                 error
             );
-            elements.errorMessage.textContent =
-                getUserFriendlyErrorMessage(
-                    error,
-                    "We couldn't verify your account. Please try again."
-                );
+            elements.errorMessage.textContent = getUserFriendlyErrorMessage(
+                error,
+                "We couldn't verify your account. Please try again."
+            );
             setViewState(elements, "error");
         }
     );

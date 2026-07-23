@@ -1,9 +1,6 @@
 "use strict";
 
-import {
-    ALLOWED_ERROR_TYPES,
-    ERROR_TYPES
-} from "../config/error-types.js";
+import { ALLOWED_ERROR_TYPES, ERROR_TYPES } from "../config/error-types.js";
 
 function cleanText(value) {
     return typeof value === "string" ? value.trim() : "";
@@ -34,9 +31,7 @@ export class AppError extends Error {
         this.title = cleanText(title) || "Something went wrong";
         this.type = type;
         this.code = cleanText(code) || "APP_ERROR";
-        this.timestamp = Number.isFinite(timestamp)
-            ? timestamp
-            : Date.now();
+        this.timestamp = Number.isFinite(timestamp) ? timestamp : Date.now();
 
         if (cause !== undefined && this.cause === undefined) {
             this.cause = cause;
@@ -55,7 +50,5 @@ export class AppError extends Error {
 }
 
 export function createAppError(options) {
-    return options instanceof AppError
-        ? options
-        : new AppError(options);
+    return options instanceof AppError ? options : new AppError(options);
 }

@@ -23,9 +23,7 @@ export function renderReviews({
     container
 } = {}) {
     if (!summary || !container) {
-        throw new TypeError(
-            "Review summary and container are required."
-        );
+        throw new TypeError("Review summary and container are required.");
     }
 
     const reviewList = Array.isArray(reviews) ? reviews : [];
@@ -37,15 +35,13 @@ export function renderReviews({
 
     const html = reviewList.length
         ? reviewList
-            .map((review) =>
-                createReviewCard(review, currentUserId)
-            )
-            .join("")
+              .map((review) => createReviewCard(review, currentUserId))
+              .join("")
         : createEmptyState(
-            "No reviews yet",
-            "Be the first to review this resource.",
-            ""
-        );
+              "No reviews yet",
+              "Be the first to review this resource.",
+              ""
+          );
 
     container.innerHTML = html;
     return html;

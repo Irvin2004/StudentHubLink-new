@@ -1,49 +1,34 @@
 "use strict";
 
-import {
-    ALLOWED_ERROR_TYPES,
-    ERROR_TYPES
-} from "../config/error-types.js";
+import { ALLOWED_ERROR_TYPES, ERROR_TYPES } from "../config/error-types.js";
 import { AppError } from "../models/app-error.js";
 import { createToast } from "../components/toast.js";
 import { error as writeErrorLog } from "../utils/logger.js";
 import { DEBUG } from "../config/debug.js";
 
 const FRIENDLY_ERROR_MESSAGES = Object.freeze({
-    "permission-denied":
-        "You don't have permission to perform this action.",
-    unauthenticated:
-        "Please sign in and try again.",
+    "permission-denied": "You don't have permission to perform this action.",
+    unauthenticated: "Please sign in and try again.",
     unavailable:
         "The service is temporarily unavailable. Please try again shortly.",
-    "deadline-exceeded":
-        "The request took too long. Please try again.",
+    "deadline-exceeded": "The request took too long. Please try again.",
     "resource-exhausted":
         "The service is busy right now. Please try again shortly.",
-    "not-found":
-        "The requested item could not be found.",
-    "already-exists":
-        "That item already exists.",
+    "not-found": "The requested item could not be found.",
+    "already-exists": "That item already exists.",
     "auth/network-request-failed":
         "Check your internet connection and try again.",
-    "auth/invalid-email":
-        "Enter a valid email address.",
-    "auth/too-many-requests":
-        "Too many attempts. Wait a moment and try again.",
-    "auth/weak-password":
-        "Use a stronger password with at least 8 characters.",
+    "auth/invalid-email": "Enter a valid email address.",
+    "auth/too-many-requests": "Too many attempts. Wait a moment and try again.",
+    "auth/weak-password": "Use a stronger password with at least 8 characters.",
     "auth/email-already-in-use":
         "An account already exists for that email address.",
-    "auth/requires-recent-login":
-        "Please sign in again before continuing.",
-    "storage/unauthorized":
-        "You don't have permission to access this file.",
-    "storage/object-not-found":
-        "The requested file could not be found.",
+    "auth/requires-recent-login": "Please sign in again before continuing.",
+    "storage/unauthorized": "You don't have permission to access this file.",
+    "storage/object-not-found": "The requested file could not be found.",
     "storage/retry-limit-exceeded":
         "The upload took too long. Please try again.",
-    "storage/quota-exceeded":
-        "File uploads are temporarily unavailable."
+    "storage/quota-exceeded": "File uploads are temporarily unavailable."
 });
 
 const DEFAULT_TITLES = Object.freeze({
@@ -63,8 +48,7 @@ export function getUserFriendlyErrorMessage(
     error,
     fallbackMessage = "Something went wrong."
 ) {
-    const code = cleanText(error?.code)
-        .replace(/^firestore\//, "");
+    const code = cleanText(error?.code).replace(/^firestore\//, "");
 
     if (FRIENDLY_ERROR_MESSAGES[code]) {
         return FRIENDLY_ERROR_MESSAGES[code];
@@ -89,9 +73,10 @@ export function normalizeError({
     const normalizedType = ALLOWED_ERROR_TYPES.includes(type)
         ? type
         : ERROR_TYPES.ERROR;
-    const normalizedMessage = normalizedType === ERROR_TYPES.ERROR
-        ? getUserFriendlyErrorMessage(error, message)
-        : cleanText(message);
+    const normalizedMessage =
+        normalizedType === ERROR_TYPES.ERROR
+            ? getUserFriendlyErrorMessage(error, message)
+            : cleanText(message);
 
     if (!normalizedMessage) {
         throw new Error("A notification message is required.");
@@ -104,9 +89,10 @@ export function normalizeError({
         type: normalizedType,
         title: cleanText(title) || DEFAULT_TITLES[normalizedType],
         message: normalizedMessage,
-        duration: duration === undefined
-            ? undefined
-            : Math.max(0, Number(duration) || 0),
+        duration:
+            duration === undefined
+                ? undefined
+                : Math.max(0, Number(duration) || 0),
         code: cleanText(code || error?.code),
         timestamp,
         error
@@ -119,10 +105,7 @@ function display(type, options = {}) {
         type
     });
 
-    if (
-        type === ERROR_TYPES.ERROR &&
-        options.log !== false
-    ) {
+    if (type === ERROR_TYPES.ERROR && options.log !== false) {
         logError(options.error || notification);
     }
 
@@ -150,40 +133,33 @@ export function logError(error, context = "") {
     const stack = error?.stack || error;
 
     if (DEBUG.ENABLED) {
-        writeErrorLog(
-            "APP",
-            ...(prefix ? [prefix] : []),
-            stack
-        );
+        writeErrorLog("APP", ...(prefix ? [prefix] : []), stack);
     }
 
     return error;
 }
 
-export function handleError(
-    error,
-    options = {}
-) {
-    const normalizedOptions = typeof options === "string"
-        ? { message: options }
-        : options;
-    const appError = error instanceof AppError
-        ? error
-        : new AppError({
-            title:
-                normalizedOptions.title ||
-                DEFAULT_TITLES[ERROR_TYPES.ERROR],
-            message: getUserFriendlyErrorMessage(
-                error,
-                normalizedOptions.message
-            ),
-            type: ERROR_TYPES.ERROR,
-            code:
-                normalizedOptions.code ||
-                error?.code ||
-                "UNEXPECTED_ERROR",
-            cause: error
-        });
+export function handleError(error, options = {}) {
+    const normalizedOptions =
+        typeof options === "string" ? { message: options } : options;
+    const appError =
+        error instanceof AppError
+            ? error
+            : new AppError({
+                  title:
+                      normalizedOptions.title ||
+                      DEFAULT_TITLES[ERROR_TYPES.ERROR],
+                  message: getUserFriendlyErrorMessage(
+                      error,
+                      normalizedOptions.message
+                  ),
+                  type: ERROR_TYPES.ERROR,
+                  code:
+                      normalizedOptions.code ||
+                      error?.code ||
+                      "UNEXPECTED_ERROR",
+                  cause: error
+              });
 
     logError(error, appError.code);
 

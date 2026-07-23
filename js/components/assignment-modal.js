@@ -70,9 +70,7 @@ export function createAssignmentModal() {
 export function setAssignmentModalMode(mode) {
     const modeDetails = MODAL_MODES[mode];
     const modalTitle = document.getElementById("assignmentModalTitle");
-    const submitButton = document.getElementById(
-        "createAssignmentButton"
-    );
+    const submitButton = document.getElementById("createAssignmentButton");
 
     if (!modeDetails) {
         throw new Error("Choose a valid assignment modal mode.");

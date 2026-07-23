@@ -16,12 +16,7 @@ function read(path) {
 test("error types are centralized, unique, and immutable", () => {
     const values = Object.values(ERROR_TYPES);
 
-    assert.deepEqual(values, [
-        "info",
-        "success",
-        "warning",
-        "error"
-    ]);
+    assert.deepEqual(values, ["info", "success", "warning", "error"]);
     assert.equal(new Set(values).size, values.length);
     assert.ok(Object.isFrozen(ERROR_TYPES));
 });
@@ -91,10 +86,7 @@ test("error service owns reporting while toast owns DOM rendering", () => {
         "logError",
         "handleError"
     ].forEach((apiName) => {
-        assert.match(
-            service,
-            new RegExp(`export function ${apiName}\\(`)
-        );
+        assert.match(service, new RegExp(`export function ${apiName}\\(`));
     });
 });
 
@@ -108,9 +100,6 @@ test("controllers and services avoid direct console error handling", () => {
         "js/services/storage-service.js",
         "js/services/theme-service.js"
     ].forEach((path) => {
-        assert.doesNotMatch(
-            read(path),
-            /console\.(?:error|warn)\(/
-        );
+        assert.doesNotMatch(read(path), /console\.(?:error|warn)\(/);
     });
 });

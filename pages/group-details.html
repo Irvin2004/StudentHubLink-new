@@ -1,195 +1,239 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Study Group | StudentHub</title>
-    <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
-    <link rel="stylesheet" href="../css/studenthub.css?v=20260723-13">
-</head>
-<body data-page="group-details">
-    <div class="groups-shell">
-        <aside
-            id="primaryNavigationDrawer"
-            class="groups-sidebar app-sidebar"
-            data-navigation-drawer
-            aria-label="StudentHub navigation">
-            <a class="groups-brand" href="../dashboard.html">
-                <img src="../assets/favicon.svg" alt="">
-                <span>StudentHub</span>
-            </a>
-
-            <nav class="groups-nav sidebar-nav" aria-label="Primary navigation">
-                <a class="sidebar-link" href="../dashboard.html">
-                    <span class="sidebar-icon" aria-hidden="true">&#8962;</span>
-                    <span class="sidebar-label">Dashboard</span>
-                </a>
-                <a class="sidebar-link" href="resources.html">
-                    <span class="sidebar-icon" aria-hidden="true">&#128722;</span>
-                    <span class="sidebar-label">Marketplace</span>
-                </a>
-                <a class="sidebar-link active" href="groups.html">
-                    <span class="sidebar-icon" aria-hidden="true">&#128101;</span>
-                    <span class="sidebar-label">Study Groups</span>
-                </a>
-                <a class="sidebar-link" href="messages.html">
-                    <span class="sidebar-icon" aria-hidden="true">&#128172;</span>
-                    <span class="sidebar-label">Messages</span>
-                </a>
-                <a class="sidebar-link" href="library.html">
-                    <span class="sidebar-icon" aria-hidden="true">&#128218;</span>
-                    <span class="sidebar-label">My Library</span>
-                </a>
-                <a class="sidebar-link" href="profile.html">
-                    <span class="sidebar-icon" aria-hidden="true">&#128100;</span>
-                    <span class="sidebar-label">Profile</span>
-                </a>
-            </nav>
-
-            <div class="groups-sidebar-footer">
-                <button
-                    class="theme-toggle"
-                    type="button"
-                    data-theme-toggle
-                    aria-label="Switch color theme">
-                    Dark
-                </button>
-                <span>Choose your theme</span>
-            </div>
-        </aside>
-
-        <button
-            class="navigation-drawer-backdrop"
-            type="button"
-            data-navigation-drawer-backdrop="primaryNavigationDrawer"
-            aria-label="Close navigation"
-            hidden>
-        </button>
-
-        <main class="groups-main group-detail-main">
-            <header class="groups-mobile-header">
-                <button
-                    class="navigation-drawer-toggle"
-                    type="button"
-                    data-navigation-drawer-toggle="primaryNavigationDrawer"
-                    aria-label="Open navigation">
-                    &#9776;
-                </button>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Study Group | StudentHub</title>
+        <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
+    </head>
+    <body data-page="group-details">
+        <div class="groups-shell">
+            <aside
+                id="primaryNavigationDrawer"
+                class="groups-sidebar app-sidebar"
+                data-navigation-drawer
+                aria-label="StudentHub navigation"
+            >
                 <a class="groups-brand" href="../dashboard.html">
-                    <img src="../assets/favicon.svg" alt="">
+                    <img src="../assets/favicon.svg" alt="" />
                     <span>StudentHub</span>
                 </a>
-                <a href="groups.html">Groups</a>
-            </header>
 
-            <a class="group-back-link" href="groups.html">
-                <span aria-hidden="true">←</span>
-                Back to study groups
-            </a>
+                <nav
+                    class="groups-nav sidebar-nav"
+                    aria-label="Primary navigation"
+                >
+                    <a class="sidebar-link" href="../dashboard.html">
+                        <span class="sidebar-icon" aria-hidden="true"
+                            >&#8962;</span
+                        >
+                        <span class="sidebar-label">Dashboard</span>
+                    </a>
+                    <a class="sidebar-link" href="resources.html">
+                        <span class="sidebar-icon" aria-hidden="true"
+                            >&#128722;</span
+                        >
+                        <span class="sidebar-label">Marketplace</span>
+                    </a>
+                    <a class="sidebar-link active" href="groups.html">
+                        <span class="sidebar-icon" aria-hidden="true"
+                            >&#128101;</span
+                        >
+                        <span class="sidebar-label">Study Groups</span>
+                    </a>
+                    <a class="sidebar-link" href="messages.html">
+                        <span class="sidebar-icon" aria-hidden="true"
+                            >&#128172;</span
+                        >
+                        <span class="sidebar-label">Messages</span>
+                    </a>
+                    <a class="sidebar-link" href="library.html">
+                        <span class="sidebar-icon" aria-hidden="true"
+                            >&#128218;</span
+                        >
+                        <span class="sidebar-label">My Library</span>
+                    </a>
+                    <a class="sidebar-link" href="profile.html">
+                        <span class="sidebar-icon" aria-hidden="true"
+                            >&#128100;</span
+                        >
+                        <span class="sidebar-label">Profile</span>
+                    </a>
+                </nav>
 
-            <div
-                id="groupDetailLoading"
-                class="group-detail-loading"
-                aria-busy="true"></div>
-
-            <div id="groupDetailContent" class="group-detail-layout hidden">
-                <article class="group-detail-card">
-                    <header class="group-detail-header">
-                        <div class="group-detail-icon" aria-hidden="true">
-                            <svg
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="1.7"
-                                stroke-linecap="round"
-                                stroke-linejoin="round">
-                                <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H11v16H6.5A2.5 2.5 0 0 0 4 21.5v-16Z"/>
-                                <path d="M20 5.5A2.5 2.5 0 0 0 17.5 3H13v16h4.5a2.5 2.5 0 0 1 2.5 2.5v-16Z"/>
-                            </svg>
-                        </div>
-
-                        <div>
-                            <h1 id="groupDetailName">Study Group</h1>
-                            <p id="groupDetailModule"></p>
-
-                            <div
-                                id="groupDetailTags"
-                                class="group-tags">
-                            </div>
-
-                            <div class="group-detail-meta">
-                                <span id="groupDetailVisibility">Public</span>
-                                <span id="groupDetailMemberCount">0 members</span>
-                            </div>
-                        </div>
-                    </header>
-
-                    <section class="group-about">
-                        <h2>About this group</h2>
-                        <p id="groupDetailDescription"></p>
-                    </section>
-
-                    <section class="group-purpose">
-                        <h2>Learn better together</h2>
-                        <ul>
-                            <li>Share explanations and useful study resources.</li>
-                            <li>Work through assignments and practical problems.</li>
-                            <li>Plan revision sessions with students in your subject.</li>
-                        </ul>
-                    </section>
-                </article>
-
-                <aside class="group-detail-rail">
+                <div class="groups-sidebar-footer">
                     <button
-                        id="groupJoinButton"
-                        class="btn btn-primary group-detail-join"
-                        type="button">
-                        Join group
+                        class="theme-toggle"
+                        type="button"
+                        data-theme-toggle
+                        aria-label="Switch color theme"
+                    >
+                        Dark
                     </button>
-                    <nav
-                        id="groupDetailTabs"
-                        class="group-detail-tabs hidden"
-                        aria-label="Group sections">
+                    <span>Choose your theme</span>
+                </div>
+            </aside>
+
+            <button
+                class="navigation-drawer-backdrop"
+                type="button"
+                data-navigation-drawer-backdrop="primaryNavigationDrawer"
+                aria-label="Close navigation"
+                hidden
+            ></button>
+
+            <main class="groups-main group-detail-main">
+                <header class="groups-mobile-header">
+                    <button
+                        class="navigation-drawer-toggle"
+                        type="button"
+                        data-navigation-drawer-toggle="primaryNavigationDrawer"
+                        aria-label="Open navigation"
+                    >
+                        &#9776;
+                    </button>
+                    <a class="groups-brand" href="../dashboard.html">
+                        <img src="../assets/favicon.svg" alt="" />
+                        <span>StudentHub</span>
+                    </a>
+                    <a href="groups.html">Groups</a>
+                </header>
+
+                <a class="group-back-link" href="groups.html">
+                    <span aria-hidden="true">←</span>
+                    Back to study groups
+                </a>
+
+                <div
+                    id="groupDetailLoading"
+                    class="group-detail-loading"
+                    aria-busy="true"
+                ></div>
+
+                <div id="groupDetailContent" class="group-detail-layout hidden">
+                    <article class="group-detail-card">
+                        <header class="group-detail-header">
+                            <div class="group-detail-icon" aria-hidden="true">
+                                <svg
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="1.7"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                >
+                                    <path
+                                        d="M4 5.5A2.5 2.5 0 0 1 6.5 3H11v16H6.5A2.5 2.5 0 0 0 4 21.5v-16Z"
+                                    />
+                                    <path
+                                        d="M20 5.5A2.5 2.5 0 0 0 17.5 3H13v16h4.5a2.5 2.5 0 0 1 2.5 2.5v-16Z"
+                                    />
+                                </svg>
+                            </div>
+
+                            <div>
+                                <h1 id="groupDetailName">Study Group</h1>
+                                <p id="groupDetailModule"></p>
+
+                                <div
+                                    id="groupDetailTags"
+                                    class="group-tags"
+                                ></div>
+
+                                <div class="group-detail-meta">
+                                    <span id="groupDetailVisibility"
+                                        >Public</span
+                                    >
+                                    <span id="groupDetailMemberCount"
+                                        >0 members</span
+                                    >
+                                </div>
+                            </div>
+                        </header>
+
+                        <section class="group-about">
+                            <h2>About this group</h2>
+                            <p id="groupDetailDescription"></p>
+                        </section>
+
+                        <section class="group-purpose">
+                            <h2>Learn better together</h2>
+                            <ul>
+                                <li>
+                                    Share explanations and useful study
+                                    resources.
+                                </li>
+                                <li>
+                                    Work through assignments and practical
+                                    problems.
+                                </li>
+                                <li>
+                                    Plan revision sessions with students in your
+                                    subject.
+                                </li>
+                            </ul>
+                        </section>
+                    </article>
+
+                    <aside class="group-detail-rail">
                         <button
-                            id="groupChatButton"
-                            class="btn btn-secondary group-tab hidden"
-                            type="button">
-                            <span aria-hidden="true">&#128172;</span> Chat
+                            id="groupJoinButton"
+                            class="btn btn-primary group-detail-join"
+                            type="button"
+                        >
+                            Join group
                         </button>
-                        <a
-                            id="groupResourcesLink"
-                            class="btn btn-secondary group-tab hidden"
-                            href="#">
-                            <span aria-hidden="true">&#128196;</span> Resources
-                        </a>
-                        <button
-                            id="assignmentsTab"
-                            class="btn btn-secondary group-tab hidden"
-                            type="button">
-                            <span aria-hidden="true">&#128221;</span> Assignments
-                        </button>
-                    </nav>
+                        <nav
+                            id="groupDetailTabs"
+                            class="group-detail-tabs hidden"
+                            aria-label="Group sections"
+                        >
+                            <button
+                                id="groupChatButton"
+                                class="btn btn-secondary group-tab hidden"
+                                type="button"
+                            >
+                                <span aria-hidden="true">&#128172;</span> Chat
+                            </button>
+                            <a
+                                id="groupResourcesLink"
+                                class="btn btn-secondary group-tab hidden"
+                                href="#"
+                            >
+                                <span aria-hidden="true">&#128196;</span>
+                                Resources
+                            </a>
+                            <button
+                                id="assignmentsTab"
+                                class="btn btn-secondary group-tab hidden"
+                                type="button"
+                            >
+                                <span aria-hidden="true">&#128221;</span>
+                                Assignments
+                            </button>
+                        </nav>
 
-                    <p class="group-join-note">
-                        Public groups can be joined immediately. Private groups require an invitation.
-                    </p>
+                        <p class="group-join-note">
+                            Public groups can be joined immediately. Private
+                            groups require an invitation.
+                        </p>
 
-                    <div class="group-members-panel">
-                        <h2>Members</h2>
-                        <ul
-                            id="groupMemberPreview"
-                            class="group-member-list">
-                        </ul>
-                    </div>
-                </aside>
-            </div>
-        </main>
-    </div>
+                        <div class="group-members-panel">
+                            <h2>Members</h2>
+                            <ul
+                                id="groupMemberPreview"
+                                class="group-member-list"
+                            ></ul>
+                        </div>
+                    </aside>
+                </div>
+            </main>
+        </div>
 
-    <script
-        type="module"
-        src="../js/controllers/group-details-controller.js?skeletons=1">
-    </script>
-    <script type="module" src="../js/theme.js?responsive=3"></script>
-</body>
+        <script
+            type="module"
+            src="../js/controllers/group-details-controller.js?skeletons=1"
+        ></script>
+        <script type="module" src="/src/main.js"></script>
+    </body>
 </html>

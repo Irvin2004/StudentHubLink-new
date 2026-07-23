@@ -27,7 +27,8 @@ export function isValidResourceCategory(category) {
 }
 
 export function getResourceCategoryLabel(category) {
-    return RESOURCE_CATEGORY_OPTIONS.find(
-        (option) => option.value === category
-    )?.label || "Other";
+    return (
+        RESOURCE_CATEGORY_OPTIONS.find((option) => option.value === category)
+            ?.label || "Other"
+    );
 }

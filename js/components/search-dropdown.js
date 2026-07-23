@@ -52,9 +52,8 @@ function setSelectedIndex(state, nextIndex) {
         return;
     }
 
-    const normalizedIndex = (
-        (nextIndex % options.length) + options.length
-    ) % options.length;
+    const normalizedIndex =
+        ((nextIndex % options.length) + options.length) % options.length;
 
     options.forEach((option, index) => {
         const isSelected = index === normalizedIndex;

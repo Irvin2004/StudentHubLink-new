@@ -12,11 +12,10 @@ const FOCUSABLE_SELECTOR = [
 ].join(",");
 
 function getFocusableElements(drawer) {
-    return [...drawer.querySelectorAll(FOCUSABLE_SELECTOR)]
-        .filter((element) => (
-            !element.hidden &&
-            element.getAttribute("aria-hidden") !== "true"
-        ));
+    return [...drawer.querySelectorAll(FOCUSABLE_SELECTOR)].filter(
+        (element) =>
+            !element.hidden && element.getAttribute("aria-hidden") !== "true"
+    );
 }
 
 export function createNavigationDrawer({
@@ -36,8 +35,7 @@ export function createNavigationDrawer({
     let destroyed = false;
     const windowReference = documentReference.defaultView;
     const mobileQuery = windowReference?.matchMedia?.(
-        `(max-width: ${mobileBreakpoint - 1}px) and ` +
-        "(min-height: 521px)"
+        `(max-width: ${mobileBreakpoint - 1}px) and ` + "(min-height: 521px)"
     );
 
     if (!drawer.id) {
@@ -60,14 +58,8 @@ export function createNavigationDrawer({
 
         openState = nextOpen && isMobile();
         drawer.classList.toggle("is-open", openState);
-        drawer.setAttribute(
-            "aria-hidden",
-            String(isMobile() && !openState)
-        );
-        toggleButton.setAttribute(
-            "aria-expanded",
-            String(openState)
-        );
+        drawer.setAttribute("aria-hidden", String(isMobile() && !openState));
+        toggleButton.setAttribute("aria-expanded", String(openState));
         backdrop.hidden = !openState;
         documentReference.body.classList.toggle(
             "navigation-drawer-open",
@@ -127,8 +119,7 @@ export function createNavigationDrawer({
         }
 
         const firstElement = focusableElements[0];
-        const lastElement =
-            focusableElements[focusableElements.length - 1];
+        const lastElement = focusableElements[focusableElements.length - 1];
         const activeElement = documentReference.activeElement;
 
         if (!drawer.contains(activeElement)) {
@@ -137,16 +128,10 @@ export function createNavigationDrawer({
             return;
         }
 
-        if (
-            event.shiftKey &&
-            activeElement === firstElement
-        ) {
+        if (event.shiftKey && activeElement === firstElement) {
             event.preventDefault();
             lastElement.focus();
-        } else if (
-            !event.shiftKey &&
-            activeElement === lastElement
-        ) {
+        } else if (!event.shiftKey && activeElement === lastElement) {
             event.preventDefault();
             firstElement.focus();
         }
@@ -183,23 +168,15 @@ export function createNavigationDrawer({
             destroyed = true;
             toggleButton.removeEventListener("click", toggle);
             backdrop.removeEventListener("click", close);
-            documentReference.removeEventListener(
-                "keydown",
-                handleKeydown
-            );
-            mobileQuery?.removeEventListener?.(
-                "change",
-                handleViewportChange
-            );
+            documentReference.removeEventListener("keydown", handleKeydown);
+            mobileQuery?.removeEventListener?.("change", handleViewportChange);
             drawer.classList.remove("is-open");
             drawer.removeAttribute("aria-hidden");
             toggleButton.removeAttribute("aria-controls");
             toggleButton.removeAttribute("aria-expanded");
             toggleButton.removeAttribute("aria-haspopup");
             backdrop.hidden = true;
-            documentReference.body.classList.remove(
-                "navigation-drawer-open"
-            );
+            documentReference.body.classList.remove("navigation-drawer-open");
         }
     };
 }
@@ -207,28 +184,26 @@ export function createNavigationDrawer({
 export function initializeNavigationDrawers(
     documentReference = globalThis.document
 ) {
-    return [
-        ...documentReference.querySelectorAll(
-            "[data-navigation-drawer]"
-        )
-    ].map((drawer) => {
-        const drawerId = drawer.id;
-        const toggleButton = documentReference.querySelector(
-            `[data-navigation-drawer-toggle="${drawerId}"]`
-        );
-        const backdrop = documentReference.querySelector(
-            `[data-navigation-drawer-backdrop="${drawerId}"]`
-        );
+    return [...documentReference.querySelectorAll("[data-navigation-drawer]")]
+        .map((drawer) => {
+            const drawerId = drawer.id;
+            const toggleButton = documentReference.querySelector(
+                `[data-navigation-drawer-toggle="${drawerId}"]`
+            );
+            const backdrop = documentReference.querySelector(
+                `[data-navigation-drawer-backdrop="${drawerId}"]`
+            );
 
-        if (!toggleButton || !backdrop) {
-            return null;
-        }
+            if (!toggleButton || !backdrop) {
+                return null;
+            }
 
-        return createNavigationDrawer({
-            drawer,
-            toggleButton,
-            backdrop,
-            documentReference
-        });
-    }).filter(Boolean);
+            return createNavigationDrawer({
+                drawer,
+                toggleButton,
+                backdrop,
+                documentReference
+            });
+        })
+        .filter(Boolean);
 }

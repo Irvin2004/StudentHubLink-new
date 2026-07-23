@@ -57,12 +57,9 @@ export function createSettingsController({
             throw new Error("Settings controller is not initialized.");
         }
 
-        const updatedSettings = await updateUserSettings(
-            userId,
-            {
-                [name]: value
-            }
-        );
+        const updatedSettings = await updateUserSettings(userId, {
+            [name]: value
+        });
 
         settings = updatedSettings;
         return updatedSettings;
@@ -77,10 +74,7 @@ export function createSettingsController({
             throw new Error("Settings controller is not initialized.");
         }
 
-        const updatedSettings = await updateUserSettings(
-            userId,
-            updates
-        );
+        const updatedSettings = await updateUserSettings(userId, updates);
 
         settings = updatedSettings;
         return updatedSettings;

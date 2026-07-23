@@ -1,7 +1,7 @@
 function uniqueValues(values) {
-  return [...new Set(values.filter(Boolean))];
+    return [...new Set(values.filter(Boolean))];
 }
 
 module.exports = {
-  uniqueValues
+    uniqueValues
 };

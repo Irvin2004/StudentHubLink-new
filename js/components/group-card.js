@@ -43,36 +43,31 @@ function renderTags(tags = []) {
 
     return `
         <div class="group-tags">
-            ${tags.map((tag) => `
+            ${tags
+                .map(
+                    (tag) => `
                 <span>#${escapeHtml(tag)}</span>
-            `).join("")}
+            `
+                )
+                .join("")}
         </div>
     `;
 }
 
-export function createGroupCard(
-    group,
-    {
-        joined = false,
-        owner = false
-    } = {}
-) {
-    const isPrivate =
-        group.visibility === "private";
+export function createGroupCard(group, { joined = false, owner = false } = {}) {
+    const isPrivate = group.visibility === "private";
 
-    const moduleLabel =
-        [group.moduleName, group.moduleCode]
-            .filter(Boolean)
-            .join(" · ");
+    const moduleLabel = [group.moduleName, group.moduleCode]
+        .filter(Boolean)
+        .join(" · ");
 
-    const buttonLabel =
-        owner
-            ? "Owner"
-            : joined
-                ? "Joined"
-                : isPrivate
-                    ? "Private group"
-                    : "Join group";
+    const buttonLabel = owner
+        ? "Owner"
+        : joined
+          ? "Joined"
+          : isPrivate
+            ? "Private group"
+            : "Join group";
 
     return `
         <article
@@ -94,7 +89,7 @@ export function createGroupCard(
             <p class="group-description">
                 ${escapeHtml(
                     group.description ||
-                    "A study community for students learning together."
+                        "A study community for students learning together."
                 )}
             </p>
 
@@ -124,8 +119,8 @@ export function createGroupCard(
                         owner
                             ? "group-owner-button"
                             : joined
-                                ? "group-joined-button"
-                                : "btn-primary"
+                              ? "group-joined-button"
+                              : "btn-primary"
                     }"
                     type="button"
                     data-action="toggle-group-membership"

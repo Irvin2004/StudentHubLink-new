@@ -1,2 +1,2 @@
 exports.updateResourceRating =
-  require("./reviews/review-functions").updateResourceRating;
+    require("./reviews/review-functions").updateResourceRating;

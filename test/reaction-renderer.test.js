@@ -28,13 +28,17 @@ function createContainer(messageId = "message-1") {
 
 test("reaction renderer groups emoji and highlights the current user", () => {
     const container = createContainer();
-    const html = renderReactionBar([
-        { userId: "user-1", reaction: REACTION_TYPES.LOVE },
-        { userId: "user-2", reaction: REACTION_TYPES.LOVE },
-        { userId: "user-2", reaction: REACTION_TYPES.LOVE },
-        { userId: "user-3", reaction: REACTION_TYPES.LIKE },
-        { userId: "user-4", reaction: "invalid" }
-    ], "user-1", container);
+    const html = renderReactionBar(
+        [
+            { userId: "user-1", reaction: REACTION_TYPES.LOVE },
+            { userId: "user-2", reaction: REACTION_TYPES.LOVE },
+            { userId: "user-2", reaction: REACTION_TYPES.LOVE },
+            { userId: "user-3", reaction: REACTION_TYPES.LIKE },
+            { userId: "user-4", reaction: "invalid" }
+        ],
+        "user-1",
+        container
+    );
 
     assert.equal(container.classList.contains("reaction-bar"), true);
     assert.match(html, /class="reaction-chip mine"/);

@@ -7,8 +7,7 @@ export function toDate(value) {
         return value.toDate();
     }
 
-    const date =
-        new Date(value);
+    const date = new Date(value);
 
     return Number.isNaN(date.getTime()) ? null : date;
 }
@@ -22,19 +21,16 @@ export function getTimestampMillis(value) {
         return value.toMillis();
     }
 
-    const date =
-        toDate(value);
+    const date = toDate(value);
 
     return date ? date.getTime() : 0;
 }
 
-export function formatDate(value, {
-    fallback = "Unknown",
-    locale,
-    options
-} = {}) {
-    const date =
-        toDate(value);
+export function formatDate(
+    value,
+    { fallback = "Unknown", locale, options } = {}
+) {
+    const date = toDate(value);
 
     if (!date) {
         return fallback;
@@ -55,14 +51,17 @@ export function formatLongDate(value) {
     });
 }
 
-export function formatTime(value, {
-    fallback = "",
-    locale,
-    options = {
-        hour: "2-digit",
-        minute: "2-digit"
-    }
-} = {}) {
+export function formatTime(
+    value,
+    {
+        fallback = "",
+        locale,
+        options = {
+            hour: "2-digit",
+            minute: "2-digit"
+        }
+    } = {}
+) {
     const date = toDate(value);
 
     if (!date) return fallback;

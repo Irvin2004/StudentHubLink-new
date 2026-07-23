@@ -2,12 +2,8 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
 
-import {
-    createSkeleton
-} from "../js/components/skeleton.js";
-import {
-    SKELETON_TYPES
-} from "../js/config/skeleton-types.js";
+import { createSkeleton } from "../js/components/skeleton.js";
+import { SKELETON_TYPES } from "../js/config/skeleton-types.js";
 import {
     destroySkeleton,
     hideSkeleton,
@@ -72,10 +68,7 @@ test("skeleton component supports every centralized layout", () => {
 
         assert.match(html, new RegExp(`data-skeleton-type="${type}"`));
         assert.match(html, /aria-hidden="true"/);
-        assert.equal(
-            (html.match(/class="skeleton-item/g) || []).length,
-            2
-        );
+        assert.equal((html.match(/class="skeleton-item/g) || []).length, 2);
     });
 });
 

@@ -1,13 +1,7 @@
-import {
-    collection,
-    getDocs,
-    limit,
-    query,
-    where
-} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+import { collection, getDocs, limit, query, where } from "firebase/firestore";
 
 import { COLLECTIONS } from "../config/firestore.js";
-import { db } from "../firebase/firebase-config.js";
+import { db } from "../../src/firebase/firestore.js";
 
 export async function getUsers() {
     const publicUsersQuery = query(

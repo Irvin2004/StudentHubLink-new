@@ -12,11 +12,7 @@ async function deliverFriendNotification(notification, eventName) {
             failed: 0
         };
     } catch (error) {
-        logError(
-            "NOTIFICATIONS",
-            `${eventName} notification failed:`,
-            error
-        );
+        logError("NOTIFICATIONS", `${eventName} notification failed:`, error);
 
         return {
             recipients: 1,

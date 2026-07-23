@@ -1,12 +1,8 @@
 import { NOTIFICATION_TYPES } from "../config/notification-types.js";
 import { escapeHtml } from "../utils/dom.js";
 import { formatTimeAgo } from "../utils/time-ago.js";
-import {
-    createEmptyState
-} from "../components/empty-state.js?refinement=1";
-import {
-    hideSkeleton
-} from "./skeleton-renderer.js";
+import { createEmptyState } from "../components/empty-state.js?refinement=1";
+import { hideSkeleton } from "./skeleton-renderer.js";
 
 function getNotificationIcon(type) {
     switch (type) {
@@ -60,9 +56,7 @@ export function renderNotifications(notifications, container) {
 
 export function renderNotificationItem(notification = {}) {
     const isUnread = notification.read !== true;
-    const stateClass = isUnread
-        ? "notification-unread"
-        : "notification-read";
+    const stateClass = isUnread ? "notification-unread" : "notification-read";
     const stateLabel = isUnread ? "&#9679; Unread" : "Read";
 
     return `
