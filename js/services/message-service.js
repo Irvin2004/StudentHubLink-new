@@ -19,7 +19,7 @@ import {
 
 import { db } from "../firebase.js";
 import { COLLECTIONS } from "../config/firestore.js";
-import { MESSAGE_TYPES } from "../utils/constants.js?messaging=13";
+import { MESSAGE_TYPES } from "../config/message-types.js";
 import {
     MESSAGE_STATUS,
     isValidMessageStatus

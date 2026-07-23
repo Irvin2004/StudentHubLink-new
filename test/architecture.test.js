@@ -67,6 +67,27 @@ test("message read receipts use user-keyed nested documents", () => {
     assert.doesNotMatch(service, /document\.|window\.|innerHTML/);
 });
 
+test("voice recording stays browser-only and message types are centralized", () => {
+    const recorder = read("js/components/voice-recorder.js");
+    const model = read("js/models/message.js");
+    const service = read("js/services/message-service.js");
+
+    assert.match(recorder, /export function createVoiceRecorder\(/);
+    assert.match(recorder, /export function startRecording\(/);
+    assert.match(recorder, /export function stopRecording\(/);
+    assert.match(recorder, /export function cancelRecording\(/);
+    assert.match(recorder, /export function destroy\(/);
+    assert.match(recorder, /getUserMedia/);
+    assert.match(recorder, /MediaRecorderClass/);
+    assert.doesNotMatch(
+        recorder,
+        /firebase|firestore|upload|sendMessage|innerHTML|createElement/
+    );
+    assert.match(model, /createMessageModel/);
+    assert.match(model, /MESSAGE_TYPES\.VOICE/);
+    assert.match(service, /config\/message-types\.js/);
+});
+
 test("read receipt renderer owns passive message status display", () => {
     const renderer = read("js/renderers/read-receipt-renderer.js");
     const messages = read("js/renderers/message-renderer.js");

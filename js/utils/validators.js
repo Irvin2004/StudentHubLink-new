@@ -1,4 +1,4 @@
-import { MESSAGE_TYPES } from "./constants.js?messaging=13";
+import { MESSAGE_TYPES } from "../config/message-types.js";
 
 const DEFAULT_MAX_FILE_SIZE = 25 * 1024 * 1024;
 
