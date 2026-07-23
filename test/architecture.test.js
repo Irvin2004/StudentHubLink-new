@@ -115,6 +115,25 @@ test("voice messages upload before Firestore writes and remain deletable", () =>
     assert.match(firestoreRules, /"mimeType", "voice"/);
 });
 
+test("voice player uses one shared audio element and remains service-free", () => {
+    const player = read("js/components/voice-player.js");
+
+    assert.match(player, /export function createVoicePlayer\(/);
+    assert.match(player, /export function destroyVoicePlayer\(/);
+    assert.equal((player.match(/new Audio\(\)/g) || []).length, 1);
+    assert.match(player, /timeupdate/);
+    assert.match(player, /loadedmetadata/);
+    assert.match(player, /playbackRate/);
+    assert.match(player, /ArrowLeft/);
+    assert.match(player, /ArrowRight/);
+    assert.match(player, /Space/);
+    assert.match(player, /aria-label/);
+    assert.doesNotMatch(
+        player,
+        /firebase|firestore|storage-service|message-service|conversation/
+    );
+});
+
 test("read receipt renderer owns passive message status display", () => {
     const renderer = read("js/renderers/read-receipt-renderer.js");
     const messages = read("js/renderers/message-renderer.js");
