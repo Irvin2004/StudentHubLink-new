@@ -43,6 +43,14 @@ export function createMessageId() {
 }
 
 function normalizeMessage(messageId, data = {}) {
+    const replySource = data.reply || data.replyTo || null;
+    const reply = replySource ? {
+        messageId: replySource.messageId || replySource.id || "",
+        senderId: replySource.senderId || "",
+        preview: replySource.preview || "Message",
+        type: replySource.type || MESSAGE_TYPES.TEXT
+    } : null;
+
     return {
         id: messageId,
         conversationId: data.conversationId || "",
@@ -75,7 +83,11 @@ function normalizeMessage(messageId, data = {}) {
         readAt: data.readAt || null,
         readBy: Array.isArray(data.readBy) ? data.readBy : [],
         reactions: data.reactions || {},
-        replyTo: data.replyTo || null
+        reply,
+        replyTo: reply ? {
+            ...reply,
+            senderName: replySource.senderName || ""
+        } : null
     };
 }
 
@@ -92,7 +104,7 @@ function createMessageDocument({
     mimeType = null,
     fileSize = null,
     voice = null,
-    replyTo = null
+    reply = null
 }) {
     return {
         conversationId,
@@ -123,7 +135,7 @@ function createMessageDocument({
         readAt: null,
         readBy: groupId ? [senderId] : [],
         reactions: {},
-        replyTo
+        ...(reply ? { reply } : {})
     };
 }
 
@@ -245,7 +257,21 @@ export async function sendMessage(input) {
         throw new Error("Direct message information is incomplete.");
     }
 
-    const message = createMessageDocument(messageInput);
+    const replySource = input.reply || input.replyTo || null;
+    const normalizedModel = createMessageModel({
+        conversationId,
+        senderId,
+        receiverId: messageInput.receiverId,
+        groupId: messageInput.groupId,
+        type: messageInput.type || MESSAGE_TYPES.TEXT,
+        content: messageInput.text,
+        voice: messageInput.voice,
+        reply: replySource
+    });
+    const message = createMessageDocument({
+        ...messageInput,
+        reply: normalizedModel.reply || null
+    });
 
     if (
         (message.type === MESSAGE_TYPES.TEXT ||
@@ -315,6 +341,48 @@ export async function sendMessage(input) {
     }
 
     return messageId;
+}
+
+export async function sendReplyMessage({
+    conversationId,
+    senderId,
+    content,
+    reply,
+    senderName = "Student"
+} = {}) {
+    const cleanConversationId = validateId(
+        conversationId,
+        "Conversation ID"
+    );
+    const cleanSenderId = validateId(senderId, "Sender ID");
+    const conversation = await getConversationById(cleanConversationId);
+    const isGroupMessage = conversation.type === "group";
+    const receiverId = isGroupMessage
+        ? null
+        : conversation.participantIds.find(
+            (participantId) => participantId !== cleanSenderId
+        );
+
+    if (
+        (!isGroupMessage &&
+            (!receiverId ||
+                !conversation.participantIds.includes(cleanSenderId))) ||
+        (isGroupMessage && !conversation.groupId)
+    ) {
+        throw new Error("Conversation participant information is incomplete.");
+    }
+
+    return sendMessage({
+        conversationId: cleanConversationId,
+        senderId: cleanSenderId,
+        receiverId,
+        groupId: isGroupMessage ? conversation.groupId : null,
+        conversationType: isGroupMessage ? "group" : "direct",
+        senderName,
+        type: MESSAGE_TYPES.TEXT,
+        text: content,
+        reply
+    });
 }
 
 export async function sendVoiceMessage({
@@ -853,10 +921,12 @@ export function copyMessage(text) {
 
 export function startReply(message) {
     return {
-        id: message.id,
+        messageId: message.id,
+        senderId: message.senderId,
         senderName: message.senderName,
         preview: message.deletedAt
             ? "Deleted message"
-            : message.text || message.fileName || "Attachment"
+            : message.text || message.fileName || "Attachment",
+        type: message.type || MESSAGE_TYPES.TEXT
     };
 }

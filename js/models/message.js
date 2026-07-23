@@ -29,6 +29,15 @@ function normalizeVoice(voice = {}) {
     };
 }
 
+function normalizeReply(reply = {}) {
+    return {
+        messageId: normalizeText(reply.messageId),
+        senderId: normalizeText(reply.senderId),
+        preview: normalizeText(reply.preview),
+        type: normalizeText(reply.type)
+    };
+}
+
 export function validateMessage(message = {}) {
     const errors = {};
     const conversationId = normalizeText(message.conversationId);
@@ -79,6 +88,26 @@ export function validateMessage(message = {}) {
         }
     }
 
+    if (message.reply !== undefined && message.reply !== null) {
+        const reply = normalizeReply(message.reply);
+
+        if (!reply.messageId) {
+            errors.replyMessageId = "Reply message ID is required.";
+        }
+
+        if (!reply.senderId) {
+            errors.replySenderId = "Reply sender ID is required.";
+        }
+
+        if (!reply.preview) {
+            errors.replyPreview = "Reply preview is required.";
+        }
+
+        if (!isValidMessageType(reply.type)) {
+            errors.replyType = "A valid reply message type is required.";
+        }
+    }
+
     return {
         isValid: Object.keys(errors).length === 0,
         errors
@@ -87,6 +116,9 @@ export function validateMessage(message = {}) {
 
 export function createMessageModel(message = {}) {
     const type = normalizeText(message.type) || MESSAGE_TYPES.TEXT;
+    const reply = message.reply === undefined || message.reply === null
+        ? null
+        : normalizeReply(message.reply);
     const normalizedMessage = {
         id: normalizeText(message.id),
         conversationId: normalizeText(message.conversationId),
@@ -97,7 +129,8 @@ export function createMessageModel(message = {}) {
         content: normalizeText(message.content ?? message.text),
         voice: type === MESSAGE_TYPES.VOICE
             ? normalizeVoice(message.voice)
-            : null
+            : null,
+        ...(reply ? { reply } : {})
     };
     const validation = validateMessage(normalizedMessage);
 

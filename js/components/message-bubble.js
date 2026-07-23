@@ -45,6 +45,7 @@ function renderMessageContent(message) {
 export function createMessageBubble(message, currentUserId, options = {}) {
     const mine = message.senderId === currentUserId;
     const deleted = message.deleted || Boolean(message.deletedAt);
+    const reply = message.reply || message.replyTo || null;
 
     return `
         <div class="message-row ${mine ? "mine" : "theirs"}"
@@ -56,10 +57,13 @@ export function createMessageBubble(message, currentUserId, options = {}) {
                     </div>
                 ` : ""}
 
-                ${!deleted && message.replyTo ? `
+                ${!deleted && reply ? `
                     <div class="reply-block">
-                        <strong>${escapeHtml(message.replyTo.senderName || "Student")}</strong>
-                        <p>${escapeHtml(message.replyTo.preview || "Message")}</p>
+                        <strong>${escapeHtml(
+                            reply.senderName ||
+                            (reply.senderId === currentUserId ? "You" : "Student")
+                        )}</strong>
+                        <p>${escapeHtml(reply.preview || "Message")}</p>
                     </div>
                 ` : ""}
 

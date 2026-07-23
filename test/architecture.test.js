@@ -18,6 +18,21 @@ test("message deep links include conversation and message context", () => {
     assert.match(read("js/controllers/notification-controller.js"), /&message=/);
 });
 
+test("message replies use validated lightweight metadata", () => {
+    const model = read("js/models/message.js");
+    const service = read("js/services/message-service.js");
+    const types = read("js/config/message-types.js");
+
+    assert.match(model, /messageId: normalizeText\(reply\.messageId\)/);
+    assert.match(model, /senderId: normalizeText\(reply\.senderId\)/);
+    assert.match(model, /preview: normalizeText\(reply\.preview\)/);
+    assert.match(model, /isValidMessageType\(reply\.type\)/);
+    assert.match(service, /export async function sendReplyMessage\(/);
+    assert.match(service, /reply: normalizedModel\.reply/);
+    assert.match(types, /Replies reuse these message types/);
+    assert.doesNotMatch(types, /REPLY\s*:/);
+});
+
 test("message reactions no longer mutate embedded message maps", () => {
     const source = read("js/services/message-service.js");
     assert.doesNotMatch(

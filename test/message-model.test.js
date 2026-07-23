@@ -80,3 +80,53 @@ test("message model rejects incomplete voice messages", () => {
         )
     );
 });
+
+test("message model normalizes lightweight reply metadata", () => {
+    const message = createMessageModel({
+        conversationId: " conversation-1 ",
+        senderId: " user-2 ",
+        type: MESSAGE_TYPES.TEXT,
+        content: " This helped. ",
+        reply: {
+            messageId: " message-1 ",
+            senderId: " user-1 ",
+            preview: " Can someone explain recursion? ",
+            type: MESSAGE_TYPES.TEXT
+        }
+    });
+
+    assert.deepEqual(message.reply, {
+        messageId: "message-1",
+        senderId: "user-1",
+        preview: "Can someone explain recursion?",
+        type: MESSAGE_TYPES.TEXT
+    });
+});
+
+test("message model validates every reply field", () => {
+    const validation = validateMessage({
+        conversationId: "conversation-1",
+        senderId: "user-2",
+        type: MESSAGE_TYPES.TEXT,
+        content: "Reply",
+        reply: {}
+    });
+
+    assert.deepEqual(Object.keys(validation.errors).sort(), [
+        "replyMessageId",
+        "replyPreview",
+        "replySenderId",
+        "replyType"
+    ]);
+});
+
+test("non-reply messages omit reply metadata", () => {
+    const message = createMessageModel({
+        conversationId: "conversation-1",
+        senderId: "user-1",
+        type: MESSAGE_TYPES.TEXT,
+        content: "Normal message"
+    });
+
+    assert.equal(Object.hasOwn(message, "reply"), false);
+});

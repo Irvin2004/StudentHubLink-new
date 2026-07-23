@@ -474,12 +474,12 @@ attachmentInput?.addEventListener("change", async () => {
             fileName: uploadedFile.fileName,
             fileSize: uploadedFile.fileSize,
             mimeType: uploadedFile.mimeType,
-            replyTo: attachmentReply
+            reply: attachmentReply
         });
 
         if (
             attachmentReply &&
-            replyingTo?.id === attachmentReply.id
+            replyingTo?.messageId === attachmentReply.messageId
         ) {
             clearReply();
         }
@@ -742,7 +742,7 @@ function initializeMessageForm(
             deliveredAt: null,
             readAt: null,
             status: "sending",
-            replyTo: replyMetadata
+            reply: replyMetadata
         });
 
         messageInput.value = "";
@@ -758,12 +758,12 @@ function initializeMessageForm(
                 senderName: getParticipantName(user),
                 text,
                 messageId,
-                replyTo: replyMetadata
+                reply: replyMetadata
             });
 
             if (
                 replyMetadata &&
-                replyingTo?.id === replyMetadata.id
+                replyingTo?.messageId === replyMetadata.messageId
             ) {
                 clearReply();
             }
