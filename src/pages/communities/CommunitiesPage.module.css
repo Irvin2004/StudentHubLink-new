@@ -1,0 +1,103 @@
+.page {
+    width: min(84rem, 100%);
+    margin-inline: auto;
+    padding: clamp(var(--spacing-lg), 4vw, var(--spacing-2xl));
+}
+
+.pageHeader {
+    margin-bottom: var(--spacing-xl);
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--spacing-lg);
+}
+
+.pageHeader h1 {
+    color: var(--text);
+    font-size: clamp(2rem, 3vw, 2.75rem);
+    letter-spacing: -0.035em;
+}
+
+.pageHeader p {
+    margin-top: var(--spacing-sm);
+    color: var(--text-secondary);
+}
+
+.ownerLabel {
+    min-height: var(--control-height-md);
+    display: inline-flex;
+    align-items: center;
+    padding-inline: var(--spacing-md);
+    border-radius: var(--radius-md);
+    background: color-mix(in srgb, var(--primary) 10%, transparent);
+    color: var(--primary);
+    font-weight: 700;
+}
+
+.skeletonGrid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--spacing-lg);
+}
+
+.skeletonCard {
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+}
+
+.skeletonCard > span {
+    display: block;
+}
+
+.skeletonCard > div {
+    padding: var(--spacing-lg);
+    display: grid;
+    gap: var(--spacing-md);
+}
+
+.details {
+    display: grid;
+    gap: var(--spacing-xl);
+}
+
+.retry {
+    margin-top: var(--spacing-xl);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-md);
+    color: var(--text-secondary);
+}
+
+@media (max-width: 75rem) {
+    .skeletonGrid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 42rem) {
+    .page {
+        padding: var(--spacing-lg);
+    }
+
+    .pageHeader {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .pageHeader > button {
+        width: 100%;
+    }
+
+    .skeletonGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .retry {
+        align-items: stretch;
+        flex-direction: column;
+        text-align: center;
+    }
+}

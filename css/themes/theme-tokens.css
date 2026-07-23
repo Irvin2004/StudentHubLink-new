@@ -92,4 +92,10 @@
     --space-md: var(--space-4);
     --space-lg: var(--space-6);
     --space-xl: var(--space-8);
+    --spacing-xs: var(--space-1);
+    --spacing-sm: var(--space-2);
+    --spacing-md: var(--space-4);
+    --spacing-lg: var(--space-6);
+    --spacing-xl: var(--space-8);
+    --spacing-2xl: var(--space-10);
 }

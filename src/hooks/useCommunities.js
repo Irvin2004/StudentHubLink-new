@@ -17,14 +17,17 @@ import {
 export function useCommunities(options = {}) {
     const { user } = useAuth();
     const userId = user?.uid ?? null;
+    const enabled = options.enabled !== false;
     const visibility = options.visibility;
     const category = options.category;
     const maxResults = options.maxResults;
     const [communities, setCommunities] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(enabled);
     const [error, setError] = useState(null);
 
     const refreshCommunities = useCallback(async () => {
+        if (!enabled) return [];
+
         setLoading(true);
         setError(null);
 
@@ -43,9 +46,11 @@ export function useCommunities(options = {}) {
         } finally {
             setLoading(false);
         }
-    }, [category, maxResults, visibility]);
+    }, [category, enabled, maxResults, visibility]);
 
     useEffect(() => {
+        if (!enabled) return undefined;
+
         let active = true;
 
         void Promise.resolve()
@@ -70,7 +75,7 @@ export function useCommunities(options = {}) {
         return () => {
             active = false;
         };
-    }, [category, maxResults, visibility]);
+    }, [category, enabled, maxResults, visibility]);
 
     const createCommunity = useCallback(
         async (input) => {

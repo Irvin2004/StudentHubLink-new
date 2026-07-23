@@ -20,6 +20,10 @@
     animation: enter var(--transition);
 }
 
+.wide {
+    width: min(42rem, 100%);
+}
+
 .header {
     display: flex;
     align-items: flex-start;

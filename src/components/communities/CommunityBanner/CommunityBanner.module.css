@@ -1,0 +1,32 @@
+.banner {
+    aspect-ratio: 16 / 7;
+    overflow: hidden;
+    background: linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--primary) 18%, var(--surface-muted)),
+        color-mix(in srgb, var(--primary) 4%, var(--surface))
+    );
+}
+
+.banner img,
+.fallback {
+    width: 100%;
+    height: 100%;
+}
+
+.banner img {
+    display: block;
+    object-fit: cover;
+}
+
+.fallback {
+    display: grid;
+    place-items: center;
+    color: color-mix(in srgb, var(--primary) 68%, var(--text));
+}
+
+.fallback span {
+    font-size: clamp(2.5rem, 6vw, 4rem);
+    font-weight: 800;
+    opacity: 0.55;
+}

@@ -2,6 +2,7 @@ import { useEffect, useId, useRef } from "react";
 import { createPortal } from "react-dom";
 
 import IconButton from "../IconButton/index.js";
+import { cx } from "../utils.js";
 import styles from "./Modal.module.css";
 
 const FOCUSABLE_SELECTOR =
@@ -36,6 +37,7 @@ export default function Modal({
     footer,
     onClose,
     open,
+    size = "medium",
     title
 }) {
     const dialogRef = useRef(null);
@@ -101,7 +103,7 @@ export default function Modal({
                 aria-describedby={description ? descriptionId : undefined}
                 aria-labelledby={titleId}
                 aria-modal="true"
-                className={styles.dialog}
+                className={cx(styles.dialog, styles[size])}
                 ref={dialogRef}
                 role="dialog"
                 tabIndex={-1}

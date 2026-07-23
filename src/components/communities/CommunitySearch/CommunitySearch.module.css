@@ -1,0 +1,14 @@
+.controls {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(12rem, 18rem);
+    align-items: end;
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-xl);
+}
+
+@media (max-width: 42rem) {
+    .controls {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-md);
+    }
+}
