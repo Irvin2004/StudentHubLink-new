@@ -4,26 +4,37 @@ import {
     onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 
-import { auth } from "../firebase.js";
+import { auth } from "../firebase/firebase-config.js";
 import { initializeActivityFeed } from
     "./activity-controller.js?activity-feed=1";
 import { createDashboardRefreshManager } from "./dashboard-refresh.js?live=1";
-import { initialiseSearch } from "./search-controller.js?global-search=1";
+import {
+    createSearchController
+} from "./search-controller.js?global-search=1";
 import { renderDashboard } from "../renderers/dashboard-renderer.js?live=1";
 import { subscribeToAssignments } from "../services/assignment-service.js?dashboard-live=1";
 import { subscribeToUserConversations } from "../services/conversation-service.js?dashboard-live=1";
 import { getDashboardData } from "../services/dashboard-service.js";
 import { subscribeToUserStudyGroups } from "../services/group-service.js?dashboard-live=1";
 import { subscribeToNotifications } from "../services/notification-service.js";
-import { getUserFriendlyErrorMessage } from "../utils/error-handler.js";
+import {
+    getUserFriendlyErrorMessage
+} from "../services/user-feedback-service.js";
 import { error as logError, log } from "../utils/logger.js";
+import {
+    hideSkeleton,
+    showSkeleton
+} from "../renderers/skeleton-renderer.js";
+import {
+    SKELETON_TYPES
+} from "../config/skeleton-types.js";
 
 let currentUser = null;
 let loadSequence = 0;
 let destroyed = false;
 let unsubscribeAuth = () => {};
 let stopLiveUpdates = () => {};
-let stopSearch = () => {};
+let searchController = { destroy() {} };
 let activityFeedController = { destroy() {} };
 
 function getRequiredElement(id) {
@@ -58,6 +69,14 @@ function getDashboardElements() {
 }
 
 function setViewState(elements, state) {
+    if (state === "loading") {
+        showSkeleton(elements.loading, SKELETON_TYPES.PROFILE);
+    } else if (
+        elements.loading.querySelector("[data-skeleton-root]")
+    ) {
+        hideSkeleton(elements.loading);
+    }
+
     elements.loading.hidden = state !== "loading";
     elements.error.hidden = state !== "error";
     elements.content.hidden = state !== "success";
@@ -297,7 +316,7 @@ async function loadDashboard(elements, {
     }
 }
 
-async function initialiseDashboard() {
+async function initializeDashboard() {
     const elements = getDashboardElements();
     const refresh = () => loadDashboard(elements, {
         preserveContent: !elements.content.hidden
@@ -305,10 +324,11 @@ async function initialiseDashboard() {
 
     elements.retryButton.addEventListener("click", refresh);
     elements.refreshButton.addEventListener("click", refresh);
-    stopSearch = initialiseSearch({
+    searchController = createSearchController({
         input: elements.searchInput,
         dropdown: elements.searchDropdown
     });
+    searchController.initialize();
 
     const destroy = () => {
         if (destroyed) {
@@ -318,7 +338,7 @@ async function initialiseDashboard() {
         destroyed = true;
         loadSequence += 1;
         stopLiveUpdates();
-        stopSearch();
+        searchController.destroy();
         activityFeedController.destroy();
         unsubscribeAuth();
         elements.retryButton.removeEventListener("click", refresh);
@@ -359,7 +379,7 @@ async function initialiseDashboard() {
     );
 }
 
-document.addEventListener("DOMContentLoaded", initialiseDashboard);
+document.addEventListener("DOMContentLoaded", initializeDashboard);
 
 window.addEventListener("pageshow", (event) => {
     if (!event.persisted || !destroyed) {
@@ -370,7 +390,7 @@ window.addEventListener("pageshow", (event) => {
     currentUser = null;
     unsubscribeAuth = () => {};
     stopLiveUpdates = () => {};
-    stopSearch = () => {};
+    searchController = { destroy() {} };
     activityFeedController = { destroy() {} };
-    initialiseDashboard();
+    initializeDashboard();
 });

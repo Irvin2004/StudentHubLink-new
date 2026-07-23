@@ -9,7 +9,7 @@ import {
     onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 
-import { auth, db } from "../firebase.js";
+import { auth, db } from "../firebase/firebase-config.js";
 import { createAchievementCard } from "../components/achievement-card.js";
 import { createEmptyState } from "../components/empty-state.js";
 import { getTimestampMillis } from "../utils/format-date.js";

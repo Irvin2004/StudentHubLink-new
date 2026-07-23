@@ -1,47 +1,39 @@
-import { auth } from "../firebase.js";
+"use strict";
+
 import { createCommentCard } from "../components/comment-card.js";
 import { createEmptyState } from "../components/empty-state.js";
-import { subscribeToComments } from "../services/comments-service.js";
 
-export function renderCommentCards(comments) {
-    const list =
-    document.getElementById("commentsList");
-
-    if (!list) {
-        return;
+/**
+ * Renders comment cards into a supplied container.
+ *
+ * @param {Array<object>} comments
+ * @param {{container: Element, currentUserId?: string}} options
+ * @returns {string}
+ */
+export function renderCommentCards(
+    comments = [],
+    {
+        container,
+        currentUserId = ""
+    } = {}
+) {
+    if (!container || !("innerHTML" in container)) {
+        throw new TypeError("Comment container is required.");
     }
 
-    if (!comments.length) {
-        list.innerHTML =
-        createEmptyState(
+    const commentList = Array.isArray(comments) ? comments : [];
+    const html = commentList.length
+        ? commentList
+            .map((comment) =>
+                createCommentCard(comment, currentUserId)
+            )
+            .join("")
+        : createEmptyState(
             "No comments yet",
             "Ask the first question or start a discussion.",
             ""
         );
 
-        return;
-    }
-
-    list.innerHTML =
-    comments
-        .map((comment) =>
-            createCommentCard(
-                comment,
-                auth.currentUser?.uid
-            )
-        )
-        .join("");
-}
-
-export function subscribeAndRenderComments(resourceId) {
-    if (!resourceId) {
-        return () => {};
-    }
-
-    return subscribeToComments(
-        resourceId,
-        (comments) => {
-            renderCommentCards(comments);
-        }
-    );
+    container.innerHTML = html;
+    return html;
 }

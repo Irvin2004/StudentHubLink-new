@@ -23,6 +23,12 @@ function requireContainer(container) {
     return container;
 }
 
+/**
+ * Creates a document fragment for batched DOM insertion.
+ *
+ * @param {Document} documentReference
+ * @returns {DocumentFragment}
+ */
 export function createFragment(
     documentReference = globalThis.document
 ) {
@@ -31,6 +37,13 @@ export function createFragment(
     ).createDocumentFragment();
 }
 
+/**
+ * Appends a prepared fragment to a container in one operation.
+ *
+ * @param {Element} container
+ * @param {DocumentFragment} fragment
+ * @returns {Element}
+ */
 export function appendFragment(container, fragment) {
     const target = requireContainer(container);
 
@@ -42,6 +55,14 @@ export function appendFragment(container, fragment) {
     return target;
 }
 
+/**
+ * Appends an iterable of nodes through one document fragment.
+ *
+ * @param {Element} container
+ * @param {Iterable<Node>} nodes
+ * @param {Document} documentReference
+ * @returns {Element}
+ */
 export function appendNodes(
     container,
     nodes,

@@ -1,4 +1,4 @@
-import { auth, db } from "../firebase.js";
+import { auth, db } from "../firebase/firebase-config.js";
 import { createResourceCard } from "../components/resource-card.js";
 import {
     areMutuals,
@@ -11,9 +11,9 @@ import {
 } from "../services/conversation-service.js";
 import { RESOURCE_STATUS } from "../utils/constants.js";
 import { setText } from "../utils/dom.js";
-import { handleError } from "../utils/error-handler.js?security=1";
+import { handleError } from "../services/user-feedback-service.js";
 import { formatPrice } from "../utils/format-price.js";
-import { showToast } from "../utils/toast.js";
+import { showToast } from "../services/user-feedback-service.js";
 
 import {
     collection,

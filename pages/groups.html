@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Study Groups | StudentHub</title>
     <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
-    <link rel="stylesheet" href="../css/studenthub.css?v=20260723-10">
+    <link rel="stylesheet" href="../css/studenthub.css?v=20260723-13">
 </head>
 <body data-page="groups">
     <div class="groups-shell">
@@ -122,7 +122,7 @@
 
             <div class="groups-results-heading">
                 <h2>Explore groups</h2>
-                <p id="groupResultCount" aria-live="polite">Loading groups...</p>
+                <p id="groupResultCount" aria-live="polite"></p>
             </div>
 
             <section
@@ -130,14 +130,11 @@
                 class="group-grid"
                 aria-live="polite"
                 aria-busy="true">
-                <div class="group-card-skeleton"></div>
-                <div class="group-card-skeleton"></div>
-                <div class="group-card-skeleton"></div>
             </section>
         </main>
     </div>
 
-    <script type="module" src="../js/controllers/groups-controller.js?security=1"></script>
+    <script type="module" src="../js/controllers/groups-controller.js?skeletons=1"></script>
     <script type="module" src="../js/theme.js?responsive=3"></script>
 </body>
 </html>

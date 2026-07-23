@@ -79,6 +79,14 @@ function getDefaults(type) {
     return EMPTY_STATE_DEFAULTS[type];
 }
 
+/**
+ * Creates accessible empty-state markup with an optional action.
+ *
+ * @param {string|object} titleOrOptions
+ * @param {string} [description]
+ * @param {string} [icon]
+ * @returns {string}
+ */
 export function createEmptyState(
     titleOrOptions,
     description,

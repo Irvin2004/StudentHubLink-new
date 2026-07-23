@@ -1,36 +1,49 @@
-import { auth } from "../firebase.js";
+"use strict";
+
+import { auth } from "../firebase/firebase-config.js";
 import { toggleFavorite } from "../services/favorites-service.js";
-import { handleError } from "../utils/error-handler.js?security=1";
-import { showToast } from "../utils/toast.js";
+import {
+    handleError,
+    showToast
+} from "../services/user-feedback-service.js";
 
 function updateFavoriteButton(button, isFavorite) {
-    const label =
-    isFavorite ? "Remove from favorites" : "Add to favorites";
+    const label = isFavorite
+        ? "Remove from favorites"
+        : "Add to favorites";
 
     button.classList.toggle("active", isFavorite);
-    button.innerHTML =
-    isFavorite ? "&hearts;" : "&#9825;";
+    button.innerHTML = isFavorite ? "&hearts;" : "&#9825;";
     button.setAttribute("aria-label", label);
     button.setAttribute("title", label);
 }
 
-export function initializeFavoriteButtons() {
-    document.addEventListener("click", async (event) => {
-        const button =
-        event.target.closest(".favorite-btn");
+/**
+ * Creates a delegated favorites controller.
+ *
+ * @param {{documentReference?: Document}} options
+ * @returns {{initialize: Function, destroy: Function}}
+ */
+export function createFavoritesController({
+    documentReference = document
+} = {}) {
+    let initialized = false;
 
-        if (!button) return;
+    async function handleClick(event) {
+        const button = event.target.closest(".favorite-btn");
 
-        const user =
-        auth.currentUser;
+        if (!button) {
+            return;
+        }
+
+        const user = auth.currentUser;
 
         if (!user) {
             showToast("Please log in first.", "warning");
             return;
         }
 
-        const resourceId =
-        button.dataset.favoriteId;
+        const resourceId = button.dataset.favoriteId;
 
         if (!resourceId) {
             showToast("Resource not found.", "error");
@@ -40,8 +53,10 @@ export function initializeFavoriteButtons() {
         button.disabled = true;
 
         try {
-            const result =
-            await toggleFavorite(user.uid, resourceId);
+            const result = await toggleFavorite(
+                user.uid,
+                resourceId
+            );
 
             updateFavoriteButton(button, result.isFavorite);
             showToast(result.message, "success");
@@ -50,5 +65,28 @@ export function initializeFavoriteButtons() {
         } finally {
             button.disabled = false;
         }
-    });
+    }
+
+    function initialize() {
+        if (initialized) {
+            return;
+        }
+
+        documentReference.addEventListener("click", handleClick);
+        initialized = true;
+    }
+
+    function destroy() {
+        if (!initialized) {
+            return;
+        }
+
+        documentReference.removeEventListener("click", handleClick);
+        initialized = false;
+    }
+
+    return {
+        initialize,
+        destroy
+    };
 }

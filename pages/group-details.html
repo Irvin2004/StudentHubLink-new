@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Study Group | StudentHub</title>
     <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
-    <link rel="stylesheet" href="../css/studenthub.css?v=20260723-10">
+    <link rel="stylesheet" href="../css/studenthub.css?v=20260723-13">
 </head>
 <body data-page="group-details">
     <div class="groups-shell">
@@ -87,9 +87,10 @@
                 Back to study groups
             </a>
 
-            <div id="groupDetailLoading" class="group-detail-loading">
-                <div class="group-detail-skeleton"></div>
-            </div>
+            <div
+                id="groupDetailLoading"
+                class="group-detail-loading"
+                aria-busy="true"></div>
 
             <div id="groupDetailContent" class="group-detail-layout hidden">
                 <article class="group-detail-card">
@@ -187,7 +188,7 @@
 
     <script
         type="module"
-        src="../js/controllers/group-details-controller.js">
+        src="../js/controllers/group-details-controller.js?skeletons=1">
     </script>
     <script type="module" src="../js/theme.js?responsive=3"></script>
 </body>

@@ -1,6 +1,6 @@
 "use strict";
 
-import { auth } from "../firebase.js";
+import { auth } from "../firebase/firebase-config.js";
 import {
     closeSearchDropdown,
     createSearchDropdown,
@@ -13,10 +13,11 @@ import {
     renderSearchResults
 } from "../renderers/search-renderer.js?global-search=1";
 import {
-    normalizeSearchQuery,
     searchEverything
 } from "../services/search-service.js?global-search=1";
+import { normalizeSearchQuery } from "../utils/search.js";
 import { error as logError } from "../utils/logger.js";
+import { debounce } from "../utils/debounce.js";
 
 const DEBOUNCE_DELAY = 300;
 const searchControllers = new WeakMap();
@@ -33,7 +34,13 @@ function renderDropdownState({
     setSearchDropdownContent(stagingContainer, dropdown);
 }
 
-export function initialiseSearch({ input, dropdown } = {}) {
+/**
+ * Creates the global search controller.
+ *
+ * @param {{input: HTMLInputElement, dropdown: Element}} options
+ * @returns {{initialize: Function, destroy: Function}}
+ */
+export function createSearchController({ input, dropdown } = {}) {
     if (!input?.addEventListener) {
         throw new Error("Search input is required.");
     }
@@ -42,20 +49,11 @@ export function initialiseSearch({ input, dropdown } = {}) {
         throw new Error("Search dropdown is required.");
     }
 
-    searchControllers.get(input)?.();
-
-    const dropdownState = createSearchDropdown(dropdown);
-
-    if (dropdownState.input !== input) {
-        dropdownState.destroy();
-        throw new Error("Search dropdown must contain the search input.");
-    }
-
-    let debounceTimer = null;
     let requestSequence = 0;
-    let destroyed = false;
+    let dropdownState = null;
+    let initialized = false;
 
-    const performSearch = async (query, requestId) => {
+    async function performSearch(query, requestId) {
         renderDropdownState({
             dropdown,
             input,
@@ -73,7 +71,7 @@ export function initialiseSearch({ input, dropdown } = {}) {
             const results = await searchEverything(userId, query);
 
             if (
-                destroyed ||
+                !initialized ||
                 requestId !== requestSequence ||
                 normalizeSearchQuery(input.value) !== query
             ) {
@@ -88,7 +86,7 @@ export function initialiseSearch({ input, dropdown } = {}) {
             });
             openSearchDropdown(dropdown);
         } catch (error) {
-            if (destroyed || requestId !== requestSequence) {
+            if (!initialized || requestId !== requestSequence) {
                 return;
             }
 
@@ -100,38 +98,66 @@ export function initialiseSearch({ input, dropdown } = {}) {
             });
             openSearchDropdown(dropdown);
         }
-    };
+    }
 
-    const handleInput = () => {
+    const scheduleSearch = debounce(
+        (query, requestId) => performSearch(query, requestId),
+        DEBOUNCE_DELAY
+    );
+
+    function handleInput() {
         const query = normalizeSearchQuery(input.value);
         const requestId = ++requestSequence;
 
-        clearTimeout(debounceTimer);
-        debounceTimer = null;
+        scheduleSearch.cancel();
 
         if (query.length < 2) {
             closeSearchDropdown(dropdown);
             return;
         }
 
-        debounceTimer = setTimeout(() => {
-            debounceTimer = null;
-            performSearch(query, requestId);
-        }, DEBOUNCE_DELAY);
-    };
+        scheduleSearch(query, requestId);
+    }
 
-    const destroy = () => {
-        if (destroyed) return;
+    function initialize() {
+        if (initialized) {
+            return;
+        }
 
-        destroyed = true;
+        searchControllers.get(input)?.destroy();
+        dropdownState = createSearchDropdown(dropdown);
+
+        if (dropdownState.input !== input) {
+            dropdownState.destroy();
+            dropdownState = null;
+            throw new Error(
+                "Search dropdown must contain the search input."
+            );
+        }
+
+        input.addEventListener("input", handleInput);
+        searchControllers.set(input, controller);
+        initialized = true;
+    }
+
+    function destroy() {
+        if (!initialized) {
+            return;
+        }
+
         requestSequence += 1;
-        clearTimeout(debounceTimer);
+        scheduleSearch.cancel();
         input.removeEventListener("input", handleInput);
-        dropdownState.destroy();
+        dropdownState?.destroy();
+        dropdownState = null;
         searchControllers.delete(input);
+        initialized = false;
+    }
+
+    const controller = {
+        initialize,
+        destroy
     };
 
-    input.addEventListener("input", handleInput);
-    searchControllers.set(input, destroy);
-    return destroy;
+    return controller;
 }

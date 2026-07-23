@@ -2,7 +2,7 @@ import {
     onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 
-import { auth } from "../firebase.js";
+import { auth } from "../firebase/firebase-config.js";
 import {
     createAssignmentModal,
     setAssignmentModalMode
@@ -15,7 +15,7 @@ import {
     openConfirmationDialog
 } from "../components/confirmation-dialog.js";
 import {
-    initialiseAssignmentForm,
+    initializeAssignmentForm,
     populateAssignmentForm
 } from "./assignment-form-controller.js";
 import {
@@ -32,10 +32,14 @@ import { renderAssignments } from "../renderers/assignment-renderer.js?v=2026072
 import {
     setText
 } from "../utils/dom.js";
-import { handleError } from "../utils/error-handler.js?security=1";
-import { showSkeleton } from "../utils/loading.js";
+import { handleError } from "../services/user-feedback-service.js";
+import { showSkeleton } from "../renderers/skeleton-renderer.js";
+import { SKELETON_TYPES } from "../config/skeleton-types.js";
+import {
+    hideSkeleton
+} from "../renderers/skeleton-renderer.js";
 import { error as logError } from "../utils/logger.js";
-import { showToast } from "../utils/toast.js";
+import { showToast } from "../services/user-feedback-service.js";
 
 const groupId = new URLSearchParams(window.location.search).get("id");
 const pageSection = document.getElementById("groupAssignments");
@@ -138,13 +142,18 @@ async function confirmDeleteAssignment(assignmentId, deleteButton) {
 
 async function loadAssignments() {
     assignmentsList.setAttribute("aria-busy", "true");
-    showSkeleton("assignmentsList", 3);
+    showSkeleton(
+        assignmentsList,
+        SKELETON_TYPES.FILE,
+        { count: 3 }
+    );
 
     try {
         const assignments = await getAssignments(groupId);
         assignmentsById = new Map(
             assignments.map((assignment) => [assignment.id, assignment])
         );
+        hideSkeleton(assignmentsList);
         renderAssignments(assignments, assignmentsList);
     } finally {
         assignmentsList.setAttribute("aria-busy", "false");
@@ -240,7 +249,7 @@ if (!document.getElementById("assignmentModal")) {
     );
 }
 
-assignmentFormController = initialiseAssignmentForm({
+assignmentFormController = initializeAssignmentForm({
     async onSubmit({ title, description, dueDate }) {
         if (!currentUser || !canManageAssignments) {
             throw new Error(

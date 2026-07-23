@@ -23,7 +23,8 @@ box-shadow:0 2px 8px rgba(0,0,0,0.1);
 margin-bottom:20px;
 }
 
-.profile-card > p {
+.profile-card > p,
+#profileSummaryContent > p {
 margin:8px 0;
 color:var(--text-main);
 }

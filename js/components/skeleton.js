@@ -129,6 +129,13 @@ function createItem(type, index) {
     }
 }
 
+/**
+ * Creates accessible skeleton placeholder markup for a known layout.
+ *
+ * @param {string} type
+ * @param {{count?: number}} options
+ * @returns {string}
+ */
 export function createSkeleton(type, options = {}) {
     const normalizedType = normalizeType(type);
     const count = normalizeCount(normalizedType, options.count);

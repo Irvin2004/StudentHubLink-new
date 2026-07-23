@@ -15,6 +15,7 @@ export function createImagePreview(image = {}) {
                 alt="${escapeHtml(image.fileName || "Shared image")}" 
                 data-image="${escapeHtml(imageUrl)}"
                 loading="lazy"
+                decoding="async"
             >
         </button>
     `;

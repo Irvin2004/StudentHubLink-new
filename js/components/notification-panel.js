@@ -1,3 +1,11 @@
+import {
+    hideSkeleton,
+    showSkeleton
+} from "../renderers/skeleton-renderer.js";
+import {
+    SKELETON_TYPES
+} from "../config/skeleton-types.js";
+
 const panelStates = new WeakMap();
 let panelId = 0;
 
@@ -9,16 +17,6 @@ function getPanelState(panelContainer) {
     }
 
     return state;
-}
-
-function renderLoadingState() {
-    return `
-        <div class="notification-panel-loading" aria-label="Loading notifications">
-            <span class="notification-panel-skeleton"></span>
-            <span class="notification-panel-skeleton"></span>
-            <span class="notification-panel-skeleton"></span>
-        </div>
-    `;
 }
 
 function renderPanelStructure() {
@@ -33,7 +31,6 @@ function renderPanelStructure() {
             aria-live="polite"
             aria-busy="true"
         >
-            ${renderLoadingState()}
         </div>
 
         <footer class="notification-panel-footer">
@@ -114,6 +111,7 @@ export function createNotificationPanel({
         "[data-notification-mark-all]"
     );
     const badge = ensureBadge(bellButton);
+    showSkeleton(list, SKELETON_TYPES.NOTIFICATION);
 
     const handleBellClick = (event) => {
         event.stopPropagation();
@@ -148,12 +146,10 @@ export function createNotificationPanel({
         markAllButton,
         badge,
         setLoading() {
-            list.setAttribute("aria-busy", "true");
-            list.innerHTML = renderLoadingState();
+            showSkeleton(list, SKELETON_TYPES.NOTIFICATION);
         },
         showError(message) {
-            list.setAttribute("aria-busy", "false");
-            list.innerHTML = "";
+            hideSkeleton(list);
 
             const errorMessage = ownerDocument.createElement("p");
             errorMessage.className = "notification-panel-error";

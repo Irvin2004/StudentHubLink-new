@@ -193,7 +193,7 @@
 }
 
 .dashboard-refresh-button.is-loading [data-refresh-icon] {
-    animation: dashboard-spin 0.8s linear infinite;
+    animation: spin 0.8s linear infinite;
 }
 
 .dashboard-refresh-button {
@@ -464,26 +464,11 @@
     color: var(--text-primary);
 }
 
-.dashboard-spinner {
-    width: 2.5rem;
-    height: 2.5rem;
-    border: 3px solid var(--border);
-    border-top-color: var(--primary);
-    border-radius: 50%;
-    animation: dashboard-spin 0.8s linear infinite;
-}
-
 .dashboard-empty-state {
     padding: 3rem 1rem;
     color: var(--text-secondary);
     text-align: center;
     opacity: 0.7;
-}
-
-@keyframes dashboard-spin {
-    to {
-        transform: rotate(360deg);
-    }
 }
 
 @media (max-width: 992px) {
@@ -564,10 +549,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .dashboard-spinner {
-        animation-duration: 1.6s;
-    }
-
     .dashboard-action,
     .notification-bell-button {
         transition: none;

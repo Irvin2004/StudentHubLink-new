@@ -4,7 +4,7 @@ import {
     onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 
-import { auth } from "../firebase.js";
+import { auth } from "../firebase/firebase-config.js";
 import { PRESENCE_STATUS } from "../config/presence-status.js";
 import {
     setUserOffline,
@@ -16,8 +16,9 @@ import {
 import {
     clearPresence,
     renderPresence
-import { logError } from "../services/error-service.js";
 } from "../renderers/presence-renderer.js";
+import { debounce } from "../utils/debounce.js";
+import { logError } from "../services/error-service.js";
 
 const TYPING_INACTIVITY_DELAY = 1900;
 
@@ -113,7 +114,6 @@ function initializeConversationPresence({
 
     let destroyed = false;
     let isTyping = false;
-    let typingTimer = null;
 
     renderPresence(
         {
@@ -148,15 +148,8 @@ function initializeConversationPresence({
         }
     );
 
-    function clearTypingTimer() {
-        if (typingTimer) {
-            clearTimeout(typingTimer);
-            typingTimer = null;
-        }
-    }
-
     function markTypingStopped() {
-        clearTypingTimer();
+        scheduleTypingStopped.cancel();
 
         if (!isTyping) {
             return Promise.resolve();
@@ -169,13 +162,10 @@ function initializeConversationPresence({
         ).catch(() => {});
     }
 
-    function restartTypingTimer() {
-        clearTypingTimer();
-        typingTimer = setTimeout(
-            markTypingStopped,
-            TYPING_INACTIVITY_DELAY
-        );
-    }
+    const scheduleTypingStopped = debounce(
+        markTypingStopped,
+        TYPING_INACTIVITY_DELAY
+    );
 
     function handleMessageInput() {
         if (destroyed || !cleanConversationId) return;
@@ -192,7 +182,7 @@ function initializeConversationPresence({
         ).catch((error) => {
             reportPresenceError("set typing status", error);
         });
-        restartTypingTimer();
+        scheduleTypingStopped();
     }
 
     if (messageInput?.addEventListener) {
@@ -202,7 +192,7 @@ function initializeConversationPresence({
     const handlePageHide = (event) => {
         if (event.persisted) return;
 
-        clearTypingTimer();
+        scheduleTypingStopped.cancel();
         isTyping = false;
         setUserOffline(cleanCurrentUserId).catch((error) => {
             reportPresenceError("mark user offline", error);
@@ -218,7 +208,7 @@ function initializeConversationPresence({
             if (destroyed) return;
             destroyed = true;
 
-            clearTypingTimer();
+            scheduleTypingStopped.cancel();
             unsubscribe();
             messageInput?.removeEventListener?.(
                 "input",

@@ -12,17 +12,26 @@ import {
     onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 
-import { auth, db } from "../firebase.js";
+import { auth, db } from "../firebase/firebase-config.js";
 import { createResourceCard } from "../components/resource-card.js";
 import {
     getResourceActionLabel,
     RESOURCE_ACTION
 } from "../utils/constants.js";
 import { getTimestampMillis } from "../utils/format-date.js";
-import { clearSkeleton, showSkeleton } from "../utils/loading.js";
+import {
+    hideSkeleton,
+    showSkeleton
+} from "../renderers/skeleton-renderer.js";
+import { SKELETON_TYPES } from "../config/skeleton-types.js";
 import { error as logError, warn } from "../utils/logger.js";
+import { debounce } from "../utils/debounce.js";
+import {
+    createEmptyState
+} from "../components/empty-state.js?refinement=1";
 
 const LIBRARY_COLLECTION = "libraries";
+const SEARCH_DELAY = 200;
 
 const libraryState = {
     resources: [],
@@ -122,18 +131,19 @@ function renderLibrary(resources) {
     }
 
     if (!resources.length) {
-        libraryGrid.innerHTML = `
-            <div class="empty-state">
-                <h2>
-                    Your library is empty
-                </h2>
+        const filtering = Boolean(
+            libraryState.search || libraryState.category !== "All"
+        );
 
-                <p>
-                    Download or purchase a resource to
-                    see it here.
-                </p>
-            </div>
-        `;
+        libraryGrid.innerHTML = createEmptyState({
+            icon: "&#128218;",
+            title: filtering
+                ? "No library results"
+                : "Your library is empty",
+            message: filtering
+                ? "Try another search term or category."
+                : "Download or purchase a resource to see it here."
+        });
 
         return;
     }
@@ -221,12 +231,19 @@ function bindLibraryControls() {
     document.getElementById("librarySearch");
 
     if (searchInput) {
-        searchInput.addEventListener("input", (event) => {
+        const scheduleSearch = debounce((value) => {
             libraryState.search =
-            event.target.value;
+            value;
 
             updateLibrary();
+        }, SEARCH_DELAY);
+
+        searchInput.addEventListener("input", (event) => {
+            scheduleSearch(event.target.value);
         });
+        window.addEventListener("pagehide", () => {
+            scheduleSearch.cancel();
+        }, { once: true });
     }
 
     const sortSelect =
@@ -271,7 +288,7 @@ function loadLibraryPage() {
 
     bindLibraryControls();
 
-    showSkeleton("libraryGrid");
+    showSkeleton(libraryGrid, SKELETON_TYPES.FILE);
 
     onAuthStateChanged(auth, async (user) => {
         if (!user) return;
@@ -280,7 +297,7 @@ function loadLibraryPage() {
             libraryState.resources =
             await getUserLibrary(user.uid);
 
-            clearSkeleton("libraryGrid");
+            hideSkeleton(libraryGrid);
             updateLibrary();
         } catch (error) {
             logError("FIRESTORE", "Library load failed:", error);

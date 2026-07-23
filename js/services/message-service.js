@@ -18,7 +18,7 @@ import {
     writeBatch
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
-import { db } from "../firebase.js";
+import { db } from "../firebase/firebase-config.js";
 import { COLLECTIONS } from "../config/firestore.js";
 import { MESSAGE_TYPES } from "../config/message-types.js";
 import {

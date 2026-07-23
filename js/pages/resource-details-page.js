@@ -1,11 +1,8 @@
-import { auth } from "../firebase.js";
+import { auth } from "../firebase/firebase-config.js";
 import { createResourceCard } from "../components/resource-card.js";
 import {
-    initializeCommentForm
+    createCommentsController
 } from "../controllers/comments-controller.js";
-import {
-    subscribeAndRenderComments
-} from "../renderers/comment-renderer.js";
 import { handleResourceAction } from "../services/marketplace-actions-service.js";
 import {
     getMarketplaceResource,
@@ -15,17 +12,14 @@ import {
     getRelatedResources
 } from "../services/recommendation-service.js";
 import {
-    initializeReviewForm
+    createReviewsController
 } from "../controllers/reviews-controller.js";
-import {
-    renderReviews
-} from "../renderers/review-renderer.js";
 import { RESOURCE_STATUS } from "../utils/constants.js";
 import { setText } from "../utils/dom.js";
 import { formatPrice } from "../utils/format-price.js";
-import { handleError } from "../utils/error-handler.js?security=1";
+import { handleError } from "../services/user-feedback-service.js";
 import { error as logError } from "../utils/logger.js";
-import { showToast } from "../utils/toast.js";
+import { showToast } from "../services/user-feedback-service.js";
 
 const params =
 new URLSearchParams(window.location.search);
@@ -33,8 +27,9 @@ new URLSearchParams(window.location.search);
 const resourceId =
 params.get("id");
 
-let unsubscribeComments =
-null;
+let commentsController = null;
+
+let reviewsController = null;
 
 let unsubscribeResource =
 null;
@@ -53,12 +48,13 @@ async function loadResourceDetails() {
     }
 
     renderResourceDetails(resource);
-    await renderReviews(resource);
     subscribeToResourceUpdates(resource.id);
-    initializeReviewForm(resource);
-    unsubscribeComments =
-    subscribeAndRenderComments(resource.id);
-    initializeCommentForm(resource.id);
+    reviewsController = createReviewsController({ resource });
+    await reviewsController.initialize();
+    commentsController = createCommentsController({
+        resourceId: resource.id
+    });
+    commentsController.initialize();
 
     try {
         const related =
@@ -87,7 +83,7 @@ function subscribeToResourceUpdates(resourceId) {
             }
 
             renderResourceDetails(resource);
-            await renderReviews(resource);
+            await reviewsController?.refresh(resource);
         },
         (error) => {
             logError("FIRESTORE", "Resource updates failed:", error);
@@ -189,9 +185,8 @@ window.addEventListener("pagehide", (event) => {
     if (event.persisted) {
         return;
     }
-    if (typeof unsubscribeComments === "function") {
-        unsubscribeComments();
-    }
+    commentsController?.destroy();
+    reviewsController?.destroy();
 
     if (typeof unsubscribeResource === "function") {
         unsubscribeResource();

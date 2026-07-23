@@ -44,25 +44,6 @@
     overflow-y: auto;
 }
 
-.notification-panel-loading {
-    display: grid;
-    gap: var(--space-3);
-    padding: var(--space-2) 0;
-}
-
-.notification-panel-skeleton {
-    height: 76px;
-    border-radius: var(--radius-md);
-    background: linear-gradient(
-        90deg,
-        var(--surface-muted) 25%,
-        color-mix(in srgb, var(--surface-muted) 60%, var(--surface)) 50%,
-        var(--surface-muted) 75%
-    );
-    background-size: 200% 100%;
-    animation: notification-panel-loading 1.4s ease-in-out infinite;
-}
-
 .notification-panel-footer {
     padding: var(--space-3) var(--space-5);
     border-top: 1px solid var(--border);
@@ -115,11 +96,6 @@
     display: none;
 }
 
-@keyframes notification-panel-loading {
-    from { background-position: 200% 0; }
-    to { background-position: -200% 0; }
-}
-
 @media (max-width: 640px) {
     .notification-panel {
         position: fixed;
@@ -129,11 +105,5 @@
         width: auto;
         max-height: calc(100vh - 84px);
         border-radius: var(--radius-md);
-    }
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .notification-panel-skeleton {
-        animation: none;
     }
 }

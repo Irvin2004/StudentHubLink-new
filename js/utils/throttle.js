@@ -1,5 +1,12 @@
 "use strict";
 
+/**
+ * Limits a callback to one leading and one trailing call per interval.
+ *
+ * @param {Function} callback
+ * @param {number} interval
+ * @returns {Function & {cancel: Function, flush: Function}}
+ */
 export function throttle(callback, interval = 250) {
     if (typeof callback !== "function") {
         throw new TypeError("Throttle callback must be a function.");

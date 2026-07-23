@@ -10,14 +10,17 @@ import {
     onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 
-import { auth, db } from "../firebase.js";
+import { auth, db } from "../firebase/firebase-config.js";
 import { createEmptyState } from "../components/empty-state.js";
 import { createResourceCard } from "../components/resource-card.js";
 import { COLLECTIONS } from "../config/firestore.js";
 import { getFavoriteIds } from "../services/favorites-service.js";
-import { initializeFavoriteButtons } from "../controllers/favorites-controller.js";
-import { showSkeleton } from "../utils/loading.js";
-import { handleError } from "../utils/error-handler.js?security=1";
+import {
+    createFavoritesController
+} from "../controllers/favorites-controller.js";
+import { showSkeleton } from "../renderers/skeleton-renderer.js";
+import { SKELETON_TYPES } from "../config/skeleton-types.js";
+import { handleError } from "../services/user-feedback-service.js";
 
 const FIRESTORE_IN_LIMIT =
 10;
@@ -103,7 +106,14 @@ async function renderFavorites(favoriteIds) {
         .join("");
 }
 
-initializeFavoriteButtons();
+const favoritesController = createFavoritesController();
+favoritesController.initialize();
+
+window.addEventListener("pagehide", (event) => {
+    if (!event.persisted) {
+        favoritesController.destroy();
+    }
+}, { once: true });
 
 onAuthStateChanged(auth, async (user) => {
     const grid =
@@ -116,7 +126,7 @@ onAuthStateChanged(auth, async (user) => {
     }
 
     try {
-        showSkeleton("favoritesGrid");
+        showSkeleton(grid, SKELETON_TYPES.FILE);
 
         const favoriteIds =
         await getFavoriteIds(user.uid);

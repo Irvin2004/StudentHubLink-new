@@ -102,7 +102,7 @@ function openNotification(notification) {
     }
 }
 
-export async function initialiseNotifications({
+export async function initializeNotifications({
     userId,
     bellButton,
     panelContainer

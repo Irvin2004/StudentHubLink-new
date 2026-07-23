@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Group Assignments | StudentHub</title>
     <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
-    <link rel="stylesheet" href="../css/studenthub.css?v=20260723-10">
+    <link rel="stylesheet" href="../css/studenthub.css?v=20260723-13">
 </head>
 <body data-page="group-assignments">
     <div class="groups-shell">
@@ -108,14 +108,16 @@
                     </button>
                 </header>
 
-                <div id="assignmentsList" class="assignments-list" aria-live="polite">
-                    <p class="assignment-notice">Loading assignments...</p>
-                </div>
+                <div
+                    id="assignmentsList"
+                    class="assignments-list"
+                    aria-live="polite"
+                    aria-busy="true"></div>
             </section>
         </main>
     </div>
 
-    <script type="module" src="../js/controllers/group-assignments-controller.js?v=20260721-4"></script>
+    <script type="module" src="../js/controllers/group-assignments-controller.js?skeletons=1"></script>
     <script type="module" src="../js/theme.js?responsive=3"></script>
 </body>
 </html>

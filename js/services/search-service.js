@@ -7,36 +7,7 @@ import { getUpcomingAssignments } from
 import { getUserGroups } from "./group-service.js?unified-search=1";
 import { getResources } from "./resource-service.js?unified-search=1";
 import { getUsers } from "./user-service.js?unified-search=1";
-
-export function normalizeSearchQuery(query) {
-    return String(query || "")
-        .trim()
-        .replace(/\s+/g, " ")
-        .toLowerCase();
-}
-
-export function searchResources(resources = [], searchTerm) {
-    const term = normalizeSearchQuery(searchTerm);
-
-    if (!term) {
-        return [...resources];
-    }
-
-    return resources.filter((resource) => {
-        const searchableFields = [
-            resource.title,
-            resource.description,
-            resource.category,
-            resource.ownerName
-        ];
-
-        return searchableFields.some((field) =>
-            String(field || "")
-                .toLowerCase()
-                .includes(term)
-        );
-    });
-}
+import { normalizeSearchQuery } from "../utils/search.js";
 
 function matches(value, query) {
     return String(value || "")

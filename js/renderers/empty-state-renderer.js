@@ -17,6 +17,12 @@ function clearActionListener(container) {
     actionCleanups.delete(container);
 }
 
+/**
+ * Renders an empty state and binds its optional action.
+ *
+ * @param {object} options
+ * @returns {Element|null}
+ */
 export function showEmptyState({
     container,
     type,
@@ -54,6 +60,12 @@ export function showEmptyState({
     return root;
 }
 
+/**
+ * Removes an empty state and its action listener.
+ *
+ * @param {Element} container
+ * @returns {void}
+ */
 export function hideEmptyState(container) {
     const target = requireContainer(container);
 

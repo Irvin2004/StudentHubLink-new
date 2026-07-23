@@ -1,11 +1,13 @@
-import { auth, db } from "../firebase.js";
+import { auth, db } from "../firebase/firebase-config.js";
 import { createEmptyState } from "../components/empty-state.js";
 import { createResourceCard } from "../components/resource-card.js";
-import { filterResources } from "../services/filter-service.js";
-import { initializeFavoriteButtons } from "../controllers/favorites-controller.js";
+import { filterResources } from "../utils/filter-resources.js";
+import {
+    createFavoritesController
+} from "../controllers/favorites-controller.js";
 import { handleResourceAction } from "../services/marketplace-actions-service.js";
-import { searchResources } from "../services/search-service.js";
-import { sortResources } from "../services/sort-service.js";
+import { searchResources } from "../utils/search.js";
+import { sortResources } from "../utils/sort-resources.js";
 import {
     RESOURCE_ACTION,
     RESOURCE_STATUS,
@@ -13,9 +15,16 @@ import {
 } from "../utils/constants.js";
 import { setText } from "../utils/dom.js";
 import { formatPrice } from "../utils/format-price.js";
-import { clearSkeleton, showSkeleton } from "../utils/loading.js";
+import {
+    hideSkeleton,
+    showSkeleton
+} from "../renderers/skeleton-renderer.js";
+import { SKELETON_TYPES } from "../config/skeleton-types.js";
 import { warn, error as logError } from "../utils/logger.js";
-import { showToast } from "../utils/toast.js";
+import { showToast } from "../services/user-feedback-service.js";
+import { debounce } from "../utils/debounce.js";
+
+const SEARCH_DELAY = 200;
 
 import {
     collection,
@@ -152,13 +161,13 @@ async function loadMarketplace() {
         return;
     }
 
-    showSkeleton("resourceGrid");
+    showSkeleton(resourceGrid, SKELETON_TYPES.FILE);
 
     try {
         marketplaceState.allResources =
         await getApprovedResources();
 
-        clearSkeleton("resourceGrid");
+        hideSkeleton(resourceGrid);
         updateMarketplace();
     } catch (error) {
         logError("FIRESTORE", "Marketplace load failed:", error);
@@ -255,12 +264,19 @@ function bindMarketplaceControls() {
     document.querySelectorAll(".filter-btn");
 
     if (searchInput) {
-        searchInput.addEventListener("input", (event) => {
+        const scheduleSearch = debounce((value) => {
             marketplaceState.search =
-            event.target.value;
+            value;
 
             updateMarketplace();
+        }, SEARCH_DELAY);
+
+        searchInput.addEventListener("input", (event) => {
+            scheduleSearch(event.target.value);
         });
+        window.addEventListener("pagehide", () => {
+            scheduleSearch.cancel();
+        }, { once: true });
     }
 
     if (priceSelect) {
@@ -299,6 +315,13 @@ function bindMarketplaceControls() {
 
 if (resourceGrid) {
     bindMarketplaceControls();
-    initializeFavoriteButtons();
+    const favoritesController = createFavoritesController();
+    favoritesController.initialize();
+
+    window.addEventListener("pagehide", (event) => {
+        if (!event.persisted) {
+            favoritesController.destroy();
+        }
+    }, { once: true });
     loadMarketplace();
 }

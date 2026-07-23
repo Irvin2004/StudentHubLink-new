@@ -7,7 +7,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
 import { COLLECTIONS } from "../config/firestore.js";
-import { db } from "../firebase.js";
+import { db } from "../firebase/firebase-config.js";
 
 export async function getUsers() {
     const publicUsersQuery = query(

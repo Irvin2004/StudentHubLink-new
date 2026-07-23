@@ -118,34 +118,8 @@
     font-size: 1.75rem;
 }
 
-.activity-loading {
-    justify-items: stretch;
-}
-
-.activity-loading > span:last-child {
-    justify-self: center;
-}
-
-.activity-loading-bar {
-    height: 52px;
-    border-radius: var(--radius-md);
-    background: linear-gradient(
-        90deg,
-        var(--surface-muted) 25%,
-        color-mix(in srgb, var(--surface-muted) 60%, var(--surface)) 50%,
-        var(--surface-muted) 75%
-    );
-    background-size: 200% 100%;
-    animation: activity-loading 1.4s ease-in-out infinite;
-}
-
 .activity-error strong {
     color: var(--danger);
-}
-
-@keyframes activity-loading {
-    from { background-position: 200% 0; }
-    to { background-position: -200% 0; }
 }
 
 @media (max-width: 640px) {
@@ -169,7 +143,4 @@
         transition: none;
     }
 
-    .activity-loading-bar {
-        animation: none;
-    }
 }

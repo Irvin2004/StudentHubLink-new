@@ -46,6 +46,12 @@ function flushFrame(timestamp) {
     tasks.forEach((callback) => callback(timestamp));
 }
 
+/**
+ * Schedules a visual update in the shared animation-frame queue.
+ *
+ * @param {FrameRequestCallback} callback
+ * @returns {Function} Cancels the queued callback.
+ */
 export function scheduleFrame(callback) {
     if (typeof callback !== "function") {
         throw new TypeError("Frame callback must be a function.");
@@ -74,6 +80,11 @@ export function scheduleFrame(callback) {
     };
 }
 
+/**
+ * Cancels every callback waiting in the shared frame queue.
+ *
+ * @returns {void}
+ */
 export function cancelScheduledFrames() {
     frameQueue.clear();
 

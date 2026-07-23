@@ -2,7 +2,7 @@ import {
     onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 
-import { auth } from "../firebase.js";
+import { auth } from "../firebase/firebase-config.js";
 import {
     getUserProfile as fetchUserProfile,
     subscribeToUserConversations
@@ -23,9 +23,15 @@ import {
 } from "../components/conversation-view-tabs.js";
 import {
     renderConversationError,
-    renderConversationList
-} from "../renderers/conversation-renderer.js?context-menu=1";
-import { handleError } from "../utils/error-handler.js?security=1";
+    renderConversationList,
+    renderConversationLoading
+} from "../renderers/conversation-renderer.js?empty-states=1";
+import { handleError } from "../services/user-feedback-service.js";
+import { debounce } from "../utils/debounce.js";
+import { throttle } from "../utils/throttle.js";
+
+const SEARCH_DELAY = 200;
+const PRESENCE_RENDER_INTERVAL = 250;
 
 const conversationList =
     document.getElementById("conversationList");
@@ -148,7 +154,7 @@ function syncPresenceSubscriptions(items) {
                 });
 
                 if (changed) {
-                    filterConversations();
+                    schedulePresenceRender();
                 }
             }
         );
@@ -212,7 +218,17 @@ function filterConversations() {
     displayConversations(filtered, currentUserId);
 }
 
-searchInput?.addEventListener("input", filterConversations);
+const scheduleConversationFilter = debounce(
+    filterConversations,
+    SEARCH_DELAY
+);
+const schedulePresenceRender = throttle(
+    filterConversations,
+    PRESENCE_RENDER_INTERVAL
+);
+
+searchInput?.addEventListener("input", scheduleConversationFilter);
+renderConversationLoading(conversationList);
 
 const conversationViewController = initializeConversationViewTabs(
     conversationViews,
@@ -285,5 +301,7 @@ window.addEventListener("pagehide", (event) => {
 
     conversationPreferenceController?.destroy();
     conversationViewController.destroy();
+    scheduleConversationFilter.cancel();
+    schedulePresenceRender.cancel();
     clearPresenceSubscriptions();
 });

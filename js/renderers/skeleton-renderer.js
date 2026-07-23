@@ -28,6 +28,14 @@ function getResponsiveCount(container, type, requestedCount) {
     return mobile ? 5 : 8;
 }
 
+/**
+ * Replaces a container's contents with a skeleton layout.
+ *
+ * @param {Element} container
+ * @param {string} type
+ * @param {{count?: number}} options
+ * @returns {Element|null}
+ */
 export function showSkeleton(container, type, options = {}) {
     const target = requireContainer(container);
     const normalizedType = String(type || "").toLowerCase();
@@ -47,6 +55,12 @@ export function showSkeleton(container, type, options = {}) {
     return target.querySelector?.("[data-skeleton-root]") || null;
 }
 
+/**
+ * Removes a rendered skeleton and clears the busy state.
+ *
+ * @param {Element} container
+ * @returns {void}
+ */
 export function hideSkeleton(container) {
     const target = requireContainer(container);
 
@@ -55,6 +69,12 @@ export function hideSkeleton(container) {
     activeContainers.delete(target);
 }
 
+/**
+ * Destroys one skeleton or every active skeleton.
+ *
+ * @param {Element} [container]
+ * @returns {void}
+ */
 export function destroySkeleton(container) {
     if (container) {
         hideSkeleton(container);

@@ -1,99 +1,64 @@
 # StudentHub Architecture
 
-## Overview
+StudentHub uses a layered, browser-native JavaScript architecture. Dependencies
+flow downward; presentation code never owns persistence or business rules.
 
-StudentHub is a modular web application built with Firebase.
+## Module responsibilities
 
-The application follows a layered architecture that separates user interface components from business logic and backend services. The frontend displays data and handles interactions, while Firebase and Cloud Functions own persistence, authentication, authorization, and sensitive business logic.
+- `js/config/` contains frozen constants and configuration values.
+- `js/models/` validates and normalizes domain data.
+- `js/services/` owns persistence, network access, and domain operations.
+- `js/controllers/` coordinates services, renderers, and user interaction.
+- `js/renderers/` receives prepared data and updates presentation only.
+- `js/components/` contains reusable interface primitives.
+- `js/utils/` contains pure helpers, except explicitly DOM-focused helpers such
+  as focus trapping and DOM batching.
+- `js/firebase/` owns Firebase initialization.
+- `js/pages/` contains page entrypoints and page-level composition.
+- `js/events/` contains application event contracts and recipient helpers.
 
-## Frontend
+## Lifecycle standard
 
-- HTML5
-- CSS3
-- JavaScript ES Modules
+Reusable controllers and stateful components expose `initialize()` and
+`destroy()`. Optional lifecycle methods are `refresh()` and `reset()`.
+Initialization must be idempotent. Destruction removes listeners, observers,
+subscriptions, and timers and may be called more than once.
 
-## Frontend Structure
+Page entrypoints may initialize immediately because their document is their
+lifecycle boundary. Long-lived work must still be released during `pagehide`.
 
-```text
-Pages
-  -> Controllers
-  -> Renderers
-  -> Components
-  -> Domain Events
-  -> Services
-  -> Firebase
-```
+## Naming
 
-## Key Frontend Folders
+- Files use lowercase kebab-case.
+- Factories use `create…`.
+- Lifecycle methods use `initialize`, `destroy`, `refresh`, and `reset`.
+- Subscriptions use `subscribe…` and return an unsubscribe function.
+- British `initialise`, abbreviated `init`, and `dispose` are not used.
 
-- `pages/`: route-level screens such as marketplace, library, profile, resource details, and chat.
-- `css/`: base theme styles, component styles, and page-specific layouts.
-- `js/components/`: reusable UI fragments such as resource cards, rating stars, review cards, comment cards, and message bubbles.
-- `js/controllers/`: user interaction handlers such as review forms, comments, favorites, and chat.
-- `js/pages/`: route bootstraps that connect a page's DOM to controllers and services.
-- `js/renderers/`: data-to-UI rendering modules.
-- `js/services/`: Firebase access and business-facing service modules.
-- `js/models/`: pure validation and normalization for persisted domain data.
-- `js/events/`: post-write domain events that coordinate secondary actions such as notifications.
-- `js/utils/`: shared helpers for DOM, formatting, errors, logging, and constants.
+## Boundaries
 
-## Backend
+- Services never import renderers or access the DOM.
+- Renderers never import services, Firebase, or controllers.
+- Models never import services, Firebase, or HTML helpers.
+- Components never fetch or persist data.
+- Utilities never import controllers, renderers, or domain services.
+- Controllers decide whether the current state is loading, empty, content, or
+  error; renderers only present that state.
 
-StudentHub uses Firebase as the backend platform.
+## Errors and diagnostics
 
-- Firebase Authentication
-- Cloud Firestore
-- Cloud Functions
-- Firebase Storage planned
-- Firebase Hosting planned
+User-facing feedback flows through `error-service.js` or
+`user-feedback-service.js`. `console.error` is isolated to the development
+logger. Services throw normalized errors and never display interface feedback.
 
-## Backend Structure
+## CSS
 
-```text
-functions/
-  index.js
-  config/
-  reviews/
-  achievements/
-  notifications/
-  analytics/
-  chat/
-  users/
-  utils/
-```
+Shared components consume semantic variables from `theme-tokens.css`.
+Light and dark theme files override semantic colors. New spacing, radii,
+shadows, and motion values should use tokens rather than one-off values.
 
-## Current Backend Flow
+## Public APIs
 
-Notifications use a recipient-owned collection and event-proven writes:
-
-```text
-Primary service write
-  -> Domain event
-  -> Notification service
-  -> users/{recipientId}/notifications/{notificationId}
-  -> Real-time notification controller subscription
-```
-
-Firestore rules validate the source assignment, message, resource, or friend
-request before allowing a cross-user notification. Notification failure remains
-secondary and never rolls back the primary action.
-
-Reviews are now backend-owned for rating aggregation:
-
-```text
-Add Review
-  -> Firestore reviews collection
-  -> Cloud Function updateResourceRating
-  -> Firestore resources averageRating/reviewCount
-  -> Frontend displays updated resource data
-```
-
-## Design Principles
-
-- Component-based UI
-- Service-oriented business logic
-- Reusable utilities
-- Separation of concerns
-- Real-time updates
-- Backend-owned sensitive logic
-- Secure Firestore rules by default
+Exported functions require concise JSDoc describing their purpose, parameters,
+return value, and cleanup behavior where relevant. Private helpers should be
+documented when their behavior is not clear from their name.

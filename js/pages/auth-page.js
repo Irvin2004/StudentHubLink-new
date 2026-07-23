@@ -1,4 +1,4 @@
-import { auth, db } from "../firebase.js";
+import { auth, db } from "../firebase/firebase-config.js";
 import { RESOURCE_STATUS, TRANSACTION_STATUS } from "../utils/constants.js";
 import {
     setButtonLoading,
@@ -9,9 +9,16 @@ import { formatLongDate } from "../utils/format-date.js";
 import { formatCurrency } from "../utils/format-price.js";
 import {
     getUserFriendlyErrorMessage
-} from "../utils/error-handler.js?security=1";
+} from "../services/user-feedback-service.js";
 import { error as logError, warn } from "../utils/logger.js";
-import { showToast } from "../utils/toast.js";
+import { showToast } from "../services/user-feedback-service.js";
+import {
+    hideSkeleton,
+    showSkeleton
+} from "../renderers/skeleton-renderer.js";
+import {
+    SKELETON_TYPES
+} from "../config/skeleton-types.js";
 
 import {
     createUserWithEmailAndPassword,
@@ -58,8 +65,21 @@ publicPages.some((page) => currentPath.endsWith(page));
 const isDashboardPage =
 currentPath.endsWith("/dashboard.html");
 
+const isProfilePage =
+currentPath.endsWith("/pages/profile.html");
+
 const isAdminPage =
 currentPath.includes("/Admin/");
+
+const profileSummaryLoading =
+document.getElementById("profileSummaryLoading");
+
+if (isProfilePage && profileSummaryLoading) {
+    showSkeleton(
+        profileSummaryLoading,
+        SKELETON_TYPES.PROFILE
+    );
+}
 
 export async function getUserDocument(user) {
     const userRef =
@@ -176,6 +196,18 @@ function renderUserProfile(userData, user) {
     setInputValue("profileCourseInput", userData.course);
     setInputValue("profileYearInput", userData.yearOfStudy);
     setInputValue("profileBioInput", userData.bio);
+
+    if (profileSummaryLoading) {
+        hideSkeleton(profileSummaryLoading);
+        profileSummaryLoading.hidden = true;
+    }
+
+    const profileSummaryContent =
+    document.getElementById("profileSummaryContent");
+
+    if (profileSummaryContent) {
+        profileSummaryContent.hidden = false;
+    }
 }
 
 function bindProfileActions(user, userData) {

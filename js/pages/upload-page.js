@@ -1,4 +1,4 @@
-import { app, auth, db } from "../firebase.js";
+import { app, auth, db } from "../firebase/firebase-config.js";
 import { createNotification } from "../services/notification-service.js";
 import { handleResourceAction } from "../services/marketplace-actions-service.js";
 import {
@@ -10,8 +10,10 @@ import {
 } from "../utils/constants.js";
 import { escapeHtml, setText } from "../utils/dom.js";
 import { formatPrice } from "../utils/format-price.js";
-import { handleError } from "../utils/error-handler.js?security=1";
-import { showToast } from "../utils/toast.js";
+import {
+    handleError,
+    showToast
+} from "../services/user-feedback-service.js";
 import { validateAttachment } from "../utils/file-validator.js?security=1";
 
 import {

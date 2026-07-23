@@ -1,6 +1,12 @@
 import { NOTIFICATION_TYPES } from "../config/notification-types.js";
 import { escapeHtml } from "../utils/dom.js";
 import { formatTimeAgo } from "../utils/time-ago.js";
+import {
+    createEmptyState
+} from "../components/empty-state.js?refinement=1";
+import {
+    hideSkeleton
+} from "./skeleton-renderer.js";
 
 function getNotificationIcon(type) {
     switch (type) {
@@ -25,20 +31,20 @@ function getNotificationIcon(type) {
 }
 
 function renderEmptyState() {
-    return `
-        <div class="notification-empty-state">
-            <span class="notification-empty-icon" aria-hidden="true">
-                &#128276;
-            </span>
-            <strong>You're all caught up.</strong>
-            <p>No notifications yet.</p>
-        </div>
-    `;
+    return createEmptyState({
+        icon: "&#128276;",
+        title: "No notifications yet",
+        message: "Updates from your conversations and groups will appear here."
+    });
 }
 
 export function renderNotifications(notifications, container) {
     if (!container || !("innerHTML" in container)) {
         throw new Error("Notification container is required.");
+    }
+
+    if (container.querySelector?.("[data-skeleton-root]")) {
+        hideSkeleton(container);
     }
 
     const cleanNotifications = Array.isArray(notifications)

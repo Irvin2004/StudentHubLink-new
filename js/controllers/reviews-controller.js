@@ -1,56 +1,113 @@
-import { auth } from "../firebase.js";
-import { addReview } from "../services/reviews-service.js";
+"use strict";
+
+import { auth } from "../firebase/firebase-config.js";
+import {
+    addReview,
+    getReviewsForResource
+} from "../services/reviews-service.js";
 import { renderReviews } from "../renderers/review-renderer.js";
-import { showToast } from "../utils/toast.js";
-import { handleError } from "../utils/error-handler.js?security=1";
+import {
+    handleError,
+    showToast
+} from "../services/user-feedback-service.js";
 
-export function initializeReviewForm(resource) {
-    const resourceId =
-    typeof resource === "string" ? resource : resource?.id;
-
-    const form =
-    document.getElementById("reviewForm");
-
-    if (!form || !resourceId) {
-        return;
+/**
+ * Creates the reviews controller for a resource.
+ *
+ * @param {object} options
+ * @param {object} options.resource
+ * @param {HTMLFormElement} [options.form]
+ * @param {Element} [options.summary]
+ * @param {Element} [options.container]
+ * @returns {{initialize: Function, refresh: Function, destroy: Function}}
+ */
+export function createReviewsController({
+    resource,
+    form = document.getElementById("reviewForm"),
+    summary = document.getElementById("reviewSummary"),
+    container = document.getElementById("reviewsList")
+} = {}) {
+    if (!resource?.id) {
+        throw new Error("Reviews controller requires a resource.");
     }
 
-    form.addEventListener("submit", async (event) => {
+    let currentResource = resource;
+    let initialized = false;
+
+    async function refresh(updatedResource = currentResource) {
+        currentResource = {
+            ...currentResource,
+            ...updatedResource
+        };
+
+        const reviews = await getReviewsForResource(
+            currentResource.id
+        );
+
+        return renderReviews({
+            resource: currentResource,
+            reviews,
+            currentUserId: auth.currentUser?.uid || "",
+            summary,
+            container
+        });
+    }
+
+    async function handleSubmit(event) {
         event.preventDefault();
 
-        const user =
-        auth.currentUser;
+        const user = auth.currentUser;
 
         if (!user) {
-            showToast("Please login first.", "warning");
+            showToast("Please log in first.", "warning");
             return;
         }
 
         try {
             await addReview({
-                resourceId,
+                resourceId: currentResource.id,
                 userId: user.uid,
-                userName:
-                    user.displayName || "Student",
+                userName: user.displayName || "Student",
                 rating:
-                    document.getElementById("ratingSelect").value,
+                    document.getElementById("ratingSelect")?.value,
                 review:
-                    document.getElementById("reviewInput").value
+                    document.getElementById("reviewInput")?.value
             });
 
+            form?.reset();
             showToast("Review submitted!", "success");
-
-            form.reset();
-
-            await renderReviews({
-                ...(typeof resource === "object" ? resource : {}),
-                id: resourceId
-            });
+            await refresh();
         } catch (error) {
-            handleError(
-                error,
-                "Unable to submit your review."
-            );
+            handleError(error, "Unable to submit your review.");
         }
-    });
+    }
+
+    async function initialize() {
+        if (initialized) {
+            return;
+        }
+
+        if (!summary || !container) {
+            throw new Error("Review containers are required.");
+        }
+
+        form?.addEventListener("submit", handleSubmit);
+        initialized = true;
+        await refresh();
+    }
+
+    function destroy() {
+        if (!initialized) {
+            return;
+        }
+
+        form?.removeEventListener("submit", handleSubmit);
+        initialized = false;
+    }
+
+    return {
+        initialize,
+        refresh,
+        destroy
+    };
 }

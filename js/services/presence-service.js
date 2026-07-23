@@ -11,7 +11,7 @@ import {
 
 import { COLLECTIONS } from "../config/firestore.js";
 import { PRESENCE_STATUS } from "../config/presence-status.js";
-import { db } from "../firebase.js";
+import { db } from "../firebase/firebase-config.js";
 import { createPresenceModel } from "../models/presence.js";
 import { error as logError } from "../utils/logger.js";
 

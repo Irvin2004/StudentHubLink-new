@@ -19,20 +19,23 @@ import {
 from
 "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
-import { auth, db } from "../firebase.js";
+import { auth, db } from "../firebase/firebase-config.js";
 import { getUserDocument } from "./auth-page.js";
 import { mountNotificationPanel } from "../components/notification-panel.js";
 import { escapeHtml, setText } from "../utils/dom.js";
 import { formatDate, getTimestampMillis } from "../utils/format-date.js";
 import { formatCurrency } from "../utils/format-price.js";
-import { showSkeleton } from "../utils/loading.js";
+import { showSkeleton } from "../renderers/skeleton-renderer.js";
+import { SKELETON_TYPES } from "../config/skeleton-types.js";
 import { error as logError, warn } from "../utils/logger.js";
 import {
     setUserOffline
 } from "../services/presence-service.js";
 import { createStudyGroup } from "../services/group-service.js";
-import { handleError } from "../utils/error-handler.js?security=1";
-import { showToast } from "../utils/toast.js";
+import {
+    handleError,
+    showToast
+} from "../services/user-feedback-service.js";
 
 function setupCreateGroupModal() {
     const openButton =
@@ -291,13 +294,21 @@ async function loadUserProfile(user) {
 }
 
 async function loadActivities() {
-    showSkeleton("recentActivityList", 3);
+    showSkeleton(
+        document.getElementById("recentActivityList"),
+        SKELETON_TYPES.NOTIFICATION,
+        { count: 3 }
+    );
 
     return [];
 }
 
 async function loadRecentlyAdded() {
-    showSkeleton("recentlyAddedList", 3);
+    showSkeleton(
+        document.getElementById("recentlyAddedList"),
+        SKELETON_TYPES.FILE,
+        { count: 3 }
+    );
 
     const approvedResourcesQuery =
     query(
@@ -362,8 +373,16 @@ function showDashboardLoading() {
     showStatSkeleton("totalUploads");
     showStatSkeleton("totalDownloads");
     showStatSkeleton("totalEarnings");
-    showSkeleton("recentlyAddedList", 3);
-    showSkeleton("recentActivityList", 3);
+    showSkeleton(
+        document.getElementById("recentlyAddedList"),
+        SKELETON_TYPES.FILE,
+        { count: 3 }
+    );
+    showSkeleton(
+        document.getElementById("recentActivityList"),
+        SKELETON_TYPES.NOTIFICATION,
+        { count: 3 }
+    );
     showChartSkeleton();
 }
 

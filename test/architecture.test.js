@@ -269,7 +269,7 @@ test("read receipt controller owns visibility-aware receipt updates", () => {
     const chat = read("js/controllers/chat-controller.js");
 
     assert.match(controller, /export function initializeReadReceipts\(/);
-    assert.match(controller, /new IntersectionObserver/);
+    assert.match(controller, /createObserver/);
     assert.match(controller, /threshold: READ_VISIBILITY_THRESHOLD/);
     assert.match(controller, /markMessageDelivered/);
     assert.match(controller, /markMessageRead/);

@@ -1,7 +1,7 @@
 import { onAuthStateChanged } from
     "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 
-import { auth } from "../firebase.js";
+import { auth } from "../firebase/firebase-config.js";
 import { RESOURCE_CATEGORY_OPTIONS } from "../config/resource-categories.js";
 import { renderResources } from "../renderers/resource-renderer.js";
 import {
@@ -13,13 +13,27 @@ import {
     getGroupResources
 } from "../services/resource-service.js?security=1";
 import { uploadGroupResource } from "../services/resource-storage-service.js?security=1";
-import { handleError } from "../utils/error-handler.js?security=1";
+import { handleError } from "../services/user-feedback-service.js";
 import { validateAttachment } from "../utils/file-validator.js?security=1";
-import { showToast } from "../utils/toast.js";
+import { showToast } from "../services/user-feedback-service.js";
 import { sanitizeUrl } from "../utils/validators.js";
-import { filterResources } from "../services/filter-service.js";
-import { searchResources } from "../services/search-service.js";
-import { sortResources } from "../services/sort-service.js";
+import { filterResources } from "../utils/filter-resources.js";
+import { searchResources } from "../utils/search.js";
+import { sortResources } from "../utils/sort-resources.js";
+import { debounce } from "../utils/debounce.js";
+import { appendNodes } from "../utils/dom-batch.js";
+import {
+    createEmptyState
+} from "../components/empty-state.js?refinement=1";
+import {
+    SKELETON_TYPES
+} from "../config/skeleton-types.js";
+import {
+    hideSkeleton,
+    showSkeleton
+} from "../renderers/skeleton-renderer.js";
+
+const SEARCH_DELAY = 200;
 
 const groupId = new URLSearchParams(window.location.search).get("id");
 const form = document.getElementById("resourceUploadForm");
@@ -51,17 +65,17 @@ function populateCategories() {
         placeholder.textContent = "Select a category";
         placeholder.disabled = true;
         placeholder.selected = true;
-        categorySelect.appendChild(placeholder);
-
-        RESOURCE_CATEGORY_OPTIONS.forEach((category) => {
-            categorySelect.appendChild(createCategoryOption(category));
-        });
+        appendNodes(categorySelect, [
+            placeholder,
+            ...RESOURCE_CATEGORY_OPTIONS.map(createCategoryOption)
+        ]);
     }
 
     if (categoryFilter && categoryFilter.options.length === 1) {
-        RESOURCE_CATEGORY_OPTIONS.forEach((category) => {
-            categoryFilter.appendChild(createCategoryOption(category));
-        });
+        appendNodes(
+            categoryFilter,
+            RESOURCE_CATEGORY_OPTIONS.map(createCategoryOption)
+        );
     }
 }
 
@@ -134,7 +148,9 @@ resourceList?.addEventListener("click", (event) => {
     );
 });
 
-searchInput?.addEventListener("input", applyResourceView);
+const scheduleResourceView = debounce(applyResourceView, SEARCH_DELAY);
+
+searchInput?.addEventListener("input", scheduleResourceView);
 categoryFilter?.addEventListener("change", applyResourceView);
 sortSelect?.addEventListener("change", applyResourceView);
 
@@ -191,6 +207,12 @@ async function initializePage(user) {
     }
 
     try {
+        if (resourceList) {
+            showSkeleton(resourceList, SKELETON_TYPES.FILE, {
+                count: 4,
+            });
+        }
+
         const [group, memberships] = await Promise.all([
             getStudyGroup(groupId),
             getStudyGroupMemberships([groupId], user.uid)
@@ -205,7 +227,12 @@ async function initializePage(user) {
         if (!isMember) {
             accessMessage.textContent =
                 "Join this study group to view and upload its resources.";
-            resourceList.innerHTML = "";
+            hideSkeleton(resourceList);
+            resourceList.innerHTML = createEmptyState({
+                icon: "&#128274;",
+                title: "Members-only resources",
+                message: "Join this study group to access shared files."
+            });
             return;
         }
 
@@ -216,7 +243,18 @@ async function initializePage(user) {
         handleError(error, "Unable to load group resources.");
         accessMessage.textContent =
             "Group resources are unavailable right now.";
-        resourceList.innerHTML = "";
+        if (
+            resourceList?.querySelector("[data-skeleton-root]")
+        ) {
+            hideSkeleton(resourceList);
+        }
+        if (resourceList) {
+            resourceList.innerHTML = createEmptyState({
+                icon: "&#9888;",
+                title: "Resources unavailable",
+                message: "Check your connection and try again."
+            });
+        }
     }
 }
 
@@ -230,4 +268,8 @@ onAuthStateChanged(auth, (user) => {
 
     currentUser = user;
     initializePage(user);
+});
+
+window.addEventListener("pagehide", (event) => {
+    if (!event.persisted) scheduleResourceView.cancel();
 });

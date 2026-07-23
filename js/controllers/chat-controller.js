@@ -1,4 +1,4 @@
-import { auth } from "../firebase.js";
+import { auth } from "../firebase/firebase-config.js";
 import {
     getConversationById,
     getUserProfile
@@ -40,10 +40,19 @@ import {
     bindContextMenuInteractions
 } from "../components/context-menu.js";
 
-import { logError } from "../services/error-service.js";
-import { handleError } from "../utils/error-handler.js?security=1";
+import { handleError } from "../services/user-feedback-service.js";
 import { validateAttachment } from "../utils/file-validator.js?security=1";
-import { showToast } from "../utils/toast.js";
+import { showToast } from "../services/user-feedback-service.js";
+import { debounce } from "../utils/debounce.js";
+import { warn as logWarning } from "../utils/logger.js";
+import { logError } from "../services/error-service.js";
+import {
+    hideSkeleton,
+    showSkeleton
+} from "../renderers/skeleton-renderer.js";
+import {
+    SKELETON_TYPES
+} from "../config/skeleton-types.js";
 
 import {
     onAuthStateChanged
@@ -99,9 +108,6 @@ null;
 let unsubscribeTyping =
 null;
 
-let typingTimer =
-null;
-
 let latestMessages = [];
 let pendingMessages = [];
 let activeReceiverId = null;
@@ -113,6 +119,19 @@ let replyingTo = null;
 let selectedMessage = null;
 let reactionController = null;
 let readReceiptController = null;
+
+const scheduleTypingReset = debounce(async (user) => {
+    try {
+        await setTypingStatus(
+            conversationId,
+            user.uid,
+            false,
+            getParticipantName(user)
+        );
+    } catch (error) {
+        logWarning("TYPING", "Typing reset failed:", error);
+    }
+}, 1200);
 
 function clearReply() {
     replyingTo = null;
@@ -510,6 +529,10 @@ function renderChatMessages(currentUserId) {
         (message) => !persistedIds.has(message.id)
     );
 
+    if (messageList?.querySelector("[data-skeleton-root]")) {
+        hideSkeleton(messageList);
+    }
+
     renderMessages(
         [...latestMessages, ...visiblePendingMessages],
         currentUserId,
@@ -523,6 +546,10 @@ function renderChatMessages(currentUserId) {
 function renderChatMessage(message) {
     if (!messageList) {
         return;
+    }
+
+    if (messageList.querySelector("[data-skeleton-root]")) {
+        hideSkeleton(messageList);
     }
 
     messageList.innerHTML = `
@@ -551,6 +578,8 @@ async function initializeChat(currentUser) {
         renderChatMessage("Conversation not found.");
         return;
     }
+
+    showSkeleton(messageList, SKELETON_TYPES.MESSAGE);
 
     const conversation =
     await getConversationById(conversationId);
@@ -805,26 +834,10 @@ function initializeTypingIndicator(user) {
                 getParticipantName(user)
             );
         } catch (error) {
-            logError(error, "Typing status failed");
+            logWarning("TYPING", "Typing status failed:", error);
         }
 
-        clearTimeout(typingTimer);
-
-        typingTimer = setTimeout(
-            async () => {
-                try {
-                    await setTypingStatus(
-                        conversationId,
-                        user.uid,
-                        false,
-                        getParticipantName(user)
-                    );
-                } catch (error) {
-                    logError(error, "Typing reset failed");
-                }
-            },
-            1200
-        );
+        scheduleTypingReset(user);
     };
 }
 
@@ -872,5 +885,5 @@ window.addEventListener("pagehide", (event) => {
         ).catch(() => {});
     }
 
-    clearTimeout(typingTimer);
+    scheduleTypingReset.cancel();
 });

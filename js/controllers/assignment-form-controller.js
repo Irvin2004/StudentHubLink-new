@@ -57,7 +57,7 @@ export function populateAssignmentForm(assignment) {
     updateCounterValues(fields);
 }
 
-export function initialiseAssignmentForm({
+export function initializeAssignmentForm({
     onSubmit,
     onError
 } = {}) {

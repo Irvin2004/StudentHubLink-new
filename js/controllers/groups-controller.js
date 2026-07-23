@@ -5,15 +5,30 @@ import {
 
 import { createGroupCard } from "../components/group-card.js";
 import { openLeaveGroupDialog } from "../components/leave-group-dialog.js";
-import { createEmptyState } from "../components/empty-state.js";
+import {
+    createEmptyState
+} from "../components/empty-state.js?refinement=1";
+import {
+    SKELETON_TYPES
+} from "../config/skeleton-types.js";
+import {
+    hideSkeleton,
+    showSkeleton
+} from "../renderers/skeleton-renderer.js";
 import {
     getStudyGroupMemberships,
     getStudyGroups,
     joinStudyGroup,
     leaveStudyGroup
 } from "../services/group-service.js?security=1";
-import { handleError } from "../utils/error-handler.js?security=1";
-import { showToast } from "../utils/toast.js";
+import {
+    handleError,
+    showToast
+} from "../services/user-feedback-service.js";
+import { debounce } from "../utils/debounce.js";
+import { appendNodes } from "../utils/dom-batch.js";
+
+const SEARCH_DELAY = 200;
 
 const auth = getAuth();
 
@@ -51,12 +66,14 @@ function populateModuleFilter(items) {
     moduleFilter.innerHTML =
         '<option value="">All subjects</option>';
 
-    modules.forEach((moduleName) => {
+    const options = modules.map((moduleName) => {
         const option = document.createElement("option");
         option.value = moduleName.toLowerCase();
         option.textContent = moduleName;
-        moduleFilter.appendChild(option);
+        return option;
     });
+
+    appendNodes(moduleFilter, options);
 }
 
 function matchesSearch(group, term) {
@@ -83,6 +100,10 @@ function renderGroups(items) {
         return;
     }
 
+    if (groupList.querySelector("[data-skeleton-root]")) {
+        hideSkeleton(groupList);
+    }
+
     if (resultCount) {
         resultCount.textContent =
             `${items.length} ${items.length === 1 ? "group" : "groups"}`;
@@ -91,11 +112,19 @@ function renderGroups(items) {
     groupList.setAttribute("aria-busy", "false");
 
     if (!items.length) {
-        groupList.innerHTML = createEmptyState(
-            "No study groups found",
-            "Try another search term or subject filter.",
-            "&#128218;"
+        const filtering = Boolean(
+            searchInput?.value.trim() || moduleFilter?.value
         );
+
+        groupList.innerHTML = createEmptyState({
+            title: filtering
+                ? "No matching study groups"
+                : "No study groups yet",
+            message: filtering
+                ? "Try another search term or subject filter."
+                : "Create or join a group to start studying together.",
+            icon: "&#128218;"
+        });
         return;
     }
 
@@ -129,11 +158,7 @@ function applyFilters() {
 
 async function loadGroups(user) {
     if (groupList) {
-        groupList.innerHTML = `
-            <div class="group-card-skeleton"></div>
-            <div class="group-card-skeleton"></div>
-            <div class="group-card-skeleton"></div>
-        `;
+        showSkeleton(groupList, SKELETON_TYPES.COMMUNITY);
     }
 
     try {
@@ -154,6 +179,9 @@ async function loadGroups(user) {
         );
 
         if (groupList) {
+            if (groupList.querySelector("[data-skeleton-root]")) {
+                hideSkeleton(groupList);
+            }
             groupList.innerHTML = createEmptyState(
                 "Study groups are unavailable",
                 "Please try again in a moment.",
@@ -163,7 +191,9 @@ async function loadGroups(user) {
     }
 }
 
-searchInput?.addEventListener("input", applyFilters);
+const scheduleGroupFilter = debounce(applyFilters, SEARCH_DELAY);
+
+searchInput?.addEventListener("input", scheduleGroupFilter);
 moduleFilter?.addEventListener("change", applyFilters);
 
 groupList?.addEventListener("click", async (event) => {
@@ -272,4 +302,8 @@ onAuthStateChanged(auth, (user) => {
 
     currentUser = user;
     loadGroups(user);
+});
+
+window.addEventListener("pagehide", (event) => {
+    if (!event.persisted) scheduleGroupFilter.cancel();
 });

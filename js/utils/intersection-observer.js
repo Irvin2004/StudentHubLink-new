@@ -8,6 +8,14 @@ function requireCallback(callback, name) {
     return callback;
 }
 
+/**
+ * Creates an IntersectionObserver with a visible fallback.
+ *
+ * @param {Function} callback
+ * @param {IntersectionObserverInit} options
+ * @param {Function} Observer
+ * @returns {IntersectionObserver|object}
+ */
 export function createIntersectionObserver(
     callback,
     options = {},
@@ -48,6 +56,14 @@ export function createIntersectionObserver(
     };
 }
 
+/**
+ * Observes a collection of elements with one shared observer.
+ *
+ * @param {Iterable<Element>} elements
+ * @param {Function} callback
+ * @param {IntersectionObserverInit} options
+ * @returns {IntersectionObserver|object}
+ */
 export function observeElements(
     elements,
     callback,
@@ -59,6 +75,13 @@ export function observeElements(
     return observer;
 }
 
+/**
+ * Creates an observer that routes visible and hidden entries separately.
+ *
+ * @param {object} options
+ * @param {Function} Observer
+ * @returns {IntersectionObserver|object}
+ */
 export function createObserver(
     {
         root = null,

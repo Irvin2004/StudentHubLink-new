@@ -14,7 +14,7 @@ import {
     clearReactionBar,
     renderReactionBar
 } from "../renderers/reaction-renderer.js?reactions=1";
-import { handleError } from "../utils/error-handler.js?security=1";
+import { handleError } from "../services/user-feedback-service.js";
 import { logError } from "../services/error-service.js";
 
 function cleanId(value) {

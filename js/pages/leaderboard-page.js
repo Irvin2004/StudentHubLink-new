@@ -7,11 +7,12 @@ import {
     where
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
-import { db } from "../firebase.js";
+import { db } from "../firebase/firebase-config.js";
 import { createEmptyState } from "../components/empty-state.js";
 import { createLeaderboardItem } from "../components/leaderboard-item.js";
 import { error as logError } from "../utils/logger.js";
-import { showSkeleton } from "../utils/loading.js";
+import { showSkeleton } from "../renderers/skeleton-renderer.js";
+import { SKELETON_TYPES } from "../config/skeleton-types.js";
 
 async function getTopContributors() {
     const contributorsQuery =
@@ -110,8 +111,16 @@ function renderTopResources(resources) {
 }
 
 async function loadLeaderboard() {
-    showSkeleton("topContributors", 5);
-    showSkeleton("topResources", 5);
+    showSkeleton(
+        document.getElementById("topContributors"),
+        SKELETON_TYPES.USER,
+        { count: 5 }
+    );
+    showSkeleton(
+        document.getElementById("topResources"),
+        SKELETON_TYPES.FILE,
+        { count: 5 }
+    );
 
     try {
         const [

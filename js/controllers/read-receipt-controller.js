@@ -9,6 +9,9 @@ import { MESSAGE_STATUS } from "../config/message-status.js";
 import {
     renderReadReceipt
 } from "../renderers/read-receipt-renderer.js?receipts=1";
+import {
+    createObserver
+} from "../utils/intersection-observer.js";
 import { logError } from "../services/error-service.js";
 
 const READ_VISIBILITY_THRESHOLD = 0.6;
@@ -26,20 +29,6 @@ function getCurrentUserReceipt(receipts, currentUserId) {
 function getExpectedRecipientCount(container) {
     const count = Number(container?.dataset?.expectedRecipientCount);
     return Number.isInteger(count) && count > 0 ? count : 1;
-}
-
-function isVisible(element) {
-    if (!element?.getBoundingClientRect) return false;
-
-    const rectangle = element.getBoundingClientRect();
-    const visibleHeight = Math.max(
-        0,
-        Math.min(rectangle.bottom, window.innerHeight) -
-            Math.max(rectangle.top, 0)
-    );
-
-    return rectangle.height > 0 &&
-        visibleHeight / rectangle.height >= READ_VISIBILITY_THRESHOLD;
 }
 
 export function initializeReadReceipts({
@@ -161,36 +150,29 @@ export function initializeReadReceipts({
 
         observedRows.set(messageId, row);
 
-        if (intersectionObserver) {
-            intersectionObserver.observe(row);
-        } else if (isVisible(row)) {
-            markVisibleMessageRead(messageId);
-        }
+        intersectionObserver.observe(row);
     }
 
-    function handleIntersection(entries) {
-        entries.forEach((entry) => {
-            if (
-                !entry.isIntersecting ||
-                entry.intersectionRatio < READ_VISIBILITY_THRESHOLD
-            ) {
-                return;
-            }
-
-            const messageId = cleanId(entry.target?.dataset?.messageId);
-
-            if (messageId) {
-                markVisibleMessageRead(messageId);
-            }
-        });
-    }
-
-    const intersectionObserver = typeof IntersectionObserver === "function"
-        ? new IntersectionObserver(handleIntersection, {
+    const intersectionObserver = createObserver(
+        {
             root: messagesContainer,
-            threshold: READ_VISIBILITY_THRESHOLD
-        })
-        : null;
+            threshold: READ_VISIBILITY_THRESHOLD,
+            onEnter(row, entry) {
+                if (
+                    entry.intersectionRatio <
+                    READ_VISIBILITY_THRESHOLD
+                ) {
+                    return;
+                }
+
+                const messageId = cleanId(row?.dataset?.messageId);
+
+                if (messageId) {
+                    markVisibleMessageRead(messageId);
+                }
+            }
+        }
+    );
 
     function updateMessage(subscription, receipts) {
         const currentReceipt = getCurrentUserReceipt(

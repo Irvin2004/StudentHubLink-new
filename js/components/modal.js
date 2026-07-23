@@ -1,4 +1,5 @@
 import { escapeHtml } from "../utils/dom.js";
+import { scheduleFrame } from "../utils/raf.js";
 
 const modalState = new WeakMap();
 
@@ -145,11 +146,14 @@ export function openModal(modalOrId) {
         }
     }
 
-    modalState.set(modal, {
+    const state = {
         previouslyFocusedElement,
         handleClick,
-        handleKeydown
-    });
+        handleKeydown,
+        cancelFocus: null
+    };
+
+    modalState.set(modal, state);
 
     modal.addEventListener("click", handleClick);
     document.addEventListener(
@@ -160,7 +164,7 @@ export function openModal(modalOrId) {
     modal.hidden = false;
     document.body.classList.add("modal-open");
 
-    requestAnimationFrame(() => {
+    state.cancelFocus = scheduleFrame(() => {
         const firstFocusable =
             getFocusableElements(modal)[0];
 
@@ -178,6 +182,8 @@ export function closeModal(modalOrId) {
     const state = modalState.get(modal);
 
     if (state) {
+        state.cancelFocus?.();
+
         modal.removeEventListener(
             "click",
             state.handleClick

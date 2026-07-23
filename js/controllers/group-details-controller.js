@@ -13,8 +13,17 @@ import {
     leaveStudyGroup
 } from "../services/group-service.js";
 import { escapeHtml } from "../utils/dom.js";
-import { handleError } from "../utils/error-handler.js?security=1";
-import { showToast } from "../utils/toast.js";
+import {
+    handleError,
+    showToast
+} from "../services/user-feedback-service.js";
+import {
+    hideSkeleton,
+    showSkeleton
+} from "../renderers/skeleton-renderer.js";
+import {
+    SKELETON_TYPES
+} from "../config/skeleton-types.js";
 
 const auth = getAuth();
 
@@ -188,6 +197,9 @@ function renderGroup(group, members) {
     renderMembers(members);
     updateJoinButton();
 
+    if (loadingState) {
+        hideSkeleton(loadingState);
+    }
     loadingState?.classList.add("hidden");
     detailContent?.classList.remove("hidden");
 }
@@ -199,6 +211,10 @@ async function loadGroup(user) {
     }
 
     try {
+        if (loadingState) {
+            showSkeleton(loadingState, SKELETON_TYPES.PROFILE);
+        }
+
         const [group, members, memberships] =
         await Promise.all([
             getStudyGroup(groupId),
@@ -221,6 +237,7 @@ async function loadGroup(user) {
         );
 
         if (loadingState) {
+            hideSkeleton(loadingState);
             loadingState.innerHTML = `
                 <h1>Group unavailable</h1>
                 <p>We could not find this study group.</p>

@@ -23,7 +23,8 @@
 @import url("./components/context-menu.css?v=20260723-2");
 @import url("./components/tables.css");
 @import url("./components/tabs.css");
-@import url("./components/skeleton.css");
+@import url("./components/skeleton.css?skeletons=1");
+@import url("./components/empty-state.css?empty-states=1");
 @import url("./components/loading.css");
 @import url("./components/comment.css");
 @import url("./components/review.css");

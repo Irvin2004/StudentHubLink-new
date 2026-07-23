@@ -1,4 +1,7 @@
-import { initializeTheme } from "./utils/theme.js";
+import {
+    destroy as destroyTheme,
+    initializeTheme
+} from "./services/theme-service.js";
 import {
     initializePresence
 } from "./controllers/presence-controller.js";
@@ -13,3 +16,9 @@ initializeTheme();
 initializeAccessibilityRenderer();
 initializeNavigationDrawers();
 initializePresence();
+
+window.addEventListener("pagehide", (event) => {
+    if (!event.persisted) {
+        destroyTheme();
+    }
+}, { once: true });

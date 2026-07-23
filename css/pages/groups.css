@@ -386,23 +386,6 @@
         text-align: center;
     }
 
-    .group-card-skeleton,
-    .group-detail-skeleton {
-        min-height: 330px;
-        border: 1px solid var(--border);
-        border-radius: var(--radius-lg);
-        background:
-            linear-gradient(
-                100deg,
-                transparent 25%,
-                rgb(255 255 255 / 0.62) 45%,
-                transparent 65%
-            ),
-            var(--surface-muted);
-        background-size: 220% 100%;
-        animation: group-shimmer 1.4s infinite linear;
-    }
-
     .group-back-link {
         display: inline-flex;
         align-items: center;
@@ -578,16 +561,6 @@
 
     .group-detail-loading {
         min-height: 420px;
-    }
-
-    .group-detail-skeleton {
-        min-height: 420px;
-    }
-
-    @keyframes group-shimmer {
-        to {
-            background-position-x: -220%;
-        }
     }
 
     @media (max-width: 1180px) {

@@ -6,7 +6,7 @@ import {
     where
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
-import { db } from "../firebase.js";
+import { db } from "../firebase/firebase-config.js";
 
 export async function getRelatedResources(resource) {
     if (!resource?.category) {

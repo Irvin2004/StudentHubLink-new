@@ -14,7 +14,7 @@ import {
     where
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
-import { db } from "../firebase.js";
+import { db } from "../firebase/firebase-config.js";
 import { COLLECTIONS } from "../config/firestore.js?preferences=2";
 import { areMutuals } from "./follows-service.js";
 import { log } from "../utils/logger.js";

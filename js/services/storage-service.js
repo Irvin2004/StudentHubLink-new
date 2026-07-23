@@ -6,7 +6,7 @@ import {
     uploadBytesResumable
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-storage.js";
 
-import { app } from "../firebase.js";
+import { app } from "../firebase/firebase-config.js";
 import { validateAttachment } from "../utils/file-validator.js?security=1";
 import { logError } from "./error-service.js";
 

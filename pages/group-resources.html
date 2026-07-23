@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Group Resources | StudentHub</title>
     <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
-    <link rel="stylesheet" href="../css/studenthub.css?v=20260723-10">
+    <link rel="stylesheet" href="../css/studenthub.css?v=20260723-13">
 </head>
 <body data-page="group-resources">
     <div class="groups-shell">
@@ -173,14 +173,15 @@
                     </select>
                 </div>
 
-                <div id="resourceList" class="group-resource-list">
-                    <p class="group-resource-notice">Loading resources...</p>
-                </div>
+                <div
+                    id="resourceList"
+                    class="group-resource-list"
+                    aria-busy="true"></div>
             </section>
         </main>
     </div>
 
-    <script type="module" src="../js/controllers/group-resources-controller.js?v=20260719-3"></script>
+    <script type="module" src="../js/controllers/group-resources-controller.js?skeletons=1"></script>
     <script type="module" src="../js/theme.js?responsive=3"></script>
 </body>
 </html>

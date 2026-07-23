@@ -4,6 +4,13 @@ import { ACTIVITY_TYPES } from "../config/activity-types.js";
 import { escapeHtml } from "../utils/dom.js";
 import { toDate } from "../utils/format-date.js";
 import { formatTimeAgo } from "../utils/time-ago.js";
+import {
+    hideSkeleton,
+    showSkeleton
+} from "./skeleton-renderer.js";
+import {
+    SKELETON_TYPES
+} from "../config/skeleton-types.js";
 
 const ACTIVITY_ICONS = Object.freeze({
     [ACTIVITY_TYPES.ASSIGNMENT_CREATED]: "📝",
@@ -134,6 +141,10 @@ function renderActivitySection(label, activities, sectionId) {
 export function renderActivityFeed(activities = [], container) {
     const target = requireContainer(container);
 
+    if (target.querySelector?.("[data-skeleton-root]")) {
+        hideSkeleton(target);
+    }
+
     if (!activities.length) {
         return renderActivityEmpty(target);
     }
@@ -149,28 +160,24 @@ export function renderActivityFeed(activities = [], container) {
         </div>
     `;
 
-    target.removeAttribute?.("aria-busy");
+    target.setAttribute?.("aria-busy", "false");
     target.innerHTML = html;
     return html;
 }
 
 export function renderActivityLoading(container) {
     const target = requireContainer(container);
-    const html = `
-        <div class="activity-state activity-loading" role="status">
-            <span class="activity-loading-bar" aria-hidden="true"></span>
-            <span class="activity-loading-bar" aria-hidden="true"></span>
-            <span>Loading activity...</span>
-        </div>
-    `;
-
-    target.setAttribute?.("aria-busy", "true");
-    target.innerHTML = html;
-    return html;
+    showSkeleton(target, SKELETON_TYPES.NOTIFICATION);
+    return target.innerHTML;
 }
 
 export function renderActivityEmpty(container) {
     const target = requireContainer(container);
+
+    if (target.querySelector?.("[data-skeleton-root]")) {
+        hideSkeleton(target);
+    }
+
     const html = `
         <div class="activity-state activity-empty" role="status">
             <span class="activity-state-icon" aria-hidden="true">📭</span>
@@ -179,13 +186,17 @@ export function renderActivityEmpty(container) {
         </div>
     `;
 
-    target.removeAttribute?.("aria-busy");
+    target.setAttribute?.("aria-busy", "false");
     target.innerHTML = html;
     return html;
 }
 
 export function renderActivityError(container) {
     const target = requireContainer(container);
+
+    if (target.querySelector?.("[data-skeleton-root]")) {
+        hideSkeleton(target);
+    }
     const html = `
         <div class="activity-state activity-error" role="alert">
             <span class="activity-state-icon" aria-hidden="true">⚠️</span>
@@ -194,7 +205,7 @@ export function renderActivityError(container) {
         </div>
     `;
 
-    target.removeAttribute?.("aria-busy");
+    target.setAttribute?.("aria-busy", "false");
     target.innerHTML = html;
     return html;
 }

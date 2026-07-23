@@ -22,6 +22,7 @@
     <link rel="stylesheet" href="../css/components/notification-card.css">
     <link rel="stylesheet" href="../css/components/search-dropdown.css">
     <link rel="stylesheet" href="../css/components/activity-feed.css">
+    <link rel="stylesheet" href="../css/components/skeleton.css?skeletons=1">
 
     <!-- Dashboard styles -->
     <link rel="stylesheet" href="../css/pages/dashboard.css">
@@ -105,10 +106,8 @@
         <section
             id="dashboardLoadingState"
             class="dashboard-status"
-            aria-live="polite"
+            aria-busy="true"
         >
-            <div class="dashboard-spinner" aria-hidden="true"></div>
-            <p>Loading your dashboard...</p>
         </section>
 
         <section
@@ -391,7 +390,7 @@
 
     <script
         type="module"
-        src="../js/controllers/dashboard-controller.js?v=20260723-activity1"
+        src="../js/controllers/dashboard-controller.js?skeletons=1"
     ></script>
 </body>
 </html>

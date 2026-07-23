@@ -52,10 +52,28 @@ function getSavedTheme() {
 }
 
 function applyResolvedTheme(theme) {
+    const resolvedTheme = resolveTheme(theme);
+
     document.documentElement.setAttribute(
         "data-theme",
-        resolveTheme(theme)
+        resolvedTheme
     );
+    updateThemeButtons(resolvedTheme);
+}
+
+function updateThemeButtons(theme) {
+    document
+        .querySelectorAll("[data-theme-toggle]")
+        .forEach((button) => {
+            const darkModeActive = theme === THEMES.DARK;
+            const label = darkModeActive
+                ? "Switch to light mode"
+                : "Switch to dark mode";
+
+            button.textContent = darkModeActive ? "Light" : "Dark";
+            button.setAttribute("aria-label", label);
+            button.setAttribute("title", label);
+        });
 }
 
 function handleSystemThemeChange() {
@@ -72,6 +90,20 @@ function handleSettingsChange(event) {
     }
 }
 
+function handleThemeToggle(event) {
+    if (!event.target.closest("[data-theme-toggle]")) {
+        return;
+    }
+
+    const resolvedTheme = resolveTheme(currentTheme);
+
+    applyTheme(
+        resolvedTheme === THEMES.DARK
+            ? THEMES.LIGHT
+            : THEMES.DARK
+    );
+}
+
 export function applyTheme(theme) {
     if (!isValidTheme(theme)) {
         throw new Error(`Unsupported theme: ${theme}`);
@@ -86,6 +118,21 @@ export function applyTheme(theme) {
 
 export function getCurrentTheme() {
     return currentTheme;
+}
+
+/**
+ * Toggles between explicit light and dark themes.
+ *
+ * @returns {string} The resolved theme that was applied.
+ */
+export function toggleTheme() {
+    const resolvedTheme = resolveTheme(currentTheme);
+
+    return applyTheme(
+        resolvedTheme === THEMES.DARK
+            ? THEMES.LIGHT
+            : THEMES.DARK
+    );
 }
 
 export function initializeTheme() {
@@ -108,6 +155,7 @@ export function initializeTheme() {
         SETTINGS_CHANGE_EVENT,
         handleSettingsChange
     );
+    document.addEventListener("click", handleThemeToggle);
 
     initialized = true;
     applyTheme(getSavedTheme());
@@ -124,6 +172,7 @@ export function destroy() {
         SETTINGS_CHANGE_EVENT,
         handleSettingsChange
     );
+    document.removeEventListener("click", handleThemeToggle);
 
     if (systemThemeQuery?.removeEventListener) {
         systemThemeQuery.removeEventListener(

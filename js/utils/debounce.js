@@ -1,5 +1,12 @@
 "use strict";
 
+/**
+ * Delays a callback until calls stop for the configured duration.
+ *
+ * @param {Function} callback
+ * @param {number} delay
+ * @returns {Function & {cancel: Function, flush: Function, pending: Function}}
+ */
 export function debounce(callback, delay = 250) {
     if (typeof callback !== "function") {
         throw new TypeError("Debounce callback must be a function.");

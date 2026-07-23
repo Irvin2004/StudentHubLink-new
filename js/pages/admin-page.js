@@ -1,7 +1,7 @@
-import { auth, db } from "../firebase.js";
+import { auth, db } from "../firebase/firebase-config.js";
 import { formatCurrency } from "../utils/format-price.js";
 import { error as logError } from "../utils/logger.js";
-import { showToast } from "../utils/toast.js";
+import { showToast } from "../services/user-feedback-service.js";
 
 import {
     onAuthStateChanged
