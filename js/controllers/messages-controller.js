@@ -5,6 +5,9 @@ import {
 import { auth } from "../firebase.js";
 import {
     getUserProfile as fetchUserProfile,
+    pinConversation,
+    subscribeToConversationPreferences,
+    unpinConversation,
     subscribeToUserConversations
 } from "../services/conversation-service.js";
 import {
@@ -12,11 +15,17 @@ import {
 } from "../services/presence-service.js";
 import { PRESENCE_STATUS } from "../config/presence-status.js";
 import {
-    createConversationItem
-} from "../components/conversation-item.js";
+    closeConversationMenu,
+    destroyConversationMenu,
+    toggleConversationMenu
+} from "../components/conversation-menu.js?preferences=1";
 import {
-    createEmptyState
-} from "../components/empty-state.js";
+    renderConversationError,
+    renderConversationList
+} from "../renderers/conversation-renderer.js?preferences=1";
+import {
+    CONVERSATION_PREFERENCES
+} from "../config/conversation-preference-types.js";
 import { handleError } from "../utils/error-handler.js?security=1";
 
 const conversationList =
@@ -28,9 +37,12 @@ const profileCache = new Map();
 let renderedConversations = [];
 let currentUserId = null;
 let unsubscribeConversations = null;
+let unsubscribePreferences = null;
 let renderRequestId = 0;
 let conversationLoadFailed = false;
+let conversationsLoaded = false;
 const presenceUnsubscribers = new Map();
+let conversationPreferences = new Map();
 
 async function getUserProfile(userId) {
     if (!userId) {
@@ -54,38 +66,26 @@ async function getUserProfile(userId) {
 function displayConversations(items, userId) {
     if (!conversationList) return;
 
-    if (!items.length) {
-        const hasSearch = searchInput?.value.trim();
+    const hasSearch = Boolean(searchInput?.value.trim());
 
-        conversationList.innerHTML = createEmptyState(
-            hasSearch ? "No matches found" : "No conversations yet",
-            hasSearch
-                ? "Try searching for a different student."
-                : "Follow each other with another student to start messaging.",
-            "&#128172;"
-        );
-        return;
-    }
-
-    conversationList.innerHTML = items
-        .map(({ conversation, otherUser }) =>
-            createConversationItem(
-                conversation,
-                userId,
-                otherUser
-            )
-        )
-        .join("");
+    closeConversationMenu();
+    renderConversationList({
+        items,
+        currentUserId: userId,
+        container: conversationList,
+        preferences: conversationPreferences,
+        emptyTitle: hasSearch ? "No matches found" : "No conversations yet",
+        emptyMessage: hasSearch
+            ? "Try searching for a different student."
+            : "Follow each other with another student to start messaging."
+    });
 }
 
 function displayConversationError() {
     if (!conversationList) return;
 
-    conversationList.innerHTML = createEmptyState(
-        "Conversations unavailable",
-        "We couldn't load your conversations. Check your connection and try again.",
-        "&#9888;"
-    );
+    closeConversationMenu();
+    renderConversationError(conversationList);
 }
 
 function clearPresenceSubscriptions() {
@@ -198,6 +198,57 @@ function filterConversations() {
 
 searchInput?.addEventListener("input", filterConversations);
 
+conversationList?.addEventListener("click", async (event) => {
+    if (!(event.target instanceof Element)) return;
+
+    const menuTrigger = event.target.closest(
+        "[data-conversation-menu-trigger]"
+    );
+
+    if (menuTrigger) {
+        event.preventDefault();
+        toggleConversationMenu(menuTrigger);
+        return;
+    }
+
+    const actionButton = event.target.closest(
+        "[data-conversation-action]"
+    );
+
+    if (
+        !actionButton ||
+        actionButton.dataset.conversationAction !==
+            CONVERSATION_PREFERENCES.PINNED ||
+        !currentUserId
+    ) {
+        return;
+    }
+
+    event.preventDefault();
+    const conversationId = actionButton.dataset.conversationId;
+    const preference = conversationPreferences.get(conversationId);
+
+    actionButton.disabled = true;
+    closeConversationMenu();
+
+    try {
+        if (preference?.pinned) {
+            await unpinConversation(currentUserId, conversationId);
+        } else {
+            await pinConversation(currentUserId, conversationId);
+        }
+    } catch (error) {
+        handleError(
+            error,
+            preference?.pinned
+                ? "Unable to unpin conversation."
+                : "Unable to pin conversation."
+        );
+    } finally {
+        if (actionButton.isConnected) actionButton.disabled = false;
+    }
+});
+
 onAuthStateChanged(auth, (user) => {
     if (!user) {
         window.location.href = "../login.html";
@@ -206,17 +257,45 @@ onAuthStateChanged(auth, (user) => {
 
     currentUserId = user.uid;
     conversationLoadFailed = false;
+    conversationsLoaded = false;
+    conversationPreferences = new Map();
     clearPresenceSubscriptions();
 
     if (typeof unsubscribeConversations === "function") {
         unsubscribeConversations();
     }
 
+    if (typeof unsubscribePreferences === "function") {
+        unsubscribePreferences();
+    }
+
+    unsubscribePreferences = subscribeToConversationPreferences(
+        user.uid,
+        (preferences) => {
+            conversationPreferences = new Map(
+                preferences.map((preference) => [
+                    preference.conversationId,
+                    preference
+                ])
+            );
+            if (conversationsLoaded) filterConversations();
+        },
+        (error) => {
+            conversationPreferences = new Map();
+            if (conversationsLoaded) filterConversations();
+            handleError(
+                error,
+                "Unable to load conversation preferences."
+            );
+        }
+    );
+
     unsubscribeConversations = subscribeToUserConversations(
         user.uid,
         (conversations) => {
             if (conversationLoadFailed) return;
 
+            conversationsLoaded = true;
             renderConversations(conversations, user.uid)
                 .catch((error) => {
                     handleError(error, "Unable to load conversations.");
@@ -240,5 +319,10 @@ window.addEventListener("pagehide", (event) => {
         unsubscribeConversations();
     }
 
+    if (typeof unsubscribePreferences === "function") {
+        unsubscribePreferences();
+    }
+
     clearPresenceSubscriptions();
+    destroyConversationMenu();
 });

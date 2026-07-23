@@ -11,6 +11,7 @@ export const COLLECTIONS = {
     FOLLOWS: "follows",
     GROUPS: "groups",
     CONVERSATIONS: "conversations",
+    CONVERSATION_PREFERENCES: "conversationPreferences",
     MESSAGES: "messages",
     PRESENCE: "presence"
 };

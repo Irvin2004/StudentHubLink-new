@@ -156,6 +156,37 @@ test("voice renderer delegates playback and composes message rendering", () => {
     assert.doesNotMatch(bubble, /<audio/);
 });
 
+test("conversation pinning remains user-scoped and presentation-only", () => {
+    const service = read("js/services/conversation-service.js");
+    const controller = read("js/controllers/messages-controller.js");
+    const renderer = read("js/renderers/conversation-renderer.js");
+    const menu = read("js/components/conversation-menu.js");
+    const rules = read("firestore.rules");
+
+    assert.match(service, /export function pinConversation\(/);
+    assert.match(service, /export function unpinConversation\(/);
+    assert.match(service, /export async function getConversationPreference\(/);
+    assert.match(
+        service,
+        /export function subscribeToConversationPreferences\(/
+    );
+    assert.match(service, /COLLECTIONS\.CONVERSATION_PREFERENCES/);
+    assert.match(controller, /subscribeToConversationPreferences\(/);
+    assert.match(controller, /pinConversation\(/);
+    assert.match(controller, /unpinConversation\(/);
+    assert.match(controller, /unsubscribePreferences\(\)/);
+    assert.match(renderer, /sortConversationItems/);
+    assert.match(renderer, /preference\.pinned/);
+    assert.doesNotMatch(renderer, /firebase|firestore|addEventListener/);
+    assert.match(menu, /data-conversation-action/);
+    assert.doesNotMatch(menu, /conversation-service|firestore|firebase/);
+    assert.match(
+        rules,
+        /match \/users\/\{userId\}\/conversationPreferences\/\{conversationId\}/
+    );
+    assert.match(rules, /allow read: if isOwner\(userId\)/);
+});
+
 test("read receipt renderer owns passive message status display", () => {
     const renderer = read("js/renderers/read-receipt-renderer.js");
     const messages = read("js/renderers/message-renderer.js");

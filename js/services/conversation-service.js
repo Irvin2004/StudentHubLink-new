@@ -8,6 +8,7 @@ import {
     onSnapshot,
     orderBy,
     query,
+    runTransaction,
     serverTimestamp,
     setDoc,
     where
@@ -17,6 +18,82 @@ import { db } from "../firebase.js";
 import { COLLECTIONS } from "../config/firestore.js";
 import { areMutuals } from "./follows-service.js";
 import { log } from "../utils/logger.js";
+import {
+    createConversationPreferenceModel
+} from "../models/conversation-preference.js";
+
+function validatePreferenceId(value, fieldName) {
+    const normalized = typeof value === "string" ? value.trim() : "";
+
+    if (!normalized) {
+        throw new Error(`${fieldName} is required.`);
+    }
+
+    return normalized;
+}
+
+function getConversationPreferencesCollection(userId) {
+    return collection(
+        db,
+        COLLECTIONS.USERS,
+        validatePreferenceId(userId, "User ID"),
+        COLLECTIONS.CONVERSATION_PREFERENCES
+    );
+}
+
+function getConversationPreferenceReference(userId, conversationId) {
+    return doc(
+        getConversationPreferencesCollection(userId),
+        validatePreferenceId(conversationId, "Conversation ID")
+    );
+}
+
+function normalizeConversationPreference(snapshot, userId) {
+    return createConversationPreferenceModel({
+        ...snapshot.data(),
+        conversationId: snapshot.id,
+        userId
+    });
+}
+
+async function updateConversationPreference(
+    userId,
+    conversationId,
+    updates
+) {
+    const cleanUserId = validatePreferenceId(userId, "User ID");
+    const cleanConversationId = validatePreferenceId(
+        conversationId,
+        "Conversation ID"
+    );
+    const preferenceReference = getConversationPreferenceReference(
+        cleanUserId,
+        cleanConversationId
+    );
+
+    return runTransaction(db, async (transaction) => {
+        const snapshot = await transaction.get(preferenceReference);
+        const existing = snapshot.exists() ? snapshot.data() : {};
+        const preference = createConversationPreferenceModel({
+            ...existing,
+            ...updates,
+            conversationId: cleanConversationId,
+            userId: cleanUserId
+        });
+
+        transaction.set(preferenceReference, {
+            conversationId: preference.conversationId,
+            userId: preference.userId,
+            pinned: preference.pinned,
+            muted: preference.muted,
+            archived: preference.archived,
+            createdAt: existing.createdAt || serverTimestamp(),
+            updatedAt: serverTimestamp()
+        });
+
+        return preference;
+    });
+}
 
 export function getConversationKey(firstUserId, secondUserId) {
     return [firstUserId, secondUserId]
@@ -97,6 +174,72 @@ export async function getConversationById(conversationId) {
     }
 
     return normalizeConversation(snapshot.id, snapshot.data());
+}
+
+export function pinConversation(userId, conversationId) {
+    return updateConversationPreference(userId, conversationId, {
+        pinned: true
+    });
+}
+
+export function unpinConversation(userId, conversationId) {
+    return updateConversationPreference(userId, conversationId, {
+        pinned: false
+    });
+}
+
+export async function getConversationPreference(userId, conversationId) {
+    const cleanUserId = validatePreferenceId(userId, "User ID");
+    const cleanConversationId = validatePreferenceId(
+        conversationId,
+        "Conversation ID"
+    );
+    const snapshot = await getDoc(
+        getConversationPreferenceReference(cleanUserId, cleanConversationId)
+    );
+
+    if (!snapshot.exists()) {
+        return createConversationPreferenceModel({
+            conversationId: cleanConversationId,
+            userId: cleanUserId
+        });
+    }
+
+    return normalizeConversationPreference(snapshot, cleanUserId);
+}
+
+export function subscribeToConversationPreferences(
+    userId,
+    callback,
+    onError
+) {
+    const cleanUserId = validatePreferenceId(userId, "User ID");
+
+    if (typeof callback !== "function") {
+        throw new Error("Conversation preference subscriber is required.");
+    }
+
+    const reportError = (error) => {
+        log("CONVERSATIONS", "Conversation preference listener failed:", error);
+        if (typeof onError === "function") onError(error);
+    };
+
+    return onSnapshot(
+        getConversationPreferencesCollection(cleanUserId),
+        (snapshot) => {
+            try {
+                callback(snapshot.docs.map((preferenceDocument) =>
+                    normalizeConversationPreference(
+                        preferenceDocument,
+                        cleanUserId
+                    )
+                ));
+            } catch (error) {
+                reportError(error);
+            }
+        },
+        reportError
+    );
 }
 
 export function subscribeToUserConversations(

@@ -1044,6 +1044,38 @@ service cloud.firestore {
       allow delete: if isOwner(userId) || isAdmin();
     }
 
+    match /users/{userId}/conversationPreferences/{conversationId} {
+      function preferenceFieldsAreValid() {
+        return request.resource.data.keys().hasOnly([
+            "conversationId", "userId", "pinned", "muted", "archived",
+            "createdAt", "updatedAt"
+          ])
+          && request.resource.data.keys().hasAll([
+            "conversationId", "userId", "pinned", "muted", "archived",
+            "createdAt", "updatedAt"
+          ])
+          && request.resource.data.conversationId == conversationId
+          && request.resource.data.userId == userId
+          && request.resource.data.pinned is bool
+          && request.resource.data.muted is bool
+          && request.resource.data.archived is bool
+          && request.resource.data.updatedAt == request.time;
+      }
+
+      allow read: if isOwner(userId);
+      allow create: if isOwner(userId)
+        && preferenceFieldsAreValid()
+        && request.resource.data.createdAt == request.time
+        && canAccessConversation(conversationFor(conversationId));
+      allow update: if isOwner(userId)
+        && preferenceFieldsAreValid()
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(["pinned", "muted", "archived", "updatedAt"])
+        && canAccessConversation(conversationFor(conversationId));
+      allow delete: if isOwner(userId);
+    }
+
     match /users/{userId}/presence/{presenceId} {
       function presenceFieldsAreValid() {
         return presenceId == "status"
