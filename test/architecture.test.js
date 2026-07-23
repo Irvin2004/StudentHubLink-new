@@ -164,6 +164,7 @@ test("conversation preferences remain user-scoped and presentation-only", () => 
     const renderer = read("js/renderers/conversation-renderer.js");
     const menu = read("js/components/conversation-menu.js");
     const viewTabs = read("js/components/conversation-view-tabs.js");
+    const sorter = read("js/utils/conversation-sorter.js");
     const rules = read("firestore.rules");
 
     assert.match(service, /export function pinConversation\(/);
@@ -194,7 +195,10 @@ test("conversation preferences remain user-scoped and presentation-only", () => 
         messagesController,
         /pinConversation\(|unpinConversation\(|toggleMuteConversation\(|toggleArchiveConversation\(/
     );
-    assert.match(renderer, /sortConversationItems/);
+    assert.match(service, /sortConversations\(/);
+    assert.match(controller, /sortConversations\(/);
+    assert.match(messagesController, /prepareConversations\(/);
+    assert.doesNotMatch(renderer, /\.sort\(|sortConversations|filter\(/);
     assert.match(renderer, /preference\.pinned/);
     assert.doesNotMatch(renderer, /firebase|firestore|addEventListener/);
     assert.match(menu, /data-conversation-action/);
@@ -205,6 +209,9 @@ test("conversation preferences remain user-scoped and presentation-only", () => 
     assert.match(messageEvents, /unarchiveConversation\(/);
     assert.match(viewTabs, /aria-selected/);
     assert.doesNotMatch(viewTabs, /conversation-service|firestore|firebase/);
+    assert.match(sorter, /export function sortConversations\(/);
+    assert.match(sorter, /export function compareConversations\(/);
+    assert.doesNotMatch(sorter, /firebase|firestore|document|addEventListener/);
     assert.match(
         rules,
         /match \/users\/\{userId\}\/conversationPreferences\/\{conversationId\}/

@@ -2,9 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 
 import {
-    filterConversationItems,
-    renderConversationList,
-    sortConversationItems
+    renderConversationList
 } from "../js/renderers/conversation-renderer.js";
 import {
     createConversationMenu
@@ -22,32 +20,13 @@ function item(id, timestamp, name) {
     };
 }
 
-test("conversation renderer sorts pinned first then by recent activity", () => {
-    const items = [
-        item("recent", 300, "Recent"),
-        item("pinned-old", 100, "Pinned Old"),
-        item("pinned-new", 200, "Pinned New")
-    ];
-    const preferences = new Map([
-        ["pinned-old", { pinned: true }],
-        ["pinned-new", { pinned: true }]
-    ]);
-
-    assert.deepEqual(
-        sortConversationItems(items, preferences).map(
-            ({ conversation }) => conversation.id
-        ),
-        ["pinned-new", "pinned-old", "recent"]
-    );
-});
-
-test("conversation renderer shows pin indicators and a section divider", () => {
+test("conversation renderer preserves prepared order and shows a divider", () => {
     const container = { innerHTML: "" };
 
     renderConversationList({
         items: [
-            item("recent", 300, "Recent"),
-            item("pinned", 100, "Pinned")
+            item("pinned", 100, "Pinned"),
+            item("recent", 300, "Recent")
         ],
         currentUserId: "user-1",
         container,
@@ -88,52 +67,7 @@ test("conversation menu restores archived conversations to the inbox", () => {
     assert.match(html, />&#128228; Move to Inbox</);
 });
 
-test("inbox and archive views filter without hiding search results", () => {
-    const items = [
-        item("active", 100, "Active"),
-        item("archived", 200, "Archived")
-    ];
-    const preferences = new Map([
-        ["archived", { archived: true }]
-    ]);
-
-    assert.deepEqual(
-        filterConversationItems(items, preferences, "inbox").map(
-            ({ conversation }) => conversation.id
-        ),
-        ["active"]
-    );
-    assert.deepEqual(
-        filterConversationItems(items, preferences, "archived").map(
-            ({ conversation }) => conversation.id
-        ),
-        ["archived"]
-    );
-    assert.equal(
-        filterConversationItems(items, preferences, "search").length,
-        2
-    );
-});
-
-test("archived view sorts only by recent activity", () => {
-    const items = [
-        item("recent", 300, "Recent"),
-        item("pinned-old", 100, "Pinned Old")
-    ];
-    const preferences = new Map([
-        ["recent", { archived: true }],
-        ["pinned-old", { archived: true, pinned: true }]
-    ]);
-
-    assert.deepEqual(
-        sortConversationItems(items, preferences, "archived").map(
-            ({ conversation }) => conversation.id
-        ),
-        ["recent", "pinned-old"]
-    );
-});
-
-test("muted conversations stay in activity order and show their state", () => {
+test("muted conversations show their state", () => {
     const items = [
         item("recent", 300, "Recent"),
         item("muted-old", 100, "Muted Old")
@@ -142,13 +76,6 @@ test("muted conversations stay in activity order and show their state", () => {
         ["muted-old", { muted: true }]
     ]);
     const container = { innerHTML: "" };
-
-    assert.deepEqual(
-        sortConversationItems(items, preferences).map(
-            ({ conversation }) => conversation.id
-        ),
-        ["recent", "muted-old"]
-    );
 
     renderConversationList({
         items,

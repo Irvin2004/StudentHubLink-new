@@ -2,7 +2,7 @@
 
 import {
     createConversationItem
-} from "../components/conversation-item.js?preferences=4";
+} from "../components/conversation-item.js?preferences=5";
 import { createEmptyState } from "../components/empty-state.js";
 
 function getPreference(preferences, conversationId) {
@@ -13,63 +13,12 @@ function getPreference(preferences, conversationId) {
     return preferences?.[conversationId] || {};
 }
 
-function getActivityTime(conversation) {
-    const value = conversation?.lastMessageAt;
-
-    if (typeof value?.toMillis === "function") return value.toMillis();
-    if (value instanceof Date) return value.getTime();
-
-    const timestamp = Number(value);
-    return Number.isFinite(timestamp) ? timestamp : 0;
-}
-
-export function filterConversationItems(
-    items = [],
-    preferences = new Map(),
-    view = "inbox"
-) {
-    if (view === "search") return [...items];
-
-    const showArchived = view === "archived";
-    return items.filter(({ conversation }) =>
-        Boolean(getPreference(preferences, conversation.id).archived) ===
-            showArchived
-    );
-}
-
-export function sortConversationItems(
-    items = [],
-    preferences = new Map(),
-    view = "inbox"
-) {
-    return [...items].sort((first, second) => {
-        if (view === "archived") {
-            return getActivityTime(second.conversation) -
-                getActivityTime(first.conversation);
-        }
-
-        const firstPinned = Boolean(
-            getPreference(preferences, first.conversation.id).pinned
-        );
-        const secondPinned = Boolean(
-            getPreference(preferences, second.conversation.id).pinned
-        );
-
-        if (firstPinned !== secondPinned) {
-            return firstPinned ? -1 : 1;
-        }
-
-        return getActivityTime(second.conversation) -
-            getActivityTime(first.conversation);
-    });
-}
-
 export function renderConversationList({
     items = [],
     currentUserId,
     container,
     preferences = new Map(),
-    view = "inbox",
+    showPinnedDivider = true,
     emptyTitle = "No conversations yet",
     emptyMessage =
         "Follow each other with another student to start messaging."
@@ -78,9 +27,7 @@ export function renderConversationList({
         throw new Error("Conversation list container is required.");
     }
 
-    const visibleItems = filterConversationItems(items, preferences, view);
-
-    if (!visibleItems.length) {
+    if (!items.length) {
         container.innerHTML = createEmptyState(
             emptyTitle,
             emptyMessage,
@@ -89,17 +36,13 @@ export function renderConversationList({
         return;
     }
 
-    const sortedItems = sortConversationItems(
-        visibleItems,
-        preferences,
-        view
-    );
     let previousPinned = null;
 
-    container.innerHTML = sortedItems.map(({ conversation, otherUser }) => {
+    container.innerHTML = items.map(({ conversation, otherUser }) => {
         const preference = getPreference(preferences, conversation.id);
         const pinned = preference.pinned === true;
-        const divider = previousPinned === true && !pinned
+        const divider = showPinnedDivider &&
+            previousPinned === true && !pinned
             ? '<div class="conversation-section-divider" aria-hidden="true"></div>'
             : "";
 

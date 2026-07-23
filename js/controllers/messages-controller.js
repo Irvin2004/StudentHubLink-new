@@ -15,15 +15,16 @@ import {
     closeConversationMenu
 } from "../components/conversation-menu.js?preferences=2";
 import {
-    initializeConversationPreferences
-} from "./conversation-controller.js?preferences=4";
+    initializeConversationPreferences,
+    prepareConversations
+} from "./conversation-controller.js?preferences=5";
 import {
     initializeConversationViewTabs
 } from "../components/conversation-view-tabs.js";
 import {
     renderConversationError,
     renderConversationList
-} from "../renderers/conversation-renderer.js?preferences=4";
+} from "../renderers/conversation-renderer.js?preferences=5";
 import { handleError } from "../utils/error-handler.js?security=1";
 
 const conversationList =
@@ -70,14 +71,19 @@ function displayConversations(items, userId) {
     const hasSearch = Boolean(searchInput?.value.trim());
     const view = hasSearch ? "search" : currentConversationView;
     const showingArchived = view === "archived";
+    const preparedItems = prepareConversations({
+        conversations: items,
+        preferences: conversationPreferences,
+        view
+    });
 
     closeConversationMenu();
     renderConversationList({
-        items,
+        items: preparedItems,
         currentUserId: userId,
         container: conversationList,
         preferences: conversationPreferences,
-        view,
+        showPinnedDivider: view !== "archived",
         emptyTitle: hasSearch
             ? "No matches found"
             : showingArchived

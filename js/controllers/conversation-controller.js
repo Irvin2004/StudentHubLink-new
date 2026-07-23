@@ -6,18 +6,42 @@ import {
     toggleArchiveConversation,
     toggleMuteConversation,
     unpinConversation
-} from "../services/conversation-service.js?preferences=4";
+} from "../services/conversation-service.js?preferences=5";
 import {
     CONVERSATION_PREFERENCES
 } from "../config/conversation-preference-types.js";
 import {
     initializeConversationMenu
 } from "../components/conversation-menu.js?preferences=2";
+import { sortConversations } from "../utils/conversation-sorter.js";
 
 function validateId(value, label) {
     const normalized = String(value || "").trim();
     if (!normalized) throw new Error(`${label} is required.`);
     return normalized;
+}
+
+export function prepareConversations({
+    conversations = [],
+    preferences = new Map(),
+    view = "inbox"
+} = {}) {
+    const preferenceMap = preferences instanceof Map
+        ? preferences
+        : new Map(Object.entries(preferences || {}));
+    const visibleConversations = view === "search"
+        ? [...conversations]
+        : conversations.filter((item) => {
+            const conversation = item.conversation || item;
+            const archived = Boolean(
+                preferenceMap.get(conversation.id)?.archived
+            );
+            return archived === (view === "archived");
+        });
+
+    return sortConversations(visibleConversations, preferenceMap, {
+        prioritizePinned: view !== "archived"
+    });
 }
 
 export function initializeConversationPreferences({

@@ -21,6 +21,7 @@ import { log } from "../utils/logger.js";
 import {
     createConversationPreferenceModel
 } from "../models/conversation-preference.js";
+import { sortConversations } from "../utils/conversation-sorter.js";
 
 function validatePreferenceId(value, fieldName) {
     const normalized = typeof value === "string" ? value.trim() : "";
@@ -295,14 +296,10 @@ export function subscribeToUserConversations(
     let groupUnsubscribers = [];
 
     const emit = () => {
-        const conversations = [
+        const conversations = sortConversations([
             ...directConversations.values(),
             ...groupConversations.values()
-        ].sort((first, second) => {
-            const firstTime = first.lastMessageAt?.toMillis?.() || 0;
-            const secondTime = second.lastMessageAt?.toMillis?.() || 0;
-            return secondTime - firstTime;
-        });
+        ]);
 
         callback(conversations);
     };
