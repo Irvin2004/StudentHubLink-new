@@ -19,7 +19,7 @@
 @import url("./components/reaction-bar.css?v=20260723-1");
 @import url("./components/read-receipt.css?v=20260723-1");
 @import url("./components/voice-message.css?v=20260723-1");
-@import url("./components/conversation-menu.css?v=20260723-2");
+@import url("./components/conversation-menu.css?v=20260723-3");
 @import url("./components/tables.css");
 @import url("./components/tabs.css");
 @import url("./components/skeleton.css");
@@ -50,7 +50,7 @@
 @import url("./pages/favorites.css?v=20260718-4");
 @import url("./pages/achievements.css?v=20260718-4");
 @import url("./pages/leaderboard.css?v=20260718-4");
-@import url("./pages/messages.css?v=20260718-4");
+@import url("./pages/messages.css?v=20260723-5");
 @import url("./pages/groups.css?v=20260721-1");
 @import url("./pages/group-resources.css?v=20260719-1");
 @import url("./pages/group-assignments.css?v=20260721-4");

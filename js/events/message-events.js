@@ -1,8 +1,9 @@
 import { NOTIFICATION_TYPES } from "../config/notification-types.js";
 import {
     getConversationById,
-    getConversationPreference
-} from "../services/conversation-service.js";
+    getConversationPreference,
+    unarchiveConversation
+} from "../services/conversation-service.js?preferences=4";
 import { createNotification } from "../services/notification-service.js";
 import { error as logError } from "../utils/logger.js";
 import {
@@ -20,20 +21,28 @@ async function getPrivateRecipients(chatId, senderId) {
     );
 }
 
-async function shouldNotifyRecipient({ recipientId, chatId }) {
+async function prepareRecipient({ recipientId, chatId }) {
     try {
         const preference = await getConversationPreference(
             recipientId,
             chatId
         );
-        return preference.muted !== true;
+
+        if (preference.archived) {
+            await unarchiveConversation(recipientId, chatId);
+        }
+
+        return {
+            recipientId,
+            shouldNotify: preference.muted !== true
+        };
     } catch (error) {
         logError(
             "NOTIFICATIONS",
             `Unable to load mute preference for ${recipientId}:`,
             error
         );
-        return true;
+        return { recipientId, shouldNotify: true };
     }
 }
 
@@ -54,12 +63,9 @@ export async function emitMessageSent({
             ? await getGroupEventRecipients(cleanGroupId, cleanSenderId)
             : await getPrivateRecipients(cleanChatId, cleanSenderId);
         const eligibility = await Promise.all(
-            recipients.map(async (recipientId) => ({
+            recipients.map((recipientId) => prepareRecipient({
                 recipientId,
-                shouldNotify: await shouldNotifyRecipient({
-                    recipientId,
-                    chatId: cleanChatId
-                })
+                chatId: cleanChatId
             }))
         );
         const eligibleRecipients = eligibility

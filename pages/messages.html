@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Messages | StudentHub</title>
     <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
-    <link rel="stylesheet" href="../css/studenthub.css?v=20260723-4">
+    <link rel="stylesheet" href="../css/studenthub.css?v=20260723-5">
 </head>
 <body data-page="messages">
     <header class="site-header">
@@ -54,6 +54,27 @@
             </header>
 
             <div
+                id="conversationViews"
+                class="conversation-view-tabs"
+                role="tablist"
+                aria-label="Conversation views"
+            >
+                <button
+                    type="button"
+                    role="tab"
+                    aria-selected="true"
+                    data-conversation-view="inbox"
+                >Inbox</button>
+                <button
+                    type="button"
+                    role="tab"
+                    aria-selected="false"
+                    data-conversation-view="archived"
+                    tabindex="-1"
+                >Archived</button>
+            </div>
+
+            <div
                 id="conversationList"
                 class="conversation-list"
                 aria-live="polite"
@@ -63,7 +84,7 @@
         </section>
     </main>
 
-    <script type="module" src="../js/controllers/messages-controller.js?preferences=3"></script>
+    <script type="module" src="../js/controllers/messages-controller.js?preferences=4"></script>
     <script type="module" src="../js/theme.js"></script>
 </body>
 </html>

@@ -16,17 +16,22 @@ import {
 } from "../components/conversation-menu.js?preferences=2";
 import {
     initializeConversationPreferences
-} from "./conversation-controller.js?preferences=3";
+} from "./conversation-controller.js?preferences=4";
+import {
+    initializeConversationViewTabs
+} from "../components/conversation-view-tabs.js";
 import {
     renderConversationError,
     renderConversationList
-} from "../renderers/conversation-renderer.js?preferences=2";
+} from "../renderers/conversation-renderer.js?preferences=4";
 import { handleError } from "../utils/error-handler.js?security=1";
 
 const conversationList =
     document.getElementById("conversationList");
 const searchInput =
     document.getElementById("conversationSearch");
+const conversationViews =
+    document.getElementById("conversationViews");
 
 const profileCache = new Map();
 let renderedConversations = [];
@@ -38,6 +43,7 @@ let conversationLoadFailed = false;
 let conversationsLoaded = false;
 const presenceUnsubscribers = new Map();
 let conversationPreferences = new Map();
+let currentConversationView = "inbox";
 
 async function getUserProfile(userId) {
     if (!userId) {
@@ -62,6 +68,8 @@ function displayConversations(items, userId) {
     if (!conversationList) return;
 
     const hasSearch = Boolean(searchInput?.value.trim());
+    const view = hasSearch ? "search" : currentConversationView;
+    const showingArchived = view === "archived";
 
     closeConversationMenu();
     renderConversationList({
@@ -69,9 +77,16 @@ function displayConversations(items, userId) {
         currentUserId: userId,
         container: conversationList,
         preferences: conversationPreferences,
-        emptyTitle: hasSearch ? "No matches found" : "No conversations yet",
+        view,
+        emptyTitle: hasSearch
+            ? "No matches found"
+            : showingArchived
+                ? "No archived conversations"
+                : "No conversations yet",
         emptyMessage: hasSearch
             ? "Try searching for a different student."
+            : showingArchived
+                ? "Conversations you archive will appear here."
             : "Follow each other with another student to start messaging."
     });
 }
@@ -193,6 +208,16 @@ function filterConversations() {
 
 searchInput?.addEventListener("input", filterConversations);
 
+const conversationViewController = initializeConversationViewTabs(
+    conversationViews,
+    {
+        onChange(view) {
+            currentConversationView = view;
+            filterConversations();
+        }
+    }
+);
+
 onAuthStateChanged(auth, (user) => {
     if (!user) {
         window.location.href = "../login.html";
@@ -253,5 +278,6 @@ window.addEventListener("pagehide", (event) => {
     }
 
     conversationPreferenceController?.destroy();
+    conversationViewController.destroy();
     clearPresenceSubscriptions();
 });

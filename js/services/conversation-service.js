@@ -211,6 +211,26 @@ export function toggleMuteConversation(userId, conversationId) {
     );
 }
 
+export function archiveConversation(userId, conversationId) {
+    return updateConversationPreference(userId, conversationId, {
+        archived: true
+    });
+}
+
+export function unarchiveConversation(userId, conversationId) {
+    return updateConversationPreference(userId, conversationId, {
+        archived: false
+    });
+}
+
+export function toggleArchiveConversation(userId, conversationId) {
+    return updateConversationPreference(
+        userId,
+        conversationId,
+        (preference) => ({ archived: !Boolean(preference.archived) })
+    );
+}
+
 export async function getConversationPreference(userId, conversationId) {
     const cleanUserId = validatePreferenceId(userId, "User ID");
     const cleanConversationId = validatePreferenceId(

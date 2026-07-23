@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 
 import {
+    filterConversationItems,
     renderConversationList,
     sortConversationItems
 } from "../js/renderers/conversation-renderer.js";
@@ -74,6 +75,62 @@ test("conversation menu exposes dynamic pin and mute actions", () => {
     assert.match(html, />&#128276; Unmute</);
     assert.match(html, /Archive/);
     assert.match(html, /aria-haspopup="menu"/);
+});
+
+test("conversation menu restores archived conversations to the inbox", () => {
+    const html = createConversationMenu({
+        conversationId: "conversation-1",
+        preference: { archived: true }
+    });
+
+    assert.match(html, /data-conversation-action="archived"/);
+    assert.match(html, /aria-label="Move conversation to inbox"/);
+    assert.match(html, />&#128228; Move to Inbox</);
+});
+
+test("inbox and archive views filter without hiding search results", () => {
+    const items = [
+        item("active", 100, "Active"),
+        item("archived", 200, "Archived")
+    ];
+    const preferences = new Map([
+        ["archived", { archived: true }]
+    ]);
+
+    assert.deepEqual(
+        filterConversationItems(items, preferences, "inbox").map(
+            ({ conversation }) => conversation.id
+        ),
+        ["active"]
+    );
+    assert.deepEqual(
+        filterConversationItems(items, preferences, "archived").map(
+            ({ conversation }) => conversation.id
+        ),
+        ["archived"]
+    );
+    assert.equal(
+        filterConversationItems(items, preferences, "search").length,
+        2
+    );
+});
+
+test("archived view sorts only by recent activity", () => {
+    const items = [
+        item("recent", 300, "Recent"),
+        item("pinned-old", 100, "Pinned Old")
+    ];
+    const preferences = new Map([
+        ["recent", { archived: true }],
+        ["pinned-old", { archived: true, pinned: true }]
+    ]);
+
+    assert.deepEqual(
+        sortConversationItems(items, preferences, "archived").map(
+            ({ conversation }) => conversation.id
+        ),
+        ["recent", "pinned-old"]
+    );
 });
 
 test("muted conversations stay in activity order and show their state", () => {

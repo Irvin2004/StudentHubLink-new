@@ -163,6 +163,7 @@ test("conversation preferences remain user-scoped and presentation-only", () => 
     const messageEvents = read("js/events/message-events.js");
     const renderer = read("js/renderers/conversation-renderer.js");
     const menu = read("js/components/conversation-menu.js");
+    const viewTabs = read("js/components/conversation-view-tabs.js");
     const rules = read("firestore.rules");
 
     assert.match(service, /export function pinConversation\(/);
@@ -170,6 +171,9 @@ test("conversation preferences remain user-scoped and presentation-only", () => 
     assert.match(service, /export function muteConversation\(/);
     assert.match(service, /export function unmuteConversation\(/);
     assert.match(service, /export function toggleMuteConversation\(/);
+    assert.match(service, /export function archiveConversation\(/);
+    assert.match(service, /export function unarchiveConversation\(/);
+    assert.match(service, /export function toggleArchiveConversation\(/);
     assert.match(service, /export async function getConversationPreference\(/);
     assert.match(
         service,
@@ -180,6 +184,7 @@ test("conversation preferences remain user-scoped and presentation-only", () => 
     assert.match(controller, /pinConversation\(/);
     assert.match(controller, /unpinConversation\(/);
     assert.match(controller, /toggleMuteConversation\(/);
+    assert.match(controller, /toggleArchiveConversation\(/);
     assert.match(controller, /unsubscribe\(\)/);
     assert.match(
         messagesController,
@@ -187,7 +192,7 @@ test("conversation preferences remain user-scoped and presentation-only", () => 
     );
     assert.doesNotMatch(
         messagesController,
-        /pinConversation\(|unpinConversation\(|toggleMuteConversation\(/
+        /pinConversation\(|unpinConversation\(|toggleMuteConversation\(|toggleArchiveConversation\(/
     );
     assert.match(renderer, /sortConversationItems/);
     assert.match(renderer, /preference\.pinned/);
@@ -196,6 +201,10 @@ test("conversation preferences remain user-scoped and presentation-only", () => 
     assert.doesNotMatch(menu, /conversation-service|firestore|firebase/);
     assert.match(messageEvents, /getConversationPreference\(/);
     assert.match(messageEvents, /preference\.muted !== true/);
+    assert.match(messageEvents, /preference\.archived/);
+    assert.match(messageEvents, /unarchiveConversation\(/);
+    assert.match(viewTabs, /aria-selected/);
+    assert.doesNotMatch(viewTabs, /conversation-service|firestore|firebase/);
     assert.match(
         rules,
         /match \/users\/\{userId\}\/conversationPreferences\/\{conversationId\}/

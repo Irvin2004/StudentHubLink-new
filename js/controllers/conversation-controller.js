@@ -3,9 +3,10 @@
 import {
     pinConversation,
     subscribeToConversationPreferences,
+    toggleArchiveConversation,
     toggleMuteConversation,
     unpinConversation
-} from "../services/conversation-service.js?preferences=3";
+} from "../services/conversation-service.js?preferences=4";
 import {
     CONVERSATION_PREFERENCES
 } from "../config/conversation-preference-types.js";
@@ -55,12 +56,24 @@ export function initializeConversationPreferences({
                         cleanUserId,
                         cleanConversationId
                     );
+                    return;
+                }
+
+                if (action === CONVERSATION_PREFERENCES.ARCHIVED) {
+                    await toggleArchiveConversation(
+                        cleanUserId,
+                        cleanConversationId
+                    );
                 }
             } catch (error) {
                 const changingMute = action === CONVERSATION_PREFERENCES.MUTED;
+                const changingArchive =
+                    action === CONVERSATION_PREFERENCES.ARCHIVED;
                 reportError(
                     error,
-                    changingMute
+                    changingArchive
+                        ? `Unable to ${preference?.archived ? "restore" : "archive"} conversation.`
+                        : changingMute
                         ? `Unable to ${preference?.muted ? "unmute" : "mute"} conversation.`
                         : `Unable to ${preference?.pinned ? "unpin" : "pin"} conversation.`
                 );

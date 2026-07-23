@@ -53,6 +53,10 @@ export function createConversationMenu({
     const pinLabel = preference.pinned ? "Unpin" : "Pin";
     const muteLabel = preference.muted ? "Unmute" : "Mute";
     const muteIcon = preference.muted ? "&#128276;" : "&#128277;";
+    const archiveLabel = preference.archived
+        ? "Move to Inbox"
+        : "Archive";
+    const archiveIcon = preference.archived ? "&#128228;" : "&#128229;";
 
     return `
         <button
@@ -88,10 +92,12 @@ export function createConversationMenu({
             <button
                 type="button"
                 role="menuitem"
-                disabled
-                aria-disabled="true"
-                title="Archive conversations is coming next"
-            >&#128229; Archive</button>
+                data-conversation-action="${CONVERSATION_PREFERENCES.ARCHIVED}"
+                data-conversation-id="${escapedId}"
+                aria-label="${preference.archived
+                    ? "Move conversation to inbox"
+                    : "Archive conversation"}"
+            >${archiveIcon} ${archiveLabel}</button>
         </div>
     `;
 }

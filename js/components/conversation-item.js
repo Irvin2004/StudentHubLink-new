@@ -2,7 +2,7 @@ import { formatDate } from "../utils/format-date.js";
 import { escapeHtml } from "../utils/dom.js";
 import {
     createConversationMenu
-} from "./conversation-menu.js?preferences=2";
+} from "./conversation-menu.js?preferences=4";
 
 function getConversationPreview(conversation) {
     if (conversation.lastMessageType === "image") {
@@ -39,7 +39,7 @@ export function createConversationItem(
 
     return `
         <article
-            class="conversation-entry${preference.pinned ? " pinned" : ""}${preference.muted ? " muted" : ""}"
+            class="conversation-entry${preference.pinned ? " pinned" : ""}${preference.muted ? " muted" : ""}${preference.archived ? " archived" : ""}"
             data-conversation-entry
             data-conversation-id="${escapeHtml(conversation.id)}"
             data-conversation-name="${escapeHtml(name.toLowerCase())}"
@@ -73,6 +73,13 @@ export function createConversationItem(
                                     aria-label="Conversation muted"
                                     title="Conversation muted"
                                 >&#128263;</span>
+                            ` : ""}
+                            ${preference.archived ? `
+                                <span
+                                    class="conversation-archived"
+                                    aria-label="Archived conversation"
+                                    title="Archived"
+                                >&#128230;</span>
                             ` : ""}
                             ${escapeHtml(name)}
                         </h3>

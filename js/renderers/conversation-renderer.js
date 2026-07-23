@@ -2,7 +2,7 @@
 
 import {
     createConversationItem
-} from "../components/conversation-item.js?preferences=2";
+} from "../components/conversation-item.js?preferences=4";
 import { createEmptyState } from "../components/empty-state.js";
 
 function getPreference(preferences, conversationId) {
@@ -23,8 +23,31 @@ function getActivityTime(conversation) {
     return Number.isFinite(timestamp) ? timestamp : 0;
 }
 
-export function sortConversationItems(items = [], preferences = new Map()) {
+export function filterConversationItems(
+    items = [],
+    preferences = new Map(),
+    view = "inbox"
+) {
+    if (view === "search") return [...items];
+
+    const showArchived = view === "archived";
+    return items.filter(({ conversation }) =>
+        Boolean(getPreference(preferences, conversation.id).archived) ===
+            showArchived
+    );
+}
+
+export function sortConversationItems(
+    items = [],
+    preferences = new Map(),
+    view = "inbox"
+) {
     return [...items].sort((first, second) => {
+        if (view === "archived") {
+            return getActivityTime(second.conversation) -
+                getActivityTime(first.conversation);
+        }
+
         const firstPinned = Boolean(
             getPreference(preferences, first.conversation.id).pinned
         );
@@ -46,6 +69,7 @@ export function renderConversationList({
     currentUserId,
     container,
     preferences = new Map(),
+    view = "inbox",
     emptyTitle = "No conversations yet",
     emptyMessage =
         "Follow each other with another student to start messaging."
@@ -54,7 +78,9 @@ export function renderConversationList({
         throw new Error("Conversation list container is required.");
     }
 
-    if (!items.length) {
+    const visibleItems = filterConversationItems(items, preferences, view);
+
+    if (!visibleItems.length) {
         container.innerHTML = createEmptyState(
             emptyTitle,
             emptyMessage,
@@ -63,7 +89,11 @@ export function renderConversationList({
         return;
     }
 
-    const sortedItems = sortConversationItems(items, preferences);
+    const sortedItems = sortConversationItems(
+        visibleItems,
+        preferences,
+        view
+    );
     let previousPinned = null;
 
     container.innerHTML = sortedItems.map(({ conversation, otherUser }) => {
