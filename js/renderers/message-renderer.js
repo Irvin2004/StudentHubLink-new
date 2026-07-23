@@ -1,4 +1,4 @@
-import { createMessageBubble } from "../components/message-bubble.js?messaging=18";
+import { createMessageBubble } from "../components/message-bubble.js?messaging=19";
 import { renderReactionBar } from "./reaction-renderer.js?reactions=1";
 import { renderReadReceipt } from "./read-receipt-renderer.js?receipts=1";
 

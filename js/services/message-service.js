@@ -2,6 +2,7 @@ import {
     collection,
     deleteDoc,
     doc,
+    getDoc,
     getDocs,
     increment,
     limitToLast,
@@ -26,8 +27,14 @@ import {
 } from "../config/message-status.js";
 import { createReadReceiptModel } from "../models/read-receipt.js";
 import { createReactionModel } from "../models/reaction.js";
+import { createMessageModel } from "../models/message.js";
 import { emitMessageSent } from "../events/message-events.js";
 import { error as logError } from "../utils/logger.js";
+import { getConversationById } from "./conversation-service.js";
+import {
+    deleteVoiceMessage,
+    uploadVoiceMessage
+} from "./storage-service.js?voice=1";
 
 export { MESSAGE_TYPES };
 
@@ -49,6 +56,13 @@ function normalizeMessage(messageId, data = {}) {
         fileName: data.fileName || null,
         mimeType: data.mimeType || null,
         fileSize: data.fileSize ?? null,
+        voice: data.voice ? {
+            url: data.voice.url || "",
+            storagePath: data.voice.storagePath || "",
+            duration: Number(data.voice.duration || 0),
+            mimeType: data.voice.mimeType || "",
+            size: Number(data.voice.size || 0)
+        } : null,
         createdAt: data.createdAt || null,
         edited: data.edited === true,
         editedAt: data.editedAt || null,
@@ -77,6 +91,7 @@ function createMessageDocument({
     fileName = null,
     mimeType = null,
     fileSize = null,
+    voice = null,
     replyTo = null
 }) {
     return {
@@ -91,6 +106,13 @@ function createMessageDocument({
         fileName,
         mimeType,
         fileSize,
+        voice: voice ? {
+            url: voice.url,
+            storagePath: voice.storagePath,
+            duration: voice.duration,
+            mimeType: voice.mimeType,
+            size: voice.size
+        } : null,
         createdAt: serverTimestamp(),
         edited: false,
         editedAt: null,
@@ -225,12 +247,27 @@ export async function sendMessage(input) {
 
     const message = createMessageDocument(messageInput);
 
-    if (message.type === MESSAGE_TYPES.TEXT && !message.text) {
+    if (
+        (message.type === MESSAGE_TYPES.TEXT ||
+            message.type === MESSAGE_TYPES.SYSTEM) &&
+        !message.text
+    ) {
         throw new Error("Message cannot be empty.");
     }
 
-    if (message.type !== MESSAGE_TYPES.TEXT && !message.fileUrl) {
+    if (
+        (message.type === MESSAGE_TYPES.IMAGE ||
+            message.type === MESSAGE_TYPES.FILE) &&
+        !message.fileUrl
+    ) {
         throw new Error("Message attachment is missing.");
+    }
+
+    if (
+        message.type === MESSAGE_TYPES.VOICE &&
+        (!message.voice?.url || !message.voice.storagePath)
+    ) {
+        throw new Error("Voice message metadata is incomplete.");
     }
 
     const batch = writeBatch(db);
@@ -280,6 +317,106 @@ export async function sendMessage(input) {
     return messageId;
 }
 
+export async function sendVoiceMessage({
+    conversationId,
+    senderId,
+    blob,
+    duration,
+    mimeType,
+    senderName = "Student",
+    onProgress = () => {}
+}) {
+    const cleanConversationId = validateId(
+        conversationId,
+        "Conversation ID"
+    );
+    const cleanSenderId = validateId(senderId, "Sender ID");
+    const cleanMimeType = typeof mimeType === "string"
+        ? mimeType.trim().toLowerCase()
+        : "";
+    const cleanDuration = Number(duration);
+
+    if (!(blob instanceof Blob) || blob.size <= 0) {
+        throw new Error("A recorded audio blob is required.");
+    }
+
+    if (!/^audio\/(webm|ogg)(;.*)?$/.test(cleanMimeType)) {
+        throw new Error("Voice message must use WebM or Ogg audio.");
+    }
+
+    if (
+        !Number.isFinite(cleanDuration) ||
+        cleanDuration < 0 ||
+        cleanDuration > 5 * 60 * 1000
+    ) {
+        throw new Error("Voice message duration must be five minutes or less.");
+    }
+
+    const conversation = await getConversationById(cleanConversationId);
+    const isGroupMessage = conversation.type === "group";
+    const receiverId = isGroupMessage
+        ? null
+        : conversation.participantIds.find(
+            (participantId) => participantId !== cleanSenderId
+        );
+
+    if (
+        (!isGroupMessage &&
+            (!receiverId ||
+                !conversation.participantIds.includes(cleanSenderId))) ||
+        (isGroupMessage && !conversation.groupId)
+    ) {
+        throw new Error("Conversation participant information is incomplete.");
+    }
+
+    const uploaded = await uploadVoiceMessage(
+        cleanConversationId,
+        cleanSenderId,
+        blob,
+        onProgress
+    );
+
+    try {
+        const voiceMessage = createMessageModel({
+            conversationId: cleanConversationId,
+            senderId: cleanSenderId,
+            receiverId,
+            groupId: isGroupMessage ? conversation.groupId : null,
+            type: MESSAGE_TYPES.VOICE,
+            voice: {
+                url: uploaded.downloadURL,
+                storagePath: uploaded.storagePath,
+                duration: cleanDuration,
+                mimeType: cleanMimeType,
+                size: uploaded.size
+            }
+        });
+
+        return await sendMessage({
+            conversationId: cleanConversationId,
+            senderId: cleanSenderId,
+            receiverId,
+            groupId: isGroupMessage ? conversation.groupId : null,
+            conversationType: isGroupMessage ? "group" : "direct",
+            senderName,
+            type: MESSAGE_TYPES.VOICE,
+            voice: voiceMessage.voice
+        });
+    } catch (error) {
+        try {
+            await deleteVoiceMessage(uploaded.storagePath);
+        } catch (cleanupError) {
+            logError(
+                "MESSAGES",
+                "Voice message cleanup failed:",
+                cleanupError
+            );
+        }
+
+        throw error;
+    }
+}
+
 export async function editMessage({
     conversationId,
     messageId,
@@ -317,8 +454,28 @@ export async function deleteMessageForEveryone({
         throw new Error("Message information is incomplete.");
     }
 
+    const messageReference = doc(db, COLLECTIONS.MESSAGES, messageId);
+    const messageSnapshot = await getDoc(messageReference);
+
+    if (!messageSnapshot.exists()) {
+        throw new Error("Message does not exist.");
+    }
+
+    const message = messageSnapshot.data();
+
+    if (message.conversationId !== conversationId) {
+        throw new Error("Message does not belong to this conversation.");
+    }
+
+    if (
+        message.type === MESSAGE_TYPES.VOICE &&
+        message.voice?.storagePath
+    ) {
+        await deleteVoiceMessage(message.voice.storagePath);
+    }
+
     await updateDoc(
-        doc(db, COLLECTIONS.MESSAGES, messageId),
+        messageReference,
         {
             text: "This message was deleted.",
             deleted: true,
@@ -326,7 +483,8 @@ export async function deleteMessageForEveryone({
             fileUrl: null,
             fileName: null,
             fileSize: null,
-            mimeType: null
+            mimeType: null,
+            voice: null
         }
     );
 }

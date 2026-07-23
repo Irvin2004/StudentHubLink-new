@@ -21,6 +21,7 @@ function normalizeNumber(value) {
 
 function normalizeVoice(voice = {}) {
     return {
+        url: normalizeText(voice.url),
         storagePath: normalizeText(voice.storagePath),
         duration: normalizeNumber(voice.duration),
         size: normalizeNumber(voice.size),

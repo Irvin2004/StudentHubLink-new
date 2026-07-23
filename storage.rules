@@ -18,6 +18,16 @@ service firebase.storage {
         );
     }
 
+    function isAllowedVoiceUpload() {
+      return request.resource != null
+        && request.resource.size > 0
+        && request.resource.size <= 25 * 1024 * 1024
+        && request.resource.contentType.matches(
+          '^audio/(webm|ogg)(;.*)?$'
+        )
+        && request.resource.name.matches('.*[.](webm|ogg)$');
+    }
+
     function conversation(conversationId) {
       return firestore.get(
         /databases/(default)/documents/conversations/$(conversationId)
@@ -65,6 +75,15 @@ service firebase.storage {
     match /messages/{conversationId}/{legacyFileName} {
       allow read: if canAccessConversation(conversationId);
       allow write: if false;
+    }
+
+    match /voice/{conversationId}/{userId}/{fileName} {
+      allow read: if canAccessConversation(conversationId);
+      allow create, update: if canAccessConversation(conversationId)
+        && request.auth.uid == userId
+        && isAllowedVoiceUpload();
+      allow delete: if canAccessConversation(conversationId)
+        && request.auth.uid == userId;
     }
 
     match /groups/{groupId}/resources/{uploaderId}/{fileName} {

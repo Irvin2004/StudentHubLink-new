@@ -42,6 +42,7 @@ test("message model normalizes voice metadata", () => {
             type: MESSAGE_TYPES.VOICE,
             content: "",
             voice: {
+                url: "",
                 storagePath: "voice/conversation-1/message-1.webm",
                 duration: 2300,
                 size: 512,

@@ -88,6 +88,33 @@ test("voice recording stays browser-only and message types are centralized", () 
     assert.match(service, /config\/message-types\.js/);
 });
 
+test("voice messages upload before Firestore writes and remain deletable", () => {
+    const storage = read("js/services/storage-service.js");
+    const messages = read("js/services/message-service.js");
+    const bubble = read("js/components/message-bubble.js");
+    const storageRules = read("storage.rules");
+    const firestoreRules = read("firestore.rules");
+
+    assert.match(storage, /export async function uploadVoiceMessage\(/);
+    assert.match(storage, /export async function deleteVoiceMessage\(/);
+    assert.match(storage, /downloadURL/);
+    assert.match(storage, /storagePath/);
+    assert.match(storage, /deleteObject/);
+    assert.doesNotMatch(storage, /firestore|sendMessage/);
+    assert.match(messages, /export async function sendVoiceMessage\(/);
+    assert.ok(
+        messages.indexOf("await uploadVoiceMessage(") <
+        messages.indexOf("return await sendMessage({")
+    );
+    assert.match(messages, /voice: voiceMessage\.voice/);
+    assert.match(messages, /await deleteVoiceMessage\(uploaded\.storagePath\)/);
+    assert.doesNotMatch(messages, /voice:\s*\{[^}]*blob/s);
+    assert.match(bubble, /message\.voice\?\.url/);
+    assert.match(storageRules, /match \/voice\/\{conversationId\}\/\{userId\}/);
+    assert.match(storageRules, /request\.auth\.uid == userId/);
+    assert.match(firestoreRules, /"mimeType", "voice"/);
+});
+
 test("read receipt renderer owns passive message status display", () => {
     const renderer = read("js/renderers/read-receipt-renderer.js");
     const messages = read("js/renderers/message-renderer.js");

@@ -26,12 +26,14 @@ function renderMessageContent(message) {
     }
 
     if (message.type === "voice") {
+        const voiceUrl = message.voice?.url || message.fileUrl;
+
         return `
             <audio
                 class="voice-message"
                 controls
                 preload="metadata"
-                src="${escapeHtml(sanitizeUrl(message.fileUrl))}"
+                src="${escapeHtml(sanitizeUrl(voiceUrl))}"
             ></audio>
         `;
     }

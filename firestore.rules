@@ -510,10 +510,50 @@ service cloud.firestore {
     }
 
     match /messages/{messageId} {
+      function messageContentIsValid() {
+        return request.resource.data.type in [
+            "text", "image", "file", "voice", "system"
+          ]
+          && (
+            (
+              request.resource.data.type == "voice"
+              && request.resource.data.voice is map
+              && request.resource.data.voice.keys().hasOnly([
+                  "url", "storagePath", "duration", "mimeType", "size"
+                ])
+              && request.resource.data.voice.keys().hasAll([
+                  "url", "storagePath", "duration", "mimeType", "size"
+                ])
+              && request.resource.data.voice.url is string
+              && request.resource.data.voice.url.matches('^https://.+$')
+              && request.resource.data.voice.storagePath is string
+              && request.resource.data.voice.storagePath.matches(
+                '^voice/' + request.resource.data.conversationId +
+                '/' + request.auth.uid + '/[^/]+[.](webm|ogg)$'
+              )
+              && request.resource.data.voice.duration is number
+              && request.resource.data.voice.duration >= 0
+              && request.resource.data.voice.duration <= 5 * 60 * 1000
+              && request.resource.data.voice.mimeType is string
+              && request.resource.data.voice.mimeType.matches(
+                '^audio/(webm|ogg)(;.*)?$'
+              )
+              && request.resource.data.voice.size is int
+              && request.resource.data.voice.size > 0
+              && request.resource.data.voice.size <= 25 * 1024 * 1024
+            )
+            || (
+              request.resource.data.type != "voice"
+              && request.resource.data.voice == null
+            )
+          );
+      }
+
       allow read: if canAccessConversation(
         conversationFor(resource.data.conversationId)
       );
       allow create: if signedIn()
+        && messageContentIsValid()
         && request.resource.data.senderId == request.auth.uid
         && request.resource.data.senderName is string
         && request.resource.data.senderName.size() > 0
@@ -588,7 +628,7 @@ service cloud.firestore {
             && request.resource.data.diff(resource.data).affectedKeys()
               .hasOnly([
                 "text", "deleted", "deletedAt", "fileUrl",
-                "fileName", "fileSize", "mimeType"
+                "fileName", "fileSize", "mimeType", "voice"
               ])
             && request.resource.data.text == "This message was deleted."
             && request.resource.data.deleted == true
@@ -597,6 +637,7 @@ service cloud.firestore {
             && request.resource.data.fileName == null
             && request.resource.data.fileSize == null
             && request.resource.data.mimeType == null
+            && request.resource.data.voice == null
           )
           ||
           (
