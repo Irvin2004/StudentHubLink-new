@@ -1,9 +1,7 @@
 "use strict";
 
-import {
-    createSkeleton,
-    SKELETON_TYPES
-} from "../components/skeleton.js";
+import { createSkeleton } from "../components/skeleton.js";
+import { SKELETON_TYPES } from "../config/skeleton-types.js";
 
 const activeContainers = new Set();
 
@@ -32,7 +30,7 @@ function getResponsiveCount(container, type, requestedCount) {
 
 export function showSkeleton(container, type, options = {}) {
     const target = requireContainer(container);
-    const normalizedType = String(type || "").toUpperCase();
+    const normalizedType = String(type || "").toLowerCase();
     const count = getResponsiveCount(
         target,
         normalizedType,

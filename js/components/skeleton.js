@@ -1,14 +1,6 @@
 "use strict";
 
-export const SKELETON_TYPES = Object.freeze({
-    MESSAGE: "MESSAGE",
-    COMMUNITY: "COMMUNITY",
-    CHANNEL: "CHANNEL",
-    USER: "USER",
-    PROFILE: "PROFILE",
-    FILE: "FILE",
-    NOTIFICATION: "NOTIFICATION"
-});
+import { SKELETON_TYPES } from "../config/skeleton-types.js";
 
 const DEFAULT_COUNTS = Object.freeze({
     [SKELETON_TYPES.MESSAGE]: 8,
@@ -23,7 +15,7 @@ const DEFAULT_COUNTS = Object.freeze({
 function normalizeType(type) {
     const normalizedType = String(type || "")
         .trim()
-        .toUpperCase();
+        .toLowerCase();
 
     if (!Object.hasOwn(DEFAULT_COUNTS, normalizedType)) {
         throw new TypeError(`Unsupported skeleton type: ${type}`);
@@ -140,7 +132,7 @@ function createItem(type, index) {
 export function createSkeleton(type, options = {}) {
     const normalizedType = normalizeType(type);
     const count = normalizeCount(normalizedType, options.count);
-    const layoutClass = normalizedType.toLowerCase();
+    const layoutClass = normalizedType;
     const items = Array.from(
         { length: count },
         (_, index) => createItem(normalizedType, index)
