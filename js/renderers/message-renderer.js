@@ -65,6 +65,12 @@ export function renderMessages(
         );
 
         if (statusContainer) {
+            statusContainer.dataset.expectedRecipientCount = String(
+                options.conversationType === "group"
+                    ? Math.max(Number(options.memberCount || 0) - 1, 1)
+                    : 1
+            );
+
             renderReadReceipt(
                 Array.isArray(message.readReceipts)
                     ? message.readReceipts

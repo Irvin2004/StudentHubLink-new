@@ -87,6 +87,30 @@ test("read receipt renderer owns passive message status display", () => {
     assert.doesNotMatch(bubble, /function getStatusIcon/);
 });
 
+test("read receipt controller owns visibility-aware receipt updates", () => {
+    const controller = read("js/controllers/read-receipt-controller.js");
+    const chat = read("js/controllers/chat-controller.js");
+
+    assert.match(controller, /export function initializeReadReceipts\(/);
+    assert.match(controller, /new IntersectionObserver/);
+    assert.match(controller, /threshold: READ_VISIBILITY_THRESHOLD/);
+    assert.match(controller, /markMessageDelivered/);
+    assert.match(controller, /markMessageRead/);
+    assert.match(controller, /subscribeToReadReceipts/);
+    assert.match(controller, /renderReadReceipt/);
+    assert.match(controller, /intersectionObserver\?\.disconnect\(\)/);
+    assert.match(controller, /subscriptions\.forEach/);
+    assert.doesNotMatch(
+        controller,
+        /firebase|firestore|innerHTML|insertAdjacentHTML|createElement/
+    );
+    assert.match(chat, /initializeReadReceipts\(/);
+    assert.doesNotMatch(
+        chat,
+        /markMessagesAsDelivered|markConversationMessagesAsRead/
+    );
+});
+
 test("reaction picker owns UI behavior without service coupling", () => {
     const picker = read("js/components/reaction-picker.js");
 

@@ -9,8 +9,6 @@ import {
     deleteMessageForEveryone,
     deleteMessageForMe,
     editMessage,
-    markConversationMessagesAsRead,
-    markMessagesAsDelivered,
     MESSAGE_TYPES,
     sendMessage,
     startReply,
@@ -32,6 +30,9 @@ import {
     showMessageMenu
 } from "../components/message-menu.js?messaging=15";
 import { initializeReactions } from "./reaction-controller.js?reactions=1";
+import {
+    initializeReadReceipts
+} from "./read-receipt-controller.js?receipts=2";
 import {
     openDeleteMessageDialog
 } from "../components/delete-message-dialog.js?messaging=15";
@@ -99,7 +100,6 @@ null;
 
 let latestMessages = [];
 let pendingMessages = [];
-let receiptUpdateChain = Promise.resolve();
 let activeReceiverId = null;
 let activeConversation = null;
 let currentChatUser = null;
@@ -108,6 +108,7 @@ let activeOtherUserName = "Student";
 let replyingTo = null;
 let selectedMessage = null;
 let reactionController = null;
+let readReceiptController = null;
 
 function clearReply() {
     replyingTo = null;
@@ -524,25 +525,6 @@ function renderChatMessages(currentUserId) {
     );
 }
 
-function queueReceiptUpdates(messages, currentUser) {
-    receiptUpdateChain = receiptUpdateChain
-        .then(async () => {
-            await markMessagesAsDelivered(
-                messages,
-                currentUser.uid,
-                activeConversation?.type || "direct"
-            );
-            await markConversationMessagesAsRead(
-                conversationId,
-                currentUser.uid,
-                activeConversation?.type || "direct"
-            );
-        })
-        .catch((error) => {
-            console.error("Message receipt update failed:", error);
-        });
-}
-
 function renderChatMessage(message) {
     if (!messageList) {
         return;
@@ -641,6 +623,13 @@ async function initializeChat(currentUser) {
         messageContainer: messageList
     });
 
+    readReceiptController?.destroy();
+    readReceiptController = initializeReadReceipts({
+        conversationId,
+        currentUserId: currentUser.uid,
+        messagesContainer: messageList
+    });
+
     unsubscribeMessages =
     subscribeToMessages(
         conversationId,
@@ -666,8 +655,6 @@ async function initializeChat(currentUser) {
                     targetMessage.focus({ preventScroll: true });
                 }
             }
-
-            queueReceiptUpdates(messages, currentUser);
         }
     );
 
@@ -881,6 +868,8 @@ window.addEventListener("pagehide", (event) => {
 
     reactionController?.destroy();
     reactionController = null;
+    readReceiptController?.destroy();
+    readReceiptController = null;
 
     if (auth.currentUser && conversationId) {
         setTypingStatus(
