@@ -1,51 +1,194 @@
-.skeleton-card {
-    background: var(--white);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow);
-    padding: 24px;
+:root {
+    --skeleton-base: var(--surface-muted);
+    --skeleton-highlight: color-mix(
+        in srgb,
+        var(--surface) 78%,
+        var(--surface-muted)
+    );
 }
 
-.skeleton-line {
+.skeleton-layout {
+    display: grid;
+    gap: var(--space-4, 16px);
+    width: 100%;
+    pointer-events: none;
+}
+
+.skeleton-item {
+    min-width: 0;
+}
+
+.skeleton {
+    display: block;
     position: relative;
     overflow: hidden;
-    height: 14px;
-    border-radius: 8px;
-    background: var(--surface-muted);
-    margin-bottom: 14px;
-    animation: pulse 1.4s infinite;
+    background: linear-gradient(
+        90deg,
+        var(--skeleton-base) 25%,
+        var(--skeleton-highlight) 50%,
+        var(--skeleton-base) 75%
+    );
+    background-size: 200% 100%;
+    animation: studenthub-skeleton-shimmer 1.2s ease-in-out infinite;
 }
 
-.skeleton-line::after {
-    position: absolute;
-    inset: 0;
-    content: "";
-    transform: translateX(-100%);
-    background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.56), transparent);
-    animation: skeleton-shimmer 1.4s infinite;
+.skeleton__content {
+    display: block;
+    flex: 1;
+    min-width: 0;
 }
 
-.skeleton-line.short {
-    width: 45%;
-}
-
-.skeleton-line.medium {
-    width: 70%;
-}
-
-.skeleton-line.large {
+.skeleton__line,
+.skeleton-line {
+    display: block;
     width: 100%;
+    height: 0.875rem;
+    margin-bottom: var(--space-3, 12px);
+    border-radius: var(--radius-pill, 999px);
 }
 
-@keyframes pulse {
-    0% {
-        opacity: .45;
+.skeleton__line:last-child,
+.skeleton-line:last-child {
+    margin-bottom: 0;
+}
+
+.skeleton__line--short,
+.skeleton-line.short {
+    width: 42%;
+}
+
+.skeleton__line--medium,
+.skeleton-line.medium {
+    width: 68%;
+}
+
+.skeleton__line--long,
+.skeleton-line.large {
+    width: 92%;
+}
+
+.skeleton__avatar {
+    flex: 0 0 44px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+}
+
+.skeleton__avatar--large {
+    flex-basis: 76px;
+    width: 76px;
+    height: 76px;
+}
+
+.skeleton__icon {
+    flex: 0 0 40px;
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-md, 12px);
+}
+
+.skeleton__icon--square {
+    border-radius: var(--radius-sm, 8px);
+}
+
+.skeleton-list-item,
+.skeleton-message,
+.skeleton-notification,
+.skeleton-profile {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3, 12px);
+    padding: var(--space-3, 12px);
+}
+
+.skeleton-layout--message {
+    align-content: start;
+}
+
+.skeleton-message {
+    width: min(72%, 36rem);
+}
+
+.skeleton-message--outgoing {
+    justify-self: end;
+    flex-direction: row-reverse;
+    width: min(58%, 30rem);
+}
+
+.skeleton-layout--file {
+    grid-template-columns: repeat(
+        auto-fit,
+        minmax(min(100%, 220px), 1fr)
+    );
+}
+
+.skeleton-file,
+.skeleton-card {
+    padding: var(--space-4, 16px);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg, 16px);
+    background: var(--surface);
+    box-shadow: var(--shadow-sm, var(--shadow));
+}
+
+.skeleton__file-preview {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    margin-bottom: var(--space-4, 16px);
+    border-radius: var(--radius-md, 12px);
+}
+
+.skeleton-profile {
+    align-items: flex-start;
+    padding: var(--space-5, 20px);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg, 16px);
+    background: var(--surface);
+}
+
+/* Compatibility for existing dashboard placeholders during migration. */
+.skeleton-line {
+    background: linear-gradient(
+        90deg,
+        var(--skeleton-base) 25%,
+        var(--skeleton-highlight) 50%,
+        var(--skeleton-base) 75%
+    );
+    background-size: 200% 100%;
+    animation: studenthub-skeleton-shimmer 1.2s ease-in-out infinite;
+}
+
+@keyframes studenthub-skeleton-shimmer {
+    from {
+        background-position: 200% 0;
     }
 
-    50% {
-        opacity: 1;
+    to {
+        background-position: -200% 0;
+    }
+}
+
+html[data-reduced-motion="true"] .skeleton,
+html[data-reduced-motion="true"] .skeleton-line {
+    background: var(--skeleton-base);
+    animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .skeleton,
+    .skeleton-line {
+        background: var(--skeleton-base);
+        animation: none;
+    }
+}
+
+@media (max-width: 767px) {
+    .skeleton-message,
+    .skeleton-message--outgoing {
+        width: min(86%, 30rem);
     }
 
-    100% {
-        opacity: .45;
+    .skeleton-layout--file {
+        grid-template-columns: 1fr;
     }
 }
