@@ -1,0 +1,87 @@
+:root {
+    /* Core palette */
+    --color-white: #ffffff;
+    --color-slate-50: #f8fafc;
+    --color-slate-100: #f1f5f9;
+    --color-slate-200: #e2e8f0;
+    --color-slate-400: #94a3b8;
+    --color-slate-500: #64748b;
+    --color-slate-700: #334155;
+    --color-slate-800: #1e293b;
+    --color-slate-900: #0f172a;
+    --color-slate-950: #020617;
+    --color-blue-100: #dbeafe;
+    --color-blue-400: #60a5fa;
+    --color-blue-300: #93c5fd;
+    --color-blue-600: #2563eb;
+    --color-blue-700: #1d4ed8;
+    --color-blue-950: #172554;
+    --color-green-400: #4ade80;
+    --color-green-600: #16a34a;
+    --color-amber-400: #fbbf24;
+    --color-amber-600: #d97706;
+    --color-red-400: #f87171;
+    --color-red-600: #dc2626;
+
+    /* Default semantic colors */
+    --background: var(--color-slate-50);
+    --surface: var(--color-white);
+    --surface-muted: var(--color-slate-100);
+    --text-primary: var(--color-slate-900);
+    --text-secondary: var(--color-slate-500);
+    --text: var(--text-primary);
+    --primary: var(--color-blue-600);
+    --primary-hover: var(--color-blue-700);
+    --primary-soft: var(--color-blue-100);
+    --success: var(--color-green-600);
+    --warning: var(--color-amber-600);
+    --danger: var(--color-red-600);
+    --border: var(--color-slate-200);
+
+    /* Spacing */
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 20px;
+    --space-6: 24px;
+    --space-8: 32px;
+    --space-10: 40px;
+
+    /* Shape */
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-pill: 999px;
+
+    /* Elevation */
+    --shadow-color-sm: rgb(15 23 42 / 0.06);
+    --shadow-color: rgb(15 23 42 / 0.09);
+    --shadow-color-lg: rgb(15 23 42 / 0.14);
+    --shadow-sm: 0 1px 2px var(--shadow-color-sm);
+    --shadow: 0 10px 28px var(--shadow-color);
+    --shadow-lg: 0 24px 48px var(--shadow-color-lg);
+
+    /* Motion */
+    --transition-fast: 150ms ease;
+    --transition: 220ms ease;
+
+    /* Responsive references */
+    --breakpoint-mobile: 767px;
+    --breakpoint-tablet: 1023px;
+    --breakpoint-laptop: 1439px;
+
+    /* Compatibility aliases for existing StudentHub screens */
+    --navy: var(--color-slate-900);
+    --blue: var(--primary);
+    --blue-dark: var(--primary-hover);
+    --white: var(--surface);
+    --bg: var(--background);
+    --text-main: var(--text-primary);
+    --text-muted: var(--text-secondary);
+    --space-xs: var(--space-1);
+    --space-sm: var(--space-2);
+    --space-md: var(--space-4);
+    --space-lg: var(--space-6);
+    --space-xl: var(--space-8);
+}

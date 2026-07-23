@@ -1,21 +1,20 @@
 :root,
 [data-theme="light"] {
     color-scheme: light;
-    --background: #f8fafc;
-    --surface: #ffffff;
-    --surface-muted: #f1f5f9;
-    --text-primary: #0f172a;
-    --text-secondary: #64748b;
-    --text: var(--text-primary);
-    --primary: #2563eb;
-    --primary-hover: #1d4ed8;
-    --primary-soft: #dbeafe;
-    --success: #16a34a;
-    --warning: #d97706;
-    --danger: #dc2626;
-    --border: #e2e8f0;
-    --navy: #0f172a;
-    --shadow-sm: 0 1px 2px rgb(15 23 42 / 0.06);
-    --shadow: 0 10px 28px rgb(15 23 42 / 0.09);
-    --shadow-lg: 0 24px 48px rgb(15 23 42 / 0.14);
+    --background: var(--color-slate-50);
+    --surface: var(--color-white);
+    --surface-muted: var(--color-slate-100);
+    --text-primary: var(--color-slate-900);
+    --text-secondary: var(--color-slate-500);
+    --primary: var(--color-blue-600);
+    --primary-hover: var(--color-blue-700);
+    --primary-soft: var(--color-blue-100);
+    --success: var(--color-green-600);
+    --warning: var(--color-amber-600);
+    --danger: var(--color-red-600);
+    --border: var(--color-slate-200);
+    --navy: var(--color-slate-900);
+    --shadow-color-sm: rgb(15 23 42 / 0.06);
+    --shadow-color: rgb(15 23 42 / 0.09);
+    --shadow-color-lg: rgb(15 23 42 / 0.14);
 }
