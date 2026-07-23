@@ -12,6 +12,8 @@
     --warning: var(--color-amber-400);
     --danger: var(--color-red-400);
     --border: var(--color-slate-700);
+    --on-primary: var(--color-slate-950);
+    --overlay: rgb(2 6 23 / 0.76);
     --navy: var(--color-slate-50);
     --focus-ring: var(--color-blue-300);
     --shadow-color-sm: rgb(0 0 0 / 0.2);

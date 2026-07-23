@@ -58,6 +58,11 @@ function splitFirebasePackages(id) {
 
 export default defineConfig({
     plugins: [react()],
+    resolve: {
+        alias: {
+            "@": resolve(process.cwd(), "src")
+        }
+    },
     build: {
         emptyOutDir: true,
         outDir: "dist",

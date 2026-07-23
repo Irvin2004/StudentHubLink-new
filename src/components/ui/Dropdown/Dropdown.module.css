@@ -1,0 +1,18 @@
+.dropdown {
+    position: relative;
+    display: inline-flex;
+}
+
+.panel {
+    position: absolute;
+    z-index: 1000;
+    top: calc(100% + var(--space-2));
+}
+
+.start {
+    left: 0;
+}
+
+.end {
+    right: 0;
+}

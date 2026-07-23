@@ -11,8 +11,6 @@ const FOCUSABLE_SELECTOR = [
     "select:not([disabled])",
     '[tabindex]:not([tabindex="-1"])'
 ].join(",");
-const DRAWER_TRANSITION_FOCUS_DELAY = 260;
-
 export function MobileDrawer({ children, onClose, open, returnFocusRef }) {
     const drawerRef = useRef(null);
     const previouslyOpenRef = useRef(false);
@@ -45,15 +43,9 @@ export function MobileDrawer({ children, onClose, open, returnFocusRef }) {
         const focusCloseButton = () => {
             drawer?.querySelector("button")?.focus();
         };
-        const focusTimer = window.setTimeout(
-            focusCloseButton,
-            DRAWER_TRANSITION_FOCUS_DELAY
-        );
 
         document.body.style.overflow = "hidden";
-        drawer?.addEventListener("transitionend", focusCloseButton, {
-            once: true
-        });
+        focusCloseButton();
 
         function handleKeyDown(event) {
             if (event.key === "Escape") {
@@ -83,8 +75,6 @@ export function MobileDrawer({ children, onClose, open, returnFocusRef }) {
         document.addEventListener("keydown", handleKeyDown);
 
         return () => {
-            window.clearTimeout(focusTimer);
-            drawer?.removeEventListener("transitionend", focusCloseButton);
             document.removeEventListener("keydown", handleKeyDown);
             document.body.style.overflow = previousOverflow;
             returnFocusElement?.focus();

@@ -5,36 +5,36 @@
 @import url("./base/animations.css");
 @import url("./base/utilities.css");
 
-@import url("./components/buttons.css?v=20260718-16");
+@import url("./components/buttons.css");
 @import url("./components/cards.css");
 @import url("./components/forms.css");
 @import url("./components/badges.css");
 @import url("./components/avatars.css");
-@import url("./components/modals.css?v=20260723-2");
+@import url("./components/modals.css");
 @import url("./components/dropdown.css");
 @import url("./components/navbar.css");
-@import url("./components/sidebar.css?v=20260723-1");
-@import url("./components/toast.css?central-errors=1");
+@import url("./components/sidebar.css");
+@import url("./components/toast.css");
 @import url("./components/notification-card.css");
 @import url("./components/notification-panel.css");
 @import url("./components/search-dropdown.css");
 @import url("./components/activity-feed.css");
-@import url("./components/chat.css?v=20260723-3");
-@import url("./components/reaction-bar.css?v=20260723-1");
-@import url("./components/read-receipt.css?v=20260723-1");
-@import url("./components/voice-message.css?v=20260723-1");
-@import url("./components/conversation-menu.css?v=20260723-3");
-@import url("./components/context-menu.css?v=20260723-2");
+@import url("./components/chat.css");
+@import url("./components/reaction-bar.css");
+@import url("./components/read-receipt.css");
+@import url("./components/voice-message.css");
+@import url("./components/conversation-menu.css");
+@import url("./components/context-menu.css");
 @import url("./components/tables.css");
 @import url("./components/tabs.css");
-@import url("./components/skeleton.css?skeletons=1");
-@import url("./components/empty-state.css?empty-states=1");
+@import url("./components/skeleton.css");
+@import url("./components/empty-state.css");
 @import url("./components/loading.css");
 @import url("./components/comment.css");
 @import url("./components/review.css");
 @import url("./components/rating.css");
 @import url("./components/footer.css");
-@import url("./components/assignment-card.css?v=20260721-2");
+@import url("./components/assignment-card.css");
 
 @import url("./layouts/dashboard.css");
 @import url("./layouts/profile.css");
@@ -42,29 +42,29 @@
 @import url("./layouts/settings.css");
 
 /* Compatibility layer while existing pages move onto the reusable primitives. */
-@import url("./pages/landing.css?v=20260718-4");
-@import url("./pages/auth.css?v=20260718-4");
-@import url("./pages/dashboard.css?v=20260718-4");
-@import url("./pages/admin-dashboard.css?v=20260718-4");
-@import url("./pages/profile.css?v=20260718-4");
-@import url("./pages/user-profile.css?v=20260718-4");
-@import url("./pages/resources.css?v=20260718-4");
-@import url("./pages/resource-details.css?v=20260718-4");
-@import url("./pages/upload.css?v=20260718-4");
-@import url("./pages/library.css?v=20260718-4");
-@import url("./pages/documents.css?v=20260718-4");
-@import url("./pages/favorites.css?v=20260718-4");
-@import url("./pages/achievements.css?v=20260718-4");
-@import url("./pages/leaderboard.css?v=20260718-4");
-@import url("./pages/messages.css?v=20260723-5");
-@import url("./pages/groups.css?v=20260721-1");
-@import url("./pages/group-resources.css?v=20260719-1");
-@import url("./pages/group-assignments.css?v=20260721-4");
-@import url("./pages/chat.css?v=20260718-9");
+@import url("./pages/landing.css");
+@import url("./pages/auth.css");
+@import url("./pages/dashboard.css");
+@import url("./pages/admin-dashboard.css");
+@import url("./pages/profile.css");
+@import url("./pages/user-profile.css");
+@import url("./pages/resources.css");
+@import url("./pages/resource-details.css");
+@import url("./pages/upload.css");
+@import url("./pages/library.css");
+@import url("./pages/documents.css");
+@import url("./pages/favorites.css");
+@import url("./pages/achievements.css");
+@import url("./pages/leaderboard.css");
+@import url("./pages/messages.css");
+@import url("./pages/groups.css");
+@import url("./pages/group-resources.css");
+@import url("./pages/group-assignments.css");
+@import url("./pages/chat.css");
 
 /* Responsive presentation layer; loaded after page compatibility styles. */
-@import url("./layout/main-layout.css?v=20260723-2");
-@import url("./layout/responsive.css?v=20260723-4");
+@import url("./layout/main-layout.css");
+@import url("./layout/responsive.css");
 
 /* Loaded last so accessibility preferences override component styles. */
-@import url("./accessibility.css?v=20260723-1");
+@import url("./accessibility.css");

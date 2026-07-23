@@ -1,0 +1,84 @@
+.avatar {
+    position: relative;
+    display: inline-grid;
+    place-items: center;
+    flex: 0 0 auto;
+    border-radius: var(--radius-pill);
+    background: var(--primary-soft);
+    color: var(--primary-hover);
+    font-weight: 800;
+}
+
+.xsmall {
+    width: 1.5rem;
+    height: 1.5rem;
+    font-size: 0.62rem;
+}
+
+.small {
+    width: 2rem;
+    height: 2rem;
+    font-size: 0.72rem;
+}
+
+.medium {
+    width: 2.75rem;
+    height: 2.75rem;
+    font-size: 0.85rem;
+}
+
+.large {
+    width: 4rem;
+    height: 4rem;
+    font-size: 1.15rem;
+}
+
+.xlarge {
+    width: 6rem;
+    height: 6rem;
+    font-size: 1.55rem;
+}
+
+.image,
+.fallback {
+    width: 100%;
+    height: 100%;
+    border-radius: inherit;
+}
+
+.image {
+    object-fit: cover;
+}
+
+.fallback {
+    display: grid;
+    place-items: center;
+}
+
+.status {
+    position: absolute;
+    right: 1%;
+    bottom: 1%;
+    width: 24%;
+    min-width: 0.45rem;
+    height: 24%;
+    min-height: 0.45rem;
+    border: 2px solid var(--surface);
+    border-radius: var(--radius-pill);
+}
+
+.online {
+    background: var(--success);
+}
+
+.offline {
+    background: var(--color-slate-400);
+}
+
+.away {
+    background: var(--warning);
+}
+
+.busy {
+    background: var(--danger);
+}

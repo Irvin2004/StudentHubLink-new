@@ -1,0 +1,65 @@
+.wrapper {
+    display: grid;
+    gap: var(--space-1);
+    color: var(--text-primary);
+}
+
+.label {
+    width: fit-content;
+    min-height: var(--control-height-md);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-3);
+    cursor: pointer;
+}
+
+.input {
+    position: absolute;
+    opacity: 0;
+}
+
+.control {
+    width: 1.25rem;
+    height: 1.25rem;
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+    border: 1px solid var(--border);
+    border-radius: var(--space-1);
+    background: var(--surface);
+    color: transparent;
+    transition:
+        background var(--transition-fast),
+        border-color var(--transition-fast);
+}
+
+.control svg {
+    width: 0.9rem;
+    height: 0.9rem;
+}
+
+.input:checked + .control {
+    border-color: var(--primary);
+    background: var(--primary);
+    color: var(--on-primary);
+}
+
+.input:focus-visible + .control {
+    outline: 3px solid var(--focus-ring, var(--primary));
+    outline-offset: 2px;
+}
+
+.input:disabled ~ * {
+    cursor: not-allowed;
+    opacity: 0.55;
+}
+
+.message {
+    padding-left: calc(1.25rem + var(--space-3));
+    color: var(--text-secondary);
+    font-size: 0.78rem;
+}
+
+.error {
+    color: var(--danger);
+}

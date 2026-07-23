@@ -1,0 +1,26 @@
+.field {
+    display: grid;
+    gap: var(--space-2);
+    color: var(--text-primary);
+}
+
+.label {
+    width: fit-content;
+    font-size: 0.875rem;
+    font-weight: 700;
+}
+
+.required {
+    margin-left: var(--space-1);
+    color: var(--danger);
+}
+
+.message {
+    color: var(--text-secondary);
+    font-size: 0.78rem;
+    line-height: 1.45;
+}
+
+.error {
+    color: var(--danger);
+}
