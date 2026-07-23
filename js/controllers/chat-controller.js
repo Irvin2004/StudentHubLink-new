@@ -36,6 +36,9 @@ import {
 import {
     openDeleteMessageDialog
 } from "../components/delete-message-dialog.js?messaging=15";
+import {
+    bindContextMenuInteractions
+} from "../components/context-menu.js";
 
 import { handleError } from "../utils/error-handler.js?security=1";
 import { validateAttachment } from "../utils/file-validator.js?security=1";
@@ -185,41 +188,33 @@ messageList?.addEventListener("click", (event) => {
     );
 });
 
-messageList?.addEventListener("contextmenu", (event) => {
-    if (!(event.target instanceof Element)) {
-        return;
-    }
+const destroyMessageContextInteractions = messageList
+    ? bindContextMenuInteractions({
+        container: messageList,
+        targetSelector: ".message-row[data-message-id]",
+        onOpen({ target: message, x, y }) {
+            const messageObject = getMessageById(
+                message.dataset.messageId
+            );
 
-    const message = event.target.closest(
-        ".message-row[data-message-id]"
-    );
+            if (!messageObject) {
+                return;
+            }
 
-    if (!message) {
-        return;
-    }
+            selectedMessage = {
+                ...messageObject,
+                senderName: getReplySenderName(messageObject)
+            };
 
-    event.preventDefault();
-
-    const messageObject = getMessageById(
-        message.dataset.messageId
-    );
-
-    if (!messageObject) {
-        return;
-    }
-
-    selectedMessage = {
-        ...messageObject,
-        senderName: getReplySenderName(messageObject)
-    };
-
-    showMessageMenu(
-        event.clientX,
-        event.clientY,
-        selectedMessage,
-        currentChatUser?.uid
-    );
-});
+            showMessageMenu(
+                x,
+                y,
+                selectedMessage,
+                currentChatUser?.uid
+            );
+        }
+    })
+    : () => {};
 
 document.addEventListener("click", async (event) => {
     if (!(event.target instanceof Element)) {
@@ -878,6 +873,7 @@ window.addEventListener("pagehide", (event) => {
     reactionController = null;
     readReceiptController?.destroy();
     readReceiptController = null;
+    destroyMessageContextInteractions();
 
     if (auth.currentUser && conversationId) {
         setTypingStatus(

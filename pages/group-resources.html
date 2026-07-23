@@ -5,26 +5,71 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Group Resources | StudentHub</title>
     <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
-    <link rel="stylesheet" href="../css/studenthub.css?v=20260719-2">
+    <link rel="stylesheet" href="../css/studenthub.css?v=20260723-10">
 </head>
 <body data-page="group-resources">
     <div class="groups-shell">
-        <aside class="groups-sidebar">
+        <aside
+            id="primaryNavigationDrawer"
+            class="groups-sidebar app-sidebar"
+            data-navigation-drawer
+            aria-label="StudentHub navigation">
             <a class="groups-brand" href="../dashboard.html">
                 <img src="../assets/favicon.svg" alt="">
                 <span>StudentHub</span>
             </a>
-            <nav class="groups-nav" aria-label="Primary navigation">
-                <a href="../dashboard.html">Dashboard</a>
-                <a href="resources.html">Marketplace</a>
-                <a class="active" href="groups.html">Study Groups</a>
-                <a href="messages.html">Messages</a>
-                <a href="library.html">My Library</a>
-                <a href="profile.html">Profile</a>
+            <nav class="groups-nav sidebar-nav" aria-label="Primary navigation">
+                <a class="sidebar-link" href="../dashboard.html">
+                    <span class="sidebar-icon" aria-hidden="true">&#8962;</span>
+                    <span class="sidebar-label">Dashboard</span>
+                </a>
+                <a class="sidebar-link" href="resources.html">
+                    <span class="sidebar-icon" aria-hidden="true">&#128722;</span>
+                    <span class="sidebar-label">Marketplace</span>
+                </a>
+                <a class="sidebar-link active" href="groups.html">
+                    <span class="sidebar-icon" aria-hidden="true">&#128101;</span>
+                    <span class="sidebar-label">Study Groups</span>
+                </a>
+                <a class="sidebar-link" href="messages.html">
+                    <span class="sidebar-icon" aria-hidden="true">&#128172;</span>
+                    <span class="sidebar-label">Messages</span>
+                </a>
+                <a class="sidebar-link" href="library.html">
+                    <span class="sidebar-icon" aria-hidden="true">&#128218;</span>
+                    <span class="sidebar-label">My Library</span>
+                </a>
+                <a class="sidebar-link" href="profile.html">
+                    <span class="sidebar-icon" aria-hidden="true">&#128100;</span>
+                    <span class="sidebar-label">Profile</span>
+                </a>
             </nav>
         </aside>
 
+        <button
+            class="navigation-drawer-backdrop"
+            type="button"
+            data-navigation-drawer-backdrop="primaryNavigationDrawer"
+            aria-label="Close navigation"
+            hidden>
+        </button>
+
         <main class="groups-main group-resources-main">
+            <header class="groups-mobile-header">
+                <button
+                    class="navigation-drawer-toggle"
+                    type="button"
+                    data-navigation-drawer-toggle="primaryNavigationDrawer"
+                    aria-label="Open navigation">
+                    &#9776;
+                </button>
+                <a class="groups-brand" href="../dashboard.html">
+                    <img src="../assets/favicon.svg" alt="">
+                    <span>StudentHub</span>
+                </a>
+                <a href="groups.html">Groups</a>
+            </header>
+
             <header class="group-resources-header">
                 <div>
                     <a id="groupBackLink" class="group-back-link" href="groups.html">
@@ -136,6 +181,6 @@
     </div>
 
     <script type="module" src="../js/controllers/group-resources-controller.js?v=20260719-3"></script>
-    <script type="module" src="../js/theme.js"></script>
+    <script type="module" src="../js/theme.js?responsive=3"></script>
 </body>
 </html>

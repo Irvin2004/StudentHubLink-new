@@ -210,3 +210,135 @@ export function closeContextMenu() {
 export function destroyContextMenu() {
     activeContextMenu?.destroy();
 }
+
+export function bindContextMenuInteractions({
+    container,
+    targetSelector,
+    onOpen,
+    longPressDuration = 550,
+    movementTolerance = 10
+} = {}) {
+    if (!container?.addEventListener) {
+        throw new Error("Context menu interaction container is required.");
+    }
+
+    if (!targetSelector || typeof onOpen !== "function") {
+        throw new Error(
+            "Context menu interactions require a selector and open handler."
+        );
+    }
+
+    let longPressTimer = null;
+    let pointerStart = null;
+    let activeTarget = null;
+    let suppressNextClick = false;
+
+    const clearLongPress = () => {
+        clearTimeout(longPressTimer);
+        longPressTimer = null;
+        pointerStart = null;
+        activeTarget = null;
+    };
+
+    const getTarget = (event) =>
+        event.target?.closest?.(targetSelector) || null;
+
+    const handleContextMenu = (event) => {
+        const target = getTarget(event);
+        if (!target) return;
+
+        event.preventDefault();
+        onOpen({
+            target,
+            anchor: target,
+            x: event.clientX,
+            y: event.clientY,
+            inputType: "mouse"
+        });
+    };
+
+    const handlePointerDown = (event) => {
+        if (!["touch", "pen"].includes(event.pointerType)) {
+            return;
+        }
+
+        const target = getTarget(event);
+        if (!target) return;
+
+        activeTarget = target;
+        pointerStart = {
+            x: event.clientX,
+            y: event.clientY
+        };
+
+        longPressTimer = setTimeout(() => {
+            const pressedTarget = activeTarget;
+            const coordinates = pointerStart;
+
+            if (!pressedTarget || !coordinates) return;
+
+            suppressNextClick = true;
+            onOpen({
+                target: pressedTarget,
+                anchor: pressedTarget,
+                ...coordinates,
+                inputType: event.pointerType
+            });
+            clearLongPress();
+        }, longPressDuration);
+    };
+
+    const handlePointerMove = (event) => {
+        if (!pointerStart) return;
+
+        if (
+            Math.abs(event.clientX - pointerStart.x) >
+                movementTolerance ||
+            Math.abs(event.clientY - pointerStart.y) >
+                movementTolerance
+        ) {
+            clearLongPress();
+        }
+    };
+
+    const handleClickCapture = (event) => {
+        if (!suppressNextClick) return;
+
+        suppressNextClick = false;
+        event.preventDefault();
+        event.stopPropagation();
+    };
+
+    container.addEventListener("contextmenu", handleContextMenu);
+    container.addEventListener("pointerdown", handlePointerDown);
+    container.addEventListener("pointermove", handlePointerMove);
+    container.addEventListener("pointerup", clearLongPress);
+    container.addEventListener("pointercancel", clearLongPress);
+    container.addEventListener("click", handleClickCapture, true);
+
+    return function destroyContextMenuInteractions() {
+        clearLongPress();
+        container.removeEventListener(
+            "contextmenu",
+            handleContextMenu
+        );
+        container.removeEventListener(
+            "pointerdown",
+            handlePointerDown
+        );
+        container.removeEventListener(
+            "pointermove",
+            handlePointerMove
+        );
+        container.removeEventListener("pointerup", clearLongPress);
+        container.removeEventListener(
+            "pointercancel",
+            clearLongPress
+        );
+        container.removeEventListener(
+            "click",
+            handleClickCapture,
+            true
+        );
+    };
+}

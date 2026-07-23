@@ -43,7 +43,9 @@
 
 .message-reply-button,
 .message-reaction-button {
-    padding: 0;
+    min-width: 44px;
+    min-height: 44px;
+    padding: var(--space-2);
     border: 0;
     background: transparent;
     color: inherit;
@@ -73,7 +75,8 @@
 .chat-image img {
     display: block;
     width: auto;
-    max-width: min(260px, 65vw);
+    max-width: min(100%, 260px, 65vw);
+    height: auto;
     max-height: 320px;
     border-radius: inherit;
     cursor: pointer;

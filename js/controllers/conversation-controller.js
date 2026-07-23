@@ -11,6 +11,7 @@ import {
     CONVERSATION_PREFERENCES
 } from "../config/conversation-preference-types.js";
 import {
+    bindContextMenuInteractions,
     createContextMenu,
     destroyContextMenu
 } from "../components/context-menu.js";
@@ -58,16 +59,6 @@ export function initializeConversationPreferences({
 
     const reportError = (error, message) => {
         onError(error, message);
-    };
-
-    let longPressTimer = null;
-    let longPressStart = null;
-    let longPressOpened = false;
-
-    const clearLongPress = () => {
-        clearTimeout(longPressTimer);
-        longPressTimer = null;
-        longPressStart = null;
     };
 
     const getContext = (entry) => ({
@@ -203,58 +194,24 @@ export function initializeConversationPreferences({
             "[data-conversation-menu-trigger]"
         );
 
-        if (longPressOpened) {
-            longPressOpened = false;
-            event.preventDefault();
-            return;
-        }
-
         if (!trigger) return;
         event.preventDefault();
         openMenu(trigger.closest("[data-conversation-entry]"), trigger);
     };
 
-    const handleContextMenu = (event) => {
-        const entry = event.target.closest?.("[data-conversation-entry]");
-        if (!entry) return;
-
-        event.preventDefault();
-        const trigger = entry.querySelector("[data-conversation-menu-trigger]");
-        openMenu(entry, trigger, { x: event.clientX, y: event.clientY });
-    };
-
-    const handlePointerDown = (event) => {
-        if (event.pointerType !== "touch") return;
-        const entry = event.target.closest?.("[data-conversation-entry]");
-        if (!entry) return;
-
-        longPressStart = { x: event.clientX, y: event.clientY };
-        longPressTimer = setTimeout(() => {
-            const trigger = entry.querySelector(
-                "[data-conversation-menu-trigger]"
-            );
-            longPressOpened = true;
-            openMenu(entry, trigger, longPressStart);
-            clearLongPress();
-        }, 550);
-    };
-
-    const handlePointerMove = (event) => {
-        if (!longPressStart) return;
-        if (
-            Math.abs(event.clientX - longPressStart.x) > 10 ||
-            Math.abs(event.clientY - longPressStart.y) > 10
-        ) {
-            clearLongPress();
-        }
-    };
+    const destroyContextMenuInteractions =
+        bindContextMenuInteractions({
+            container,
+            targetSelector: "[data-conversation-entry]",
+            onOpen({ target: entry, x, y }) {
+                const trigger = entry.querySelector(
+                    "[data-conversation-menu-trigger]"
+                );
+                openMenu(entry, trigger, { x, y });
+            }
+        });
 
     container.addEventListener("click", handleClick);
-    container.addEventListener("contextmenu", handleContextMenu);
-    container.addEventListener("pointerdown", handlePointerDown);
-    container.addEventListener("pointermove", handlePointerMove);
-    container.addEventListener("pointerup", clearLongPress);
-    container.addEventListener("pointercancel", clearLongPress);
 
     const unsubscribe = subscribeToConversationPreferences(
         cleanUserId,
@@ -274,14 +231,9 @@ export function initializeConversationPreferences({
 
     return {
         destroy() {
-            clearLongPress();
+            destroyContextMenuInteractions();
             destroyContextMenu();
             container.removeEventListener("click", handleClick);
-            container.removeEventListener("contextmenu", handleContextMenu);
-            container.removeEventListener("pointerdown", handlePointerDown);
-            container.removeEventListener("pointermove", handlePointerMove);
-            container.removeEventListener("pointerup", clearLongPress);
-            container.removeEventListener("pointercancel", clearLongPress);
             unsubscribe();
         },
         getPreferences() {

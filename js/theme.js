@@ -5,7 +5,11 @@ import {
 import {
     initializeAccessibilityRenderer
 } from "./renderers/accessibility-renderer.js";
+import {
+    initializeNavigationDrawers
+} from "./components/navigation-drawer.js?responsive=2";
 
 initializeTheme();
 initializeAccessibilityRenderer();
+initializeNavigationDrawers();
 initializePresence();

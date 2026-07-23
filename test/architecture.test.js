@@ -224,8 +224,9 @@ test("conversation preferences remain user-scoped and presentation-only", () => 
     assert.match(menu, /ArrowUp/);
     assert.doesNotMatch(menu, /conversation-service|firestore|firebase/);
     assert.match(controller, /createContextMenu\(/);
-    assert.match(controller, /contextmenu/);
-    assert.match(controller, /pointerType !== "touch"/);
+    assert.match(controller, /bindContextMenuInteractions\(/);
+    assert.match(menu, /contextmenu/);
+    assert.match(menu, /\["touch", "pen"\]/);
     assert.match(controller, /Leave conversation/);
     assert.match(messageEvents, /getConversationPreference\(/);
     assert.match(messageEvents, /preference\.muted !== true/);

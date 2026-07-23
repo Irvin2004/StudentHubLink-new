@@ -1,0 +1,22 @@
+.app-layout,
+body[data-page] .groups-shell {
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: grid;
+    grid-template-columns: 280px minmax(0, 1fr);
+    background: var(--background);
+}
+
+.app-main,
+body[data-page] .groups-main {
+    min-width: 0;
+}
+
+.navigation-drawer-toggle,
+.navigation-drawer-backdrop {
+    display: none;
+}
+
+body.navigation-drawer-open {
+    overflow: hidden;
+}

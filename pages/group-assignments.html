@@ -5,23 +5,45 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Group Assignments | StudentHub</title>
     <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
-    <link rel="stylesheet" href="../css/studenthub.css?v=20260721-4">
+    <link rel="stylesheet" href="../css/studenthub.css?v=20260723-10">
 </head>
 <body data-page="group-assignments">
     <div class="groups-shell">
-        <aside class="groups-sidebar">
+        <aside
+            id="primaryNavigationDrawer"
+            class="groups-sidebar app-sidebar"
+            data-navigation-drawer
+            aria-label="StudentHub navigation">
             <a class="groups-brand" href="../dashboard.html">
                 <img src="../assets/favicon.svg" alt="">
                 <span>StudentHub</span>
             </a>
 
-            <nav class="groups-nav" aria-label="Primary navigation">
-                <a href="../dashboard.html">Dashboard</a>
-                <a href="resources.html">Marketplace</a>
-                <a class="active" href="groups.html">Study Groups</a>
-                <a href="messages.html">Messages</a>
-                <a href="library.html">My Library</a>
-                <a href="profile.html">Profile</a>
+            <nav class="groups-nav sidebar-nav" aria-label="Primary navigation">
+                <a class="sidebar-link" href="../dashboard.html">
+                    <span class="sidebar-icon" aria-hidden="true">&#8962;</span>
+                    <span class="sidebar-label">Dashboard</span>
+                </a>
+                <a class="sidebar-link" href="resources.html">
+                    <span class="sidebar-icon" aria-hidden="true">&#128722;</span>
+                    <span class="sidebar-label">Marketplace</span>
+                </a>
+                <a class="sidebar-link active" href="groups.html">
+                    <span class="sidebar-icon" aria-hidden="true">&#128101;</span>
+                    <span class="sidebar-label">Study Groups</span>
+                </a>
+                <a class="sidebar-link" href="messages.html">
+                    <span class="sidebar-icon" aria-hidden="true">&#128172;</span>
+                    <span class="sidebar-label">Messages</span>
+                </a>
+                <a class="sidebar-link" href="library.html">
+                    <span class="sidebar-icon" aria-hidden="true">&#128218;</span>
+                    <span class="sidebar-label">My Library</span>
+                </a>
+                <a class="sidebar-link" href="profile.html">
+                    <span class="sidebar-icon" aria-hidden="true">&#128100;</span>
+                    <span class="sidebar-label">Profile</span>
+                </a>
             </nav>
 
             <div class="groups-sidebar-footer">
@@ -36,8 +58,23 @@
             </div>
         </aside>
 
+        <button
+            class="navigation-drawer-backdrop"
+            type="button"
+            data-navigation-drawer-backdrop="primaryNavigationDrawer"
+            aria-label="Close navigation"
+            hidden>
+        </button>
+
         <main class="groups-main group-assignments-main">
             <header class="groups-mobile-header">
+                <button
+                    class="navigation-drawer-toggle"
+                    type="button"
+                    data-navigation-drawer-toggle="primaryNavigationDrawer"
+                    aria-label="Open navigation">
+                    &#9776;
+                </button>
                 <a class="groups-brand" href="../dashboard.html">
                     <img src="../assets/favicon.svg" alt="">
                     <span>StudentHub</span>
@@ -79,6 +116,6 @@
     </div>
 
     <script type="module" src="../js/controllers/group-assignments-controller.js?v=20260721-4"></script>
-    <script type="module" src="../js/theme.js"></script>
+    <script type="module" src="../js/theme.js?responsive=3"></script>
 </body>
 </html>
