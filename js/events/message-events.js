@@ -1,5 +1,8 @@
 import { NOTIFICATION_TYPES } from "../config/notification-types.js";
-import { getConversationById } from "../services/conversation-service.js";
+import {
+    getConversationById,
+    getConversationPreference
+} from "../services/conversation-service.js";
 import { createNotification } from "../services/notification-service.js";
 import { error as logError } from "../utils/logger.js";
 import {
@@ -17,10 +20,21 @@ async function getPrivateRecipients(chatId, senderId) {
     );
 }
 
-function shouldNotifyRecipient() {
-    // Conversation-presence checks can be added here without changing
-    // the message service or the event's public API.
-    return true;
+async function shouldNotifyRecipient({ recipientId, chatId }) {
+    try {
+        const preference = await getConversationPreference(
+            recipientId,
+            chatId
+        );
+        return preference.muted !== true;
+    } catch (error) {
+        logError(
+            "NOTIFICATIONS",
+            `Unable to load mute preference for ${recipientId}:`,
+            error
+        );
+        return true;
+    }
 }
 
 export async function emitMessageSent({
@@ -39,12 +53,18 @@ export async function emitMessageSent({
         const recipients = isGroupChat
             ? await getGroupEventRecipients(cleanGroupId, cleanSenderId)
             : await getPrivateRecipients(cleanChatId, cleanSenderId);
-        const eligibleRecipients = recipients.filter((recipientId) =>
-            shouldNotifyRecipient({
+        const eligibility = await Promise.all(
+            recipients.map(async (recipientId) => ({
                 recipientId,
-                chatId: cleanChatId
-            })
+                shouldNotify: await shouldNotifyRecipient({
+                    recipientId,
+                    chatId: cleanChatId
+                })
+            }))
         );
+        const eligibleRecipients = eligibility
+            .filter(({ shouldNotify }) => shouldNotify)
+            .map(({ recipientId }) => recipientId);
         const senderName = message?.senderName?.trim() || "Someone";
         const deliveries = await Promise.all(
             eligibleRecipients.map(async (recipientId) => {

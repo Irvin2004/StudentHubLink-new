@@ -61,15 +61,45 @@ test("conversation renderer shows pin indicators and a section divider", () => {
     );
 });
 
-test("conversation menu exposes pin and future preference actions", () => {
+test("conversation menu exposes dynamic pin and mute actions", () => {
     const html = createConversationMenu({
         conversationId: "conversation-1",
-        preference: { pinned: true }
+        preference: { pinned: true, muted: true }
     });
 
     assert.match(html, /data-conversation-action="pinned"/);
     assert.match(html, />&#128204; Unpin</);
-    assert.match(html, /Mute/);
+    assert.match(html, /data-conversation-action="muted"/);
+    assert.match(html, /aria-label="Unmute conversation"/);
+    assert.match(html, />&#128276; Unmute</);
     assert.match(html, /Archive/);
     assert.match(html, /aria-haspopup="menu"/);
+});
+
+test("muted conversations stay in activity order and show their state", () => {
+    const items = [
+        item("recent", 300, "Recent"),
+        item("muted-old", 100, "Muted Old")
+    ];
+    const preferences = new Map([
+        ["muted-old", { muted: true }]
+    ]);
+    const container = { innerHTML: "" };
+
+    assert.deepEqual(
+        sortConversationItems(items, preferences).map(
+            ({ conversation }) => conversation.id
+        ),
+        ["recent", "muted-old"]
+    );
+
+    renderConversationList({
+        items,
+        currentUserId: "user-1",
+        container,
+        preferences
+    });
+
+    assert.match(container.innerHTML, /class="conversation-entry muted"/);
+    assert.match(container.innerHTML, /aria-label="Conversation muted"/);
 });

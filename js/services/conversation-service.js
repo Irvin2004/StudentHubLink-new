@@ -15,7 +15,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
 import { db } from "../firebase.js";
-import { COLLECTIONS } from "../config/firestore.js";
+import { COLLECTIONS } from "../config/firestore.js?preferences=2";
 import { areMutuals } from "./follows-service.js";
 import { log } from "../utils/logger.js";
 import {
@@ -74,9 +74,12 @@ async function updateConversationPreference(
     return runTransaction(db, async (transaction) => {
         const snapshot = await transaction.get(preferenceReference);
         const existing = snapshot.exists() ? snapshot.data() : {};
+        const resolvedUpdates = typeof updates === "function"
+            ? updates(existing)
+            : updates;
         const preference = createConversationPreferenceModel({
             ...existing,
-            ...updates,
+            ...resolvedUpdates,
             conversationId: cleanConversationId,
             userId: cleanUserId
         });
@@ -186,6 +189,26 @@ export function unpinConversation(userId, conversationId) {
     return updateConversationPreference(userId, conversationId, {
         pinned: false
     });
+}
+
+export function muteConversation(userId, conversationId) {
+    return updateConversationPreference(userId, conversationId, {
+        muted: true
+    });
+}
+
+export function unmuteConversation(userId, conversationId) {
+    return updateConversationPreference(userId, conversationId, {
+        muted: false
+    });
+}
+
+export function toggleMuteConversation(userId, conversationId) {
+    return updateConversationPreference(
+        userId,
+        conversationId,
+        (preference) => ({ muted: !Boolean(preference.muted) })
+    );
 }
 
 export async function getConversationPreference(userId, conversationId) {

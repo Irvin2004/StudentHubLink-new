@@ -7,6 +7,7 @@ import { escapeHtml } from "../utils/dom.js";
 
 let activeMenu = null;
 let activeTrigger = null;
+const menuControllers = new Map();
 
 function removeOpenListeners() {
     document.removeEventListener("pointerdown", handleOutsidePointer);
@@ -50,6 +51,8 @@ export function createConversationMenu({
 
     const escapedId = escapeHtml(cleanConversationId);
     const pinLabel = preference.pinned ? "Unpin" : "Pin";
+    const muteLabel = preference.muted ? "Unmute" : "Mute";
+    const muteIcon = preference.muted ? "&#128276;" : "&#128277;";
 
     return `
         <button
@@ -73,14 +76,15 @@ export function createConversationMenu({
                 role="menuitem"
                 data-conversation-action="${CONVERSATION_PREFERENCES.PINNED}"
                 data-conversation-id="${escapedId}"
+                aria-label="${pinLabel} conversation"
             >&#128204; ${pinLabel}</button>
             <button
                 type="button"
                 role="menuitem"
-                disabled
-                aria-disabled="true"
-                title="Mute conversations is coming next"
-            >&#128277; Mute</button>
+                data-conversation-action="${CONVERSATION_PREFERENCES.MUTED}"
+                data-conversation-id="${escapedId}"
+                aria-label="${muteLabel} conversation"
+            >${muteIcon} ${muteLabel}</button>
             <button
                 type="button"
                 role="menuitem"
@@ -90,6 +94,66 @@ export function createConversationMenu({
             >&#128229; Archive</button>
         </div>
     `;
+}
+
+export function initializeConversationMenu(container, { onAction } = {}) {
+    if (!container?.addEventListener) {
+        throw new Error("Conversation menu container is required.");
+    }
+
+    if (typeof onAction !== "function") {
+        throw new Error("Conversation menu action handler is required.");
+    }
+
+    menuControllers.get(container)?.destroy();
+
+    const handleClick = async (event) => {
+        if (!(event.target instanceof Element)) return;
+
+        const trigger = event.target.closest(
+            "[data-conversation-menu-trigger]"
+        );
+
+        if (trigger) {
+            event.preventDefault();
+            toggleConversationMenu(trigger);
+            return;
+        }
+
+        const actionButton = event.target.closest(
+            "[data-conversation-action]"
+        );
+
+        if (!actionButton) return;
+
+        event.preventDefault();
+        const detail = {
+            action: actionButton.dataset.conversationAction,
+            conversationId: actionButton.dataset.conversationId
+        };
+
+        actionButton.disabled = true;
+        closeConversationMenu();
+
+        try {
+            await onAction(detail);
+        } finally {
+            if (actionButton.isConnected) actionButton.disabled = false;
+        }
+    };
+
+    container.addEventListener("click", handleClick);
+
+    const controller = {
+        destroy() {
+            container.removeEventListener("click", handleClick);
+            closeConversationMenu();
+            menuControllers.delete(container);
+        }
+    };
+
+    menuControllers.set(container, controller);
+    return controller;
 }
 
 export function openConversationMenu(trigger) {
@@ -136,4 +200,7 @@ export function toggleConversationMenu(trigger) {
 
 export function destroyConversationMenu() {
     closeConversationMenu();
+    [...menuControllers.values()].forEach((controller) => {
+        controller.destroy();
+    });
 }

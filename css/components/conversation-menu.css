@@ -21,6 +21,16 @@
     font-size: 0.9em;
 }
 
+.conversation-muted {
+    flex: 0 0 auto;
+    color: var(--text-secondary);
+    font-size: 0.9em;
+}
+
+.conversation-entry.muted .conversation-content > :not(.conversation-top) {
+    opacity: 0.82;
+}
+
 .conversation-menu-trigger {
     position: absolute;
     top: 50%;

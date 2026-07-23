@@ -2,7 +2,7 @@
 
 import {
     createConversationItem
-} from "../components/conversation-item.js?preferences=1";
+} from "../components/conversation-item.js?preferences=2";
 import { createEmptyState } from "../components/empty-state.js";
 
 function getPreference(preferences, conversationId) {

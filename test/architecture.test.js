@@ -156,15 +156,20 @@ test("voice renderer delegates playback and composes message rendering", () => {
     assert.doesNotMatch(bubble, /<audio/);
 });
 
-test("conversation pinning remains user-scoped and presentation-only", () => {
+test("conversation preferences remain user-scoped and presentation-only", () => {
     const service = read("js/services/conversation-service.js");
-    const controller = read("js/controllers/messages-controller.js");
+    const controller = read("js/controllers/conversation-controller.js");
+    const messagesController = read("js/controllers/messages-controller.js");
+    const messageEvents = read("js/events/message-events.js");
     const renderer = read("js/renderers/conversation-renderer.js");
     const menu = read("js/components/conversation-menu.js");
     const rules = read("firestore.rules");
 
     assert.match(service, /export function pinConversation\(/);
     assert.match(service, /export function unpinConversation\(/);
+    assert.match(service, /export function muteConversation\(/);
+    assert.match(service, /export function unmuteConversation\(/);
+    assert.match(service, /export function toggleMuteConversation\(/);
     assert.match(service, /export async function getConversationPreference\(/);
     assert.match(
         service,
@@ -174,12 +179,23 @@ test("conversation pinning remains user-scoped and presentation-only", () => {
     assert.match(controller, /subscribeToConversationPreferences\(/);
     assert.match(controller, /pinConversation\(/);
     assert.match(controller, /unpinConversation\(/);
-    assert.match(controller, /unsubscribePreferences\(\)/);
+    assert.match(controller, /toggleMuteConversation\(/);
+    assert.match(controller, /unsubscribe\(\)/);
+    assert.match(
+        messagesController,
+        /initializeConversationPreferences\(/
+    );
+    assert.doesNotMatch(
+        messagesController,
+        /pinConversation\(|unpinConversation\(|toggleMuteConversation\(/
+    );
     assert.match(renderer, /sortConversationItems/);
     assert.match(renderer, /preference\.pinned/);
     assert.doesNotMatch(renderer, /firebase|firestore|addEventListener/);
     assert.match(menu, /data-conversation-action/);
     assert.doesNotMatch(menu, /conversation-service|firestore|firebase/);
+    assert.match(messageEvents, /getConversationPreference\(/);
+    assert.match(messageEvents, /preference\.muted !== true/);
     assert.match(
         rules,
         /match \/users\/\{userId\}\/conversationPreferences\/\{conversationId\}/
