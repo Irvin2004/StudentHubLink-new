@@ -5,6 +5,8 @@ export const ROUTES = Object.freeze({
     DASHBOARD: "/app",
     COMMUNITIES: "/app/communities",
     CHAT: "/app/chat",
+    FILES: "/app/files",
+    NOTIFICATIONS: "/app/notifications",
     SETTINGS: "/app/settings"
 });
 

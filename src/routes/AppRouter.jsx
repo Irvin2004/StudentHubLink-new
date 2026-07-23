@@ -1,7 +1,7 @@
 import { lazy, Suspense } from "react";
 import { Route, Routes } from "react-router-dom";
 
-import { AppShell } from "../components/layout/AppShell.jsx";
+import { AppLayout } from "../components/layout/AppLayout/AppLayout.jsx";
 import { LoadingScreen } from "../components/feedback/LoadingScreen.jsx";
 import { ROUTES } from "../config/routes.js";
 import { GuestRoute } from "./GuestRoute.jsx";
@@ -17,6 +17,10 @@ const CommunitiesPage = lazy(
     () => import("../pages/communities/CommunitiesPage.jsx")
 );
 const ChatPage = lazy(() => import("../pages/chat/ChatPage.jsx"));
+const FilesPage = lazy(() => import("../pages/files/FilesPage.jsx"));
+const NotificationsPage = lazy(
+    () => import("../pages/notifications/NotificationsPage.jsx")
+);
 const SettingsPage = lazy(() => import("../pages/settings/SettingsPage.jsx"));
 const NotFoundPage = lazy(() => import("../pages/NotFoundPage.jsx"));
 
@@ -32,7 +36,7 @@ export function AppRouter() {
                     <Route path="/register.html" element={<RegisterPage />} />
                 </Route>
                 <Route element={<ProtectedRoute />}>
-                    <Route element={<AppShell />}>
+                    <Route element={<AppLayout />}>
                         <Route
                             path={ROUTES.DASHBOARD}
                             element={<DashboardPage />}
@@ -42,6 +46,11 @@ export function AppRouter() {
                             element={<CommunitiesPage />}
                         />
                         <Route path={ROUTES.CHAT} element={<ChatPage />} />
+                        <Route path={ROUTES.FILES} element={<FilesPage />} />
+                        <Route
+                            path={ROUTES.NOTIFICATIONS}
+                            element={<NotificationsPage />}
+                        />
                         <Route
                             path={ROUTES.SETTINGS}
                             element={<SettingsPage />}

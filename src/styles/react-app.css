@@ -505,73 +505,6 @@ body:is([data-page="login"], [data-page="register"]) .auth-switch a {
     font-size: 1.5rem;
 }
 
-.react-app-shell {
-    min-height: 100vh;
-    display: grid;
-    grid-template-columns: 17rem minmax(0, 1fr);
-    background: var(--background);
-    color: var(--text);
-}
-
-.react-sidebar {
-    position: sticky;
-    top: 0;
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-8);
-    padding: var(--space-6);
-    border-right: 1px solid var(--border);
-    background: var(--surface);
-}
-
-.react-sidebar nav {
-    display: grid;
-    gap: var(--space-2);
-}
-
-.react-sidebar nav a {
-    padding: var(--space-3) var(--space-4);
-    border-radius: var(--radius-md);
-    color: var(--text-secondary);
-    font-weight: 650;
-    text-decoration: none;
-}
-
-.react-sidebar nav a:hover,
-.react-sidebar nav a.active {
-    background: var(--primary-soft);
-    color: var(--primary);
-}
-
-.react-sidebar > button {
-    margin-top: auto;
-}
-
-.react-app-main {
-    min-width: 0;
-}
-
-.react-app-header {
-    display: flex;
-    min-height: 4.5rem;
-    align-items: center;
-    justify-content: flex-end;
-    padding: var(--space-3) var(--space-8);
-    border-bottom: 1px solid var(--border);
-    background: var(--surface);
-}
-
-.react-app-header div {
-    display: grid;
-    text-align: right;
-}
-
-.react-app-header span {
-    color: var(--text-secondary);
-    font-size: 0.8rem;
-}
-
 .react-page {
     width: min(72rem, 100%);
     margin-inline: auto;
@@ -683,26 +616,6 @@ body:is([data-page="login"], [data-page="register"]) .auth-switch a {
 
     body:is([data-page="login"], [data-page="register"]) .auth-features {
         display: none;
-    }
-
-    .react-app-shell {
-        grid-template-columns: 1fr;
-    }
-
-    .react-sidebar {
-        position: static;
-        height: auto;
-        gap: var(--space-4);
-        border-right: 0;
-        border-bottom: 1px solid var(--border);
-    }
-
-    .react-sidebar nav {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    .react-sidebar > button {
-        margin-top: 0;
     }
 
     .react-page {

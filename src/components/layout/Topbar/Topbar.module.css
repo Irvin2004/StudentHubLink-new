@@ -1,0 +1,152 @@
+.topbar {
+    position: sticky;
+    z-index: 20;
+    top: 0;
+    min-width: 0;
+    min-height: 4.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-6);
+    padding: 0 var(--space-6);
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+}
+
+.mobileBrand {
+    display: none;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+.mobileBrand a {
+    color: var(--text);
+    font-size: 1.1rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    text-decoration: none;
+}
+
+.search {
+    width: min(32rem, 48%);
+    min-height: 2.875rem;
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: 0 var(--space-3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--background);
+    color: var(--text-secondary);
+    transition:
+        border var(--transition-fast),
+        box-shadow var(--transition-fast);
+}
+
+.search:focus-within {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 16%, transparent);
+}
+
+.search input {
+    min-width: 0;
+    flex: 1;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: var(--text);
+    font: inherit;
+    font-size: 0.925rem;
+}
+
+.search input::placeholder {
+    color: var(--text-secondary);
+}
+
+.search kbd {
+    min-width: 1.5rem;
+    padding: 0.1rem 0.4rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    color: var(--text-secondary);
+    font: inherit;
+    font-size: 0.75rem;
+    text-align: center;
+}
+
+.actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.iconButton,
+.themeButton {
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid transparent;
+    border-radius: var(--radius-md);
+    background: transparent;
+    color: var(--text-secondary);
+    font: inherit;
+    text-decoration: none;
+    transition:
+        background var(--transition-fast),
+        color var(--transition-fast);
+}
+
+.iconButton:hover,
+.themeButton:hover {
+    background: var(--surface-muted);
+    color: var(--text);
+}
+
+.themeButton {
+    gap: var(--space-2);
+    padding: 0 var(--space-3);
+    border-color: var(--border);
+    background: var(--surface);
+    color: var(--text);
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: capitalize;
+}
+
+@media (max-width: 47.999rem) {
+    .topbar {
+        min-height: 4.25rem;
+        gap: var(--space-2);
+        padding-inline: var(--space-3);
+    }
+
+    .mobileBrand {
+        display: flex;
+    }
+
+    .search {
+        display: none;
+    }
+
+    .actions {
+        margin-left: auto;
+    }
+
+    .themeButton {
+        width: 2.75rem;
+        padding: 0;
+    }
+
+    .themeButton span {
+        display: none;
+    }
+}
+
+@media (max-width: 24rem) {
+    .mobileBrand a {
+        display: none;
+    }
+}
