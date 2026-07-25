@@ -1,0 +1,57 @@
+.sidebar {
+    min-width: 0;
+    border-right: 1px solid var(--border);
+    background: var(--surface);
+}
+
+.labelRow {
+    min-height: 3.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 var(--space-5);
+}
+
+.labelRow h2 {
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    letter-spacing: 0.065em;
+    text-transform: uppercase;
+}
+
+.labelRow span {
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+}
+
+.list {
+    display: grid;
+    gap: var(--space-1);
+    margin: 0;
+    padding: 0 0 var(--space-4);
+    list-style: none;
+}
+
+.skeletons {
+    display: grid;
+    gap: var(--space-5);
+    padding: var(--space-3) var(--space-6) var(--space-6);
+}
+
+.create {
+    margin: 0 var(--space-5);
+    padding: var(--space-4) 0;
+    border-top: 1px solid var(--border);
+}
+
+.create button {
+    width: 100%;
+    justify-content: flex-start;
+    color: var(--text);
+}
+
+.noResults {
+    padding: var(--space-4) var(--space-5);
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}

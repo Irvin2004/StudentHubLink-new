@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import Button from "../../components/ui/Button/index.js";
 import Modal from "../../components/ui/Modal/index.js";
@@ -61,6 +62,7 @@ function CommunityGridSkeleton() {
 export default function CommunitiesPage() {
     useDocumentTitle("StudentHub - Communities", "react-app");
 
+    const navigate = useNavigate();
     const { user } = useAuth();
     const { showToast } = useToast();
     const { communities, createCommunity, error, loading, refreshCommunities } =
@@ -240,7 +242,9 @@ export default function CommunitiesPage() {
                         onClick: () => setCreateOpen(true)
                     }}
                     getAction={renderMembershipAction}
-                    onOpenCommunity={setSelectedCommunity}
+                    onOpenCommunity={(community) =>
+                        navigate(`/community/${community.id}/channel/general`)
+                    }
                 />
             )}
 

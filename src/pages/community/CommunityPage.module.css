@@ -1,0 +1,114 @@
+.page {
+    --channel-accent: #f97316;
+    --channel-accent-soft: #fff1e8;
+    min-height: calc(100vh - 4.75rem);
+    min-height: calc(100dvh - 4.75rem);
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    background: var(--surface);
+    color: var(--text);
+}
+
+.communityHeader {
+    min-height: 7.75rem;
+    display: flex;
+    align-items: center;
+    gap: var(--space-5);
+    padding: var(--space-6) clamp(var(--space-6), 4vw, var(--space-10));
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+}
+
+.communityHeader h1 {
+    color: var(--text);
+    font-size: clamp(1.55rem, 2.4vw, 2.1rem);
+    letter-spacing: -0.035em;
+}
+
+.communityHeader p {
+    margin-top: var(--space-2);
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.communityMark {
+    width: 3.75rem;
+    height: 3.75rem;
+    flex: 0 0 auto;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--color-slate-900);
+    color: var(--color-white);
+    font-size: 1.1rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+}
+
+.headerSkeleton {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+}
+
+.headerSkeleton div {
+    display: grid;
+    gap: var(--space-2);
+}
+
+.workspace {
+    min-height: 0;
+    display: grid;
+    grid-template-columns: 17.5rem minmax(0, 1fr);
+}
+
+.channelArea {
+    min-width: 0;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    background: var(--surface);
+}
+
+.srOnly {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+}
+
+@media (max-width: 47.999rem) {
+    .page {
+        min-height: calc(100dvh - 4.25rem);
+    }
+
+    .communityHeader {
+        min-height: 6.5rem;
+        padding: var(--space-5);
+    }
+
+    .communityMark {
+        width: 3.25rem;
+        height: 3.25rem;
+    }
+
+    .workspace {
+        grid-template-columns: 14.5rem minmax(22rem, 1fr);
+        overflow-x: auto;
+    }
+}
+
+@media (max-width: 36rem) {
+    .workspace {
+        grid-template-columns: 1fr;
+        overflow-x: visible;
+    }
+
+    .workspace > aside {
+        max-height: 18rem;
+        overflow-y: auto;
+        border-right: 0;
+        border-bottom: 1px solid var(--border);
+    }
+}

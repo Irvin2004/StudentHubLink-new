@@ -1,0 +1,78 @@
+.item {
+    position: relative;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+}
+
+.link {
+    min-width: 0;
+    min-height: var(--control-height-md);
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: 0 3.25rem 0 var(--space-5);
+    border-left: 3px solid transparent;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    font-weight: 650;
+    text-decoration: none;
+    transition:
+        color var(--transition-fast),
+        background var(--transition-fast);
+}
+
+.link span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.link:hover {
+    background: var(--surface-muted);
+    color: var(--text);
+}
+
+.active,
+.active:hover {
+    border-left-color: var(--channel-accent);
+    background: var(--channel-accent-soft);
+    color: var(--channel-accent);
+}
+
+.actions {
+    position: absolute;
+    z-index: 3;
+    right: var(--space-3);
+}
+
+.more {
+    width: 2rem;
+    height: 2rem;
+    display: grid;
+    opacity: 0;
+    place-items: center;
+    border: 0;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--text-secondary);
+}
+
+.item:hover .more,
+.more:focus-visible,
+.more[aria-expanded="true"] {
+    opacity: 1;
+}
+
+.more:hover {
+    background: color-mix(in srgb, var(--text) 8%, transparent);
+    color: var(--text);
+}
+
+.menu {
+    position: absolute;
+    top: calc(100% + var(--space-1));
+    right: 0;
+    width: 12rem;
+}

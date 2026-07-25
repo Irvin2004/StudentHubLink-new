@@ -27,6 +27,30 @@ service cloud.firestore {
         ).data.role in ["owner", "admin"];
     }
 
+    function isCommunityMember(communityId) {
+      return signedIn()
+        && exists(
+          /databases/$(database)/documents/communities/$(communityId)/members/$(request.auth.uid)
+        );
+    }
+
+    function isCommunityManager(communityId) {
+      return isCommunityMember(communityId)
+        && get(
+          /databases/$(database)/documents/communities/$(communityId)/members/$(request.auth.uid)
+        ).data.role in ["owner", "admin"];
+    }
+
+    function isCommunityManagerAfter(communityId) {
+      return signedIn()
+        && existsAfter(
+          /databases/$(database)/documents/communities/$(communityId)/members/$(request.auth.uid)
+        )
+        && getAfter(
+          /databases/$(database)/documents/communities/$(communityId)/members/$(request.auth.uid)
+        ).data.role in ["owner", "admin"];
+    }
+
     function unchanged(field) {
       return !(field in request.resource.data)
         || request.resource.data[field] == resource.data[field];
@@ -654,6 +678,98 @@ service cloud.firestore {
         );
       allow delete: if false;
     }
+    match /communities/{communityId} {
+      allow read: if signedIn()
+        && (
+          resource.data.visibility == "public"
+          || isCommunityMember(communityId)
+        );
+      allow create: if signedIn()
+        && request.resource.data.ownerId == request.auth.uid
+        && request.resource.data.memberCount == 1
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.updatedAt == request.time
+        && existsAfter(
+          /databases/$(database)/documents/communities/$(communityId)/members/$(request.auth.uid)
+        )
+        && existsAfter(
+          /databases/$(database)/documents/communities/$(communityId)/channels/general
+        );
+      allow update: if signedIn()
+        && request.resource.data.ownerId == resource.data.ownerId
+        && request.resource.data.createdAt == resource.data.createdAt
+        && (
+          isCommunityManager(communityId)
+          || request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(["memberCount", "updatedAt"])
+        );
+      allow delete: if signedIn()
+        && resource.data.ownerId == request.auth.uid;
+
+      match /members/{userId} {
+        allow read: if signedIn()
+          && (
+            userId == request.auth.uid
+            || isCommunityMember(communityId)
+          );
+        allow create: if signedIn()
+          && request.resource.data.userId == userId
+          && request.resource.data.communityId == communityId
+          && request.resource.data.role in [
+            "owner", "admin", "moderator", "member"
+          ]
+          && (
+            userId == request.auth.uid
+            || isCommunityManagerAfter(communityId)
+          );
+        allow update, delete: if signedIn()
+          && (
+            userId == request.auth.uid
+            || isCommunityManager(communityId)
+          );
+      }
+
+      match /channels/{channelId} {
+        allow read: if isCommunityMember(communityId);
+        allow create: if isCommunityManagerAfter(communityId)
+          && request.resource.data.communityId == communityId
+          && request.resource.data.createdBy == request.auth.uid
+          && request.resource.data.name is string
+          && request.resource.data.name.size() > 0
+          && request.resource.data.name.size() <= 80
+          && request.resource.data.description is string
+          && request.resource.data.description.size() <= 120
+          && request.resource.data.type in ["TEXT", "ANNOUNCEMENTS"]
+          && request.resource.data.position is number
+          && request.resource.data.position >= 0
+          && request.resource.data.createdAt == request.time
+          && request.resource.data.updatedAt == request.time;
+        allow update: if isCommunityManager(communityId)
+          && request.resource.data.communityId == resource.data.communityId
+          && request.resource.data.createdBy == resource.data.createdBy
+          && request.resource.data.createdAt == resource.data.createdAt
+          && (
+            channelId != "general"
+            || request.resource.data.name == "general"
+          );
+        allow delete: if channelId != "general"
+          && isCommunityManager(communityId);
+
+        match /messages/{messageId} {
+          allow read: if isCommunityMember(communityId);
+          allow create: if isCommunityMember(communityId)
+            && (
+              get(
+                /databases/$(database)/documents/communities/$(communityId)/channels/$(channelId)
+              ).data.type == "TEXT"
+              || isCommunityManager(communityId)
+            );
+          allow update, delete: if isCommunityManager(communityId)
+            || resource.data.createdBy == request.auth.uid;
+        }
+      }
+    }
+
     match /groups/{groupId} {
       function groupFieldsAreValid() {
         return request.resource.data.keys().hasOnly([

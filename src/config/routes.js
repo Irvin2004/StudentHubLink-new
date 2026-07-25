@@ -4,6 +4,8 @@ export const ROUTES = Object.freeze({
     REGISTER: "/register",
     DASHBOARD: "/app",
     COMMUNITIES: "/app/communities",
+    COMMUNITY: "/community/:communityId",
+    COMMUNITY_CHANNEL: "/community/:communityId/channel/:channelId",
     CHAT: "/app/chat",
     FILES: "/app/files",
     NOTIFICATIONS: "/app/notifications",

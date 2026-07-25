@@ -35,6 +35,7 @@ export default function Modal({
     closeOnOverlay = true,
     description,
     footer,
+    initialFocusRef,
     onClose,
     open,
     size = "medium",
@@ -51,7 +52,7 @@ export default function Modal({
         const previousOverflow = document.body.style.overflow;
         const dialog = dialogRef.current;
         const focusable = [...dialog.querySelectorAll(FOCUSABLE_SELECTOR)];
-        (focusable[0] || dialog).focus();
+        (initialFocusRef?.current || focusable[0] || dialog).focus();
         document.body.style.overflow = "hidden";
 
         function handleKeyDown(event) {
@@ -86,7 +87,7 @@ export default function Modal({
             document.body.style.overflow = previousOverflow;
             previousFocus?.focus?.();
         };
-    }, [onClose, open]);
+    }, [initialFocusRef, onClose, open]);
 
     if (!open) return null;
 

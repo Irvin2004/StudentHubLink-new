@@ -1,0 +1,36 @@
+.state {
+    min-height: 24rem;
+    display: grid;
+    align-content: center;
+    justify-items: center;
+    padding: var(--space-10);
+    text-align: center;
+}
+
+.mark {
+    width: 7rem;
+    height: 7rem;
+    display: grid;
+    place-items: center;
+    margin-bottom: var(--space-8);
+    border-radius: 50%;
+    background: var(--surface-muted);
+    color: var(--color-slate-400);
+    font-size: 4.5rem;
+    font-weight: 500;
+    line-height: 1;
+}
+
+.state h2 {
+    color: var(--text);
+    font-size: clamp(1.6rem, 3vw, 2.25rem);
+    letter-spacing: -0.035em;
+}
+
+.state p {
+    max-width: 35rem;
+    margin-top: var(--space-3);
+    color: var(--text-secondary);
+    font-size: 1rem;
+    line-height: 1.65;
+}

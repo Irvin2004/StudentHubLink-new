@@ -18,6 +18,7 @@ import {
 } from "firebase/firestore";
 
 import { COMMUNITY_ROLES } from "../config/community-roles.js";
+import { CHANNEL_TYPES } from "../config/channel-types.js";
 import { auth, db } from "../firebase/index.js";
 import { createCommunityModel } from "../models/community.js";
 import { createCommunityMemberModel } from "../models/community-member.js";
@@ -36,6 +37,7 @@ const CHILD_COLLECTIONS = Object.freeze([
 ]);
 const DELETE_BATCH_SIZE = 400;
 const DEFAULT_RESULT_LIMIT = 50;
+const DEFAULT_CHANNEL_ID = "general";
 
 function getAuthenticatedUserId(userId) {
     const resolvedUserId = userId || auth.currentUser?.uid;
@@ -121,6 +123,13 @@ export async function createCommunity(input, ownerId) {
         communityReference.id,
         resolvedOwnerId
     );
+    const generalChannelReference = doc(
+        db,
+        COMMUNITIES_COLLECTION,
+        communityReference.id,
+        "channels",
+        DEFAULT_CHANNEL_ID
+    );
     const timestamp = serverTimestamp();
     const communityData = {
         ...validated,
@@ -136,10 +145,21 @@ export async function createCommunity(input, ownerId) {
         joinedAt: timestamp,
         nickname: null
     };
+    const generalChannelData = {
+        communityId: communityReference.id,
+        name: DEFAULT_CHANNEL_ID,
+        description: `General conversation for everyone in ${validated.name}.`,
+        type: CHANNEL_TYPES.TEXT,
+        createdBy: resolvedOwnerId,
+        createdAt: timestamp,
+        updatedAt: timestamp,
+        position: 0
+    };
     const batch = writeBatch(db);
 
     batch.set(communityReference, communityData);
     batch.set(ownerReference, ownerData);
+    batch.set(generalChannelReference, generalChannelData);
     await batch.commit();
 
     return createCommunityModel({
@@ -251,6 +271,19 @@ export async function getCommunity(communityId) {
     const snapshot = await getDoc(getCommunityReference(communityId));
 
     return snapshot.exists() ? communityFromSnapshot(snapshot) : null;
+}
+
+/**
+ * Loads a single membership when it exists.
+ *
+ * @param {string} communityId
+ * @param {string} userId
+ * @returns {Promise<Readonly<object>|null>}
+ */
+export async function getCommunityMember(communityId, userId) {
+    const snapshot = await getDoc(getMemberReference(communityId, userId));
+
+    return snapshot.exists() ? memberFromSnapshot(snapshot, communityId) : null;
 }
 
 /**

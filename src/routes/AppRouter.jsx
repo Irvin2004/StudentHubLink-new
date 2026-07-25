@@ -16,6 +16,9 @@ const DashboardPage = lazy(
 const CommunitiesPage = lazy(
     () => import("../pages/communities/CommunitiesPage.jsx")
 );
+const CommunityPage = lazy(
+    () => import("../pages/community/CommunityPage.jsx")
+);
 const ChatPage = lazy(() => import("../pages/chat/ChatPage.jsx"));
 const FilesPage = lazy(() => import("../pages/files/FilesPage.jsx"));
 const NotificationsPage = lazy(
@@ -44,6 +47,14 @@ export function AppRouter() {
                         <Route
                             path={ROUTES.COMMUNITIES}
                             element={<CommunitiesPage />}
+                        />
+                        <Route
+                            path={ROUTES.COMMUNITY}
+                            element={<CommunityPage />}
+                        />
+                        <Route
+                            path={ROUTES.COMMUNITY_CHANNEL}
+                            element={<CommunityPage />}
                         />
                         <Route path={ROUTES.CHAT} element={<ChatPage />} />
                         <Route path={ROUTES.FILES} element={<FilesPage />} />

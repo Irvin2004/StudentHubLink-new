@@ -1,5 +1,6 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, test, vi } from "vitest";
+import { MemoryRouter } from "react-router-dom";
 
 const communities = [
     {
@@ -59,7 +60,11 @@ describe("CommunitiesPage", () => {
 
     test("filters rendered communities after the debounced search", () => {
         vi.useFakeTimers();
-        render(<CommunitiesPage />);
+        render(
+            <MemoryRouter>
+                <CommunitiesPage />
+            </MemoryRouter>
+        );
 
         expect(
             screen.getByRole("heading", { name: "Robotics Club" })

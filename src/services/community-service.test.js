@@ -48,7 +48,11 @@ vi.mock("firebase/firestore", () => ({
 
         return {
             id: segments.at(-1),
-            kind: path.includes("/members/") ? "member" : "community",
+            kind: path.includes("/members/")
+                ? "member"
+                : path.includes("/channels/")
+                  ? "channel"
+                  : "community",
             path
         };
     },
@@ -152,12 +156,21 @@ describe("community service", () => {
             visibility: "private",
             memberCount: 1
         });
-        expect(mocks.batch.set).toHaveBeenCalledTimes(2);
+        expect(mocks.batch.set).toHaveBeenCalledTimes(3);
         expect(mocks.batch.set).toHaveBeenCalledWith(
             expect.objectContaining({ kind: "member" }),
             expect.objectContaining({
                 role: COMMUNITY_ROLES.OWNER,
                 userId: "owner-1"
+            })
+        );
+        expect(mocks.batch.set).toHaveBeenCalledWith(
+            expect.objectContaining({ id: "general", kind: "channel" }),
+            expect.objectContaining({
+                communityId: "community-1",
+                name: "general",
+                position: 0,
+                type: "TEXT"
             })
         );
         expect(mocks.batch.commit).toHaveBeenCalledOnce();
