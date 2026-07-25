@@ -11,10 +11,10 @@ service firebase.storage {
         && request.resource.size > 0
         && request.resource.size <= 25 * 1024 * 1024
         && request.resource.contentType.matches(
-          '^(image/(jpeg|png|webp)|application/(pdf|msword|vnd[.]openxmlformats-officedocument[.]wordprocessingml[.]document|vnd[.]ms-powerpoint|vnd[.]openxmlformats-officedocument[.]presentationml[.]presentation|vnd[.]ms-excel|vnd[.]openxmlformats-officedocument[.]spreadsheetml[.]sheet|zip|x-zip-compressed))$'
+          '^(image/(gif|jpeg|png|webp)|text/(plain|csv)|application/(csv|pdf|msword|vnd[.]openxmlformats-officedocument[.]wordprocessingml[.]document|vnd[.]ms-powerpoint|vnd[.]openxmlformats-officedocument[.]presentationml[.]presentation|vnd[.]ms-excel|vnd[.]openxmlformats-officedocument[.]spreadsheetml[.]sheet|zip|x-zip-compressed|octet-stream))$'
         )
         && request.resource.name.matches(
-          '.*[.](jpg|jpeg|png|webp|pdf|doc|docx|ppt|pptx|xls|xlsx|zip)$'
+          '.*[.](jpg|jpeg|gif|png|webp|pdf|doc|docx|ppt|pptx|xls|xlsx|zip|txt|csv)$'
         );
     }
 
@@ -46,6 +46,20 @@ service firebase.storage {
         && firestore.get(
           /databases/(default)/documents/groups/$(groupId)
         ).data.ownerId == request.auth.uid;
+    }
+
+    function isCommunityMember(communityId) {
+      return signedIn()
+        && firestore.exists(
+          /databases/(default)/documents/communities/$(communityId)/members/$(request.auth.uid)
+        );
+    }
+
+    function isCommunityManager(communityId) {
+      return isCommunityMember(communityId)
+        && firestore.get(
+          /databases/(default)/documents/communities/$(communityId)/members/$(request.auth.uid)
+        ).data.role in ["owner", "admin"];
     }
 
     function canAccessConversation(conversationId) {
@@ -101,6 +115,21 @@ service firebase.storage {
     match /groups/{groupId}/resources/{legacyFileName} {
       allow read: if isGroupMember(groupId);
       allow write: if false;
+    }
+
+    match /communities/{communityId}/channels/{channelId}/files/{fileName} {
+      allow read: if isCommunityMember(communityId);
+      allow create: if isCommunityMember(communityId)
+        && isAllowedUpload()
+        && request.resource.metadata.communityId == communityId
+        && request.resource.metadata.channelId == channelId
+        && request.resource.metadata.uploadedBy == request.auth.uid;
+      allow update: if false;
+      allow delete: if isCommunityMember(communityId)
+        && (
+          resource.metadata.uploadedBy == request.auth.uid
+          || isCommunityManager(communityId)
+        );
     }
 
     match /resources/{userId}/{fileName} {

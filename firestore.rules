@@ -831,6 +831,53 @@ service cloud.firestore {
           allow delete: if isCommunityManager(communityId);
         }
 
+        match /files/{fileId} {
+          allow read: if isCommunityMember(communityId);
+          allow create: if isCommunityMember(communityId)
+            && request.resource.data.keys().hasOnly([
+              "name",
+              "originalName",
+              "extension",
+              "size",
+              "type",
+              "url",
+              "storagePath",
+              "uploadedBy",
+              "uploadedByName",
+              "uploadedAt",
+              "communityId",
+              "channelId",
+              "messageId"
+            ])
+            && request.resource.data.communityId == communityId
+            && request.resource.data.channelId == channelId
+            && request.resource.data.uploadedBy == request.auth.uid
+            && request.resource.data.originalName is string
+            && request.resource.data.originalName.size() > 0
+            && request.resource.data.originalName.size() <= 255
+            && request.resource.data.extension in [
+              "png", "jpg", "jpeg", "gif", "webp", "pdf", "doc", "docx",
+              "ppt", "pptx", "xls", "xlsx", "zip", "txt", "csv"
+            ]
+            && request.resource.data.size is int
+            && request.resource.data.size > 0
+            && request.resource.data.size <= 25 * 1024 * 1024
+            && request.resource.data.type is string
+            && request.resource.data.url is string
+            && request.resource.data.storagePath is string
+            && request.resource.data.uploadedAt == request.time
+            && (
+              request.resource.data.messageId == null
+              || request.resource.data.messageId is string
+            );
+          allow update: if false;
+          allow delete: if isCommunityManager(communityId)
+            || (
+              isCommunityMember(communityId)
+              && resource.data.uploadedBy == request.auth.uid
+            );
+        }
+
         match /typing/{userId} {
           allow read: if isCommunityMember(communityId);
           allow create, update: if isCommunityMember(communityId)

@@ -3,6 +3,16 @@ import { describe, expect, test, vi } from "vitest";
 
 import MessageComposer from "./MessageComposer.jsx";
 
+vi.mock("../../../hooks/useFiles.js", () => ({
+    useFiles: () => ({
+        cancelUpload: vi.fn(),
+        removeUpload: vi.fn(),
+        retryUpload: vi.fn(),
+        uploadFiles: vi.fn().mockResolvedValue([]),
+        uploads: []
+    })
+}));
+
 describe("MessageComposer", () => {
     test("sends with Enter and includes a reply reference", async () => {
         const onSend = vi.fn().mockResolvedValue();

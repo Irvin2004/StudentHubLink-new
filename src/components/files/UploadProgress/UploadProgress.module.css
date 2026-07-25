@@ -1,0 +1,77 @@
+.item {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface);
+}
+
+.details {
+    min-width: 0;
+}
+.heading {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-3);
+}
+.heading strong {
+    overflow: hidden;
+    font-size: 0.8rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.heading span,
+.details p {
+    color: var(--text-secondary);
+    font-size: 0.7rem;
+}
+.details p {
+    margin-top: 0.3rem;
+}
+.track {
+    height: 0.35rem;
+    margin-top: 0.4rem;
+    overflow: hidden;
+    border-radius: 999px;
+    background: var(--surface-muted);
+}
+.track span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--channel-accent);
+    transition: width 180ms ease;
+}
+.item[data-status="failed"] .track span,
+.item[data-status="cancelled"] .track span {
+    background: var(--danger);
+}
+.actions {
+    display: flex;
+    gap: var(--space-2);
+}
+.actions button {
+    border: 0;
+    background: transparent;
+    color: var(--channel-accent);
+    font: inherit;
+    font-size: 0.72rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+.actions button:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+}
+
+@media (max-width: 36rem) {
+    .item {
+        grid-template-columns: auto minmax(0, 1fr);
+    }
+    .actions {
+        grid-column: 2;
+    }
+}

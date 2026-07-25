@@ -1,0 +1,57 @@
+.icon {
+    position: relative;
+    display: inline-grid;
+    place-items: end center;
+    flex: 0 0 auto;
+    width: 3rem;
+    height: 3.6rem;
+    padding-bottom: 0.55rem;
+    overflow: hidden;
+    border-radius: 0.45rem;
+    background: #51657a;
+    color: white;
+    box-shadow: inset 0 -1rem 0 rgb(0 0 0 / 10%);
+}
+
+.icon[data-size="small"] {
+    width: 2.25rem;
+    height: 2.7rem;
+    padding-bottom: 0.4rem;
+}
+
+.icon strong {
+    font-size: 0.62rem;
+    letter-spacing: 0.04em;
+}
+
+.fold {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 0.8rem;
+    height: 0.8rem;
+    background: rgb(255 255 255 / 55%);
+    clip-path: polygon(0 0, 100% 100%, 100% 0);
+}
+
+.icon[data-category="pdf"] {
+    background: #d43d4f;
+}
+.icon[data-category="document"] {
+    background: #2874d0;
+}
+.icon[data-category="presentation"] {
+    background: #d65b32;
+}
+.icon[data-category="spreadsheet"] {
+    background: #17845a;
+}
+.icon[data-category="archive"] {
+    background: #7256b6;
+}
+.icon[data-category="image"] {
+    background: #148aa0;
+}
+.icon[data-category="text"] {
+    background: #53687a;
+}

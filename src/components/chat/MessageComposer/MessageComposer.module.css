@@ -1,6 +1,31 @@
 .wrapper {
+    position: relative;
     padding: 0 clamp(var(--space-4), 4vw, var(--space-8)) var(--space-4);
     background: var(--surface);
+}
+
+.wrapper[data-dragging] {
+    background: color-mix(in srgb, var(--channel-accent) 7%, var(--surface));
+}
+
+.uploads {
+    display: grid;
+    gap: var(--space-2);
+    margin-bottom: var(--space-2);
+}
+
+.dropHint {
+    position: absolute;
+    z-index: 3;
+    inset: 0.25rem clamp(var(--space-4), 4vw, var(--space-8));
+    display: grid;
+    place-items: center;
+    border: 2px dashed var(--channel-accent);
+    border-radius: var(--radius-lg);
+    background: color-mix(in srgb, var(--surface) 92%, transparent);
+    color: var(--channel-accent);
+    font-weight: 800;
+    pointer-events: none;
 }
 
 .composer {

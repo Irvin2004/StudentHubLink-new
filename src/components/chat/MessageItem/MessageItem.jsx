@@ -1,6 +1,7 @@
 import { memo, useState } from "react";
 
 import Avatar from "../../ui/Avatar/index.js";
+import AttachmentPreview from "../AttachmentPreview/AttachmentPreview.jsx";
 import MessageContextMenu from "../MessageContextMenu/MessageContextMenu.jsx";
 import MessageReactions from "../MessageReactions/MessageReactions.jsx";
 import MessageStatus from "../MessageStatus/MessageStatus.jsx";
@@ -122,6 +123,7 @@ function MessageItem({
                         ) : (
                             <p className={styles.text}>{message.text}</p>
                         )}
+                        <AttachmentPreview attachments={message.attachments} />
                         <MessageReactions
                             currentUserId={currentUserId}
                             message={message}

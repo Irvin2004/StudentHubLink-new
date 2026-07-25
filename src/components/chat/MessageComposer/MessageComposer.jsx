@@ -1,14 +1,18 @@
 import { useRef, useState } from "react";
 
+import UploadProgress from "../../files/UploadProgress/UploadProgress.jsx";
 import AttachmentPreview from "../AttachmentPreview/AttachmentPreview.jsx";
 import MessageInput from "../MessageInput/MessageInput.jsx";
 import ReplyPreview from "../ReplyPreview/ReplyPreview.jsx";
 import { MESSAGE_MAX_LENGTH } from "../../../config/message-types.js";
+import { useFiles } from "../../../hooks/useFiles.js";
 import styles from "./MessageComposer.module.css";
 
 export default function MessageComposer({
     canPost = true,
+    channelId,
     channelName,
+    communityId,
     onCancelReply,
     onSend,
     onTyping,
@@ -18,12 +22,17 @@ export default function MessageComposer({
     const [attachments, setAttachments] = useState([]);
     const [sending, setSending] = useState(false);
     const [sendError, setSendError] = useState("");
+    const [dragging, setDragging] = useState(false);
     const inputRef = useRef(null);
     const fileRef = useRef(null);
+    const { cancelUpload, removeUpload, retryUpload, uploadFiles, uploads } =
+        useFiles(channelId, { communityId, subscribe: false });
+    const uploading = uploads.some((upload) => upload.status === "uploading");
     const cleanText = text.trim();
     const canSend =
         canPost &&
         !sending &&
+        !uploading &&
         (Boolean(cleanText) || attachments.length > 0) &&
         text.length <= MESSAGE_MAX_LENGTH;
 
@@ -36,6 +45,9 @@ export default function MessageComposer({
             await onSend(cleanText, { attachments, replyTo: reply });
             setText("");
             setAttachments([]);
+            uploads
+                .filter((upload) => upload.status === "complete")
+                .forEach((upload) => removeUpload(upload.id));
             onCancelReply?.();
             inputRef.current?.focus();
         } catch (error) {
@@ -50,19 +62,53 @@ export default function MessageComposer({
         onTyping?.();
     }
 
-    function handleFiles(event) {
-        const files = Array.from(event.target.files || []).map((file) => ({
-            id: `${file.name}-${file.lastModified}`,
-            name: file.name,
-            size: file.size,
-            type: file.type
-        }));
-        setAttachments((current) => [...current, ...files].slice(0, 5));
-        event.target.value = "";
+    async function handleFiles(files) {
+        const remaining = Math.max(0, 5 - attachments.length);
+        if (!remaining) {
+            setSendError("A message can include up to 5 attachments.");
+            return;
+        }
+
+        setSendError("");
+        const results = await uploadFiles(
+            Array.from(files || []).slice(0, remaining)
+        );
+        const completed = results
+            .filter((result) => result.status === "fulfilled")
+            .map((result) => result.value);
+        const failure = results.find((result) => result.status === "rejected");
+
+        if (completed.length) {
+            setAttachments((current) => [...current, ...completed].slice(0, 5));
+        }
+        if (failure) {
+            setSendError(
+                failure.reason?.message ||
+                    "An attachment could not be uploaded."
+            );
+        }
     }
 
     return (
-        <div className={styles.wrapper}>
+        <div
+            className={styles.wrapper}
+            data-dragging={dragging || undefined}
+            onDragEnter={(event) => {
+                event.preventDefault();
+                setDragging(true);
+            }}
+            onDragLeave={(event) => {
+                if (!event.currentTarget.contains(event.relatedTarget)) {
+                    setDragging(false);
+                }
+            }}
+            onDragOver={(event) => event.preventDefault()}
+            onDrop={(event) => {
+                event.preventDefault();
+                setDragging(false);
+                if (canPost) void handleFiles(event.dataTransfer.files);
+            }}
+        >
             <ReplyPreview onClose={onCancelReply} reply={reply} />
             <AttachmentPreview
                 attachments={attachments}
@@ -74,6 +120,22 @@ export default function MessageComposer({
                     )
                 }
             />
+            {uploads.length ? (
+                <div className={styles.uploads}>
+                    {uploads.map((upload) => (
+                        <UploadProgress
+                            key={upload.id}
+                            onCancel={cancelUpload}
+                            onRemove={removeUpload}
+                            onRetry={retryUpload}
+                            upload={upload}
+                        />
+                    ))}
+                </div>
+            ) : null}
+            {dragging ? (
+                <p className={styles.dropHint}>Drop files to attach</p>
+            ) : null}
             <div
                 className={styles.composer}
                 data-disabled={!canPost || undefined}
@@ -82,7 +144,10 @@ export default function MessageComposer({
                     aria-label="Choose attachments"
                     className={styles.fileInput}
                     multiple
-                    onChange={handleFiles}
+                    onChange={(event) => {
+                        void handleFiles(event.target.files);
+                        event.target.value = "";
+                    }}
                     ref={fileRef}
                     type="file"
                 />
