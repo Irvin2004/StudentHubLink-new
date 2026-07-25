@@ -758,14 +758,93 @@ service cloud.firestore {
         match /messages/{messageId} {
           allow read: if isCommunityMember(communityId);
           allow create: if isCommunityMember(communityId)
+            && request.resource.data.keys().hasOnly([
+              "channelId",
+              "senderId",
+              "senderName",
+              "senderPhotoURL",
+              "text",
+              "attachments",
+              "replyTo",
+              "type",
+              "reactions",
+              "edited",
+              "deleted",
+              "deletedAt",
+              "readBy",
+              "createdAt",
+              "updatedAt"
+            ])
+            && request.resource.data.channelId == channelId
+            && request.resource.data.senderId == request.auth.uid
+            && request.resource.data.senderName is string
+            && request.resource.data.senderName.size() > 0
+            && request.resource.data.senderName.size() <= 120
+            && (
+              request.resource.data.senderPhotoURL == null
+              || request.resource.data.senderPhotoURL is string
+            )
+            && request.resource.data.text is string
+            && request.resource.data.text.size() <= 2000
+            && request.resource.data.attachments is list
+            && request.resource.data.attachments.size() <= 5
+            && (
+              request.resource.data.replyTo == null
+              || request.resource.data.replyTo is map
+            )
+            && request.resource.data.type == "TEXT"
+            && request.resource.data.reactions is map
+            && request.resource.data.edited == false
+            && request.resource.data.deleted == false
+            && request.resource.data.deletedAt == null
+            && request.resource.data.readBy == [request.auth.uid]
+            && request.resource.data.createdAt == request.time
+            && request.resource.data.updatedAt == request.time
             && (
               get(
                 /databases/$(database)/documents/communities/$(communityId)/channels/$(channelId)
               ).data.type == "TEXT"
               || isCommunityManager(communityId)
             );
-          allow update, delete: if isCommunityManager(communityId)
-            || resource.data.createdBy == request.auth.uid;
+          allow update: if isCommunityMember(communityId)
+            && request.resource.data.channelId == resource.data.channelId
+            && request.resource.data.senderId == resource.data.senderId
+            && request.resource.data.createdAt == resource.data.createdAt
+            && request.resource.data.updatedAt == request.time
+            && (
+              isCommunityManager(communityId)
+              || (
+                resource.data.senderId == request.auth.uid
+                && request.resource.data.diff(resource.data).affectedKeys()
+                  .hasOnly([
+                    "text",
+                    "attachments",
+                    "edited",
+                    "deleted",
+                    "deletedAt",
+                    "updatedAt"
+                  ])
+              )
+              || request.resource.data.diff(resource.data).affectedKeys()
+                .hasOnly(["reactions", "updatedAt"])
+            );
+          allow delete: if isCommunityManager(communityId);
+        }
+
+        match /typing/{userId} {
+          allow read: if isCommunityMember(communityId);
+          allow create, update: if isCommunityMember(communityId)
+            && userId == request.auth.uid
+            && request.resource.data.keys().hasOnly([
+              "userId", "displayName", "updatedAt"
+            ])
+            && request.resource.data.userId == request.auth.uid
+            && request.resource.data.displayName is string
+            && request.resource.data.displayName.size() > 0
+            && request.resource.data.displayName.size() <= 120
+            && request.resource.data.updatedAt == request.time;
+          allow delete: if userId == request.auth.uid
+            || isCommunityManager(communityId);
         }
       }
     }

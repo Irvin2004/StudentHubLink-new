@@ -1,0 +1,28 @@
+.chat {
+    min-height: 0;
+    display: grid;
+    grid-template-rows: minmax(0, 1fr) auto auto;
+    background: var(--surface);
+}
+
+.unavailable {
+    display: grid;
+    place-content: center;
+    min-height: 20rem;
+    padding: var(--space-6);
+    text-align: center;
+}
+
+.unavailable p {
+    margin-top: var(--space-2);
+    color: var(--text-secondary);
+}
+
+.srOnly {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+}

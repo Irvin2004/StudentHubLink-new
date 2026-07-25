@@ -1,0 +1,123 @@
+.wrapper {
+    padding: 0 clamp(var(--space-4), 4vw, var(--space-8)) var(--space-4);
+    background: var(--surface);
+}
+
+.composer {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: var(--space-3);
+    min-height: 4.65rem;
+    padding: 0.55rem 0.65rem;
+    border: 1px solid #aebbc9;
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    box-shadow: 0 1px 3px rgb(15 39 68 / 8%);
+}
+
+.composer:focus-within {
+    border-color: var(--channel-accent);
+    box-shadow: 0 0 0 3px
+        color-mix(in srgb, var(--channel-accent) 15%, transparent);
+}
+
+.composer[data-disabled] {
+    background: var(--surface-muted);
+}
+
+.fileInput {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+}
+
+.attach,
+.send {
+    min-height: 2.7rem;
+    border-radius: var(--radius-md);
+    font: inherit;
+    font-weight: 750;
+    cursor: pointer;
+}
+
+.attach {
+    width: 2.7rem;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-secondary);
+    font-size: 1.3rem;
+}
+
+.send {
+    min-width: 4.5rem;
+    padding: 0 var(--space-4);
+    border: 1px solid var(--channel-accent);
+    background: var(--channel-accent);
+    color: white;
+}
+
+.attach:hover:not(:disabled),
+.attach:focus-visible {
+    border-color: var(--channel-accent);
+    color: var(--channel-accent);
+}
+
+.send:hover:not(:disabled),
+.send:focus-visible {
+    filter: brightness(0.94);
+}
+
+.attach:focus-visible,
+.send:focus-visible {
+    outline: 2px solid var(--channel-accent);
+    outline-offset: 2px;
+}
+
+.attach:disabled,
+.send:disabled {
+    cursor: not-allowed;
+    opacity: 0.48;
+}
+
+.counter {
+    color: var(--text-secondary);
+    font-size: 0.7rem;
+}
+
+.counter[data-warning] {
+    color: var(--danger);
+}
+
+.hint {
+    margin-top: var(--space-2);
+    color: var(--text-secondary);
+    font-size: 0.7rem;
+}
+
+.error {
+    margin-top: var(--space-2);
+    color: var(--danger);
+    font-size: 0.75rem;
+}
+
+@media (max-width: 36rem) {
+    .wrapper {
+        padding-inline: var(--space-3);
+    }
+
+    .composer {
+        grid-template-columns: auto minmax(0, 1fr) auto;
+    }
+
+    .counter {
+        display: none;
+    }
+
+    .send {
+        min-width: auto;
+        padding-inline: var(--space-3);
+    }
+}

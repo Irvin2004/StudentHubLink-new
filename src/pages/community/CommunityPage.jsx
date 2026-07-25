@@ -11,6 +11,7 @@ import { useChannels } from "../../hooks/useChannels.js";
 import { useCommunity } from "../../hooks/useCommunity.js";
 import { useDocumentTitle } from "../../hooks/useDocumentTitle.js";
 import { useToast } from "../../hooks/useToast.js";
+import ChatPage from "../chat/ChatPage.jsx";
 import styles from "./CommunityPage.module.css";
 
 function CommunityMark({ name }) {
@@ -154,7 +155,10 @@ export default function CommunityPage() {
                     </>
                 )}
             </header>
-            <div className={styles.workspace}>
+            <div
+                className={styles.workspace}
+                data-channel-selected={Boolean(selectedChannel) || undefined}
+            >
                 <ChannelList
                     channels={channels}
                     communityId={communityId}
@@ -174,7 +178,11 @@ export default function CommunityPage() {
                     {selectedChannel ? (
                         <>
                             <ChannelHeader channel={selectedChannel} />
-                            <ChannelEmptyState selected />
+                            <ChatPage
+                                channel={selectedChannel}
+                                communityId={communityId}
+                                role={role}
+                            />
                         </>
                     ) : (
                         <ChannelEmptyState />
