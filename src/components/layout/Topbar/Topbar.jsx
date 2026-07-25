@@ -4,6 +4,7 @@ import { AppIcon } from "../../common/AppIcon.jsx";
 import { ROUTES } from "../../../config/routes.js";
 import { useSettings } from "../../../hooks/useSettings.js";
 import { useTheme } from "../../../hooks/useTheme.js";
+import { useNotifications } from "../../../hooks/useNotifications.js";
 import { UserMenu } from "../UserMenu/UserMenu.jsx";
 import styles from "./Topbar.module.css";
 
@@ -16,6 +17,7 @@ const THEME_ICONS = Object.freeze({
 
 export function Topbar({ menuButtonRef, onMenuToggle }) {
     const { updateSettings } = useSettings();
+    const { unreadCount } = useNotifications();
     const { setTheme, theme } = useTheme();
     const nextTheme =
         THEME_ORDER[(THEME_ORDER.indexOf(theme) + 1) % THEME_ORDER.length];
@@ -54,11 +56,16 @@ export function Topbar({ menuButtonRef, onMenuToggle }) {
             </div>
             <div className={styles.actions}>
                 <Link
-                    aria-label="View notifications"
+                    aria-label={`View notifications${unreadCount ? `, ${unreadCount} unread` : ""}`}
                     className={styles.iconButton}
                     to={ROUTES.NOTIFICATIONS}
                 >
                     <AppIcon name="bell" size={21} />
+                    {unreadCount ? (
+                        <span className={styles.notificationBadge}>
+                            {unreadCount > 99 ? "99+" : unreadCount}
+                        </span>
+                    ) : null}
                 </Link>
                 <button
                     aria-label={`Theme: ${theme}. Switch to ${nextTheme}.`}

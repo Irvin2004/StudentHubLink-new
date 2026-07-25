@@ -5,9 +5,11 @@ import MessageList from "../../components/chat/MessageList/MessageList.jsx";
 import TypingIndicator from "../../components/chat/TypingIndicator/TypingIndicator.jsx";
 import FileList from "../../components/files/FileList/FileList.jsx";
 import FileUploader from "../../components/files/FileUploader/FileUploader.jsx";
+import ActivityFeed from "../../components/notifications/ActivityFeed/ActivityFeed.jsx";
 import { canPostInChannel } from "../../config/channel-permissions.js";
 import { useAuth } from "../../hooks/useAuth.js";
 import { useFiles } from "../../hooks/useFiles.js";
+import { useActivityFeed } from "../../hooks/useActivityFeed.js";
 import { useMessages } from "../../hooks/useMessages.js";
 import { useToast } from "../../hooks/useToast.js";
 import styles from "./ChatPage.module.css";
@@ -18,6 +20,8 @@ export default function ChatPage({ channel, communityId, role }) {
     const [reply, setReply] = useState(null);
     const [view, setView] = useState("messages");
     const announcementRef = useRef(null);
+    const { activities, loading: activityLoading } =
+        useActivityFeed(communityId);
     const {
         deleteFile,
         downloadFile,
@@ -119,6 +123,13 @@ export default function ChatPage({ channel, communityId, role }) {
                     Messages
                 </button>
                 <button
+                    aria-current={view === "activity" ? "page" : undefined}
+                    onClick={() => setView("activity")}
+                    type="button"
+                >
+                    Activity
+                </button>
+                <button
                     aria-current={view === "files" ? "page" : undefined}
                     onClick={() => setView("files")}
                     type="button"
@@ -174,6 +185,12 @@ export default function ChatPage({ channel, communityId, role }) {
                     onDelete={handleDeleteFile}
                     onDownload={downloadFile}
                     role={role}
+                />
+            </div>
+            <div className={styles.activity} hidden={view !== "activity"}>
+                <ActivityFeed
+                    activities={activities}
+                    loading={activityLoading}
                 />
             </div>
             <p

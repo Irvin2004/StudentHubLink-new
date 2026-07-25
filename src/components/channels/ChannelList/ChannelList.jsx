@@ -8,6 +8,7 @@ import {
     canCreateChannel,
     canManageChannel
 } from "../../../config/channel-permissions.js";
+import { useNotifications } from "../../../hooks/useNotifications.js";
 import styles from "./ChannelList.module.css";
 
 function PlusIcon() {
@@ -61,6 +62,7 @@ export default function ChannelList({
     role
 }) {
     const [searchTerm, setSearchTerm] = useState("");
+    const { notifications, setRead } = useNotifications();
     const handleSearch = useCallback((value) => setSearchTerm(value), []);
     const filteredChannels = useMemo(() => {
         const query = searchTerm.trim().toLowerCase();
@@ -68,6 +70,33 @@ export default function ChannelList({
             ? channels.filter((channel) => channel.name.includes(query))
             : channels;
     }, [channels, searchTerm]);
+    const unreadByChannel = useMemo(() => {
+        const counts = new Map();
+        notifications.forEach((item) => {
+            if (
+                !item.read &&
+                item.communityId === communityId &&
+                item.channelId
+            ) {
+                counts.set(
+                    item.channelId,
+                    (counts.get(item.channelId) || 0) + 1
+                );
+            }
+        });
+        return counts;
+    }, [communityId, notifications]);
+
+    function markChannelRead(channelId) {
+        notifications
+            .filter(
+                (item) =>
+                    !item.read &&
+                    item.communityId === communityId &&
+                    item.channelId === channelId
+            )
+            .forEach((item) => void setRead(item.id, true));
+    }
 
     return (
         <aside aria-label="Community channels" className={styles.sidebar}>
@@ -99,6 +128,8 @@ export default function ChannelList({
                             key={channel.id}
                             manageable={canManageChannel(role)}
                             onManage={onManage}
+                            onOpen={() => markChannelRead(channel.id)}
+                            unreadCount={unreadByChannel.get(channel.id) || 0}
                         />
                     ))}
                 </ul>

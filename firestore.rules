@@ -60,10 +60,11 @@ service cloud.firestore {
       return request.resource.data.keys().hasOnly([
           "recipientId", "senderId", "groupId", "conversationId",
           "referenceId", "title", "message", "type", "read",
-          "createdAt", "updatedAt"
+          "createdAt", "updatedAt", "senderName", "communityId",
+          "channelId", "route"
         ])
         && request.resource.data.keys().hasAll([
-          "recipientId", "senderId", "groupId", "conversationId",
+          "recipientId", "senderId",
           "referenceId", "title", "message", "type", "read",
           "createdAt", "updatedAt"
         ])
@@ -79,7 +80,8 @@ service cloud.firestore {
         && request.resource.data.type in [
           "friend_request", "friend_accepted", "group_invite",
           "new_assignment", "assignment_due", "new_resource",
-          "new_message", "mention", "system"
+          "new_message", "mention", "channel_mention", "new_file",
+          "community_activity", "system"
         ]
         && request.resource.data.read == false
         && request.resource.data.createdAt == request.time
@@ -117,6 +119,34 @@ service cloud.firestore {
             && request.resource.data.groupId == get(conversationPath).data.groupId
             && exists(/databases/$(database)/documents/groups/$(request.resource.data.groupId)/members/$(userId))
           )
+        );
+    }
+
+    function communityMessageNotificationIsValid(userId) {
+      let messagePath = /databases/$(database)/documents/communities/$(request.resource.data.communityId)/channels/$(request.resource.data.channelId)/messages/$(request.resource.data.referenceId);
+      return request.resource.data.type in [
+          "new_message", "mention", "channel_mention"
+        ]
+        && request.resource.data.senderId == request.auth.uid
+        && userId != request.auth.uid
+        && exists(messagePath)
+        && get(messagePath).data.senderId == request.auth.uid
+        && isCommunityMember(request.resource.data.communityId)
+        && exists(
+          /databases/$(database)/documents/communities/$(request.resource.data.communityId)/members/$(userId)
+        );
+    }
+
+    function communityFileNotificationIsValid(userId) {
+      let filePath = /databases/$(database)/documents/communities/$(request.resource.data.communityId)/channels/$(request.resource.data.channelId)/files/$(request.resource.data.referenceId);
+      return request.resource.data.type == "new_file"
+        && request.resource.data.senderId == request.auth.uid
+        && userId != request.auth.uid
+        && exists(filePath)
+        && get(filePath).data.uploadedBy == request.auth.uid
+        && isCommunityMember(request.resource.data.communityId)
+        && exists(
+          /databases/$(database)/documents/communities/$(request.resource.data.communityId)/members/$(userId)
         );
     }
 
@@ -158,6 +188,16 @@ service cloud.firestore {
         || (
           request.resource.data.type in ["new_message", "mention"]
           && messageNotificationIsValid(userId)
+        )
+        || (
+          request.resource.data.type in [
+            "new_message", "mention", "channel_mention"
+          ]
+          && communityMessageNotificationIsValid(userId)
+        )
+        || (
+          request.resource.data.type == "new_file"
+          && communityFileNotificationIsValid(userId)
         )
         || (
           request.resource.data.type in ["friend_request", "friend_accepted"]
@@ -893,6 +933,21 @@ service cloud.firestore {
           allow delete: if userId == request.auth.uid
             || isCommunityManager(communityId);
         }
+      }
+
+      match /activities/{activityId} {
+        allow read: if isCommunityMember(communityId);
+        allow create: if isCommunityMember(communityId)
+          && request.resource.data.actorId == request.auth.uid
+          && request.resource.data.communityId == communityId
+          && request.resource.data.type in [
+            "message_sent", "file_uploaded", "channel_created", "system"
+          ]
+          && request.resource.data.title is string
+          && request.resource.data.description is string
+          && request.resource.data.createdAt == request.time;
+        allow update: if false;
+        allow delete: if isCommunityManager(communityId);
       }
     }
 

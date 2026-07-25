@@ -20,6 +20,8 @@ import {
 
 import { auth, db, storage } from "../firebase/index.js";
 import { createFileModel } from "../models/file.js";
+import { createActivity } from "./activity-service.js";
+import { createNotification } from "./notification-service.js";
 import {
     sanitizeStorageFileName,
     validateFile
@@ -83,6 +85,30 @@ function normalizeFileError(error) {
     );
     normalized.code = error?.code || "file/unknown";
     return normalized;
+}
+
+async function announceFile(file) {
+    const snapshot = await getDocs(
+        collection(db, COMMUNITIES, file.communityId, "members")
+    );
+    if (!snapshot?.docs) return;
+    await Promise.allSettled(
+        snapshot.docs
+            .filter((item) => item.id !== file.uploadedBy)
+            .map((item) =>
+                createNotification(item.id, {
+                    senderId: file.uploadedBy,
+                    senderName: file.uploadedByName,
+                    type: "new_file",
+                    title: `New file in #${file.channelId}`,
+                    message: file.originalName,
+                    communityId: file.communityId,
+                    channelId: file.channelId,
+                    referenceId: file.id,
+                    route: `/community/${file.communityId}/channel/${file.channelId}`
+                })
+            )
+    );
 }
 
 export function uploadFile(
@@ -152,12 +178,21 @@ export function uploadFile(
                     };
 
                     await setDoc(metadataReference, data);
-                    resolve(
-                        createFileModel({
-                            id: metadataReference.id,
-                            ...data
-                        })
-                    );
+                    const model = createFileModel({
+                        id: metadataReference.id,
+                        ...data
+                    });
+                    void createActivity(cleanCommunityId, {
+                        type: "file_uploaded",
+                        actorId: cleanUserId,
+                        actorName: data.uploadedByName,
+                        title: `${data.uploadedByName} shared a file`,
+                        description: data.originalName,
+                        channelId: cleanChannelId,
+                        referenceId: metadataReference.id
+                    });
+                    void announceFile(model);
+                    resolve(model);
                 } catch (error) {
                     try {
                         await deleteObject(storageReference);

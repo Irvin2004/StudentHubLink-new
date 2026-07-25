@@ -63,7 +63,9 @@ export default function ChannelItem({
     channel,
     communityId,
     manageable,
-    onManage
+    onManage,
+    onOpen,
+    unreadCount = 0
 }) {
     const [menuOpen, setMenuOpen] = useState(false);
     const announcement = channel.type === CHANNEL_TYPES.ANNOUNCEMENTS;
@@ -75,10 +77,19 @@ export default function ChannelItem({
                 className={({ isActive }) =>
                     `${styles.link} ${isActive ? styles.active : ""}`
                 }
+                onClick={onOpen}
                 to={`/community/${communityId}/channel/${channel.id}`}
             >
                 {announcement ? <AnnouncementIcon /> : <HashIcon />}
                 <span>{channel.name}</span>
+                {unreadCount ? (
+                    <strong
+                        aria-label={`${unreadCount} unread messages`}
+                        className={styles.unread}
+                    >
+                        {unreadCount > 99 ? "99+" : unreadCount}
+                    </strong>
+                ) : null}
             </NavLink>
             {manageable ? (
                 <div className={styles.actions}>

@@ -29,6 +29,19 @@
     white-space: nowrap;
 }
 
+.unread {
+    min-width: 1.35rem;
+    height: 1.35rem;
+    display: grid;
+    margin-left: auto;
+    padding: 0 0.3rem;
+    place-items: center;
+    border-radius: 999px;
+    background: var(--channel-accent);
+    color: white;
+    font-size: 0.62rem;
+}
+
 .link:hover {
     background: var(--surface-muted);
     color: var(--text);

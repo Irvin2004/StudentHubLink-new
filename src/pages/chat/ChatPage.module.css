@@ -70,8 +70,14 @@
 }
 
 .messages[hidden],
-.files[hidden] {
+.files[hidden],
+.activity[hidden] {
     display: none;
+}
+
+.activity {
+    min-height: 0;
+    overflow: auto;
 }
 
 .files > * + * {

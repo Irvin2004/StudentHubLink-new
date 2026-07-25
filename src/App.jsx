@@ -2,6 +2,7 @@ import { BrowserRouter } from "react-router-dom";
 
 import { ToastViewport } from "./components/feedback/ToastViewport.jsx";
 import { AuthProvider } from "./context/AuthContext.jsx";
+import { NotificationProvider } from "./context/NotificationContext.jsx";
 import { SettingsProvider } from "./context/SettingsContext.jsx";
 import { ThemeProvider } from "./context/ThemeContext.jsx";
 import { ToastProvider } from "./context/ToastContext.jsx";
@@ -14,8 +15,10 @@ export default function App() {
                 <SettingsProvider>
                     <ToastProvider>
                         <AuthProvider>
-                            <AppRouter />
-                            <ToastViewport />
+                            <NotificationProvider>
+                                <AppRouter />
+                                <ToastViewport />
+                            </NotificationProvider>
                         </AuthProvider>
                     </ToastProvider>
                 </SettingsProvider>

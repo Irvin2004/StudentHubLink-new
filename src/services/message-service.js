@@ -19,6 +19,9 @@ import { MESSAGE_PAGE_SIZE, MESSAGE_TYPES } from "../config/message-types.js";
 import { isReactionType, REACTION_KEYS } from "../config/reaction-types.js";
 import { auth, db } from "../firebase/index.js";
 import { createMessageModel, validateMessageInput } from "../models/message.js";
+import { createNotification } from "./notification-service.js";
+import { createActivity } from "./activity-service.js";
+import { parseMentions } from "../utils/mention-parser.js";
 
 const COMMUNITIES = "communities";
 const CHANNELS = "channels";
@@ -74,6 +77,41 @@ function fromSnapshot(snapshot, communityId, channelId) {
     });
 }
 
+async function notifyCommunityMembers(messageId, message) {
+    const snapshot = await getDocs(
+        collection(db, COMMUNITIES, message.communityId, "members")
+    );
+    if (!snapshot?.docs) return;
+    const mentions = parseMentions(message.text);
+    const mentionedNames = new Set(mentions.users);
+    const recipients = snapshot.docs.filter(
+        (item) => item.id !== message.senderId
+    );
+    await Promise.allSettled(
+        recipients.map((item) => {
+            const nickname = String(item.data().nickname || "").toLowerCase();
+            const mentioned = mentions.channel || mentionedNames.has(nickname);
+            return createNotification(item.id, {
+                senderId: message.senderId,
+                senderName: message.senderName,
+                type: mentioned
+                    ? mentions.channel
+                        ? "channel_mention"
+                        : "mention"
+                    : "new_message",
+                title: mentioned
+                    ? `${message.senderName} mentioned you`
+                    : `New message in #${message.channelId}`,
+                message: message.text || "Shared an attachment",
+                communityId: message.communityId,
+                channelId: message.channelId,
+                referenceId: messageId,
+                route: `/community/${message.communityId}/channel/${message.channelId}`
+            });
+        })
+    );
+}
+
 export async function sendMessage(input) {
     const validated = validateMessageInput({
         ...input,
@@ -102,6 +140,16 @@ export async function sendMessage(input) {
     };
 
     await setDoc(reference, data);
+    void createActivity(validated.communityId, {
+        type: "message_sent",
+        actorId: validated.senderId,
+        actorName: validated.senderName,
+        title: `${validated.senderName} posted in #${validated.channelId}`,
+        description: validated.text || "Shared an attachment",
+        channelId: validated.channelId,
+        referenceId: reference.id
+    });
+    void notifyCommunityMembers(reference.id, validated);
     return createMessageModel({
         id: reference.id,
         communityId: validated.communityId,
