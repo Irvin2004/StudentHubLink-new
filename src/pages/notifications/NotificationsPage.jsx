@@ -2,7 +2,7 @@ import { useDeferredValue, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 
 import { LoadErrorState } from "../../components/common/LoadErrorState.jsx";
-import Skeleton from "../../components/ui/Skeleton/index.js";
+import NotificationSkeleton from "../../components/Skeleton/NotificationSkeleton.jsx";
 import { NOTIFICATION_TYPES } from "../../config/notification-types.js";
 import { useDocumentTitle } from "../../hooks/useDocumentTitle.js";
 import { useNotifications } from "../../hooks/useNotifications.js";
@@ -110,7 +110,7 @@ export default function NotificationsPage() {
                 className={styles.list}
             >
                 {loading ? (
-                    <Skeleton count={5} height="5.5rem" />
+                    <NotificationSkeleton />
                 ) : error && !notifications.length ? (
                     <LoadErrorState
                         description="We could not load your notifications."

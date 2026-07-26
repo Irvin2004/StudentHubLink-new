@@ -11,10 +11,6 @@
     padding-right: var(--space-1);
 }
 
-.loadingState {
-    min-height: 8rem;
-}
-
 .group {
     display: grid;
     gap: var(--space-1);

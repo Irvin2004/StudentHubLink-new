@@ -8,7 +8,8 @@ import ChannelSettingsModal from "../../components/channels/ChannelSettingsModal
 import CreateChannelModal from "../../components/channels/CreateChannelModal/CreateChannelModal.jsx";
 import { LoadErrorState } from "../../components/common/LoadErrorState.jsx";
 import PerformanceProfiler from "../../components/performance/PerformanceProfiler.jsx";
-import Skeleton from "../../components/ui/Skeleton/index.js";
+import ChatMessageSkeleton from "../../components/Skeleton/ChatMessageSkeleton.jsx";
+import Skeleton from "../../components/Skeleton/Skeleton.jsx";
 import { ROUTES } from "../../config/routes.js";
 import { useChannels } from "../../hooks/useChannels.js";
 import { useCommunity } from "../../hooks/useCommunity.js";
@@ -204,15 +205,7 @@ export default function CommunityPage() {
                         <>
                             <ChannelHeader channel={selectedChannel} />
                             <Suspense
-                                fallback={
-                                    <div
-                                        aria-label="Loading conversation"
-                                        className={styles.chatSkeleton}
-                                        role="status"
-                                    >
-                                        <Skeleton count={4} />
-                                    </div>
-                                }
+                                fallback={<ChatMessageSkeleton count={4} />}
                             >
                                 <PerformanceProfiler id="ChatPage">
                                     <ChatPage

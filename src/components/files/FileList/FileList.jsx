@@ -2,7 +2,7 @@ import { useDeferredValue, useMemo, useState } from "react";
 
 import { LoadErrorState } from "../../common/LoadErrorState.jsx";
 import SearchInput from "../../ui/SearchInput/index.js";
-import Skeleton from "../../ui/Skeleton/index.js";
+import FileCardSkeleton from "../../Skeleton/FileCardSkeleton.jsx";
 import FileActions from "../FileActions/FileActions.jsx";
 import FileGrid from "../FileGrid/FileGrid.jsx";
 import FileIcon from "../FileIcon/FileIcon.jsx";
@@ -107,16 +107,7 @@ export default function FileList({
                 </div>
             </div>
             {loading ? (
-                <div
-                    aria-busy="true"
-                    aria-label="Loading files"
-                    className={styles.loading}
-                    role="status"
-                >
-                    {[1, 2, 3].map((item) => (
-                        <Skeleton height="13rem" key={item} />
-                    ))}
-                </div>
+                <FileCardSkeleton />
             ) : error && !files.length ? (
                 <LoadErrorState
                     description="We could not load the files shared in this channel."

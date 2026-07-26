@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useState } from "react";
 
 import Button from "../../ui/Button/index.js";
-import Skeleton from "../../ui/Skeleton/index.js";
+import Skeleton from "../../Skeleton/Skeleton.jsx";
 import ChannelItem from "../ChannelItem/ChannelItem.jsx";
 import ChannelSearch from "../ChannelSearch/ChannelSearch.jsx";
 import {

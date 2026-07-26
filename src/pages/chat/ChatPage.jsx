@@ -4,7 +4,7 @@ import { useSearchParams } from "react-router-dom";
 import MessageComposer from "../../components/chat/MessageComposer/MessageComposer.jsx";
 import MessageList from "../../components/chat/MessageList/MessageList.jsx";
 import TypingIndicator from "../../components/chat/TypingIndicator/TypingIndicator.jsx";
-import Skeleton from "../../components/ui/Skeleton/index.js";
+import ChatMessageSkeleton from "../../components/Skeleton/ChatMessageSkeleton.jsx";
 import { canPostInChannel } from "../../config/channel-permissions.js";
 import { useAuth } from "../../hooks/useAuth.js";
 import { useMessages } from "../../hooks/useMessages.js";
@@ -20,15 +20,7 @@ const ChatFilesView = lazy(
 );
 
 function TabLoadingState() {
-    return (
-        <div
-            aria-label="Loading channel content"
-            className={styles.panelLoading}
-            role="status"
-        >
-            <Skeleton count={4} />
-        </div>
-    );
+    return <ChatMessageSkeleton count={3} />;
 }
 
 export default function ChatPage({ channel, communityId, role }) {
