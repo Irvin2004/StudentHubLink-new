@@ -4,13 +4,16 @@ import { NotificationContext } from "./notification-context.js";
 import { useAuth } from "../hooks/useAuth.js";
 import { useToast } from "../hooks/useToast.js";
 import { useSettings } from "../hooks/useSettings.js";
-import {
-    listenToNotifications,
-    markAllNotificationsRead,
-    markNotification
-} from "../services/notification-service.js";
+import { captureError } from "../services/observability-service.js";
 
 const EMPTY_NOTIFICATIONS = Object.freeze([]);
+let notificationServicePromise;
+
+function loadNotificationService() {
+    notificationServicePromise ??=
+        import("../services/notification-service.js");
+    return notificationServicePromise;
+}
 
 export function NotificationProvider({ children }) {
     const { user } = useAuth();
@@ -21,7 +24,12 @@ export function NotificationProvider({ children }) {
     const [error, setError] = useState(null);
     const initializedRef = useRef(false);
     const knownIdsRef = useRef(new Set());
+    const notificationsEnabledRef = useRef(settings.notifications.enabled);
     const userId = user?.uid;
+
+    useEffect(() => {
+        notificationsEnabledRef.current = settings.notifications.enabled;
+    }, [settings.notifications.enabled]);
 
     useEffect(() => {
         if (!userId) {
@@ -29,44 +37,59 @@ export function NotificationProvider({ children }) {
         }
         initializedRef.current = false;
         knownIdsRef.current = new Set();
-        return listenToNotifications(
-            userId,
-            (next) => {
-                if (initializedRef.current) {
-                    const incoming = next.find(
-                        (item) =>
-                            !item.read && !knownIdsRef.current.has(item.id)
-                    );
-                    if (incoming && settings.notifications.enabled) {
-                        showToast({
-                            title: incoming.title,
-                            message: incoming.message,
-                            type: incoming.type.includes("mention")
-                                ? "info"
-                                : "success"
-                        });
+        let active = true;
+        let unsubscribe = () => {};
+
+        void loadNotificationService().then(({ listenToNotifications }) => {
+            if (!active) return;
+            unsubscribe = listenToNotifications(
+                userId,
+                (next) => {
+                    if (initializedRef.current) {
+                        const incoming = next.find(
+                            (item) =>
+                                !item.read && !knownIdsRef.current.has(item.id)
+                        );
+                        if (incoming && notificationsEnabledRef.current) {
+                            showToast({
+                                title: incoming.title,
+                                message: incoming.message,
+                                type: incoming.type.includes("mention")
+                                    ? "info"
+                                    : "success"
+                            });
+                        }
                     }
+                    knownIdsRef.current = new Set(next.map((item) => item.id));
+                    initializedRef.current = true;
+                    setNotifications(next);
+                    setLoading(false);
+                },
+                (nextError) => {
+                    captureError(nextError, { feature: "notifications" });
+                    setError(nextError);
+                    setLoading(false);
                 }
-                knownIdsRef.current = new Set(next.map((item) => item.id));
-                initializedRef.current = true;
-                setNotifications(next);
-                setLoading(false);
-            },
-            (nextError) => {
-                setError(nextError);
-                setLoading(false);
-            }
-        );
-    }, [settings.notifications.enabled, showToast, userId]);
+            );
+        });
+
+        return () => {
+            active = false;
+            unsubscribe();
+        };
+    }, [showToast, userId]);
 
     const setRead = useCallback(
-        (id, read) => markNotification(userId, id, read),
+        async (id, read) => {
+            const { markNotification } = await loadNotificationService();
+            return markNotification(userId, id, read);
+        },
         [userId]
     );
-    const markAllRead = useCallback(
-        () => markAllNotificationsRead(userId),
-        [userId]
-    );
+    const markAllRead = useCallback(async () => {
+        const { markAllNotificationsRead } = await loadNotificationService();
+        return markAllNotificationsRead(userId);
+    }, [userId]);
     const visibleNotifications = userId ? notifications : EMPTY_NOTIFICATIONS;
     const unreadCount = visibleNotifications.reduce(
         (count, item) => count + (item.read ? 0 : 1),

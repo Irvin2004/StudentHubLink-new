@@ -25,7 +25,7 @@ export function listenToNotifications(userId, onData, onError) {
     const notificationsQuery = query(
         notificationsReference(userId),
         orderBy("createdAt", "desc"),
-        limit(100)
+        limit(50)
     );
     return onSnapshot(
         notificationsQuery,
@@ -48,7 +48,11 @@ export async function markNotification(userId, notificationId, read = true) {
 
 export async function markAllNotificationsRead(userId) {
     const snapshot = await getDocs(
-        query(notificationsReference(userId), where("read", "==", false))
+        query(
+            notificationsReference(userId),
+            where("read", "==", false),
+            limit(500)
+        )
     );
     const batch = writeBatch(db);
     snapshot.docs.forEach((item) =>

@@ -1,6 +1,7 @@
 import { useDeferredValue, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 
+import { LoadErrorState } from "../../components/common/LoadErrorState.jsx";
 import Skeleton from "../../components/ui/Skeleton/index.js";
 import { NOTIFICATION_TYPES } from "../../config/notification-types.js";
 import { useDocumentTitle } from "../../hooks/useDocumentTitle.js";
@@ -24,7 +25,7 @@ function destination(item) {
 
 export default function NotificationsPage() {
     useDocumentTitle("StudentHub - Notifications", "react-app");
-    const { loading, markAllRead, notifications, setRead, unreadCount } =
+    const { error, loading, markAllRead, notifications, setRead, unreadCount } =
         useNotifications();
     const { settings, updateSettings } = useSettings();
     const [filter, setFilter] = useState("all");
@@ -110,6 +111,11 @@ export default function NotificationsPage() {
             >
                 {loading ? (
                     <Skeleton count={5} height="5.5rem" />
+                ) : error && !notifications.length ? (
+                    <LoadErrorState
+                        description="We could not load your notifications."
+                        title="Notifications unavailable"
+                    />
                 ) : visible.length ? (
                     visible.map((item) => (
                         <article
