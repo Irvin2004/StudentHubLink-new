@@ -1,9 +1,18 @@
+.content {
+    display: grid;
+    gap: var(--space-3);
+}
+
 .results {
     max-height: min(28rem, 58vh);
     display: grid;
     gap: var(--space-4);
     overflow-y: auto;
     padding-right: var(--space-1);
+}
+
+.loadingState {
+    min-height: 8rem;
 }
 
 .group {

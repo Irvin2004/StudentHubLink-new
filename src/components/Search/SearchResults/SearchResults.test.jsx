@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import SearchResults from "./SearchResults.jsx";
@@ -6,7 +6,7 @@ import SearchResults from "./SearchResults.jsx";
 const search = vi.hoisted(() => ({
     error: "",
     loading: false,
-    openSelected: vi.fn(),
+    openResult: vi.fn(),
     query: "python",
     results: { channels: [], communities: [], files: [] },
     selectedIndex: 0
@@ -62,6 +62,13 @@ describe("SearchResults", () => {
             screen.getByRole("heading", { name: "Files" })
         ).toBeInTheDocument();
         expect(screen.getAllByRole("option")).toHaveLength(3);
+
+        fireEvent.click(
+            screen.getByRole("option", { name: /Programming Society/ })
+        );
+        expect(search.openResult).toHaveBeenCalledWith(
+            search.results.communities[0]
+        );
     });
 
     it("renders the empty state", () => {
@@ -71,7 +78,7 @@ describe("SearchResults", () => {
         search.query = "nothing";
         render(<SearchResults />);
         expect(screen.getByText("No results found.")).toBeInTheDocument();
-        expect(screen.getByText("Try another search.")).toBeInTheDocument();
+        expect(screen.getByText("Try another keyword.")).toBeInTheDocument();
     });
 
     it("renders skeletons while loading", () => {
@@ -83,14 +90,50 @@ describe("SearchResults", () => {
         search.loading = false;
     });
 
+    it("keeps previous results visible while loading the next query", () => {
+        search.results = {
+            channels: [],
+            communities: [
+                {
+                    icon: "community",
+                    id: "programming",
+                    subtitle: "Computer Science",
+                    title: "Programming Society",
+                    type: "community",
+                    url: "/community"
+                }
+            ],
+            files: []
+        };
+        search.loading = true;
+
+        render(<SearchResults />);
+
+        expect(screen.getByText("Programming Society")).toBeVisible();
+        expect(screen.getByRole("status")).toHaveTextContent(
+            "Searching StudentHub"
+        );
+        search.loading = false;
+    });
+
+    it("renders nothing until the minimum query length is reached", () => {
+        search.results = { channels: [], communities: [], files: [] };
+        search.query = "a";
+
+        const { container } = render(<SearchResults />);
+
+        expect(container).toBeEmptyDOMElement();
+        search.query = "python";
+    });
+
     it("renders an actionable error state", () => {
         search.error = "Check your internet connection and try again.";
         render(<SearchResults />);
         expect(screen.getByRole("alert")).toHaveTextContent(
-            "Couldn't search StudentHub."
+            "Unable to search StudentHub."
         );
         expect(screen.getByRole("alert")).toHaveTextContent(
-            "Check your internet connection."
+            "Please try again."
         );
         search.error = "";
     });

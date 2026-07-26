@@ -89,7 +89,7 @@ function Harness() {
             <button onClick={search.selectPrevious} type="button">
                 Previous
             </button>
-            <button onClick={() => search.openSelected()} type="button">
+            <button onClick={() => search.openResult()} type="button">
                 Open selected
             </button>
             <button onClick={() => search.setFilter("community")} type="button">
@@ -188,6 +188,40 @@ describe("SearchProvider and useSearch", () => {
         fireEvent.keyDown(document, { ctrlKey: true, key: "k" });
 
         expect(screen.getByTestId("open")).toHaveTextContent("true");
+    });
+
+    it("opens from Command+K on macOS", () => {
+        renderSearch();
+
+        fireEvent.keyDown(document, { key: "k", metaKey: true });
+
+        expect(screen.getByTestId("open")).toHaveTextContent("true");
+    });
+
+    it.each(["input", "textarea"])(
+        "ignores the global shortcut while typing in a %s",
+        (element) => {
+            renderSearch();
+            const editable = document.createElement(element);
+            document.body.append(editable);
+
+            fireEvent.keyDown(editable, { ctrlKey: true, key: "k" });
+
+            expect(screen.getByTestId("open")).toHaveTextContent("false");
+            editable.remove();
+        }
+    );
+
+    it("ignores the global shortcut in editable content", () => {
+        renderSearch();
+        const editable = document.createElement("div");
+        editable.setAttribute("contenteditable", "true");
+        document.body.append(editable);
+
+        fireEvent.keyDown(editable, { ctrlKey: true, key: "k" });
+
+        expect(screen.getByTestId("open")).toHaveTextContent("false");
+        editable.remove();
     });
 
     it("debounces searches for 300 milliseconds and owns loading state", async () => {

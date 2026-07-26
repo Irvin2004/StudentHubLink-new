@@ -11,7 +11,7 @@ export default function SearchModal({ onClose, open }) {
     const {
         clearSearch,
         loading,
-        openSelected,
+        openResult,
         performSearch,
         query,
         selectedIndex,
@@ -30,7 +30,7 @@ export default function SearchModal({ onClose, open }) {
             }
         } else if (event.key === "Enter") {
             event.preventDefault();
-            openSelected();
+            openResult();
         }
     }
 
@@ -68,7 +68,7 @@ export default function SearchModal({ onClose, open }) {
                 </div>
                 <SearchResults />
                 <footer className={styles.hints} aria-hidden="true">
-                    <span>↑ ↓ Navigate</span>
+                    <span>Up / Down Navigate</span>
                     <span>Enter Open</span>
                     <span>Esc Close</span>
                 </footer>
