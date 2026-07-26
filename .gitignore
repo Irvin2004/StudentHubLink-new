@@ -54,3 +54,4 @@ test-results/
 
 # Local archive files
 *.zip
+release/
