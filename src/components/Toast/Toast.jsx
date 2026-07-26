@@ -1,6 +1,11 @@
-import IconButton from "../IconButton/index.js";
-import { cx } from "../utils.js";
 import styles from "./Toast.module.css";
+
+const TYPE_LABELS = Object.freeze({
+    error: "Error",
+    info: "Information",
+    success: "Success",
+    warning: "Warning"
+});
 
 function StatusIcon({ type }) {
     const path =
@@ -38,60 +43,47 @@ function StatusIcon({ type }) {
     );
 }
 
-function CloseIcon() {
-    return (
-        <svg
-            aria-hidden="true"
-            fill="none"
-            height="18"
-            viewBox="0 0 24 24"
-            width="18"
-        >
-            <path
-                d="M7 7l10 10M17 7 7 17"
-                stroke="currentColor"
-                strokeLinecap="round"
-                strokeWidth="1.8"
-            />
-        </svg>
-    );
-}
-
-/**
- * Displays a dismissible live-region notification.
- */
 export default function Toast({
-    className,
+    dismissing = false,
     message,
     onDismiss,
     title,
     type = "info"
 }) {
     const urgent = type === "error" || type === "warning";
+    const className = [
+        styles.toast,
+        styles[type],
+        dismissing ? styles.dismissing : ""
+    ]
+        .filter(Boolean)
+        .join(" ");
 
     return (
         <section
+            aria-atomic="true"
             aria-live={urgent ? "assertive" : "polite"}
-            className={cx(styles.toast, styles[type], className)}
+            className={className}
+            data-dismissing={dismissing || undefined}
+            data-type={type}
             role={urgent ? "alert" : "status"}
         >
-            <span className={styles.icon}>
+            <span aria-hidden="true" className={styles.icon}>
                 <StatusIcon type={type} />
             </span>
+            <span className="sr-only">{TYPE_LABELS[type]} notification:</span>
             <div className={styles.content}>
                 {title ? <strong>{title}</strong> : null}
                 <p>{message}</p>
             </div>
-            {onDismiss ? (
-                <IconButton
-                    aria-label="Dismiss notification"
-                    className={styles.dismiss}
-                    onClick={onDismiss}
-                    size="small"
-                >
-                    <CloseIcon />
-                </IconButton>
-            ) : null}
+            <button
+                aria-label={`Dismiss ${TYPE_LABELS[type].toLowerCase()} notification`}
+                className={styles.dismiss}
+                onClick={onDismiss}
+                type="button"
+            >
+                <span aria-hidden="true">×</span>
+            </button>
         </section>
     );
 }

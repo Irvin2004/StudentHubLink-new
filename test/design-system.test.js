@@ -25,7 +25,6 @@ const PUBLIC_COMPONENTS = [
     "Switch",
     "Tabs",
     "Textarea",
-    "Toast",
     "Tooltip"
 ];
 

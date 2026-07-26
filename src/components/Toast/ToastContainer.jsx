@@ -1,13 +1,19 @@
-import Toast from "../ui/Toast/index.js";
 import { useToast } from "../../hooks/useToast.js";
+import Toast from "./Toast.jsx";
+import styles from "./Toast.module.css";
 
-export function ToastViewport() {
+export default function ToastContainer() {
     const { dismiss, toasts } = useToast();
 
     return (
-        <div className="react-toast-viewport" aria-label="Notifications">
+        <aside
+            aria-label="Notifications"
+            className={styles.container}
+            data-testid="toast-container"
+        >
             {toasts.map((toast) => (
                 <Toast
+                    dismissing={toast.dismissing}
                     key={toast.id}
                     message={toast.message}
                     onDismiss={() => dismiss(toast.id)}
@@ -15,6 +21,6 @@ export function ToastViewport() {
                     type={toast.type}
                 />
             ))}
-        </div>
+        </aside>
     );
 }
