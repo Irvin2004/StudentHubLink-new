@@ -1,5 +1,6 @@
 import {
     collection,
+    collectionGroup,
     deleteDoc,
     doc,
     endAt,
@@ -18,6 +19,7 @@ import {
 } from "firebase/firestore";
 
 import { COMMUNITY_ROLES } from "../config/community-roles.js";
+import { ACTIVITY_TYPES } from "../config/activity-types.js";
 import { CHANNEL_TYPES } from "../config/channel-types.js";
 import { auth, db } from "../firebase/index.js";
 import { createCommunityModel } from "../models/community.js";
@@ -27,6 +29,7 @@ import {
     validateCommunityInput,
     validateCommunityUpdates
 } from "../utils/community-validation.js";
+import { createActivity } from "./activity-service.js";
 
 const COMMUNITIES_COLLECTION = "communities";
 const MEMBERS_COLLECTION = "members";
@@ -238,8 +241,8 @@ export async function deleteCommunity(communityId) {
  * @param {string|null} [nickname]
  * @returns {Promise<Readonly<object>>}
  */
-export function joinCommunity(communityId, userId, nickname = null) {
-    return persistMember(
+export async function joinCommunity(communityId, userId, nickname = null) {
+    const result = await persistMember(
         communityId,
         {
             userId: getAuthenticatedUserId(userId),
@@ -248,6 +251,27 @@ export function joinCommunity(communityId, userId, nickname = null) {
         },
         { allowExisting: true }
     );
+
+    if (result.created) {
+        const actorName =
+            String(
+                nickname ||
+                    auth.currentUser?.displayName ||
+                    auth.currentUser?.email?.split("@")[0] ||
+                    "A student"
+            ).trim() || "A student";
+
+        void createActivity(communityId, {
+            type: ACTIVITY_TYPES.MEMBER_JOINED,
+            actorId: result.member.userId,
+            actorName,
+            title: `${actorName} joined the community`,
+            description: "A new member is ready to participate.",
+            referenceId: result.member.userId
+        }).catch(() => {});
+    }
+
+    return result.member;
 }
 
 /**
@@ -284,6 +308,26 @@ export async function getCommunityMember(communityId, userId) {
     const snapshot = await getDoc(getMemberReference(communityId, userId));
 
     return snapshot.exists() ? memberFromSnapshot(snapshot, communityId) : null;
+}
+
+/**
+ * Loads community IDs for memberships owned by one user.
+ *
+ * @param {string} userId
+ * @returns {Promise<string[]>}
+ */
+export async function getCommunityMembershipIds(userId) {
+    const resolvedUserId = getAuthenticatedUserId(userId);
+    const membershipQuery = query(
+        collectionGroup(db, MEMBERS_COLLECTION),
+        where("userId", "==", resolvedUserId),
+        limit(100)
+    );
+    const snapshot = await getDocs(membershipQuery);
+
+    return snapshot.docs
+        .map((membershipDocument) => membershipDocument.ref?.parent?.parent?.id)
+        .filter(Boolean);
 }
 
 /**
@@ -350,8 +394,11 @@ export async function searchCommunities(searchTerm, options = {}) {
  * @param {{userId: string, role?: string, nickname?: string|null}} member
  * @returns {Promise<Readonly<object>>}
  */
-export function addMember(communityId, member) {
-    return persistMember(communityId, member, { allowExisting: false });
+export async function addMember(communityId, member) {
+    const result = await persistMember(communityId, member, {
+        allowExisting: false
+    });
+    return result.member;
 }
 
 /**
@@ -444,6 +491,7 @@ async function persistMember(communityId, member, { allowExisting }) {
     const communityReference = getCommunityReference(communityId);
     const memberReference = getMemberReference(communityId, member?.userId);
     let persistedMember = null;
+    let created = false;
 
     await runTransaction(db, async (transaction) => {
         const [communitySnapshot, memberSnapshot] = await Promise.all([
@@ -473,13 +521,14 @@ async function persistMember(communityId, member, { allowExisting }) {
         });
 
         transaction.set(memberReference, persistedMember);
+        created = true;
         transaction.update(communityReference, {
             memberCount: Number(communitySnapshot.data().memberCount || 0) + 1,
             updatedAt: timestamp
         });
     });
 
-    return persistedMember;
+    return { created, member: persistedMember };
 }
 
 async function deleteCollectionDocuments(collectionReference) {

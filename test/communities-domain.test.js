@@ -33,6 +33,7 @@ test("the community service owns the complete Firestore API", async () => {
         "joinCommunity",
         "leaveCommunity",
         "getCommunity",
+        "getCommunityMembershipIds",
         "getCommunities",
         "searchCommunities",
         "addMember",
@@ -65,4 +66,72 @@ test("the community hook exposes domain state without importing Firebase", async
     }
 
     assert.doesNotMatch(hook, /firebase|firestore/i);
+});
+
+test("channel uniqueness and positioning use bounded Firestore reads", async () => {
+    const service = await read("src/services/channel-service.js");
+
+    assert.match(service, /where\("name", "==", name\)/);
+    assert.match(service, /orderBy\("position", "desc"\)/);
+    assert.match(service, /limit\(1\)/);
+    assert.match(service, /Promise\.all/);
+    assert.doesNotMatch(
+        service,
+        /getDocs\(getChannelsReference\(communityId\)\)/
+    );
+    assert.match(service, /ACTIVITY_TYPES\.CHANNEL_CREATED/);
+    assert.match(service, /createActivity\(communityId/);
+});
+
+test("community permissions stay centralized across content surfaces", async () => {
+    const [permissions, channelPermissions, messageItem, fileModel] =
+        await Promise.all([
+            read("src/config/community-permissions.js"),
+            read("src/config/channel-permissions.js"),
+            read("src/components/chat/MessageItem/MessageItem.jsx"),
+            read("src/models/file.js")
+        ]);
+
+    for (const guard of [
+        "canEditCommunity",
+        "canDeleteCommunity",
+        "canManageMembers",
+        "canDeleteCommunityMessage",
+        "canDeleteCommunityFile"
+    ]) {
+        assert.match(permissions, new RegExp(`function ${guard}\\(`));
+    }
+
+    assert.match(channelPermissions, /hasCommunityPermission/);
+    assert.match(messageItem, /canDeleteCommunityMessage/);
+    assert.match(fileModel, /canDeleteCommunityFile/);
+    assert.doesNotMatch(messageItem, /MANAGER_ROLES|role\s*===/);
+});
+
+test("Firestore rules enforce community membership and moderation boundaries", async () => {
+    const rules = await read("firestore.rules");
+
+    assert.match(rules, /function isCommunityModerator\(communityId\)/);
+    assert.match(
+        rules,
+        /userId == request\.auth\.uid[\s\S]*request\.resource\.data\.role == "member"/
+    );
+    assert.match(
+        rules,
+        /request\.resource\.data\.diff\(resource\.data\)\.affectedKeys\(\)[\s\S]*\.hasOnly\(\["nickname"\]\)/
+    );
+    assert.match(rules, /resource\.data\.role != "owner"/);
+    assert.match(rules, /allow delete: if isCommunityManager\(communityId\)/);
+    assert.match(
+        rules,
+        /resource\.data\.senderId == request\.auth\.uid[\s\S]*resource\.data\.deleted == false[\s\S]*request\.resource\.data\.edited == true/
+    );
+    assert.match(
+        rules,
+        /resource\.data\.senderId == request\.auth\.uid[\s\S]*isCommunityModerator\(communityId\)[\s\S]*request\.resource\.data\.deleted == true/
+    );
+    assert.match(
+        rules,
+        /isCommunityModerator\(communityId\)[\s\S]*\.hasOnly\(\["pinnedAt", "pinnedBy", "updatedAt"\]\)/
+    );
 });

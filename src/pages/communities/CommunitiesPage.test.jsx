@@ -46,6 +46,9 @@ vi.mock("../../hooks/useCommunities.js", () => ({
                   communities,
                   createCommunity: vi.fn(),
                   error: null,
+                  joinedCommunityIds: new Set(),
+                  joinCommunity: vi.fn(),
+                  leaveCommunity: vi.fn(),
                   loading: false,
                   refreshCommunities: vi.fn()
               }

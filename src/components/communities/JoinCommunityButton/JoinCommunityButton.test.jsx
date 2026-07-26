@@ -2,33 +2,22 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, test, vi } from "vitest";
 
-const mocks = vi.hoisted(() => ({
-    joinCommunity: vi.fn()
-}));
-
-vi.mock("../../../hooks/useCommunities.js", () => ({
-    useCommunities: () => ({
-        joinCommunity: mocks.joinCommunity
-    })
-}));
-
 import JoinCommunityButton from "./JoinCommunityButton.jsx";
 
 describe("JoinCommunityButton", () => {
-    test("invokes the community hook with the selected community", async () => {
+    test("invokes the provided optimistic membership action", async () => {
         const membership = {
             communityId: "community-1",
             userId: "user-1"
         };
+        const onJoin = vi.fn().mockResolvedValue(membership);
         const onJoined = vi.fn();
         const user = userEvent.setup();
 
-        mocks.joinCommunity.mockResolvedValue(membership);
-
         render(
             <JoinCommunityButton
-                communityId="community-1"
                 communityName="Robotics Club"
+                onJoin={onJoin}
                 onJoined={onJoined}
             />
         );
@@ -37,7 +26,7 @@ describe("JoinCommunityButton", () => {
             screen.getByRole("button", { name: "Join Robotics Club" })
         );
 
-        expect(mocks.joinCommunity).toHaveBeenCalledWith("community-1");
+        expect(onJoin).toHaveBeenCalledOnce();
         expect(onJoined).toHaveBeenCalledWith(membership);
     });
 });

@@ -2,23 +2,36 @@ import { useEffect, useState } from "react";
 
 import { listenToActivity } from "../services/activity-service.js";
 
-export function useActivityFeed(communityId) {
+export function useActivityFeed(communityId, { enabled = true } = {}) {
     const [activities, setActivities] = useState([]);
-    const [loading, setLoading] = useState(Boolean(communityId));
-    const [error, setError] = useState(null);
+    const shouldSubscribe = Boolean(enabled && communityId);
+    const [loadedCommunityId, setLoadedCommunityId] = useState("");
+    const [errorState, setErrorState] = useState({
+        key: "",
+        value: null
+    });
+    const subscriptionKey = shouldSubscribe ? communityId : "";
+    const error = errorState.key === subscriptionKey ? errorState.value : null;
+    const loading = Boolean(
+        shouldSubscribe && loadedCommunityId !== subscriptionKey && !error
+    );
+
     useEffect(() => {
-        if (!communityId) return undefined;
+        if (!shouldSubscribe) return undefined;
+
         return listenToActivity(
             communityId,
             (next) => {
                 setActivities(next);
-                setLoading(false);
+                setLoadedCommunityId(subscriptionKey);
+                setErrorState({ key: subscriptionKey, value: null });
             },
             (nextError) => {
-                setError(nextError);
-                setLoading(false);
+                setLoadedCommunityId(subscriptionKey);
+                setErrorState({ key: subscriptionKey, value: nextError });
             }
         );
-    }, [communityId]);
+    }, [communityId, shouldSubscribe, subscriptionKey]);
+
     return { activities, error, loading };
 }

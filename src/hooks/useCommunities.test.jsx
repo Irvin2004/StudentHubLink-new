@@ -6,6 +6,7 @@ import { AuthContext } from "../context/auth-context.js";
 const mocks = vi.hoisted(() => ({
     createCommunity: vi.fn(),
     getCommunities: vi.fn(),
+    getCommunityMembershipIds: vi.fn(),
     joinCommunity: vi.fn(),
     leaveCommunity: vi.fn()
 }));
@@ -13,6 +14,7 @@ const mocks = vi.hoisted(() => ({
 vi.mock("../services/community-service.js", () => ({
     createCommunity: mocks.createCommunity,
     getCommunities: mocks.getCommunities,
+    getCommunityMembershipIds: mocks.getCommunityMembershipIds,
     joinCommunity: mocks.joinCommunity,
     leaveCommunity: mocks.leaveCommunity
 }));
@@ -31,6 +33,7 @@ describe("useCommunities", () => {
     beforeEach(() => {
         vi.clearAllMocks();
         mocks.getCommunities.mockResolvedValue([]);
+        mocks.getCommunityMembershipIds.mockResolvedValue([]);
     });
 
     test("loads communities and exposes authenticated mutations", async () => {
@@ -76,7 +79,8 @@ describe("useCommunities", () => {
             "community-1",
             "user-1"
         );
-        expect(mocks.getCommunities).toHaveBeenCalledTimes(3);
+        expect(mocks.getCommunities).toHaveBeenCalledOnce();
+        expect(mocks.getCommunityMembershipIds).toHaveBeenCalledOnce();
     });
 
     test("surfaces loading failures without mutating the list", async () => {
@@ -90,5 +94,42 @@ describe("useCommunities", () => {
 
         expect(result.current.error).toBe(failure);
         expect(result.current.communities).toEqual([]);
+    });
+
+    test("optimistically updates member counts and rolls back failures", async () => {
+        const community = {
+            id: "community-1",
+            name: "Robotics Club",
+            memberCount: 4
+        };
+        let rejectJoin;
+        const pendingJoin = new Promise((_, reject) => {
+            rejectJoin = reject;
+        });
+
+        mocks.getCommunities.mockResolvedValue([community]);
+        mocks.joinCommunity.mockReturnValue(pendingJoin);
+
+        const { result } = renderHook(() => useCommunities(), { wrapper });
+        await waitFor(() => expect(result.current.loading).toBe(false));
+
+        let joinResult;
+        act(() => {
+            joinResult = result.current.joinCommunity("community-1");
+        });
+
+        expect(result.current.communities[0].memberCount).toBe(5);
+
+        const failure = new Error("Join failed");
+        await act(async () => {
+            rejectJoin(failure);
+            await expect(joinResult).rejects.toBe(failure);
+        });
+
+        expect(result.current.communities[0].memberCount).toBe(4);
+        expect(result.current.joinedCommunityIds.has("community-1")).toBe(
+            false
+        );
+        expect(mocks.getCommunities).toHaveBeenCalledOnce();
     });
 });

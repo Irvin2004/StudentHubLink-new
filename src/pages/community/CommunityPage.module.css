@@ -9,6 +9,11 @@
     color: var(--text);
 }
 
+.pageState {
+    place-items: center;
+    padding: var(--space-8);
+}
+
 .communityHeader {
     min-height: 7.75rem;
     display: flex;
@@ -76,6 +81,10 @@
     overflow: hidden;
     clip: rect(0 0 0 0);
     white-space: nowrap;
+}
+
+.chatSkeleton {
+    padding: var(--space-6);
 }
 
 @media (max-width: 47.999rem) {

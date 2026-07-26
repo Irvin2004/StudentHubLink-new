@@ -25,6 +25,13 @@ export function useCommunity(communityId) {
         ])
             .then(([nextCommunity, membership]) => {
                 if (!active) return;
+                if (!nextCommunity) {
+                    const notFound = new Error(
+                        "This community no longer exists."
+                    );
+                    notFound.code = "community/not-found";
+                    throw notFound;
+                }
                 setCommunity(nextCommunity);
                 setRole(
                     membership?.role ||

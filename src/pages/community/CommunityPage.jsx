@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import ChannelEmptyState from "../../components/channels/ChannelEmptyState/ChannelEmptyState.jsx";
@@ -6,13 +6,18 @@ import ChannelHeader from "../../components/channels/ChannelHeader/ChannelHeader
 import ChannelList from "../../components/channels/ChannelList/ChannelList.jsx";
 import ChannelSettingsModal from "../../components/channels/ChannelSettingsModal/ChannelSettingsModal.jsx";
 import CreateChannelModal from "../../components/channels/CreateChannelModal/CreateChannelModal.jsx";
+import { LoadErrorState } from "../../components/common/LoadErrorState.jsx";
+import PerformanceProfiler from "../../components/performance/PerformanceProfiler.jsx";
 import Skeleton from "../../components/ui/Skeleton/index.js";
+import { ROUTES } from "../../config/routes.js";
 import { useChannels } from "../../hooks/useChannels.js";
 import { useCommunity } from "../../hooks/useCommunity.js";
 import { useDocumentTitle } from "../../hooks/useDocumentTitle.js";
+import { useObservability } from "../../hooks/useObservability.js";
 import { useToast } from "../../hooks/useToast.js";
-import ChatPage from "../chat/ChatPage.jsx";
 import styles from "./CommunityPage.module.css";
+
+const ChatPage = lazy(() => import("../chat/ChatPage.jsx"));
 
 function CommunityMark({ name }) {
     const initials = name
@@ -49,6 +54,7 @@ export default function CommunityPage() {
     const { communityId, channelId } = useParams();
     const navigate = useNavigate();
     const { showToast } = useToast();
+    const { captureError, getActionableErrorMessage } = useObservability();
     const [createOpen, setCreateOpen] = useState(false);
     const [managedChannel, setManagedChannel] = useState(null);
     const announcementRef = useRef(null);
@@ -88,22 +94,24 @@ export default function CommunityPage() {
     useEffect(() => {
         if (!error) return;
 
+        captureError(error, { feature: "community_channels" });
         showToast({
             title: "Channels unavailable",
-            message: error.message,
+            message: getActionableErrorMessage(error, "channels"),
             type: "error"
         });
-    }, [error, showToast]);
+    }, [captureError, error, getActionableErrorMessage, showToast]);
 
     useEffect(() => {
         if (!communityError) return;
 
+        captureError(communityError, { feature: "community_details" });
         showToast({
             title: "Community unavailable",
-            message: communityError.message,
+            message: getActionableErrorMessage(communityError, "community"),
             type: "error"
         });
-    }, [communityError, showToast]);
+    }, [captureError, communityError, getActionableErrorMessage, showToast]);
 
     async function handleCreate(input) {
         const channel = await createChannel(input);
@@ -133,6 +141,18 @@ export default function CommunityPage() {
             type: "info"
         });
         navigate(`/community/${communityId}/channel/general`);
+    }
+
+    if (!communityLoading && communityError && !community) {
+        return (
+            <main className={`${styles.page} ${styles.pageState}`}>
+                <LoadErrorState
+                    description="We could not open this community. It may be unavailable or you may no longer have access."
+                    onRetry={() => navigate(ROUTES.COMMUNITIES)}
+                    title="Community unavailable"
+                />
+            </main>
+        );
     }
 
     return (
@@ -175,14 +195,33 @@ export default function CommunityPage() {
                     }
                     className={styles.channelArea}
                 >
-                    {selectedChannel ? (
+                    {!channelsLoading && error && !channels.length ? (
+                        <LoadErrorState
+                            description="We could not load this community's channels."
+                            title="Channels unavailable"
+                        />
+                    ) : selectedChannel ? (
                         <>
                             <ChannelHeader channel={selectedChannel} />
-                            <ChatPage
-                                channel={selectedChannel}
-                                communityId={communityId}
-                                role={role}
-                            />
+                            <Suspense
+                                fallback={
+                                    <div
+                                        aria-label="Loading conversation"
+                                        className={styles.chatSkeleton}
+                                        role="status"
+                                    >
+                                        <Skeleton count={4} />
+                                    </div>
+                                }
+                            >
+                                <PerformanceProfiler id="ChatPage">
+                                    <ChatPage
+                                        channel={selectedChannel}
+                                        communityId={communityId}
+                                        role={role}
+                                    />
+                                </PerformanceProfiler>
+                            </Suspense>
                         </>
                     ) : (
                         <ChannelEmptyState />

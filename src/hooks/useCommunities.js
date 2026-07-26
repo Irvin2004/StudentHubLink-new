@@ -1,12 +1,14 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { useAuth } from "./useAuth.js";
 import {
     createCommunity as createCommunityRecord,
     getCommunities,
+    getCommunityMembershipIds,
     joinCommunity as joinCommunityRecord,
     leaveCommunity as leaveCommunityRecord
 } from "../services/community-service.js";
+import { captureError, trackEvent } from "../services/observability-service.js";
 
 /**
  * Loads communities and exposes authenticated community mutations.
@@ -22,8 +24,28 @@ export function useCommunities(options = {}) {
     const category = options.category;
     const maxResults = options.maxResults;
     const [communities, setCommunities] = useState([]);
+    const [joinedCommunityIds, setJoinedCommunityIds] = useState(
+        () => new Set()
+    );
     const [loading, setLoading] = useState(enabled);
     const [error, setError] = useState(null);
+    const pendingMembershipsRef = useRef(new Set());
+
+    const adjustMemberCount = useCallback((communityId, amount) => {
+        setCommunities((current) =>
+            current.map((community) =>
+                community.id === communityId
+                    ? {
+                          ...community,
+                          memberCount: Math.max(
+                              0,
+                              Number(community.memberCount || 0) + amount
+                          )
+                      }
+                    : community
+            )
+        );
+    }, []);
 
     const refreshCommunities = useCallback(async () => {
         if (!enabled) return [];
@@ -32,13 +54,17 @@ export function useCommunities(options = {}) {
         setError(null);
 
         try {
-            const nextCommunities = await getCommunities({
-                visibility,
-                category,
-                maxResults
-            });
+            const [nextCommunities, membershipIds] = await Promise.all([
+                getCommunities({
+                    visibility,
+                    category,
+                    maxResults
+                }),
+                userId ? getCommunityMembershipIds(userId) : []
+            ]);
 
             setCommunities(nextCommunities);
+            setJoinedCommunityIds(new Set(membershipIds));
             return nextCommunities;
         } catch (nextError) {
             setError(nextError);
@@ -46,7 +72,7 @@ export function useCommunities(options = {}) {
         } finally {
             setLoading(false);
         }
-    }, [category, enabled, maxResults, visibility]);
+    }, [category, enabled, maxResults, userId, visibility]);
 
     useEffect(() => {
         if (!enabled) return undefined;
@@ -60,10 +86,15 @@ export function useCommunities(options = {}) {
                     setError(null);
                 }
 
-                return getCommunities({ visibility, category, maxResults });
+                return Promise.all([
+                    getCommunities({ visibility, category, maxResults }),
+                    userId ? getCommunityMembershipIds(userId) : []
+                ]);
             })
-            .then((nextCommunities) => {
-                if (active) setCommunities(nextCommunities);
+            .then(([nextCommunities, membershipIds]) => {
+                if (!active) return;
+                setCommunities(nextCommunities);
+                setJoinedCommunityIds(new Set(membershipIds));
             })
             .catch((nextError) => {
                 if (active) setError(nextError);
@@ -75,7 +106,7 @@ export function useCommunities(options = {}) {
         return () => {
             active = false;
         };
-    }, [category, enabled, maxResults, visibility]);
+    }, [category, enabled, maxResults, userId, visibility]);
 
     const createCommunity = useCallback(
         async (input) => {
@@ -86,6 +117,9 @@ export function useCommunities(options = {}) {
             const community = await createCommunityRecord(input, userId);
 
             setCommunities((current) => [community, ...current]);
+            setJoinedCommunityIds((current) =>
+                new Set(current).add(community.id)
+            );
             return community;
         },
         [userId]
@@ -97,15 +131,41 @@ export function useCommunities(options = {}) {
                 throw new Error("Authentication is required.");
             }
 
-            const membership = await joinCommunityRecord(
-                communityId,
-                userId,
-                nickname
+            if (pendingMembershipsRef.current.has(communityId)) {
+                throw new Error("A membership update is already in progress.");
+            }
+
+            pendingMembershipsRef.current.add(communityId);
+            adjustMemberCount(communityId, 1);
+            setJoinedCommunityIds((current) =>
+                new Set(current).add(communityId)
             );
-            await refreshCommunities();
-            return membership;
+
+            try {
+                const membership = await joinCommunityRecord(
+                    communityId,
+                    userId,
+                    nickname
+                );
+                trackEvent("community_joined", { communityId });
+                return membership;
+            } catch (nextError) {
+                adjustMemberCount(communityId, -1);
+                setJoinedCommunityIds((current) => {
+                    const next = new Set(current);
+                    next.delete(communityId);
+                    return next;
+                });
+                captureError(nextError, {
+                    feature: "join_community",
+                    recoverable: true
+                });
+                throw nextError;
+            } finally {
+                pendingMembershipsRef.current.delete(communityId);
+            }
         },
-        [refreshCommunities, userId]
+        [adjustMemberCount, userId]
     );
 
     const leaveCommunity = useCallback(
@@ -114,16 +174,43 @@ export function useCommunities(options = {}) {
                 throw new Error("Authentication is required.");
             }
 
-            await leaveCommunityRecord(communityId, userId);
-            await refreshCommunities();
+            if (pendingMembershipsRef.current.has(communityId)) {
+                throw new Error("A membership update is already in progress.");
+            }
+
+            pendingMembershipsRef.current.add(communityId);
+            adjustMemberCount(communityId, -1);
+            setJoinedCommunityIds((current) => {
+                const next = new Set(current);
+                next.delete(communityId);
+                return next;
+            });
+
+            try {
+                await leaveCommunityRecord(communityId, userId);
+                trackEvent("community_left", { communityId });
+            } catch (nextError) {
+                adjustMemberCount(communityId, 1);
+                setJoinedCommunityIds((current) =>
+                    new Set(current).add(communityId)
+                );
+                captureError(nextError, {
+                    feature: "leave_community",
+                    recoverable: true
+                });
+                throw nextError;
+            } finally {
+                pendingMembershipsRef.current.delete(communityId);
+            }
         },
-        [refreshCommunities, userId]
+        [adjustMemberCount, userId]
     );
 
     return {
         communities,
         loading,
         error,
+        joinedCommunityIds,
         createCommunity,
         joinCommunity,
         leaveCommunity,

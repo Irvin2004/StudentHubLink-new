@@ -26,7 +26,7 @@
 .feed li {
     position: relative;
     display: grid;
-    grid-template-columns: 1rem minmax(0, 1fr);
+    grid-template-columns: 1.75rem minmax(0, 1fr);
     gap: var(--space-3);
     padding: 0 0 var(--space-5);
 }
@@ -34,19 +34,23 @@
     position: absolute;
     top: 0.9rem;
     bottom: 0;
-    left: 0.35rem;
+    left: 0.85rem;
     width: 1px;
     background: var(--border);
     content: "";
 }
 .feed li > span {
     z-index: 1;
-    width: 0.75rem;
-    height: 0.75rem;
-    margin-top: 0.2rem;
+    width: 1.75rem;
+    height: 1.75rem;
+    display: grid;
+    place-items: center;
     border: 2px solid var(--surface);
     border-radius: 50%;
     background: var(--channel-accent);
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 800;
     box-shadow: 0 0 0 1px var(--channel-accent);
 }
 .feed li strong {
@@ -54,6 +58,13 @@
 }
 .feed time {
     display: block;
+}
+.feed li a {
+    display: inline-block;
+    margin-top: var(--space-2);
+    color: var(--channel-accent);
+    font-size: 0.75rem;
+    font-weight: 700;
 }
 .empty {
     min-height: 15rem;

@@ -1,22 +1,20 @@
 import { useState } from "react";
 
 import Button from "../../ui/Button/index.js";
-import { useCommunities } from "../../../hooks/useCommunities.js";
 
 export default function JoinCommunityButton({
-    communityId,
     communityName,
     onError,
+    onJoin,
     onJoined
 }) {
-    const { joinCommunity } = useCommunities({ enabled: false });
     const [loading, setLoading] = useState(false);
 
     async function handleJoin() {
         setLoading(true);
 
         try {
-            const membership = await joinCommunity(communityId);
+            const membership = await onJoin();
             onJoined?.(membership);
         } catch (error) {
             onError?.(error);

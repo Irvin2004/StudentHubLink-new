@@ -11,6 +11,7 @@ const mocks = vi.hoisted(() => {
             set: vi.fn()
         },
         deleteDoc: vi.fn(),
+        createActivity: vi.fn(),
         getDoc: vi.fn(),
         getDocs: vi.fn(),
         runTransaction: vi.fn(),
@@ -30,6 +31,10 @@ vi.mock("firebase/firestore", () => ({
     collection: (...segments) => ({
         kind: "collection",
         path: segments.map((segment) => segment.path || segment).join("/")
+    }),
+    collectionGroup: (_database, name) => ({
+        kind: "collectionGroup",
+        path: name
     }),
     deleteDoc: mocks.deleteDoc,
     doc: (...segments) => {
@@ -81,9 +86,14 @@ vi.mock("../firebase/index.js", () => ({
     db: { name: "test-db" }
 }));
 
+vi.mock("./activity-service.js", () => ({
+    createActivity: mocks.createActivity
+}));
+
 import { COMMUNITY_ROLES } from "../config/community-roles.js";
 import {
     createCommunity,
+    getCommunityMembershipIds,
     joinCommunity,
     leaveCommunity,
     searchCommunities,
@@ -131,6 +141,7 @@ describe("community service", () => {
         vi.clearAllMocks();
         mocks.auth.currentUser = { uid: "owner-1" };
         mocks.batch.commit.mockResolvedValue();
+        mocks.createActivity.mockResolvedValue("activity-1");
         mocks.getDocs.mockResolvedValue({
             docs: [],
             empty: true,
@@ -211,6 +222,13 @@ describe("community service", () => {
             expect.objectContaining({ kind: "community" }),
             expect.objectContaining({ memberCount: 5 })
         );
+        expect(mocks.createActivity).toHaveBeenCalledWith(
+            "community-1",
+            expect.objectContaining({
+                actorId: "user-2",
+                type: "member_joined"
+            })
+        );
     });
 
     test("leaves transactionally without allowing the owner to leave", async () => {
@@ -271,6 +289,44 @@ describe("community service", () => {
         expect(searchQuery.constraints).toContainEqual({
             type: "endAt",
             value: "robotics club\uf8ff"
+        });
+    });
+
+    test("loads memberships with one user-scoped collection-group query", async () => {
+        mocks.getDocs.mockResolvedValue({
+            docs: [
+                {
+                    ref: {
+                        parent: {
+                            parent: { id: "community-1" }
+                        }
+                    }
+                },
+                {
+                    ref: {
+                        parent: {
+                            parent: { id: "community-2" }
+                        }
+                    }
+                }
+            ]
+        });
+
+        await expect(getCommunityMembershipIds("user-2")).resolves.toEqual([
+            "community-1",
+            "community-2"
+        ]);
+
+        const membershipQuery = mocks.getDocs.mock.calls[0][0];
+        expect(membershipQuery.reference).toMatchObject({
+            kind: "collectionGroup",
+            path: "members"
+        });
+        expect(membershipQuery.constraints).toContainEqual({
+            type: "where",
+            field: "userId",
+            operator: "==",
+            value: "user-2"
         });
     });
 });

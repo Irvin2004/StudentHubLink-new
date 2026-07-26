@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import Button from "../../components/ui/Button/index.js";
 import Modal from "../../components/ui/Modal/index.js";
 import Skeleton from "../../components/ui/Skeleton/index.js";
+import { LoadErrorState } from "../../components/common/LoadErrorState.jsx";
 import CommunityGrid from "../../components/communities/CommunityGrid/index.js";
 import CommunityHeader from "../../components/communities/CommunityHeader/index.js";
 import CommunityMembers from "../../components/communities/CommunityMembers/index.js";
@@ -11,10 +12,12 @@ import CommunitySearch from "../../components/communities/CommunitySearch/index.
 import CreateCommunityModal from "../../components/communities/CreateCommunityModal/index.js";
 import JoinCommunityButton from "../../components/communities/JoinCommunityButton/index.js";
 import LeaveCommunityButton from "../../components/communities/LeaveCommunityButton/index.js";
+import { isCommunityOwner } from "../../config/community-permissions.js";
 import { COMMUNITY_ROLES } from "../../config/community-roles.js";
 import { useAuth } from "../../hooks/useAuth.js";
 import { useCommunities } from "../../hooks/useCommunities.js";
 import { useDocumentTitle } from "../../hooks/useDocumentTitle.js";
+import { useObservability } from "../../hooks/useObservability.js";
 import { useToast } from "../../hooks/useToast.js";
 import { normalizeCommunityText } from "../../utils/community-validation.js";
 import styles from "./CommunitiesPage.module.css";
@@ -65,13 +68,24 @@ export default function CommunitiesPage() {
     const navigate = useNavigate();
     const { user } = useAuth();
     const { showToast } = useToast();
-    const { communities, createCommunity, error, loading, refreshCommunities } =
-        useCommunities();
+    const { captureError, getActionableErrorMessage } = useObservability();
+    const {
+        communities,
+        createCommunity,
+        error,
+        joinedCommunityIds,
+        joinCommunity,
+        leaveCommunity,
+        loading,
+        refreshCommunities
+    } = useCommunities();
     const [searchTerm, setSearchTerm] = useState("");
     const [category, setCategory] = useState("");
     const [createOpen, setCreateOpen] = useState(false);
     const [selectedCommunity, setSelectedCommunity] = useState(null);
-    const [joinedIds, setJoinedIds] = useState(() => new Set());
+    const [pendingMemberships, setPendingMemberships] = useState(
+        () => new Map()
+    );
     const reportedError = useRef(null);
 
     useEffect(() => {
@@ -80,10 +94,10 @@ export default function CommunitiesPage() {
         reportedError.current = error;
         showToast({
             title: "Communities unavailable",
-            message: error.message || "Please try again.",
+            message: getActionableErrorMessage(error, "community"),
             type: "error"
         });
-    }, [error, showToast]);
+    }, [error, getActionableErrorMessage, showToast]);
 
     const handleSearch = useCallback((value) => setSearchTerm(value), []);
 
@@ -105,41 +119,68 @@ export default function CommunitiesPage() {
     }, [category, communities, searchTerm]);
 
     function isOwner(community) {
-        return community.ownerId === user?.uid;
+        return isCommunityOwner(user, community);
     }
 
     function isJoined(community) {
-        return isOwner(community) || joinedIds.has(community.id);
+        return isOwner(community) || joinedCommunityIds.has(community.id);
     }
 
     function reportActionError(action, actionError) {
+        captureError(actionError, {
+            feature: action.toLowerCase().replaceAll(" ", "_")
+        });
         showToast({
             title: `${action} failed`,
-            message: actionError.message || "Please try again.",
+            message: getActionableErrorMessage(actionError, "community"),
             type: "error"
         });
     }
 
-    function handleJoined(community) {
-        setJoinedIds((current) => new Set(current).add(community.id));
-        showToast({
-            title: "Community joined",
-            message: `You joined ${community.name}.`,
-            type: "success"
+    function setPendingMembership(communityId, action) {
+        setPendingMemberships((current) => {
+            const next = new Map(current);
+            if (action) next.set(communityId, action);
+            else next.delete(communityId);
+            return next;
         });
     }
 
-    function handleLeft(community) {
-        setJoinedIds((current) => {
-            const next = new Set(current);
-            next.delete(community.id);
-            return next;
-        });
-        showToast({
-            title: "Community left",
-            message: `You left ${community.name}.`,
-            type: "info"
-        });
+    async function handleJoin(community) {
+        setPendingMembership(community.id, "join");
+
+        try {
+            const membership = await joinCommunity(community.id);
+            showToast({
+                title: "Community joined",
+                message: `You joined ${community.name}.`,
+                type: "success"
+            });
+            return membership;
+        } catch (actionError) {
+            reportActionError("Join", actionError);
+            throw actionError;
+        } finally {
+            setPendingMembership(community.id, null);
+        }
+    }
+
+    async function handleLeave(community) {
+        setPendingMembership(community.id, "leave");
+
+        try {
+            await leaveCommunity(community.id);
+            showToast({
+                title: "Community left",
+                message: `You left ${community.name}.`,
+                type: "info"
+            });
+        } catch (actionError) {
+            reportActionError("Leave", actionError);
+            throw actionError;
+        } finally {
+            setPendingMembership(community.id, null);
+        }
     }
 
     function renderMembershipAction(community) {
@@ -147,23 +188,31 @@ export default function CommunitiesPage() {
             return <span className={styles.ownerLabel}>Owner</span>;
         }
 
+        const pendingAction = pendingMemberships.get(community.id);
+
+        if (pendingAction) {
+            return (
+                <Button
+                    loading
+                    loadingLabel={
+                        pendingAction === "join" ? "Joining" : "Leaving"
+                    }
+                    variant={pendingAction === "join" ? "outline" : "danger"}
+                >
+                    {pendingAction === "join" ? "Join" : "Leave"}
+                </Button>
+            );
+        }
+
         return isJoined(community) ? (
             <LeaveCommunityButton
-                communityId={community.id}
                 communityName={community.name}
-                onError={(actionError) =>
-                    reportActionError("Leave", actionError)
-                }
-                onLeft={() => handleLeft(community)}
+                onLeave={() => handleLeave(community)}
             />
         ) : (
             <JoinCommunityButton
-                communityId={community.id}
                 communityName={community.name}
-                onError={(actionError) =>
-                    reportActionError("Join", actionError)
-                }
-                onJoined={() => handleJoined(community)}
+                onJoin={() => handleJoin(community)}
             />
         );
     }
@@ -182,6 +231,10 @@ export default function CommunitiesPage() {
             reportActionError("Create community", createError);
             throw createError;
         }
+    }
+
+    function handleRetry() {
+        void refreshCommunities().catch(() => {});
     }
 
     async function handleShare() {
@@ -234,6 +287,12 @@ export default function CommunitiesPage() {
 
             {loading ? (
                 <CommunityGridSkeleton />
+            ) : error && !communities.length ? (
+                <LoadErrorState
+                    description="We could not load the community list."
+                    onRetry={handleRetry}
+                    title="Communities unavailable"
+                />
             ) : (
                 <CommunityGrid
                     communities={filteredCommunities}
@@ -248,13 +307,12 @@ export default function CommunitiesPage() {
                 />
             )}
 
-            {!loading && error ? (
+            {!loading && error && communities.length ? (
                 <div className={styles.retry}>
-                    <p>We could not refresh the community list.</p>
-                    <Button
-                        onClick={() => void refreshCommunities()}
-                        variant="outline"
-                    >
+                    <p role="status">
+                        Showing saved results because the latest refresh failed.
+                    </p>
+                    <Button onClick={handleRetry} variant="outline">
                         Try again
                     </Button>
                 </div>

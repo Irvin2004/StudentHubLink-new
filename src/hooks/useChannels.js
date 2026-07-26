@@ -11,9 +11,20 @@ import {
 export function useChannels(communityId) {
     const { user } = useAuth();
     const userId = user?.uid ?? null;
-    const [channels, setChannels] = useState([]);
-    const [loading, setLoading] = useState(Boolean(communityId));
-    const [error, setError] = useState(null);
+    const [channelState, setChannelState] = useState({
+        key: "",
+        value: []
+    });
+    const [loadedCommunityId, setLoadedCommunityId] = useState("");
+    const [errorState, setErrorState] = useState({
+        key: "",
+        value: null
+    });
+    const channels = channelState.key === communityId ? channelState.value : [];
+    const error = errorState.key === communityId ? errorState.value : null;
+    const loading = Boolean(
+        communityId && loadedCommunityId !== communityId && !error
+    );
 
     useEffect(() => {
         if (!communityId) return undefined;
@@ -21,12 +32,13 @@ export function useChannels(communityId) {
         return subscribeToChannels(
             communityId,
             (nextChannels) => {
-                setChannels(nextChannels);
-                setLoading(false);
+                setChannelState({ key: communityId, value: nextChannels });
+                setLoadedCommunityId(communityId);
+                setErrorState({ key: communityId, value: null });
             },
             (nextError) => {
-                setError(nextError);
-                setLoading(false);
+                setLoadedCommunityId(communityId);
+                setErrorState({ key: communityId, value: nextError });
             }
         );
     }, [communityId]);
