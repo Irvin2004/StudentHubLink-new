@@ -12,29 +12,41 @@ export function useFiles(channelId, { communityId, subscribe = true } = {}) {
     const { profile, user } = useAuth();
     const [files, setFiles] = useState([]);
     const [uploads, setUploads] = useState([]);
-    const [loading, setLoading] = useState(Boolean(subscribe && channelId));
-    const [error, setError] = useState(null);
+    const [loadedSubscription, setLoadedSubscription] = useState("");
+    const [errorState, setErrorState] = useState({
+        key: "",
+        value: null
+    });
     const activeUploadsRef = useRef(new Map());
     const userId = user?.uid;
     const uploadedByName =
         profile?.displayName || user?.displayName || "Student";
+    const shouldSubscribe = Boolean(subscribe && communityId && channelId);
+    const subscriptionKey = shouldSubscribe
+        ? `${communityId}/${channelId}`
+        : "";
+    const error = errorState.key === subscriptionKey ? errorState.value : null;
+    const loading = Boolean(
+        shouldSubscribe && loadedSubscription !== subscriptionKey && !error
+    );
 
     useEffect(() => {
-        if (!subscribe || !communityId || !channelId) return undefined;
+        if (!shouldSubscribe) return undefined;
 
         return listenToFiles(
             communityId,
             channelId,
             (nextFiles) => {
                 setFiles(nextFiles);
-                setLoading(false);
+                setLoadedSubscription(subscriptionKey);
+                setErrorState({ key: subscriptionKey, value: null });
             },
             (nextError) => {
-                setError(nextError);
-                setLoading(false);
+                setLoadedSubscription(subscriptionKey);
+                setErrorState({ key: subscriptionKey, value: nextError });
             }
         );
-    }, [channelId, communityId, subscribe]);
+    }, [channelId, communityId, shouldSubscribe, subscriptionKey]);
 
     useEffect(
         () => () => {

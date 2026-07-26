@@ -1,5 +1,6 @@
 import { useDeferredValue, useMemo, useState } from "react";
 
+import { LoadErrorState } from "../../common/LoadErrorState.jsx";
 import SearchInput from "../../ui/SearchInput/index.js";
 import Skeleton from "../../ui/Skeleton/index.js";
 import FileActions from "../FileActions/FileActions.jsx";
@@ -16,6 +17,7 @@ function timestamp(value) {
 
 export default function FileList({
     currentUserId,
+    error,
     files = [],
     loading,
     onDelete,
@@ -105,11 +107,21 @@ export default function FileList({
                 </div>
             </div>
             {loading ? (
-                <div aria-label="Loading files" className={styles.loading}>
+                <div
+                    aria-busy="true"
+                    aria-label="Loading files"
+                    className={styles.loading}
+                    role="status"
+                >
                     {[1, 2, 3].map((item) => (
                         <Skeleton height="13rem" key={item} />
                     ))}
                 </div>
+            ) : error && !files.length ? (
+                <LoadErrorState
+                    description="We could not load the files shared in this channel."
+                    title="Files unavailable"
+                />
             ) : visibleFiles.length ? (
                 view === "grid" ? (
                     <FileGrid files={visibleFiles} {...common} />

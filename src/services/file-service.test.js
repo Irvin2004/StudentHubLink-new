@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
+    createActivity: vi.fn(),
     deleteDoc: vi.fn(),
     deleteObject: vi.fn(),
     getDownloadURL: vi.fn(),
@@ -46,6 +47,10 @@ vi.mock("../firebase/index.js", () => ({
     storage: { path: "storage" }
 }));
 
+vi.mock("./activity-service.js", () => ({
+    createActivity: mocks.createActivity
+}));
+
 import { downloadFile, uploadFile } from "./file-service.js";
 
 describe("file service", () => {
@@ -56,6 +61,7 @@ describe("file service", () => {
         );
         mocks.setDoc.mockResolvedValue();
         mocks.deleteObject.mockResolvedValue();
+        mocks.createActivity.mockResolvedValue("activity-1");
         mocks.task = {
             snapshot: { ref: { path: "stored-file" } },
             cancel: vi.fn(),
@@ -92,6 +98,13 @@ describe("file service", () => {
             })
         );
         expect(uploaded.id).toBe("file-1");
+        expect(mocks.createActivity).toHaveBeenCalledWith(
+            "community-1",
+            expect.objectContaining({
+                type: "file_uploaded",
+                referenceId: "file-1"
+            })
+        );
     });
 
     test("normalizes upload cancellation", async () => {
@@ -123,7 +136,9 @@ describe("file service", () => {
             uploadedBy: "user-1"
         });
 
-        await expect(handle.promise).rejects.toThrow("metadata unavailable");
+        await expect(handle.promise).rejects.toThrow(
+            "Check your connection and retry the file operation."
+        );
         expect(mocks.deleteObject).toHaveBeenCalled();
     });
 

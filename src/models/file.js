@@ -1,10 +1,5 @@
-import { COMMUNITY_ROLES } from "../config/community-roles.js";
+import { canDeleteCommunityFile } from "../config/community-permissions.js";
 import { getFileExtension } from "../utils/file-validation.js";
-
-const FILE_MANAGER_ROLES = new Set([
-    COMMUNITY_ROLES.OWNER,
-    COMMUNITY_ROLES.ADMIN
-]);
 
 function text(value) {
     return String(value ?? "").trim();
@@ -21,6 +16,10 @@ export function createFileModel(input = {}) {
     return {
         id: text(input.id),
         name: text(input.name) || originalName,
+        filename: text(input.filename) || originalName,
+        normalizedFilename:
+            text(input.normalizedFilename).toLowerCase() ||
+            originalName.toLowerCase(),
         originalName,
         extension:
             text(input.extension).toLowerCase() ||
@@ -34,13 +33,13 @@ export function createFileModel(input = {}) {
         uploadedAt: input.uploadedAt || null,
         communityId: text(input.communityId),
         channelId: text(input.channelId),
-        messageId: text(input.messageId) || null
+        messageId: text(input.messageId) || null,
+        tags: Array.isArray(input.tags)
+            ? input.tags.map(text).filter(Boolean)
+            : []
     };
 }
 
 export function canDeleteFile(file, userId, role) {
-    return (
-        Boolean(userId) &&
-        (file?.uploadedBy === userId || FILE_MANAGER_ROLES.has(role))
-    );
+    return canDeleteCommunityFile(file, userId, role);
 }

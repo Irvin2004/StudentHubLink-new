@@ -19,6 +19,7 @@ import {
 } from "firebase/storage";
 
 import { auth, db, storage } from "../firebase/index.js";
+import { ACTIVITY_TYPES } from "../config/activity-types.js";
 import { createFileModel } from "../models/file.js";
 import { createActivity } from "./activity-service.js";
 import { createNotification } from "./notification-service.js";
@@ -26,6 +27,7 @@ import {
     sanitizeStorageFileName,
     validateFile
 } from "../utils/file-validation.js";
+import { getActionableErrorMessage } from "../utils/app-error-mapper.js";
 
 const COMMUNITIES = "communities";
 const CHANNELS = "channels";
@@ -80,9 +82,7 @@ function normalizeFileError(error) {
         return canceled;
     }
 
-    const normalized = new Error(
-        error?.message || "The file operation failed."
-    );
+    const normalized = new Error(getActionableErrorMessage(error, "files"));
     normalized.code = error?.code || "file/unknown";
     return normalized;
 }
@@ -161,6 +161,9 @@ export function uploadFile(
                     const url = await getDownloadURL(task.snapshot.ref);
                     const data = {
                         name: storedName,
+                        filename: validated.originalName,
+                        normalizedFilename:
+                            validated.originalName.toLowerCase(),
                         originalName: validated.originalName,
                         extension: validated.extension,
                         size: validated.size,
@@ -174,7 +177,8 @@ export function uploadFile(
                         uploadedAt: serverTimestamp(),
                         communityId: cleanCommunityId,
                         channelId: cleanChannelId,
-                        messageId: messageId ? String(messageId) : null
+                        messageId: messageId ? String(messageId) : null,
+                        tags: []
                     };
 
                     await setDoc(metadataReference, data);
@@ -183,14 +187,14 @@ export function uploadFile(
                         ...data
                     });
                     void createActivity(cleanCommunityId, {
-                        type: "file_uploaded",
+                        type: ACTIVITY_TYPES.FILE_UPLOADED,
                         actorId: cleanUserId,
                         actorName: data.uploadedByName,
                         title: `${data.uploadedByName} shared a file`,
                         description: data.originalName,
                         channelId: cleanChannelId,
                         referenceId: metadataReference.id
-                    });
+                    }).catch(() => {});
                     void announceFile(model);
                     resolve(model);
                 } catch (error) {
