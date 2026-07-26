@@ -1,14 +1,21 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 
 import DateDivider from "../DateDivider/DateDivider.jsx";
 import MessageItem from "../MessageItem/MessageItem.jsx";
+import PinnedMessages from "../PinnedMessages/PinnedMessages.jsx";
+import { LoadErrorState } from "../../common/LoadErrorState.jsx";
 import Skeleton from "../../ui/Skeleton/index.js";
 import { groupMessagesByDate } from "../../../utils/message-formatter.js";
 import styles from "./MessageList.module.css";
 
 function MessageListSkeleton() {
     return (
-        <div aria-label="Loading messages" className={styles.skeleton}>
+        <div
+            aria-busy="true"
+            aria-label="Loading messages"
+            className={styles.skeleton}
+            role="status"
+        >
             {[82, 64, 76, 55].map((width) => (
                 <div key={width}>
                     <Skeleton height="2.5rem" variant="circle" width="2.5rem" />
@@ -24,6 +31,7 @@ function MessageListSkeleton() {
 
 export default function MessageList({
     currentUserId,
+    error,
     hasOlder,
     loading,
     loadingOlder,
@@ -33,11 +41,21 @@ export default function MessageList({
     onLoadOlder,
     onReact,
     onReply,
+    onRetry,
+    onTogglePin,
     role
 }) {
     const containerRef = useRef(null);
     const previousNewestIdRef = useRef(null);
-    const groups = groupMessagesByDate(messages);
+    const { groups, pinnedMessages } = useMemo(
+        () => ({
+            groups: groupMessagesByDate(messages),
+            pinnedMessages: messages.filter(
+                (message) => message.pinnedAt && !message.deleted
+            )
+        }),
+        [messages]
+    );
 
     useEffect(() => {
         const container = containerRef.current;
@@ -71,6 +89,14 @@ export default function MessageList({
     }
 
     if (loading) return <MessageListSkeleton />;
+    if (error && !messages.length) {
+        return (
+            <LoadErrorState
+                description="We could not load this channel's messages."
+                title="Messages unavailable"
+            />
+        );
+    }
 
     return (
         <div
@@ -86,6 +112,7 @@ export default function MessageList({
                     Loading earlier messages…
                 </p>
             ) : null}
+            <PinnedMessages messages={pinnedMessages} />
             {!messages.length ? (
                 <div className={styles.empty}>
                     <span aria-hidden="true">#</span>
@@ -106,8 +133,10 @@ export default function MessageList({
                                 message={message}
                                 onDelete={onDelete}
                                 onEdit={onEdit}
+                                onPin={onTogglePin}
                                 onReact={onReact}
                                 onReply={onReply}
+                                onRetry={onRetry}
                                 role={role}
                             />
                         ))}

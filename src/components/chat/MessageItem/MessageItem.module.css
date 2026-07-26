@@ -5,6 +5,8 @@
     gap: var(--space-3);
     padding: var(--space-3) clamp(var(--space-4), 4vw, var(--space-8));
     border-radius: var(--radius-md);
+    content-visibility: auto;
+    contain-intrinsic-size: auto 5rem;
 }
 
 .item:hover,
@@ -39,6 +41,24 @@
 .meta time {
     color: var(--text-secondary);
     font-size: 0.72rem;
+}
+
+.pinned {
+    color: var(--channel-accent);
+    font-size: 0.72rem;
+    font-weight: 750;
+}
+
+.pinned {
+    color: var(--channel-accent);
+    font-size: 0.72rem;
+    font-weight: 750;
+}
+
+.pinned {
+    color: var(--channel-accent);
+    font-size: 0.72rem;
+    font-weight: 750;
 }
 
 .text,

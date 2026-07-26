@@ -4,9 +4,12 @@ import styles from "./MessageActions.module.css";
 export default function MessageActions({
     canDelete,
     canEdit,
+    canPin,
+    isPinned,
     onCopy,
     onDelete,
     onEdit,
+    onPin,
     onReact,
     onReply
 }) {
@@ -36,6 +39,11 @@ export default function MessageActions({
             {canEdit ? (
                 <button onClick={onEdit} type="button">
                     Edit
+                </button>
+            ) : null}
+            {canPin ? (
+                <button onClick={onPin} type="button">
+                    {isPinned ? "Unpin" : "Pin"}
                 </button>
             ) : null}
             <button onClick={onCopy} type="button">

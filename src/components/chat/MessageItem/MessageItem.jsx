@@ -6,30 +6,30 @@ import MessageContextMenu from "../MessageContextMenu/MessageContextMenu.jsx";
 import MessageReactions from "../MessageReactions/MessageReactions.jsx";
 import MessageStatus from "../MessageStatus/MessageStatus.jsx";
 import ReplyPreview from "../ReplyPreview/ReplyPreview.jsx";
-import { COMMUNITY_ROLES } from "../../../config/community-roles.js";
+import {
+    canDeleteCommunityMessage,
+    canPinCommunityMessage
+} from "../../../config/community-permissions.js";
 import { formatMessageTime } from "../../../utils/message-formatter.js";
 import styles from "./MessageItem.module.css";
-
-const MANAGER_ROLES = new Set([
-    COMMUNITY_ROLES.OWNER,
-    COMMUNITY_ROLES.ADMIN,
-    COMMUNITY_ROLES.MODERATOR
-]);
 
 function MessageItem({
     currentUserId,
     message,
     onDelete,
     onEdit,
+    onPin,
     onReact,
     onReply,
+    onRetry,
     role
 }) {
     const [editing, setEditing] = useState(false);
     const [editText, setEditText] = useState(message.text);
     const [saving, setSaving] = useState(false);
     const isAuthor = message.senderId === currentUserId;
-    const canDelete = isAuthor || MANAGER_ROLES.has(role);
+    const canDelete = canDeleteCommunityMessage(message, currentUserId, role);
+    const canPin = canPinCommunityMessage(role);
 
     async function saveEdit() {
         const text = editText.trim();
@@ -57,6 +57,8 @@ function MessageItem({
             aria-label={`Message from ${message.senderName}`}
             className={`${styles.item} message-row`}
             data-deleted={message.deleted || undefined}
+            id={`message-${message.id}`}
+            tabIndex="-1"
         >
             <Avatar
                 className={styles.avatar}
@@ -71,7 +73,15 @@ function MessageItem({
                         {formatMessageTime(message.createdAt)}
                         {message.edited && !message.deleted ? " (edited)" : ""}
                     </time>
-                    <MessageStatus pending={!message.createdAt} />
+                    {message.pinnedAt ? (
+                        <span className={styles.pinned}>📌 Pinned</span>
+                    ) : null}
+                    {isAuthor ? (
+                        <MessageStatus
+                            onRetry={() => onRetry(message.id)}
+                            status={message.deliveryStatus}
+                        />
+                    ) : null}
                 </header>
                 {message.deleted ? (
                     <p className={styles.deleted}>This message was deleted.</p>
@@ -136,9 +146,12 @@ function MessageItem({
                 <MessageContextMenu
                     canDelete={canDelete}
                     canEdit={isAuthor}
+                    canPin={canPin}
+                    isPinned={Boolean(message.pinnedAt)}
                     onCopy={copyMessage}
                     onDelete={() => onDelete(message.id)}
                     onEdit={() => setEditing(true)}
+                    onPin={() => onPin(message)}
                     onReact={(reaction) => onReact(message, reaction)}
                     onReply={() => onReply(message)}
                 />

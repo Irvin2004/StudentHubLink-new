@@ -1,4 +1,8 @@
-import { MESSAGE_MAX_LENGTH, MESSAGE_TYPES } from "../config/message-types.js";
+import {
+    MESSAGE_DELIVERY_STATUS,
+    MESSAGE_MAX_LENGTH,
+    MESSAGE_TYPES
+} from "../config/message-types.js";
 
 function normalizeText(value) {
     return String(value ?? "").trim();
@@ -77,8 +81,12 @@ export function createMessageModel(input = {}) {
         edited: input.edited === true,
         deleted: input.deleted === true,
         deletedAt: input.deletedAt || null,
+        pinnedAt: input.pinnedAt || null,
+        pinnedBy: normalizeText(input.pinnedBy) || null,
         readBy: Array.isArray(input.readBy) ? input.readBy : [],
         createdAt: input.createdAt || null,
-        updatedAt: input.updatedAt || null
+        updatedAt: input.updatedAt || null,
+        deliveryStatus: input.deliveryStatus || MESSAGE_DELIVERY_STATUS.SENT,
+        deliveryError: normalizeText(input.deliveryError) || null
     };
 }

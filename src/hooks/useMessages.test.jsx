@@ -4,8 +4,12 @@ import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 const mocks = vi.hoisted(() => ({
     listenToMessages: vi.fn(),
     listenToTyping: vi.fn(),
+    pinMessage: vi.fn(),
     sendMessage: vi.fn(),
-    stopTyping: vi.fn()
+    stopTyping: vi.fn(),
+    unpinMessage: vi.fn(),
+    unsubscribeMessages: vi.fn(),
+    unsubscribeTyping: vi.fn()
 }));
 
 vi.mock("./useAuth.js", () => ({
@@ -17,6 +21,7 @@ vi.mock("./useAuth.js", () => ({
 
 vi.mock("../services/message-service.js", () => ({
     addReaction: vi.fn(),
+    createMessageId: vi.fn(() => "message-2"),
     deleteMessage: vi.fn(),
     editMessage: vi.fn(),
     listenToMessages: mocks.listenToMessages,
@@ -25,7 +30,9 @@ vi.mock("../services/message-service.js", () => ({
     removeReaction: vi.fn(),
     sendMessage: mocks.sendMessage,
     sendTyping: vi.fn(),
-    stopTyping: mocks.stopTyping
+    stopTyping: mocks.stopTyping,
+    pinMessage: mocks.pinMessage,
+    unpinMessage: mocks.unpinMessage
 }));
 
 import { useMessages } from "./useMessages.js";
@@ -39,13 +46,13 @@ describe("useMessages", () => {
         mocks.listenToMessages.mockImplementation(
             (_communityId, _channelId, onData) => {
                 messagesListener = onData;
-                return vi.fn();
+                return mocks.unsubscribeMessages;
             }
         );
         mocks.listenToTyping.mockImplementation(
             (_communityId, _channelId, onData) => {
                 typingListener = onData;
-                return vi.fn();
+                return mocks.unsubscribeTyping;
             }
         );
     });
@@ -73,6 +80,15 @@ describe("useMessages", () => {
         ]);
 
         await act(() => result.current.sendMessage("New message"));
+        expect(result.current.messages).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({
+                    id: "message-2",
+                    text: "New message",
+                    deliveryStatus: "sent"
+                })
+            ])
+        );
         expect(mocks.sendMessage).toHaveBeenCalledWith(
             expect.objectContaining({
                 communityId: "community-1",
@@ -81,6 +97,32 @@ describe("useMessages", () => {
                 text: "New message"
             })
         );
+    });
+
+    test("shows failed optimistic messages and retries them", async () => {
+        mocks.sendMessage
+            .mockRejectedValueOnce(new Error("Offline"))
+            .mockResolvedValueOnce({ id: "message-2" });
+        const { result } = renderHook(() =>
+            useMessages("general", { communityId: "community-1" })
+        );
+
+        act(() => {
+            messagesListener({ messages: [], oldestSnapshot: null });
+        });
+        await act(async () => {
+            result.current.sendMessage("Try again");
+            await Promise.resolve();
+        });
+        expect(result.current.messages[0]).toMatchObject({
+            id: "message-2",
+            deliveryStatus: "failed",
+            deliveryError: "Offline"
+        });
+
+        await act(() => result.current.retryMessage("message-2"));
+        expect(mocks.sendMessage).toHaveBeenCalledTimes(2);
+        expect(result.current.messages[0].deliveryStatus).toBe("sent");
     });
 
     test("hides stale typing users and clears active users after timeout", async () => {
@@ -112,5 +154,27 @@ describe("useMessages", () => {
             vi.advanceTimersByTime(5000);
         });
         expect(result.current.typingUsers).toEqual([]);
+    });
+
+    test("subscribes only while the messages view is enabled and cleans up", () => {
+        const { rerender, unmount } = renderHook(
+            ({ enabled }) =>
+                useMessages("general", {
+                    communityId: "community-1",
+                    enabled
+                }),
+            { initialProps: { enabled: false } }
+        );
+
+        expect(mocks.listenToMessages).not.toHaveBeenCalled();
+        expect(mocks.listenToTyping).not.toHaveBeenCalled();
+
+        rerender({ enabled: true });
+        expect(mocks.listenToMessages).toHaveBeenCalledOnce();
+        expect(mocks.listenToTyping).toHaveBeenCalledOnce();
+
+        unmount();
+        expect(mocks.unsubscribeMessages).toHaveBeenCalledOnce();
+        expect(mocks.unsubscribeTyping).toHaveBeenCalledOnce();
     });
 });

@@ -2,7 +2,6 @@ import {
     COMMUNITY_PERMISSIONS,
     hasCommunityPermission
 } from "./community-permissions.js";
-import { COMMUNITY_ROLES } from "./community-roles.js";
 import { CHANNEL_TYPES } from "./channel-types.js";
 
 export const CHANNEL_PERMISSIONS = Object.freeze({
@@ -21,7 +20,10 @@ export function canCreateChannel(role) {
 }
 
 export function canManageChannel(role) {
-    return [COMMUNITY_ROLES.OWNER, COMMUNITY_ROLES.ADMIN].includes(role);
+    return hasCommunityPermission(
+        role,
+        COMMUNITY_PERMISSIONS.CAN_MANAGE_CHANNELS
+    );
 }
 
 export function canPostInChannel(role, channel) {

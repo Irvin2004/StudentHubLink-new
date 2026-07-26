@@ -80,6 +80,10 @@
     overflow: auto;
 }
 
+.panelLoading {
+    padding: var(--space-6);
+}
+
 .files > * + * {
     margin-top: var(--space-6);
 }

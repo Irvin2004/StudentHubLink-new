@@ -73,4 +73,30 @@ describe("MessageList", () => {
         fireEvent.click(screen.getByRole("button", { name: "Reply" }));
         expect(onReply).toHaveBeenCalledWith(messages[0]);
     });
+
+    test("shows pinned messages and lets moderators unpin them", () => {
+        const onTogglePin = vi.fn();
+        const pinnedMessage = {
+            ...messages[0],
+            pinnedAt: new Date("2026-07-25T09:01:00")
+        };
+        render(
+            <MessageList
+                currentUserId="user-2"
+                messages={[pinnedMessage]}
+                onDelete={vi.fn()}
+                onEdit={vi.fn()}
+                onLoadOlder={vi.fn()}
+                onReact={vi.fn()}
+                onReply={vi.fn()}
+                onRetry={vi.fn()}
+                onTogglePin={onTogglePin}
+                role={COMMUNITY_ROLES.MODERATOR}
+            />
+        );
+
+        expect(screen.getByLabelText("Pinned messages")).toBeInTheDocument();
+        fireEvent.click(screen.getByRole("button", { name: "Unpin" }));
+        expect(onTogglePin).toHaveBeenCalledWith(pinnedMessage);
+    });
 });

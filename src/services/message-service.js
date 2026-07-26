@@ -16,6 +16,8 @@ import {
 } from "firebase/firestore";
 
 import { MESSAGE_PAGE_SIZE, MESSAGE_TYPES } from "../config/message-types.js";
+import { ACTIVITY_TYPES } from "../config/activity-types.js";
+import { CHANNEL_TYPES } from "../config/channel-types.js";
 import { isReactionType, REACTION_KEYS } from "../config/reaction-types.js";
 import { auth, db } from "../firebase/index.js";
 import { createMessageModel, validateMessageInput } from "../models/message.js";
@@ -117,9 +119,9 @@ export async function sendMessage(input) {
         ...input,
         senderId: input.senderId || auth.currentUser?.uid
     });
-    const reference = doc(
-        messagesReference(validated.communityId, validated.channelId)
-    );
+    const reference = input.id
+        ? messageReference(validated.communityId, validated.channelId, input.id)
+        : doc(messagesReference(validated.communityId, validated.channelId));
     const timestamp = serverTimestamp();
     const data = {
         channelId: validated.channelId,
@@ -134,27 +136,35 @@ export async function sendMessage(input) {
         edited: false,
         deleted: false,
         deletedAt: null,
+        pinnedAt: null,
+        pinnedBy: null,
         readBy: [validated.senderId],
         createdAt: timestamp,
         updatedAt: timestamp
     };
 
     await setDoc(reference, data);
-    void createActivity(validated.communityId, {
-        type: "message_sent",
-        actorId: validated.senderId,
-        actorName: validated.senderName,
-        title: `${validated.senderName} posted in #${validated.channelId}`,
-        description: validated.text || "Shared an attachment",
-        channelId: validated.channelId,
-        referenceId: reference.id
-    });
+    if (input.channelType === CHANNEL_TYPES.ANNOUNCEMENTS) {
+        void createActivity(validated.communityId, {
+            type: ACTIVITY_TYPES.ANNOUNCEMENT_POSTED,
+            actorId: validated.senderId,
+            actorName: validated.senderName,
+            title: `New announcement in #${validated.channelId}`,
+            description: validated.text || "Shared an announcement",
+            channelId: validated.channelId,
+            referenceId: reference.id
+        }).catch(() => {});
+    }
     void notifyCommunityMembers(reference.id, validated);
     return createMessageModel({
         id: reference.id,
         communityId: validated.communityId,
         ...data
     });
+}
+
+export function createMessageId(communityId, channelId) {
+    return doc(messagesReference(communityId, channelId)).id;
 }
 
 export async function editMessage(
@@ -187,6 +197,23 @@ export async function deleteMessage(communityId, channelId, messageId, userId) {
         attachments: [],
         deleted: true,
         deletedAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+    });
+}
+
+export async function pinMessage(communityId, channelId, messageId, userId) {
+    await updateDoc(messageReference(communityId, channelId, messageId), {
+        pinnedAt: serverTimestamp(),
+        pinnedBy: requireUserId(userId),
+        updatedAt: serverTimestamp()
+    });
+}
+
+export async function unpinMessage(communityId, channelId, messageId, userId) {
+    requireUserId(userId);
+    await updateDoc(messageReference(communityId, channelId, messageId), {
+        pinnedAt: null,
+        pinnedBy: null,
         updatedAt: serverTimestamp()
     });
 }

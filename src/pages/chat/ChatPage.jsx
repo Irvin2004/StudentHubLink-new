@@ -1,34 +1,47 @@
-import { useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 
 import MessageComposer from "../../components/chat/MessageComposer/MessageComposer.jsx";
 import MessageList from "../../components/chat/MessageList/MessageList.jsx";
 import TypingIndicator from "../../components/chat/TypingIndicator/TypingIndicator.jsx";
-import FileList from "../../components/files/FileList/FileList.jsx";
-import FileUploader from "../../components/files/FileUploader/FileUploader.jsx";
-import ActivityFeed from "../../components/notifications/ActivityFeed/ActivityFeed.jsx";
+import Skeleton from "../../components/ui/Skeleton/index.js";
 import { canPostInChannel } from "../../config/channel-permissions.js";
 import { useAuth } from "../../hooks/useAuth.js";
-import { useFiles } from "../../hooks/useFiles.js";
-import { useActivityFeed } from "../../hooks/useActivityFeed.js";
 import { useMessages } from "../../hooks/useMessages.js";
+import { useObservability } from "../../hooks/useObservability.js";
 import { useToast } from "../../hooks/useToast.js";
 import styles from "./ChatPage.module.css";
 
+const ChatActivityView = lazy(
+    () => import("../../components/chat/ChatActivityView/ChatActivityView.jsx")
+);
+const ChatFilesView = lazy(
+    () => import("../../components/chat/ChatFilesView/ChatFilesView.jsx")
+);
+
+function TabLoadingState() {
+    return (
+        <div
+            aria-label="Loading channel content"
+            className={styles.panelLoading}
+            role="status"
+        >
+            <Skeleton count={4} />
+        </div>
+    );
+}
+
 export default function ChatPage({ channel, communityId, role }) {
+    const [searchParams, setSearchParams] = useSearchParams();
     const { user } = useAuth();
     const { showToast } = useToast();
+    const { captureError, getActionableErrorMessage } = useObservability();
     const [reply, setReply] = useState(null);
-    const [view, setView] = useState("messages");
+    const requestedView = searchParams.get("view");
+    const view = ["activity", "files", "messages"].includes(requestedView)
+        ? requestedView
+        : "messages";
     const announcementRef = useRef(null);
-    const { activities, loading: activityLoading } =
-        useActivityFeed(communityId);
-    const {
-        deleteFile,
-        downloadFile,
-        error: fileError,
-        files,
-        loading: filesLoading
-    } = useFiles(channel?.id, { communityId });
     const {
         clearTyping,
         deleteMessage,
@@ -40,28 +53,25 @@ export default function ChatPage({ channel, communityId, role }) {
         loadingOlder,
         messages,
         notifyTyping,
+        retryMessage,
         sendMessage,
+        togglePin,
         toggleReaction,
         typingUsers
-    } = useMessages(channel?.id, { communityId });
+    } = useMessages(channel?.id, {
+        communityId,
+        enabled: view === "messages"
+    });
 
     useEffect(() => {
         if (!error) return;
+        captureError(error, { feature: "channel_messages" });
         showToast({
             title: "Messaging unavailable",
-            message: error.message,
+            message: getActionableErrorMessage(error, "messages"),
             type: "error"
         });
-    }, [error, showToast]);
-
-    useEffect(() => {
-        if (!fileError) return;
-        showToast({
-            title: "Files unavailable",
-            message: fileError.message,
-            type: "error"
-        });
-    }, [fileError, showToast]);
+    }, [captureError, error, getActionableErrorMessage, showToast]);
 
     useEffect(() => {
         const latest = messages.at(-1);
@@ -74,6 +84,18 @@ export default function ChatPage({ channel, communityId, role }) {
         }
     }, [messages, user?.uid]);
 
+    function selectView(nextView) {
+        setSearchParams(
+            (current) => {
+                const next = new URLSearchParams(current);
+                if (nextView === "messages") next.delete("view");
+                else next.set("view", nextView);
+                return next;
+            },
+            { replace: true }
+        );
+    }
+
     if (!channel || !communityId) {
         return (
             <div className={styles.unavailable}>
@@ -84,32 +106,11 @@ export default function ChatPage({ channel, communityId, role }) {
     }
 
     async function handleSend(text, options) {
-        await sendMessage(text, options);
+        await sendMessage(text, {
+            ...options,
+            channelType: channel.type
+        });
         clearTyping();
-    }
-
-    async function handleDeleteFile(file) {
-        if (
-            !window.confirm(
-                `Delete ${file.originalName}? This cannot be undone.`
-            )
-        ) {
-            return;
-        }
-        try {
-            await deleteFile(file);
-            showToast({
-                title: "File deleted",
-                message: `${file.originalName} was removed.`,
-                type: "success"
-            });
-        } catch (nextError) {
-            showToast({
-                title: "Could not delete file",
-                message: nextError.message,
-                type: "error"
-            });
-        }
     }
 
     return (
@@ -117,25 +118,24 @@ export default function ChatPage({ channel, communityId, role }) {
             <nav aria-label="Channel content" className={styles.tabs}>
                 <button
                     aria-current={view === "messages" ? "page" : undefined}
-                    onClick={() => setView("messages")}
+                    onClick={() => selectView("messages")}
                     type="button"
                 >
                     Messages
                 </button>
                 <button
                     aria-current={view === "activity" ? "page" : undefined}
-                    onClick={() => setView("activity")}
+                    onClick={() => selectView("activity")}
                     type="button"
                 >
                     Activity
                 </button>
                 <button
                     aria-current={view === "files" ? "page" : undefined}
-                    onClick={() => setView("files")}
+                    onClick={() => selectView("files")}
                     type="button"
                 >
                     Shared files
-                    {files.length ? <span>{files.length}</span> : null}
                 </button>
             </nav>
             <div className={styles.messages} hidden={view !== "messages"}>
@@ -145,11 +145,14 @@ export default function ChatPage({ channel, communityId, role }) {
                     loading={loading}
                     loadingOlder={loadingOlder}
                     messages={messages}
+                    error={error}
                     onDelete={deleteMessage}
                     onEdit={editMessage}
                     onLoadOlder={loadOlder}
                     onReact={toggleReaction}
                     onReply={setReply}
+                    onRetry={retryMessage}
+                    onTogglePin={togglePin}
                     role={role}
                 />
                 <TypingIndicator users={typingUsers} />
@@ -173,26 +176,20 @@ export default function ChatPage({ channel, communityId, role }) {
                     }
                 />
             </div>
-            <div className={styles.files} hidden={view !== "files"}>
-                <FileUploader
-                    channelId={channel.id}
-                    communityId={communityId}
-                />
-                <FileList
-                    currentUserId={user?.uid}
-                    files={files}
-                    loading={filesLoading}
-                    onDelete={handleDeleteFile}
-                    onDownload={downloadFile}
-                    role={role}
-                />
-            </div>
-            <div className={styles.activity} hidden={view !== "activity"}>
-                <ActivityFeed
-                    activities={activities}
-                    loading={activityLoading}
-                />
-            </div>
+            {view === "files" ? (
+                <Suspense fallback={<TabLoadingState />}>
+                    <ChatFilesView
+                        channelId={channel.id}
+                        communityId={communityId}
+                        role={role}
+                    />
+                </Suspense>
+            ) : null}
+            {view === "activity" ? (
+                <Suspense fallback={<TabLoadingState />}>
+                    <ChatActivityView communityId={communityId} />
+                </Suspense>
+            ) : null}
             <p
                 aria-live="polite"
                 className={styles.srOnly}

@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, test, vi } from "vitest";
 const mocks = vi.hoisted(() => ({
     arrayRemove: vi.fn((value) => ({ operation: "remove", value })),
     arrayUnion: vi.fn((value) => ({ operation: "union", value })),
+    createActivity: vi.fn(),
     deleteDoc: vi.fn(),
     getDocs: vi.fn(),
     onSnapshot: vi.fn(),
@@ -48,20 +49,27 @@ vi.mock("../firebase/index.js", () => ({
     db: { name: "test-db" }
 }));
 
+vi.mock("./activity-service.js", () => ({
+    createActivity: mocks.createActivity
+}));
+
 import {
     addReaction,
     deleteMessage,
     editMessage,
     listenToMessages,
+    pinMessage,
     sendMessage,
     sendTyping,
-    stopTyping
+    stopTyping,
+    unpinMessage
 } from "./message-service.js";
 
 describe("message service", () => {
     beforeEach(() => {
         vi.clearAllMocks();
         mocks.setDoc.mockResolvedValue();
+        mocks.createActivity.mockResolvedValue("activity-1");
         mocks.updateDoc.mockResolvedValue();
         mocks.deleteDoc.mockResolvedValue();
     });
@@ -90,6 +98,27 @@ describe("message service", () => {
             })
         );
         expect(message.id).toBe("message-1");
+        expect(mocks.createActivity).not.toHaveBeenCalled();
+    });
+
+    test("records announcements as community activity", async () => {
+        await sendMessage({
+            communityId: "community-1",
+            channelId: "announcements",
+            channelType: "ANNOUNCEMENTS",
+            senderId: "user-1",
+            senderName: "Alex",
+            text: "Assignment two is available."
+        });
+
+        expect(mocks.createActivity).toHaveBeenCalledWith(
+            "community-1",
+            expect.objectContaining({
+                type: "announcement_posted",
+                channelId: "announcements",
+                title: "New announcement in #announcements"
+            })
+        );
     });
 
     test("edits and soft deletes messages", async () => {
@@ -115,6 +144,25 @@ describe("message service", () => {
                 deleted: true,
                 attachments: []
             })
+        );
+    });
+
+    test("pins and unpins messages independently", async () => {
+        await pinMessage("community-1", "general", "message-1", "user-1");
+        await unpinMessage("community-1", "general", "message-1", "user-1");
+
+        expect(mocks.updateDoc).toHaveBeenNthCalledWith(
+            1,
+            expect.anything(),
+            expect.objectContaining({
+                pinnedBy: "user-1",
+                pinnedAt: mocks.timestamp
+            })
+        );
+        expect(mocks.updateDoc).toHaveBeenNthCalledWith(
+            2,
+            expect.anything(),
+            expect.objectContaining({ pinnedBy: null, pinnedAt: null })
         );
     });
 
