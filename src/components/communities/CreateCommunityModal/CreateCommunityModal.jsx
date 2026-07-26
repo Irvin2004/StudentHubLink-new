@@ -18,7 +18,12 @@ const INITIAL_FORM = {
     banner: ""
 };
 
-export default function CreateCommunityModal({ onClose, onCreate, open }) {
+export default function CreateCommunityModal({
+    disabled = false,
+    onClose,
+    onCreate,
+    open
+}) {
     const [form, setForm] = useState(INITIAL_FORM);
     const [errors, setErrors] = useState({});
     const [submitting, setSubmitting] = useState(false);
@@ -39,6 +44,8 @@ export default function CreateCommunityModal({ onClose, onCreate, open }) {
 
     async function handleSubmit(event) {
         event.preventDefault();
+        if (disabled) return;
+
         const nextErrors = {};
 
         if (form.name.trim().length < 3) {
@@ -84,6 +91,7 @@ export default function CreateCommunityModal({ onClose, onCreate, open }) {
                         Cancel
                     </Button>
                     <Button
+                        disabled={disabled}
                         loading={submitting}
                         loadingLabel="Creating"
                         onClick={handleSubmit}

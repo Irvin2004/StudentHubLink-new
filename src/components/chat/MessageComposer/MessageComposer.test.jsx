@@ -3,6 +3,8 @@ import { describe, expect, test, vi } from "vitest";
 
 import MessageComposer from "./MessageComposer.jsx";
 
+const network = vi.hoisted(() => ({ isOnline: true }));
+
 vi.mock("../../../hooks/useFiles.js", () => ({
     useFiles: () => ({
         cancelUpload: vi.fn(),
@@ -11,6 +13,10 @@ vi.mock("../../../hooks/useFiles.js", () => ({
         uploadFiles: vi.fn().mockResolvedValue([]),
         uploads: []
     })
+}));
+
+vi.mock("../../../hooks/useNetwork.js", () => ({
+    useNetwork: () => network
 }));
 
 describe("MessageComposer", () => {
@@ -54,5 +60,17 @@ describe("MessageComposer", () => {
             shiftKey: true
         });
         expect(onSend).not.toHaveBeenCalled();
+    });
+
+    test("disables messaging controls while offline", () => {
+        network.isOnline = false;
+        render(<MessageComposer channelName="general" onSend={vi.fn()} />);
+
+        expect(screen.getByLabelText("Message general")).toBeDisabled();
+        expect(screen.getByRole("button", { name: "Send" })).toBeDisabled();
+        expect(
+            screen.getByRole("button", { name: "Add attachment" })
+        ).toBeDisabled();
+        network.isOnline = true;
     });
 });

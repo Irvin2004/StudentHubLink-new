@@ -2,8 +2,10 @@ import { lazy, Suspense } from "react";
 import { BrowserRouter } from "react-router-dom";
 
 import ErrorBoundary from "./components/ErrorBoundary/index.js";
+import NetworkStatus from "./components/NetworkStatus/NetworkStatus.jsx";
 import { ToastContainer } from "./components/Toast/index.js";
 import { AuthProvider } from "./context/AuthContext.jsx";
+import { NetworkProvider } from "./context/NetworkContext.jsx";
 import { NotificationProvider } from "./context/NotificationContext.jsx";
 import { SearchProvider } from "./context/SearchContext.jsx";
 import { SettingsProvider } from "./context/SettingsContext.jsx";
@@ -41,17 +43,20 @@ export default function App() {
             <BrowserRouter>
                 <ThemeProvider>
                     <SettingsProvider>
-                        <ToastProvider>
-                            <AuthProvider>
-                                <SearchProvider>
-                                    <NotificationProvider>
-                                        <AppRouter />
-                                        <DeferredSearchModal />
-                                        <ToastContainer />
-                                    </NotificationProvider>
-                                </SearchProvider>
-                            </AuthProvider>
-                        </ToastProvider>
+                        <NetworkProvider>
+                            <ToastProvider>
+                                <AuthProvider>
+                                    <SearchProvider>
+                                        <NotificationProvider>
+                                            <AppRouter />
+                                            <DeferredSearchModal />
+                                            <NetworkStatus />
+                                            <ToastContainer />
+                                        </NotificationProvider>
+                                    </SearchProvider>
+                                </AuthProvider>
+                            </ToastProvider>
+                        </NetworkProvider>
                     </SettingsProvider>
                 </ThemeProvider>
             </BrowserRouter>

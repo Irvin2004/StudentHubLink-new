@@ -26,6 +26,7 @@ const communities = [
         memberCount: 77
     }
 ];
+const network = vi.hoisted(() => ({ isOnline: true }));
 
 vi.mock("../../hooks/useAuth.js", () => ({
     useAuth: () => ({ user: { uid: "user-1" } })
@@ -33,6 +34,10 @@ vi.mock("../../hooks/useAuth.js", () => ({
 
 vi.mock("../../hooks/useToast.js", () => ({
     useToast: () => ({ showToast: vi.fn() })
+}));
+
+vi.mock("../../hooks/useNetwork.js", () => ({
+    useNetwork: () => network
 }));
 
 vi.mock("../../hooks/useCommunities.js", () => ({
@@ -58,6 +63,7 @@ import CommunitiesPage from "./CommunitiesPage.jsx";
 
 describe("CommunitiesPage", () => {
     afterEach(() => {
+        network.isOnline = true;
         vi.useRealTimers();
     });
 
@@ -88,5 +94,18 @@ describe("CommunitiesPage", () => {
         expect(
             screen.queryByRole("heading", { name: "Campus Creatives" })
         ).not.toBeInTheDocument();
+    });
+
+    test("disables community creation while offline", () => {
+        network.isOnline = false;
+        render(
+            <MemoryRouter>
+                <CommunitiesPage />
+            </MemoryRouter>
+        );
+
+        expect(
+            screen.getByRole("button", { name: "Create community" })
+        ).toBeDisabled();
     });
 });
