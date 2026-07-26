@@ -1,7 +1,7 @@
 import { lazy, Suspense } from "react";
 import { BrowserRouter } from "react-router-dom";
 
-import AppErrorBoundary from "./components/feedback/AppErrorBoundary.jsx";
+import ErrorBoundary from "./components/ErrorBoundary/index.js";
 import { ToastViewport } from "./components/feedback/ToastViewport.jsx";
 import { AuthProvider } from "./context/AuthContext.jsx";
 import { NotificationProvider } from "./context/NotificationContext.jsx";
@@ -11,6 +11,7 @@ import { ThemeProvider } from "./context/ThemeContext.jsx";
 import { ToastProvider } from "./context/ToastContext.jsx";
 import { useSearch } from "./hooks/useSearch.js";
 import { AppRouter } from "./routes/AppRouter.jsx";
+import { captureError } from "./services/observability-service.js";
 
 const SearchModal = lazy(
     () => import("./components/Search/SearchModal/SearchModal.jsx")
@@ -26,9 +27,17 @@ function DeferredSearchModal() {
     );
 }
 
+function captureAppError(error, errorInfo) {
+    captureError(error, {
+        component: "ErrorBoundary",
+        componentStack: Boolean(errorInfo?.componentStack),
+        recoverable: false
+    });
+}
+
 export default function App() {
     return (
-        <AppErrorBoundary>
+        <ErrorBoundary onError={captureAppError}>
             <BrowserRouter>
                 <ThemeProvider>
                     <SettingsProvider>
@@ -46,6 +55,6 @@ export default function App() {
                     </SettingsProvider>
                 </ThemeProvider>
             </BrowserRouter>
-        </AppErrorBoundary>
+        </ErrorBoundary>
     );
 }
