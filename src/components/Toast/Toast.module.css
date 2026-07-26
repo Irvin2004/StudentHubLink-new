@@ -1,0 +1,135 @@
+.container {
+    position: fixed;
+    z-index: 1000;
+    top: var(--space-4);
+    right: var(--space-4);
+    width: min(24rem, calc(100vw - (2 * var(--space-4))));
+    display: grid;
+    gap: var(--space-3);
+    pointer-events: none;
+}
+
+.toast {
+    --toast-accent: var(--primary);
+
+    width: 100%;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: start;
+    gap: var(--space-3);
+    padding: var(--space-4);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--toast-accent);
+    border-radius: var(--radius-md);
+    background: var(--surface);
+    box-shadow: var(--shadow);
+    color: var(--text);
+    pointer-events: auto;
+    animation: toast-in 180ms ease-out both;
+}
+
+.success {
+    --toast-accent: var(--success);
+}
+
+.error {
+    --toast-accent: var(--danger);
+}
+
+.warning {
+    --toast-accent: var(--warning);
+}
+
+.info {
+    --toast-accent: var(--primary);
+}
+
+.icon {
+    display: grid;
+    place-items: center;
+    margin-top: 0.1rem;
+    color: var(--toast-accent);
+}
+
+.content {
+    min-width: 0;
+}
+
+.content strong {
+    display: block;
+    margin-bottom: var(--space-1);
+}
+
+.content p {
+    margin: 0;
+    color: var(--text-secondary);
+    line-height: 1.45;
+    overflow-wrap: anywhere;
+}
+
+.dismiss {
+    width: 2rem;
+    height: 2rem;
+    display: grid;
+    place-items: center;
+    margin: calc(var(--space-2) * -1);
+    border: 0;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--text-secondary);
+    font: inherit;
+    font-size: 1.35rem;
+    cursor: pointer;
+}
+
+.dismiss:hover {
+    background: var(--surface-muted);
+    color: var(--text);
+}
+
+.dismiss:focus-visible {
+    outline: 3px solid var(--focus-ring);
+    outline-offset: 2px;
+}
+
+.dismissing {
+    pointer-events: none;
+    animation: toast-out 160ms ease-in both;
+}
+
+@keyframes toast-in {
+    from {
+        opacity: 0;
+        transform: translateX(var(--space-4));
+    }
+}
+
+@keyframes toast-out {
+    to {
+        opacity: 0;
+        transform: translateX(var(--space-4));
+    }
+}
+
+@media (max-width: 30rem) {
+    .container {
+        top: auto;
+        right: var(--space-3);
+        bottom: var(--space-3);
+        left: var(--space-3);
+        width: auto;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .toast,
+    .dismissing {
+        animation-duration: 1ms;
+    }
+}
+
+@media (forced-colors: active) {
+    .toast {
+        border: 2px solid CanvasText;
+    }
+}

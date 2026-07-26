@@ -2,7 +2,7 @@ import { lazy, Suspense } from "react";
 import { BrowserRouter } from "react-router-dom";
 
 import ErrorBoundary from "./components/ErrorBoundary/index.js";
-import { ToastViewport } from "./components/feedback/ToastViewport.jsx";
+import { ToastContainer } from "./components/Toast/index.js";
 import { AuthProvider } from "./context/AuthContext.jsx";
 import { NotificationProvider } from "./context/NotificationContext.jsx";
 import { SearchProvider } from "./context/SearchContext.jsx";
@@ -47,7 +47,7 @@ export default function App() {
                                     <NotificationProvider>
                                         <AppRouter />
                                         <DeferredSearchModal />
-                                        <ToastViewport />
+                                        <ToastContainer />
                                     </NotificationProvider>
                                 </SearchProvider>
                             </AuthProvider>
