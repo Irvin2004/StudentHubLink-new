@@ -1,18 +1,18 @@
 import { useRef } from "react";
 
 import Modal from "../../ui/Modal/index.js";
-import SearchInput from "../../ui/SearchInput/index.js";
 import { useSearch } from "../../../hooks/useSearch.js";
+import SearchBar from "../SearchBar/index.js";
 import SearchFilters from "../SearchFilters/SearchFilters.jsx";
 import SearchResults from "../SearchResults/SearchResults.jsx";
 import styles from "./SearchModal.module.css";
 
-export default function SearchModal() {
+export default function SearchModal({ onClose, open }) {
     const {
         activateResult,
         activeIndex,
-        closeSearch,
-        isOpen,
+        clearSearch,
+        loading,
         moveSelection,
         query,
         setQuery
@@ -31,15 +31,17 @@ export default function SearchModal() {
 
     return (
         <Modal
+            className={styles.dialog}
+            closeLabel="Close Search"
             description="Search communities, channels, and shared files."
             initialFocusRef={inputRef}
-            onClose={closeSearch}
-            open={isOpen}
+            onClose={onClose}
+            open={open}
             size="wide"
             title="Search StudentHub"
         >
             <div className={styles.search}>
-                <SearchInput
+                <SearchBar
                     aria-activedescendant={
                         activeIndex >= 0
                             ? `global-search-result-${activeIndex}`
@@ -47,9 +49,9 @@ export default function SearchModal() {
                     }
                     aria-controls="global-search-results"
                     aria-expanded="true"
-                    autoComplete="off"
-                    label="Search StudentHub"
-                    onChange={(event) => setQuery(event.target.value)}
+                    loading={loading}
+                    onChange={setQuery}
+                    onClear={clearSearch}
                     onKeyDown={handleKeyDown}
                     placeholder="Search StudentHub..."
                     ref={inputRef}

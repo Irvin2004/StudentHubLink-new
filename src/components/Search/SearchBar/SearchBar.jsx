@@ -1,18 +1,25 @@
+import { forwardRef } from "react";
+
 import { AppIcon } from "../../common/AppIcon.jsx";
 import Spinner from "../../ui/Spinner/index.js";
 import styles from "./SearchBar.module.css";
 
 const DEFAULT_PLACEHOLDER = "Search StudentHub...";
 
-export default function SearchBar({
-    autoFocus = false,
-    disabled = false,
-    loading = false,
-    onChange,
-    onClear,
-    placeholder = DEFAULT_PLACEHOLDER,
-    value
-}) {
+const SearchBar = forwardRef(function SearchBar(
+    {
+        autoFocus = false,
+        disabled = false,
+        loading = false,
+        onChange,
+        onClear,
+        onKeyDown,
+        placeholder = DEFAULT_PLACEHOLDER,
+        value,
+        ...inputProps
+    },
+    ref
+) {
     function clearSearch() {
         if (onClear) {
             onClear();
@@ -27,6 +34,8 @@ export default function SearchBar({
             event.preventDefault();
             clearSearch();
         }
+
+        onKeyDown?.(event);
     }
 
     return (
@@ -38,6 +47,7 @@ export default function SearchBar({
         >
             <AppIcon className={styles.searchIcon} name="search" size={18} />
             <input
+                {...inputProps}
                 aria-label="Search StudentHub"
                 autoComplete="off"
                 autoFocus={autoFocus}
@@ -45,6 +55,7 @@ export default function SearchBar({
                 onChange={(event) => onChange(event.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder={placeholder}
+                ref={ref}
                 type="search"
                 value={value}
             />
@@ -68,4 +79,6 @@ export default function SearchBar({
             ) : null}
         </div>
     );
-}
+});
+
+export default SearchBar;

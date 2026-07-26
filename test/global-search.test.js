@@ -18,6 +18,7 @@ test("global search is composed through context without presentation data access
     assert.match(app, /<SearchProvider>/);
     assert.match(app, /<DeferredSearchModal \/>/);
     assert.match(app, /const SearchModal = lazy/);
+    assert.match(app, /<SearchModal onClose=\{closeSearch\} open=\{isOpen\}/);
     assert.match(provider, /useSearchController/);
     assert.match(topbar, /<SearchBar/);
     assert.match(topbar, /onChange=\{updateSearch\}/);
@@ -60,8 +61,9 @@ test("global search provides keyboard and accessible modal behavior", async () =
     assert.match(modal, /event\.key === "ArrowUp"/);
     assert.match(modal, /event\.key === "Enter"/);
     assert.match(modal, /role="combobox"/);
+    assert.match(modal, /<SearchBar/);
     assert.match(results, /role="listbox"/);
     assert.match(results, /No results found\./);
-    assert.match(results, /Couldn&apos;t search\./);
+    assert.match(results, /Couldn&apos;t search StudentHub\./);
     assert.match(results, /<Skeleton/);
 });

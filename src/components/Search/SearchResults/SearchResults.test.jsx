@@ -72,6 +72,7 @@ describe("SearchResults", () => {
         search.query = "nothing";
         render(<SearchResults />);
         expect(screen.getByText("No results found.")).toBeInTheDocument();
+        expect(screen.getByText("Try another search.")).toBeInTheDocument();
     });
 
     it("renders skeletons while loading", () => {
@@ -86,7 +87,12 @@ describe("SearchResults", () => {
     it("renders an actionable error state", () => {
         search.error = "Check your internet connection and try again.";
         render(<SearchResults />);
-        expect(screen.getByRole("alert")).toHaveTextContent("Couldn't search.");
+        expect(screen.getByRole("alert")).toHaveTextContent(
+            "Couldn't search StudentHub."
+        );
+        expect(screen.getByRole("alert")).toHaveTextContent(
+            "Check your internet connection."
+        );
         search.error = "";
     });
 });

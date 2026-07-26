@@ -1,3 +1,4 @@
+import { AppIcon } from "../../common/AppIcon.jsx";
 import Skeleton from "../../ui/Skeleton/index.js";
 import { useSearch } from "../../../hooks/useSearch.js";
 import SearchResultItem from "../SearchResultItem/SearchResultItem.jsx";
@@ -39,8 +40,8 @@ export default function SearchResults() {
                 id="global-search-results"
                 role="alert"
             >
-                <strong>Couldn&apos;t search.</strong>
-                <p>{error}</p>
+                <strong>Couldn&apos;t search StudentHub.</strong>
+                <p>Check your internet connection.</p>
             </div>
         );
     }
@@ -61,8 +62,9 @@ export default function SearchResults() {
                 className={styles.state}
                 id="global-search-results"
             >
+                <AppIcon className={styles.stateIcon} name="search" size={28} />
                 <strong>No results found.</strong>
-                <p>Try another keyword.</p>
+                <p>Try another search.</p>
             </div>
         );
     }

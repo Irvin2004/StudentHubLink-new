@@ -32,6 +32,8 @@ function CloseIcon() {
  */
 export default function Modal({
     children,
+    className,
+    closeLabel = "Close dialog",
     closeOnOverlay = true,
     description,
     footer,
@@ -85,7 +87,18 @@ export default function Modal({
         return () => {
             document.removeEventListener("keydown", handleKeyDown);
             document.body.style.overflow = previousOverflow;
-            previousFocus?.focus?.();
+
+            function restoreFocus() {
+                if (
+                    previousFocus?.isConnected &&
+                    document.activeElement === document.body
+                ) {
+                    previousFocus.focus();
+                }
+            }
+
+            queueMicrotask(restoreFocus);
+            requestAnimationFrame(restoreFocus);
         };
     }, [initialFocusRef, onClose, open]);
 
@@ -104,7 +117,7 @@ export default function Modal({
                 aria-describedby={description ? descriptionId : undefined}
                 aria-labelledby={titleId}
                 aria-modal="true"
-                className={cx(styles.dialog, styles[size])}
+                className={cx(styles.dialog, styles[size], className)}
                 ref={dialogRef}
                 role="dialog"
                 tabIndex={-1}
@@ -116,7 +129,7 @@ export default function Modal({
                             <p id={descriptionId}>{description}</p>
                         ) : null}
                     </div>
-                    <IconButton aria-label="Close dialog" onClick={onClose}>
+                    <IconButton aria-label={closeLabel} onClick={onClose}>
                         <CloseIcon />
                     </IconButton>
                 </header>

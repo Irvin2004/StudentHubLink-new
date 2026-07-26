@@ -17,11 +17,11 @@ const SearchModal = lazy(
 );
 
 function DeferredSearchModal() {
-    const { isOpen } = useSearch();
+    const { closeSearch, isOpen } = useSearch();
     if (!isOpen) return null;
     return (
         <Suspense fallback={null}>
-            <SearchModal />
+            <SearchModal onClose={closeSearch} open={isOpen} />
         </Suspense>
     );
 }

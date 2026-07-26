@@ -46,11 +46,12 @@ function renderSearch() {
 
 function SearchIntegration() {
     const location = useLocation();
+    const { closeSearch, isOpen } = useSearch();
     return (
         <>
             <button type="button">Previous control</button>
             <output data-testid="location">{location.pathname}</output>
-            <SearchModal />
+            <SearchModal onClose={closeSearch} open={isOpen} />
         </>
     );
 }
@@ -116,7 +117,7 @@ describe("useSearch", () => {
         expect(service.globalSearch).not.toHaveBeenCalled();
     });
 
-    it("restores focus after Escape closes the command palette", () => {
+    it("restores focus after Escape closes the command palette", async () => {
         renderSearchIntegration();
         const previousControl = screen.getByRole("button", {
             name: "Previous control"
@@ -129,6 +130,7 @@ describe("useSearch", () => {
         ).toHaveFocus();
 
         fireEvent.keyDown(document, { key: "Escape" });
+        await act(async () => {});
         expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
         expect(previousControl).toHaveFocus();
     });

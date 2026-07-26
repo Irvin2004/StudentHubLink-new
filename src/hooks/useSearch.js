@@ -105,6 +105,7 @@ export function useSearchController() {
             setLoading(true);
         }
     }, []);
+    const clearSearch = useCallback(() => setQuery(""), [setQuery]);
     const setActiveFilter = useCallback((filter) => {
         setActiveFilterState(filter);
         setActiveIndex(-1);
@@ -188,6 +189,7 @@ export function useSearchController() {
             activateResult,
             activeFilter,
             activeIndex,
+            clearSearch,
             closeSearch,
             error,
             isOpen,
@@ -204,6 +206,7 @@ export function useSearchController() {
             activateResult,
             activeFilter,
             activeIndex,
+            clearSearch,
             closeSearch,
             error,
             isOpen,

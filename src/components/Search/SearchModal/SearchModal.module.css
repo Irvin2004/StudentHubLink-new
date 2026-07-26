@@ -3,6 +3,10 @@
     gap: var(--space-4);
 }
 
+.dialog {
+    width: min(43.75rem, 90vw);
+}
+
 .filters > div {
     display: flex;
     gap: var(--space-2);
@@ -39,6 +43,18 @@
 }
 
 @media (max-width: 35rem) {
+    .dialog {
+        width: 100%;
+        height: 100%;
+        max-height: 100%;
+        border: 0;
+        border-radius: 0;
+    }
+
+    .search {
+        min-height: 0;
+    }
+
     .hints {
         display: none;
     }
