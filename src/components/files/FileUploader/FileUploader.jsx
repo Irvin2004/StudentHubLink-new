@@ -1,5 +1,7 @@
 import { useState } from "react";
 
+import { ANALYTICS_EVENTS } from "../../../config/analytics-events.js";
+import { useAnalytics } from "../../../hooks/useAnalytics.js";
 import { useFiles } from "../../../hooks/useFiles.js";
 import { useNetwork } from "../../../hooks/useNetwork.js";
 import DragDropZone from "../DragDropZone/DragDropZone.jsx";
@@ -7,6 +9,7 @@ import UploadProgress from "../UploadProgress/UploadProgress.jsx";
 import styles from "./FileUploader.module.css";
 
 export default function FileUploader({ channelId, communityId, onUploaded }) {
+    const { track } = useAnalytics();
     const { isOnline } = useNetwork();
     const { cancelUpload, removeUpload, retryUpload, uploadFiles, uploads } =
         useFiles(channelId, { communityId, subscribe: false });
@@ -29,7 +32,14 @@ export default function FileUploader({ channelId, communityId, onUploaded }) {
             setError(
                 failure.reason?.message || "Some files could not be uploaded."
             );
-        if (completed.length) onUploaded?.(completed);
+        if (completed.length) {
+            track(ANALYTICS_EVENTS.FILE_UPLOADED, {
+                channelId,
+                communityId,
+                count: completed.length
+            });
+            onUploaded?.(completed);
+        }
     }
 
     return (

@@ -4,7 +4,9 @@ import { Link } from "react-router-dom";
 import { LoadErrorState } from "../../components/common/LoadErrorState.jsx";
 import EmptyState from "../../components/EmptyState/EmptyState.jsx";
 import NotificationSkeleton from "../../components/Skeleton/NotificationSkeleton.jsx";
+import { ANALYTICS_EVENTS } from "../../config/analytics-events.js";
 import { NOTIFICATION_TYPES } from "../../config/notification-types.js";
+import { useAnalytics } from "../../hooks/useAnalytics.js";
 import { useDocumentTitle } from "../../hooks/useDocumentTitle.js";
 import { useNotifications } from "../../hooks/useNotifications.js";
 import { useSettings } from "../../hooks/useSettings.js";
@@ -26,6 +28,7 @@ function destination(item) {
 
 export default function NotificationsPage() {
     useDocumentTitle("StudentHub - Notifications", "react-app");
+    const { track } = useAnalytics();
     const { error, loading, markAllRead, notifications, setRead, unreadCount } =
         useNotifications();
     const { settings, updateSettings } = useSettings();
@@ -45,6 +48,14 @@ export default function NotificationsPage() {
             }),
         [deferredFilter, notifications]
     );
+
+    function openNotification(item) {
+        track(ANALYTICS_EVENTS.NOTIFICATION_OPENED, {
+            notificationId: item.id,
+            notificationType: item.type
+        });
+        setRead(item.id, true);
+    }
 
     return (
         <main className={styles.page}>
@@ -146,7 +157,7 @@ export default function NotificationsPage() {
                             <div className={styles.actions}>
                                 {destination(item) !== "#" ? (
                                     <Link
-                                        onClick={() => setRead(item.id, true)}
+                                        onClick={() => openNotification(item)}
                                         to={destination(item)}
                                     >
                                         Open

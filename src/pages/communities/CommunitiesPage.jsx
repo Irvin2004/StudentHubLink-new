@@ -12,8 +12,10 @@ import CommunitySearch from "../../components/communities/CommunitySearch/index.
 import CreateCommunityModal from "../../components/communities/CreateCommunityModal/index.js";
 import JoinCommunityButton from "../../components/communities/JoinCommunityButton/index.js";
 import LeaveCommunityButton from "../../components/communities/LeaveCommunityButton/index.js";
+import { ANALYTICS_EVENTS } from "../../config/analytics-events.js";
 import { isCommunityOwner } from "../../config/community-permissions.js";
 import { COMMUNITY_ROLES } from "../../config/community-roles.js";
+import { useAnalytics } from "../../hooks/useAnalytics.js";
 import { useAuth } from "../../hooks/useAuth.js";
 import { useCommunities } from "../../hooks/useCommunities.js";
 import { useDocumentTitle } from "../../hooks/useDocumentTitle.js";
@@ -46,6 +48,7 @@ export default function CommunitiesPage() {
     useDocumentTitle("StudentHub - Communities", "react-app");
 
     const navigate = useNavigate();
+    const { track } = useAnalytics();
     const { user } = useAuth();
     const { isOnline } = useNetwork();
     const { showToast } = useToast();
@@ -132,6 +135,10 @@ export default function CommunitiesPage() {
 
         try {
             const membership = await joinCommunity(community.id);
+            track(ANALYTICS_EVENTS.COMMUNITY_JOINED, {
+                communityId: community.id,
+                role: membership?.role || COMMUNITY_ROLES.MEMBER
+            });
             showToast({
                 title: "Community joined",
                 message: `You joined ${community.name}.`,

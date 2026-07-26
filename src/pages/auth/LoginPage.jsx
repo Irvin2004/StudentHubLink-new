@@ -2,7 +2,9 @@ import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
 import { FormField } from "../../components/forms/FormField.jsx";
+import { ANALYTICS_EVENTS } from "../../config/analytics-events.js";
 import { ROUTES } from "../../config/routes.js";
+import { useAnalytics } from "../../hooks/useAnalytics.js";
 import { useAuth } from "../../hooks/useAuth.js";
 import { useDocumentTitle } from "../../hooks/useDocumentTitle.js";
 import { useToast } from "../../hooks/useToast.js";
@@ -18,6 +20,7 @@ const LOGIN_FEATURES = [
 export default function LoginPage() {
     useDocumentTitle("StudentHub - Login", "login");
 
+    const { track } = useAnalytics();
     const { login, resetPassword } = useAuth();
     const { showToast } = useToast();
     const navigate = useNavigate();
@@ -36,6 +39,7 @@ export default function LoginPage() {
 
         try {
             await login(form.get("email"), form.get("password"));
+            track(ANALYTICS_EVENTS.USER_LOGGED_IN, { method: "password" });
             navigate(destination, { replace: true });
         } catch (error) {
             setMessage(mapAuthError(error));

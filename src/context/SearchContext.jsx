@@ -2,6 +2,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { SearchContext } from "./search-context.js";
+import { ANALYTICS_EVENTS } from "../config/analytics-events.js";
+import { useAnalytics } from "../hooks/useAnalytics.js";
 import { debounce } from "../utils/debounce.js";
 
 const EMPTY_RESULTS = Object.freeze({
@@ -34,6 +36,14 @@ function groupSearchResults(results) {
         ),
         files: Object.freeze(results.filter(({ type }) => type === "file"))
     });
+}
+
+function resultCount(results) {
+    return (
+        results.channels.length +
+        results.communities.length +
+        results.files.length
+    );
 }
 
 function filteredGroups(results, filter) {
@@ -81,6 +91,7 @@ function isEditableTarget(target) {
 
 export function SearchProvider({ children }) {
     const navigate = useNavigate();
+    const { track } = useAnalytics();
     const [isOpen, setIsOpen] = useState(false);
     const [query, setQueryState] = useState("");
     const [results, setResults] = useState(EMPTY_RESULTS);
@@ -116,26 +127,34 @@ export function SearchProvider({ children }) {
         setSelectedIndex(0);
     }, []);
 
-    const performSearch = useCallback((value) => {
-        const nextQuery = String(value ?? "");
-        const term = nextQuery.trim().toLowerCase();
-        const cached = readCachedResult(term);
+    const performSearch = useCallback(
+        (value) => {
+            const nextQuery = String(value ?? "");
+            const term = nextQuery.trim().toLowerCase();
+            const cached = readCachedResult(term);
 
-        requestIdRef.current += 1;
-        setQueryState(nextQuery);
-        setSelectedIndex(0);
-        setError(null);
+            requestIdRef.current += 1;
+            setQueryState(nextQuery);
+            setSelectedIndex(0);
+            setError(null);
 
-        if (term.length < MINIMUM_QUERY_LENGTH) {
-            setResults(EMPTY_RESULTS);
-            setLoading(false);
-        } else if (cached) {
-            setResults(cached);
-            setLoading(false);
-        } else {
-            setLoading(true);
-        }
-    }, []);
+            if (term.length < MINIMUM_QUERY_LENGTH) {
+                setResults(EMPTY_RESULTS);
+                setLoading(false);
+            } else if (cached) {
+                setResults(cached);
+                setLoading(false);
+                track(ANALYTICS_EVENTS.SEARCH_PERFORMED, {
+                    cached: true,
+                    queryLength: term.length,
+                    resultCount: resultCount(cached)
+                });
+            } else {
+                setLoading(true);
+            }
+        },
+        [track]
+    );
 
     const clearSearch = useCallback(() => performSearch(""), [performSearch]);
 
@@ -201,6 +220,11 @@ export function SearchProvider({ children }) {
                 if (requestIdRef.current !== currentRequest) return;
                 cacheResult(term, nextResults);
                 setResults(nextResults);
+                track(ANALYTICS_EVENTS.SEARCH_PERFORMED, {
+                    cached: false,
+                    queryLength: term.length,
+                    resultCount: resultCount(nextResults)
+                });
             } catch {
                 if (requestIdRef.current !== currentRequest) return;
                 setResults(EMPTY_RESULTS);
@@ -214,7 +238,7 @@ export function SearchProvider({ children }) {
 
         executeSearch();
         return () => executeSearch.cancel();
-    }, [query]);
+    }, [query, track]);
 
     const value = useMemo(
         () => ({
