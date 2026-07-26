@@ -54,7 +54,7 @@ with an existing decision or planned milestone.
 
 1. Search existing issues and pull requests for related work.
 2. Read the [README](README.md), the
-   [Engineering Charter](docs/engineering-charter.md), and the
+   [Engineering Manifesto](docs/ENGINEERING.md), and the
    [architecture guide](ARCHITECTURE.md).
 3. Review the relevant
    [Architecture Decision Records](docs/decisions/README.md).
