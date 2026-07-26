@@ -1,38 +1,71 @@
 import { AppIcon } from "../../common/AppIcon.jsx";
-import { useSearch } from "../../../hooks/useSearch.js";
+import Spinner from "../../ui/Spinner/index.js";
 import styles from "./SearchBar.module.css";
 
-export default function SearchBar() {
-    const { openSearch, query, setQuery } = useSearch();
+const DEFAULT_PLACEHOLDER = "Search StudentHub...";
+
+export default function SearchBar({
+    autoFocus = false,
+    disabled = false,
+    loading = false,
+    onChange,
+    onClear,
+    placeholder = DEFAULT_PLACEHOLDER,
+    value
+}) {
+    function clearSearch() {
+        if (onClear) {
+            onClear();
+            return;
+        }
+
+        onChange("");
+    }
+
+    function handleKeyDown(event) {
+        if (event.key === "Escape" && value) {
+            event.preventDefault();
+            clearSearch();
+        }
+    }
 
     return (
-        <div className={styles.wrapper} role="search">
-            <AppIcon name="search" size={20} />
-            <label className="sr-only" htmlFor="global-search-trigger">
-                Search StudentHub
-            </label>
+        <div
+            className={styles.container}
+            data-disabled={disabled || undefined}
+            data-loading={loading || undefined}
+            role="search"
+        >
+            <AppIcon className={styles.searchIcon} name="search" size={18} />
             <input
-                aria-haspopup="dialog"
+                aria-label="Search StudentHub"
                 autoComplete="off"
-                id="global-search-trigger"
-                onChange={(event) => {
-                    setQuery(event.target.value);
-                    openSearch();
-                }}
-                onFocus={openSearch}
-                placeholder="Search StudentHub"
+                autoFocus={autoFocus}
+                disabled={disabled}
+                onChange={(event) => onChange(event.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder={placeholder}
                 type="search"
-                value={query}
+                value={value}
             />
-            <kbd aria-hidden="true">Ctrl K</kbd>
-            <button
-                aria-label="Open global search"
-                className={styles.mobileTrigger}
-                onClick={openSearch}
-                type="button"
-            >
-                <AppIcon name="search" size={21} />
-            </button>
+            {loading ? (
+                <Spinner
+                    className={styles.spinner}
+                    label="Searching"
+                    size="small"
+                />
+            ) : null}
+            {!loading && value ? (
+                <button
+                    aria-label="Clear search"
+                    className={styles.clearButton}
+                    disabled={disabled}
+                    onClick={clearSearch}
+                    type="button"
+                >
+                    <AppIcon name="close" size={16} />
+                </button>
+            ) : null}
         </div>
     );
 }

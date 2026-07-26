@@ -10,14 +10,24 @@ test("global search is composed through context without presentation data access
     const app = await read("src/App.jsx");
     const provider = await read("src/context/SearchContext.jsx");
     const hook = await read("src/hooks/useSearch.js");
+    const searchBar = await read(
+        "src/components/Search/SearchBar/SearchBar.jsx"
+    );
     const topbar = await read("src/components/layout/Topbar/Topbar.jsx");
 
     assert.match(app, /<SearchProvider>/);
     assert.match(app, /<DeferredSearchModal \/>/);
     assert.match(app, /const SearchModal = lazy/);
     assert.match(provider, /useSearchController/);
-    assert.match(topbar, /<SearchBar \/>/);
+    assert.match(topbar, /<SearchBar/);
+    assert.match(topbar, /onChange=\{updateSearch\}/);
+    assert.match(topbar, /value=\{query\}/);
     assert.doesNotMatch(topbar, /firebase|firestore|search-service/);
+    assert.match(searchBar, /onChange\(event\.target\.value\)/);
+    assert.doesNotMatch(
+        searchBar,
+        /useSearch|firebase|firestore|search-service/
+    );
     assert.match(hook, /const SEARCH_DELAY = 300/);
     assert.match(hook, /const MINIMUM_QUERY_LENGTH = 2/);
     assert.match(hook, /resultCache/);

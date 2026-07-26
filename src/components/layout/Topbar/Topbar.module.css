@@ -19,6 +19,10 @@
     gap: var(--space-3);
 }
 
+.searchSlot {
+    width: min(31.25rem, 48%);
+}
+
 .mobileBrand a {
     color: var(--text);
     font-size: 1.1rem;
@@ -88,13 +92,21 @@
 
 @media (max-width: 47.999rem) {
     .topbar {
+        display: grid;
+        grid-template-columns: 1fr auto;
         min-height: 4.25rem;
         gap: var(--space-2);
-        padding-inline: var(--space-3);
+        padding: var(--space-3);
     }
 
     .mobileBrand {
         display: flex;
+    }
+
+    .searchSlot {
+        width: 100%;
+        grid-column: 1 / -1;
+        grid-row: 2;
     }
 
     .actions {

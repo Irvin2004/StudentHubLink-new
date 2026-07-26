@@ -1,8 +1,9 @@
 import { Link } from "react-router-dom";
 
 import { AppIcon } from "../../common/AppIcon.jsx";
-import SearchBar from "../../Search/SearchBar/SearchBar.jsx";
+import SearchBar from "../../Search/SearchBar/index.js";
 import { ROUTES } from "../../../config/routes.js";
+import { useSearch } from "../../../hooks/useSearch.js";
 import { useSettings } from "../../../hooks/useSettings.js";
 import { useTheme } from "../../../hooks/useTheme.js";
 import { useNotifications } from "../../../hooks/useNotifications.js";
@@ -17,6 +18,7 @@ const THEME_ICONS = Object.freeze({
 });
 
 export function Topbar({ menuButtonRef, onMenuToggle }) {
+    const { loading: searchLoading, openSearch, query, setQuery } = useSearch();
     const { updateSettings } = useSettings();
     const { unreadCount } = useNotifications();
     const { setTheme, theme } = useTheme();
@@ -26,6 +28,11 @@ export function Topbar({ menuButtonRef, onMenuToggle }) {
     function cycleTheme() {
         setTheme(nextTheme);
         updateSettings({ theme: nextTheme });
+    }
+
+    function updateSearch(nextQuery) {
+        setQuery(nextQuery);
+        openSearch();
     }
 
     return (
@@ -42,7 +49,14 @@ export function Topbar({ menuButtonRef, onMenuToggle }) {
                 </button>
                 <Link to={ROUTES.DASHBOARD}>StudentHub</Link>
             </div>
-            <SearchBar />
+            <div className={styles.searchSlot} onFocusCapture={openSearch}>
+                <SearchBar
+                    loading={searchLoading}
+                    onChange={updateSearch}
+                    onClear={() => setQuery("")}
+                    value={query}
+                />
+            </div>
             <div className={styles.actions}>
                 <Link
                     aria-label={`View notifications${unreadCount ? `, ${unreadCount} unread` : ""}`}
