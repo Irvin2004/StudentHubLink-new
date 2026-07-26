@@ -1,3 +1,5 @@
+import { forwardRef } from "react";
+
 import Input from "../Input/index.js";
 
 function SearchIcon() {
@@ -23,18 +25,20 @@ function SearchIcon() {
 /**
  * Renders a search-specialized Input with a standard accessible label.
  */
-export default function SearchInput({
-    label = "Search",
-    placeholder = "Search",
-    ...props
-}) {
+const SearchInput = forwardRef(function SearchInput(
+    { label = "Search", placeholder = "Search", ...props },
+    ref
+) {
     return (
         <Input
             {...props}
             icon={<SearchIcon />}
             label={label}
             placeholder={placeholder}
+            ref={ref}
             type="search"
         />
     );
-}
+});
+
+export default SearchInput;

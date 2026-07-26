@@ -1,0 +1,38 @@
+.results {
+    max-height: min(28rem, 58vh);
+    display: grid;
+    gap: var(--space-4);
+    overflow-y: auto;
+    padding-right: var(--space-1);
+}
+
+.group {
+    display: grid;
+    gap: var(--space-1);
+}
+
+.group h3 {
+    margin: 0;
+    padding: 0 var(--space-2);
+    color: var(--text-secondary);
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.state {
+    min-height: 12rem;
+    display: grid;
+    align-content: center;
+    gap: var(--space-2);
+    color: var(--text-secondary);
+    text-align: center;
+}
+
+.state strong {
+    color: var(--text);
+}
+
+.state p {
+    margin: 0;
+}

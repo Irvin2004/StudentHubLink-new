@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 
 import { AppIcon } from "../../common/AppIcon.jsx";
+import SearchBar from "../../Search/SearchBar/SearchBar.jsx";
 import { ROUTES } from "../../../config/routes.js";
 import { useSettings } from "../../../hooks/useSettings.js";
 import { useTheme } from "../../../hooks/useTheme.js";
@@ -41,19 +42,7 @@ export function Topbar({ menuButtonRef, onMenuToggle }) {
                 </button>
                 <Link to={ROUTES.DASHBOARD}>StudentHub</Link>
             </div>
-            <div className={styles.search} role="search">
-                <AppIcon name="search" size={20} />
-                <label className="sr-only" htmlFor="app-search">
-                    Search StudentHub
-                </label>
-                <input
-                    autoComplete="off"
-                    id="app-search"
-                    placeholder="Search StudentHub"
-                    type="search"
-                />
-                <kbd aria-hidden="true">/</kbd>
-            </div>
+            <SearchBar />
             <div className={styles.actions}>
                 <Link
                     aria-label={`View notifications${unreadCount ? `, ${unreadCount} unread` : ""}`}
