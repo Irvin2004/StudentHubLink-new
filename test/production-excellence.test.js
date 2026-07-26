@@ -74,7 +74,7 @@ test("observability and actionable application errors have central boundaries", 
     const mapper = await read("src/utils/app-error-mapper.js");
     const observability = await read("src/services/observability-service.js");
 
-    assert.match(app, /<AppErrorBoundary>/);
+    assert.match(app, /<ErrorBoundary onError=\{captureAppError\}>/);
     assert.match(main, /initializePerformanceMonitoring/);
     assert.match(mapper, /getActionableErrorMessage/);
     assert.match(observability, /configureObservability/);
