@@ -1,16 +1,23 @@
 import { useState } from "react";
 
 import { useFiles } from "../../../hooks/useFiles.js";
+import { useNetwork } from "../../../hooks/useNetwork.js";
 import DragDropZone from "../DragDropZone/DragDropZone.jsx";
 import UploadProgress from "../UploadProgress/UploadProgress.jsx";
 import styles from "./FileUploader.module.css";
 
 export default function FileUploader({ channelId, communityId, onUploaded }) {
+    const { isOnline } = useNetwork();
     const { cancelUpload, removeUpload, retryUpload, uploadFiles, uploads } =
         useFiles(channelId, { communityId, subscribe: false });
     const [error, setError] = useState("");
 
     async function handleFiles(files) {
+        if (!isOnline) {
+            setError("You're offline. Reconnect before uploading files.");
+            return;
+        }
+
         setError("");
         const results = await uploadFiles(files);
         const completed = results
@@ -33,7 +40,7 @@ export default function FileUploader({ channelId, communityId, onUploaded }) {
             <h2 className={styles.srOnly} id="upload-files-title">
                 Upload files
             </h2>
-            <DragDropZone onFiles={handleFiles} />
+            <DragDropZone disabled={!isOnline} onFiles={handleFiles} />
             {uploads.length ? (
                 <div className={styles.progress}>
                     {uploads.map((upload) => (

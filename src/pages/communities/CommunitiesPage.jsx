@@ -17,6 +17,7 @@ import { COMMUNITY_ROLES } from "../../config/community-roles.js";
 import { useAuth } from "../../hooks/useAuth.js";
 import { useCommunities } from "../../hooks/useCommunities.js";
 import { useDocumentTitle } from "../../hooks/useDocumentTitle.js";
+import { useNetwork } from "../../hooks/useNetwork.js";
 import { useObservability } from "../../hooks/useObservability.js";
 import { useToast } from "../../hooks/useToast.js";
 import { normalizeCommunityText } from "../../utils/community-validation.js";
@@ -46,6 +47,7 @@ export default function CommunitiesPage() {
 
     const navigate = useNavigate();
     const { user } = useAuth();
+    const { isOnline } = useNetwork();
     const { showToast } = useToast();
     const { captureError, getActionableErrorMessage } = useObservability();
     const {
@@ -253,7 +255,11 @@ export default function CommunitiesPage() {
                     <h1>Communities</h1>
                     <p>Find your people, share ideas, and learn together.</p>
                 </div>
-                <Button icon={<AddIcon />} onClick={() => setCreateOpen(true)}>
+                <Button
+                    disabled={!isOnline}
+                    icon={<AddIcon />}
+                    onClick={() => setCreateOpen(true)}
+                >
                     Create community
                 </Button>
             </header>
@@ -298,6 +304,7 @@ export default function CommunitiesPage() {
             ) : null}
 
             <CreateCommunityModal
+                disabled={!isOnline}
                 onClose={() => setCreateOpen(false)}
                 onCreate={handleCreate}
                 open={createOpen}

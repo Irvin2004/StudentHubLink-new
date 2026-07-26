@@ -6,6 +6,7 @@ import MessageInput from "../MessageInput/MessageInput.jsx";
 import ReplyPreview from "../ReplyPreview/ReplyPreview.jsx";
 import { MESSAGE_MAX_LENGTH } from "../../../config/message-types.js";
 import { useFiles } from "../../../hooks/useFiles.js";
+import { useNetwork } from "../../../hooks/useNetwork.js";
 import styles from "./MessageComposer.module.css";
 
 export default function MessageComposer({
@@ -19,6 +20,7 @@ export default function MessageComposer({
     onTyping,
     reply
 }) {
+    const { isOnline } = useNetwork();
     const [text, setText] = useState("");
     const [attachments, setAttachments] = useState([]);
     const [sending, setSending] = useState(false);
@@ -32,6 +34,7 @@ export default function MessageComposer({
     const cleanText = text.trim();
     const canSend =
         canPost &&
+        isOnline &&
         !sending &&
         !uploading &&
         (Boolean(cleanText) || attachments.length > 0) &&
@@ -64,6 +67,11 @@ export default function MessageComposer({
     }
 
     async function handleFiles(files) {
+        if (!isOnline) {
+            setSendError("You're offline. Reconnect before attaching files.");
+            return;
+        }
+
         const remaining = Math.max(0, 5 - attachments.length);
         if (!remaining) {
             setSendError("A message can include up to 5 attachments.");
@@ -144,6 +152,7 @@ export default function MessageComposer({
                 <input
                     aria-label="Choose attachments"
                     className={styles.fileInput}
+                    disabled={!canPost || !isOnline || sending}
                     multiple
                     onChange={(event) => {
                         void handleFiles(event.target.files);
@@ -155,7 +164,7 @@ export default function MessageComposer({
                 <button
                     aria-label="Add attachment"
                     className={styles.attach}
-                    disabled={!canPost || sending}
+                    disabled={!canPost || !isOnline || sending}
                     onClick={() => fileRef.current?.click()}
                     type="button"
                 >
@@ -163,15 +172,17 @@ export default function MessageComposer({
                 </button>
                 <MessageInput
                     aria-label={`Message ${channelName}`}
-                    disabled={!canPost || sending}
+                    disabled={!canPost || !isOnline || sending}
                     id={inputId}
                     maxLength={MESSAGE_MAX_LENGTH}
                     onChange={handleChange}
                     onSend={handleSend}
                     placeholder={
-                        canPost
-                            ? `Message #${channelName}`
-                            : "Only admins can post in this channel"
+                        !isOnline
+                            ? "Reconnect to send a message"
+                            : canPost
+                              ? `Message #${channelName}`
+                              : "Only admins can post in this channel"
                     }
                     ref={inputRef}
                     value={text}

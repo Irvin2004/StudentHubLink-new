@@ -1,0 +1,110 @@
+.banner {
+    position: fixed;
+    z-index: 1100;
+    top: var(--space-4);
+    left: 50%;
+    width: min(calc(100% - 2rem), 42rem);
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    color: var(--text);
+    box-shadow: var(--shadow);
+    transform: translateX(-50%);
+    animation: network-banner-enter 180ms ease-out;
+}
+
+.banner[data-status="offline"] {
+    border-color: color-mix(in srgb, var(--warning) 55%, var(--border));
+}
+
+.banner[data-status="online"] {
+    border-color: color-mix(in srgb, var(--success) 55%, var(--border));
+}
+
+.icon {
+    width: 2.25rem;
+    height: 2.25rem;
+    display: grid;
+    place-items: center;
+    border-radius: var(--radius-pill);
+    background: var(--surface-muted);
+    font-weight: 850;
+}
+
+.banner[data-status="offline"] .icon {
+    color: var(--warning);
+}
+
+.banner[data-status="online"] .icon {
+    color: var(--success);
+}
+
+.copy {
+    min-width: 0;
+}
+
+.copy strong {
+    display: block;
+    font-size: 0.9rem;
+}
+
+.copy p {
+    margin-top: 0.15rem;
+    color: var(--text-secondary);
+    font-size: 0.76rem;
+}
+
+.banner button {
+    min-height: 2.5rem;
+    padding-inline: var(--space-3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: transparent;
+    color: var(--text);
+    font: inherit;
+    font-size: 0.75rem;
+    font-weight: 750;
+    cursor: pointer;
+}
+
+.banner button:focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--primary) 30%, transparent);
+    outline-offset: 2px;
+}
+
+@keyframes network-banner-enter {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -0.75rem);
+    }
+}
+
+@media (max-width: 36rem) {
+    .banner {
+        top: auto;
+        bottom: var(--space-3);
+        grid-template-columns: auto minmax(0, 1fr);
+    }
+
+    .banner button {
+        grid-column: 2;
+        justify-self: start;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .banner {
+        animation: none;
+    }
+}
+
+@media (forced-colors: active) {
+    .banner {
+        border: 2px solid CanvasText;
+    }
+}
