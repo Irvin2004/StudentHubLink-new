@@ -53,7 +53,9 @@ with an existing decision or planned milestone.
 ## Before you start
 
 1. Search existing issues and pull requests for related work.
-2. Read the [README](README.md) and [architecture guide](ARCHITECTURE.md).
+2. Read the [README](README.md), the
+   [Engineering Charter](docs/engineering-charter.md), and the
+   [architecture guide](ARCHITECTURE.md).
 3. Review the relevant
    [Architecture Decision Records](docs/decisions/README.md).
 4. Fork the repository if you do not have write access.
