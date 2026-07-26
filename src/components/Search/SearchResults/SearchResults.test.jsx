@@ -78,7 +78,9 @@ describe("SearchResults", () => {
         search.query = "nothing";
         render(<SearchResults />);
         expect(screen.getByText("No results found.")).toBeInTheDocument();
-        expect(screen.getByText("Try another keyword.")).toBeInTheDocument();
+        expect(
+            screen.getByText("Try another keyword or check your spelling.")
+        ).toBeInTheDocument();
     });
 
     it("renders skeletons while loading", () => {

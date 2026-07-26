@@ -4,6 +4,7 @@ import DateDivider from "../DateDivider/DateDivider.jsx";
 import MessageItem from "../MessageItem/MessageItem.jsx";
 import PinnedMessages from "../PinnedMessages/PinnedMessages.jsx";
 import { LoadErrorState } from "../../common/LoadErrorState.jsx";
+import EmptyState from "../../EmptyState/EmptyState.jsx";
 import ChatMessageSkeleton from "../../Skeleton/ChatMessageSkeleton.jsx";
 import { groupMessagesByDate } from "../../../utils/message-formatter.js";
 import styles from "./MessageList.module.css";
@@ -21,6 +22,7 @@ export default function MessageList({
     onReact,
     onReply,
     onRetry,
+    onStartConversation,
     onTogglePin,
     role
 }) {
@@ -93,14 +95,15 @@ export default function MessageList({
             ) : null}
             <PinnedMessages messages={pinnedMessages} />
             {!messages.length ? (
-                <div className={styles.empty}>
-                    <span aria-hidden="true">#</span>
-                    <h2>Start the conversation</h2>
-                    <p>
-                        This channel is ready. Share a question, update, or
-                        resource with your community.
-                    </p>
-                </div>
+                <EmptyState
+                    actionLabel={
+                        onStartConversation ? "Send message" : undefined
+                    }
+                    description="Start the conversation and send the first message."
+                    icon="💬"
+                    onAction={onStartConversation}
+                    title="No messages yet"
+                />
             ) : (
                 groups.map((group) => (
                     <section aria-label={group.label} key={group.key}>

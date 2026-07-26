@@ -2,6 +2,7 @@ import { useDeferredValue, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 
 import { LoadErrorState } from "../../components/common/LoadErrorState.jsx";
+import EmptyState from "../../components/EmptyState/EmptyState.jsx";
 import NotificationSkeleton from "../../components/Skeleton/NotificationSkeleton.jsx";
 import { NOTIFICATION_TYPES } from "../../config/notification-types.js";
 import { useDocumentTitle } from "../../hooks/useDocumentTitle.js";
@@ -161,14 +162,11 @@ export default function NotificationsPage() {
                         </article>
                     ))
                 ) : (
-                    <div className={styles.empty}>
-                        <span aria-hidden="true">✓</span>
-                        <h2>No notifications here</h2>
-                        <p>
-                            New messages, mentions, files and community activity
-                            will appear here.
-                        </p>
-                    </div>
+                    <EmptyState
+                        description="You don't have any notifications yet."
+                        illustration="notifications"
+                        title="You're all caught up"
+                    />
                 )}
             </section>
         </main>

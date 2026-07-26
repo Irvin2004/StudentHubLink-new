@@ -1,4 +1,4 @@
-import { AppIcon } from "../../common/AppIcon.jsx";
+import EmptyState from "../../EmptyState/EmptyState.jsx";
 import SearchResultSkeleton from "../../Skeleton/SearchResultSkeleton.jsx";
 import { useSearch } from "../../../hooks/useSearch.js";
 import SearchResultItem from "../SearchResultItem/SearchResultItem.jsx";
@@ -71,15 +71,11 @@ export default function SearchResults() {
             {loading ? <SearchResultSkeleton /> : null}
 
             {!loading && !hasResults ? (
-                <div aria-live="polite" className={styles.state}>
-                    <AppIcon
-                        className={styles.stateIcon}
-                        name="search"
-                        size={28}
-                    />
-                    <strong>No results found.</strong>
-                    <p>Try another keyword.</p>
-                </div>
+                <EmptyState
+                    description="Try another keyword or check your spelling."
+                    illustration="search"
+                    title="No results found."
+                />
             ) : null}
         </div>
     );

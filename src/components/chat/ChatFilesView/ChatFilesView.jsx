@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 import FileList from "../../files/FileList/FileList.jsx";
 import FileUploader from "../../files/FileUploader/FileUploader.jsx";
@@ -9,6 +9,7 @@ import { useToast } from "../../../hooks/useToast.js";
 import styles from "./ChatFilesView.module.css";
 
 export default function ChatFilesView({ channelId, communityId, role }) {
+    const uploaderRef = useRef(null);
     const { user } = useAuth();
     const { showToast } = useToast();
     const { captureError, getActionableErrorMessage } = useObservability();
@@ -55,7 +56,9 @@ export default function ChatFilesView({ channelId, communityId, role }) {
 
     return (
         <div className={styles.files}>
-            <FileUploader channelId={channelId} communityId={communityId} />
+            <div ref={uploaderRef}>
+                <FileUploader channelId={channelId} communityId={communityId} />
+            </div>
             <FileList
                 currentUserId={user?.uid}
                 error={error}
@@ -63,6 +66,15 @@ export default function ChatFilesView({ channelId, communityId, role }) {
                 loading={loading}
                 onDelete={handleDelete}
                 onDownload={downloadFile}
+                onUpload={() => {
+                    uploaderRef.current?.scrollIntoView({
+                        behavior: "smooth",
+                        block: "center"
+                    });
+                    uploaderRef.current
+                        ?.querySelector("button")
+                        ?.focus({ preventScroll: true });
+                }}
                 role={role}
             />
         </div>

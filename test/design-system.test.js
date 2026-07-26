@@ -12,7 +12,6 @@ const PUBLIC_COMPONENTS = [
     "Checkbox",
     "Divider",
     "Dropdown",
-    "EmptyState",
     "Field",
     "IconButton",
     "Input",

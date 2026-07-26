@@ -141,30 +141,6 @@
     border-color: var(--primary);
     color: var(--primary);
 }
-.empty {
-    min-height: 20rem;
-    display: grid;
-    place-content: center;
-    justify-items: center;
-    text-align: center;
-}
-.empty span {
-    width: 3.5rem;
-    height: 3.5rem;
-    display: grid;
-    margin-bottom: var(--space-3);
-    place-items: center;
-    border-radius: 50%;
-    background: var(--surface-muted);
-    color: var(--primary);
-    font-size: 1.4rem;
-}
-.empty p {
-    max-width: 28rem;
-    margin-top: var(--space-2);
-    color: var(--text-secondary);
-    font-size: 0.8rem;
-}
 @media (max-width: 42rem) {
     .header {
         align-items: stretch;

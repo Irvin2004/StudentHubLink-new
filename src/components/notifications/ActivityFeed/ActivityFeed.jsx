@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 
 import { LoadErrorState } from "../../common/LoadErrorState.jsx";
+import EmptyState from "../../EmptyState/EmptyState.jsx";
 import NotificationSkeleton from "../../Skeleton/NotificationSkeleton.jsx";
 import { ACTIVITY_TYPES } from "../../../config/activity-types.js";
 import styles from "./ActivityFeed.module.css";
@@ -67,10 +68,11 @@ export default function ActivityFeed({ activities, error, loading }) {
                     ))}
                 </ol>
             ) : (
-                <div className={styles.empty}>
-                    <h3>No recent activity</h3>
-                    <p>Community events will appear as students participate.</p>
-                </div>
+                <EmptyState
+                    description="Community events will appear as students participate."
+                    icon="✦"
+                    title="No recent activity"
+                />
             )}
         </section>
     );

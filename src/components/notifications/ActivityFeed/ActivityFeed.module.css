@@ -10,8 +10,7 @@
 }
 .feed header p,
 .feed li p,
-.feed time,
-.empty p {
+.feed time {
     margin-top: 0.25rem;
     color: var(--text-secondary);
     font-size: 0.75rem;
@@ -65,10 +64,4 @@
     color: var(--channel-accent);
     font-size: 0.75rem;
     font-weight: 700;
-}
-.empty {
-    min-height: 15rem;
-    display: grid;
-    place-content: center;
-    text-align: center;
 }

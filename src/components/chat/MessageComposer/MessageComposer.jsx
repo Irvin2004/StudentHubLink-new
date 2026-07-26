@@ -13,6 +13,7 @@ export default function MessageComposer({
     channelId,
     channelName,
     communityId,
+    inputId,
     onCancelReply,
     onSend,
     onTyping,
@@ -163,6 +164,7 @@ export default function MessageComposer({
                 <MessageInput
                     aria-label={`Message ${channelName}`}
                     disabled={!canPost || sending}
+                    id={inputId}
                     maxLength={MESSAGE_MAX_LENGTH}
                     onChange={handleChange}
                     onSend={handleSend}
