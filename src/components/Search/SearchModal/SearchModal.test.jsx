@@ -10,7 +10,7 @@ const search = vi.hoisted(() => ({
     error: "",
     filter: "all",
     loading: false,
-    openSelected: vi.fn(),
+    openResult: vi.fn(),
     performSearch: vi.fn(),
     query: "",
     results: { channels: [], communities: [], files: [] },
@@ -27,7 +27,7 @@ vi.mock("../../../hooks/useSearch.js", () => ({
 describe("SearchModal", () => {
     beforeEach(() => {
         search.clearSearch.mockReset();
-        search.openSelected.mockReset();
+        search.openResult.mockReset();
         search.performSearch.mockReset();
         search.selectedIndex = 0;
         search.selectNext.mockReset();
@@ -106,7 +106,7 @@ describe("SearchModal", () => {
 
         fireEvent.keyDown(screen.getByRole("combobox"), { key: "Enter" });
 
-        expect(search.openSelected).toHaveBeenCalledOnce();
+        expect(search.openResult).toHaveBeenCalledOnce();
     });
 
     it("restores focus to the opener after closing", async () => {

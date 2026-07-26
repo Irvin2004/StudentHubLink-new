@@ -26,7 +26,8 @@ test("global search is composed through context without presentation data access
     assert.match(provider, /performSearch/);
     assert.match(provider, /selectNext/);
     assert.match(provider, /selectPrevious/);
-    assert.match(provider, /openSelected/);
+    assert.match(provider, /openResult/);
+    assert.match(provider, /isEditableTarget/);
     assert.match(topbar, /<SearchBar/);
     assert.match(topbar, /onChange=\{updateSearch\}/);
     assert.match(topbar, /value=\{query\}/);
@@ -81,6 +82,6 @@ test("global search provides keyboard and accessible modal behavior", async () =
     assert.match(modal, /<SearchBar/);
     assert.match(results, /role="listbox"/);
     assert.match(results, /No results found\./);
-    assert.match(results, /Couldn&apos;t search StudentHub\./);
+    assert.match(results, /Unable to search StudentHub\./);
     assert.match(results, /<Skeleton/);
 });

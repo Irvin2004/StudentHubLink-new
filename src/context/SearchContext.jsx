@@ -68,6 +68,17 @@ function readCachedResult(key) {
     return cached.results;
 }
 
+function isEditableTarget(target) {
+    return (
+        target instanceof Element &&
+        Boolean(
+            target.closest(
+                'input, textarea, select, [contenteditable]:not([contenteditable="false"]), [role="textbox"]'
+            )
+        )
+    );
+}
+
 export function SearchProvider({ children }) {
     const navigate = useNavigate();
     const [isOpen, setIsOpen] = useState(false);
@@ -147,7 +158,7 @@ export function SearchProvider({ children }) {
         );
     }, [flatResults.length]);
 
-    const openSelected = useCallback(
+    const openResult = useCallback(
         (result = flatResults[selectedIndex]) => {
             if (!result?.url) return;
             closeSearch();
@@ -160,7 +171,8 @@ export function SearchProvider({ children }) {
         function handleShortcut(event) {
             if (
                 (event.ctrlKey || event.metaKey) &&
-                event.key.toLowerCase() === "k"
+                event.key.toLowerCase() === "k" &&
+                !isEditableTarget(event.target)
             ) {
                 event.preventDefault();
                 openSearch();
@@ -213,7 +225,7 @@ export function SearchProvider({ children }) {
             isOpen,
             loading,
             openSearch,
-            openSelected,
+            openResult,
             performSearch,
             query,
             results: visibleResults,
@@ -231,7 +243,7 @@ export function SearchProvider({ children }) {
             isOpen,
             loading,
             openSearch,
-            openSelected,
+            openResult,
             performSearch,
             query,
             selectedIndex,

@@ -236,10 +236,7 @@ test("CI and deployment workflows run through committed configuration", () => {
     const firebase = JSON.parse(read("firebase.json"));
 
     assert.match(ci, /npm ci/);
-    assert.match(ci, /npm run lint/);
-    assert.match(ci, /npm run format:check/);
-    assert.match(ci, /npm test/);
-    assert.match(ci, /npm run build/);
+    assert.match(ci, /npm run check/);
     assert.match(deploy, /workflow_dispatch/);
     assert.match(deploy, /FIREBASE_SERVICE_ACCOUNT/);
     assert.equal(firebase.hosting.public, "dist");

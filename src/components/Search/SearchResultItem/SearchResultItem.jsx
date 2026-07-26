@@ -8,7 +8,7 @@ const ICONS = Object.freeze({
 });
 
 export default function SearchResultItem({ index, result }) {
-    const { openSelected, selectedIndex } = useSearch();
+    const { openResult, selectedIndex } = useSearch();
     const active = selectedIndex === index;
 
     return (
@@ -16,7 +16,7 @@ export default function SearchResultItem({ index, result }) {
             aria-selected={active}
             className={styles.item}
             id={`global-search-result-${index}`}
-            onClick={() => openSelected(result)}
+            onClick={() => openResult(result)}
             role="option"
             tabIndex={-1}
             type="button"
