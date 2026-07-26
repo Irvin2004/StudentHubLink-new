@@ -1,6 +1,7 @@
 import { useDeferredValue, useMemo, useState } from "react";
 
 import { LoadErrorState } from "../../common/LoadErrorState.jsx";
+import EmptyState from "../../EmptyState/EmptyState.jsx";
 import SearchInput from "../../ui/SearchInput/index.js";
 import FileCardSkeleton from "../../Skeleton/FileCardSkeleton.jsx";
 import FileActions from "../FileActions/FileActions.jsx";
@@ -22,6 +23,7 @@ export default function FileList({
     loading,
     onDelete,
     onDownload,
+    onUpload,
     role
 }) {
     const [query, setQuery] = useState("");
@@ -137,17 +139,17 @@ export default function FileList({
                     </div>
                 )
             ) : (
-                <div className={styles.empty}>
-                    <span aria-hidden="true">↥</span>
-                    <h3>
-                        {query ? "No matching files" : "No files shared yet"}
-                    </h3>
-                    <p>
-                        {query
-                            ? "Try a different filename, extension or uploader."
-                            : "Upload assignments, notes and resources for everyone in this channel."}
-                    </p>
-                </div>
+                <EmptyState
+                    actionLabel={!query && onUpload ? "Upload file" : undefined}
+                    description={
+                        query
+                            ? "Try a different filename, extension, or uploader."
+                            : "Upload your first file to share it with your community."
+                    }
+                    illustration={query ? "search" : "files"}
+                    onAction={!query ? onUpload : undefined}
+                    title={query ? "No matching files" : "No files uploaded"}
+                />
             )}
             <FilePreview
                 file={preview}

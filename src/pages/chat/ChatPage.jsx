@@ -33,6 +33,7 @@ export default function ChatPage({ channel, communityId, role }) {
     const view = ["activity", "files", "messages"].includes(requestedView)
         ? requestedView
         : "messages";
+    const canPost = canPostInChannel(role, channel);
     const announcementRef = useRef(null);
     const {
         clearTyping,
@@ -144,15 +145,24 @@ export default function ChatPage({ channel, communityId, role }) {
                     onReact={toggleReaction}
                     onReply={setReply}
                     onRetry={retryMessage}
+                    onStartConversation={
+                        canPost
+                            ? () =>
+                                  document
+                                      .getElementById("channel-message-input")
+                                      ?.focus()
+                            : undefined
+                    }
                     onTogglePin={togglePin}
                     role={role}
                 />
                 <TypingIndicator users={typingUsers} />
                 <MessageComposer
-                    canPost={canPostInChannel(role, channel)}
+                    canPost={canPost}
                     channelId={channel.id}
                     channelName={channel.name}
                     communityId={communityId}
+                    inputId="channel-message-input"
                     onCancelReply={() => setReply(null)}
                     onSend={handleSend}
                     onTyping={notifyTyping}

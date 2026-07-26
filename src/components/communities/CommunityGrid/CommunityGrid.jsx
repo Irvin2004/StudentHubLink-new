@@ -1,4 +1,4 @@
-import EmptyState from "../../ui/EmptyState/index.js";
+import EmptyState from "../../EmptyState/EmptyState.jsx";
 import CommunityCard from "../CommunityCard/index.js";
 import styles from "./CommunityGrid.module.css";
 
@@ -11,9 +11,10 @@ export default function CommunityGrid({
     if (!communities.length) {
         return (
             <EmptyState
-                action={createAction}
+                actionLabel={createAction?.label}
                 description="Try another search or create a space for students to connect."
-                icon="👥"
+                illustration="communities"
+                onAction={createAction?.onClick}
                 title="No communities found"
             />
         );

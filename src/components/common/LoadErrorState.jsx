@@ -1,4 +1,4 @@
-import EmptyState from "../ui/EmptyState/index.js";
+import EmptyState from "../EmptyState/EmptyState.jsx";
 
 export function LoadErrorState({
     description = "We could not load this content. Please try again.",
@@ -8,17 +8,11 @@ export function LoadErrorState({
     return (
         <div role="alert">
             <EmptyState
-                action={
-                    onRetry
-                        ? {
-                              label: "Try again",
-                              onClick: onRetry,
-                              variant: "outline"
-                          }
-                        : undefined
-                }
+                actionLabel={onRetry ? "Try again" : undefined}
+                actionVariant="outline"
                 description={description}
                 icon="!"
+                onAction={onRetry}
                 title={title}
             />
         </div>

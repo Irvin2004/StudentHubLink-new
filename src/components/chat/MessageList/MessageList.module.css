@@ -20,35 +20,3 @@
     font-size: 0.78rem;
     text-align: center;
 }
-
-.empty {
-    max-width: 31rem;
-    margin: auto;
-    padding: clamp(var(--space-8), 10vh, 6rem) var(--space-5);
-    text-align: center;
-}
-
-.empty > span {
-    width: 3.5rem;
-    height: 3.5rem;
-    display: grid;
-    place-items: center;
-    margin: 0 auto var(--space-4);
-    border-radius: 50%;
-    background: var(--channel-accent-soft);
-    color: var(--channel-accent);
-    font-size: 1.6rem;
-    font-weight: 800;
-}
-
-.empty h2 {
-    color: var(--text);
-    font-size: 1.2rem;
-}
-
-.empty p {
-    margin-top: var(--space-2);
-    color: var(--text-secondary);
-    font-size: 0.86rem;
-    line-height: 1.6;
-}

@@ -38,11 +38,6 @@
     color: var(--text);
 }
 
-.stateIcon {
-    margin-inline: auto;
-    color: var(--text-secondary);
-}
-
 .state p {
     margin: 0;
 }
