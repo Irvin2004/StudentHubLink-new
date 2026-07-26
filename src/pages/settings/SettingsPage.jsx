@@ -29,6 +29,18 @@ export default function SettingsPage() {
                     <option value="dark">Dark</option>
                     <option value="system">System</option>
                 </select>
+                <label htmlFor="font-size">Text size</label>
+                <select
+                    id="font-size"
+                    value={settings.fontSize}
+                    onChange={(event) =>
+                        updateSettings({ fontSize: event.target.value })
+                    }
+                >
+                    <option value="small">Small</option>
+                    <option value="medium">Medium</option>
+                    <option value="large">Large</option>
+                </select>
                 <label className="react-setting-toggle">
                     <input
                         type="checkbox"
@@ -40,6 +52,18 @@ export default function SettingsPage() {
                         }
                     />
                     Reduce motion
+                </label>
+                <label className="react-setting-toggle">
+                    <input
+                        type="checkbox"
+                        checked={settings.highContrast}
+                        onChange={(event) =>
+                            updateSettings({
+                                highContrast: event.target.checked
+                            })
+                        }
+                    />
+                    High contrast
                 </label>
             </section>
         </main>

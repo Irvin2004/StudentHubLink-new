@@ -22,4 +22,23 @@ createRoot(rootElement).render(
     </StrictMode>
 );
 
-window.addEventListener("pagehide", destroyTheme, { once: true });
+let stopPerformanceMonitoring = () => {};
+const schedulePerformanceMonitoring = window.requestIdleCallback
+    ? window.requestIdleCallback.bind(window)
+    : (callback) => window.setTimeout(callback, 0);
+schedulePerformanceMonitoring(() => {
+    void import("./services/observability-service.js").then(
+        ({ initializePerformanceMonitoring }) => {
+            stopPerformanceMonitoring = initializePerformanceMonitoring();
+        }
+    );
+});
+
+window.addEventListener(
+    "pagehide",
+    () => {
+        stopPerformanceMonitoring();
+        destroyTheme();
+    },
+    { once: true }
+);

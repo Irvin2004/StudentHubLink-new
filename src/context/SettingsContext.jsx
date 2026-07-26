@@ -31,6 +31,13 @@ export function SettingsProvider({ children }) {
 
     useEffect(() => {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+        document.documentElement.dataset.fontSize = settings.fontSize;
+        document.documentElement.dataset.contrast = settings.highContrast
+            ? "high"
+            : "normal";
+        document.documentElement.dataset.reducedMotion = String(
+            settings.reducedMotion
+        );
     }, [settings]);
 
     const value = useMemo(

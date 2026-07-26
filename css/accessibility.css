@@ -93,3 +93,17 @@ html[data-reduced-motion="true"] .message--highlight {
         outline-offset: 3px;
     }
 }
+
+@media (forced-colors: active) {
+    :focus-visible {
+        outline: 3px solid CanvasText !important;
+    }
+
+    button,
+    a,
+    input,
+    textarea,
+    select {
+        forced-color-adjust: auto;
+    }
+}

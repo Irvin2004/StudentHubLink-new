@@ -3,6 +3,7 @@ import { Route, Routes } from "react-router-dom";
 
 import { AppLayout } from "../components/layout/AppLayout/AppLayout.jsx";
 import { LoadingScreen } from "../components/feedback/LoadingScreen.jsx";
+import PerformanceProfiler from "../components/performance/PerformanceProfiler.jsx";
 import { ROUTES } from "../config/routes.js";
 import { GuestRoute } from "./GuestRoute.jsx";
 import { ProtectedRoute } from "./ProtectedRoute.jsx";
@@ -27,6 +28,10 @@ const NotificationsPage = lazy(
 const SettingsPage = lazy(() => import("../pages/settings/SettingsPage.jsx"));
 const NotFoundPage = lazy(() => import("../pages/NotFoundPage.jsx"));
 
+function ProfiledRoute({ children, id }) {
+    return <PerformanceProfiler id={id}>{children}</PerformanceProfiler>;
+}
+
 export function AppRouter() {
     return (
         <Suspense fallback={<LoadingScreen />}>
@@ -42,21 +47,44 @@ export function AppRouter() {
                     <Route element={<AppLayout />}>
                         <Route
                             path={ROUTES.DASHBOARD}
-                            element={<DashboardPage />}
+                            element={
+                                <ProfiledRoute id="DashboardPage">
+                                    <DashboardPage />
+                                </ProfiledRoute>
+                            }
                         />
                         <Route
                             path={ROUTES.COMMUNITIES}
-                            element={<CommunitiesPage />}
+                            element={
+                                <ProfiledRoute id="CommunitiesPage">
+                                    <CommunitiesPage />
+                                </ProfiledRoute>
+                            }
                         />
                         <Route
                             path={ROUTES.COMMUNITY}
-                            element={<CommunityPage />}
+                            element={
+                                <ProfiledRoute id="CommunityPage">
+                                    <CommunityPage />
+                                </ProfiledRoute>
+                            }
                         />
                         <Route
                             path={ROUTES.COMMUNITY_CHANNEL}
-                            element={<CommunityPage />}
+                            element={
+                                <ProfiledRoute id="CommunityPage">
+                                    <CommunityPage />
+                                </ProfiledRoute>
+                            }
                         />
-                        <Route path={ROUTES.CHAT} element={<ChatPage />} />
+                        <Route
+                            path={ROUTES.CHAT}
+                            element={
+                                <ProfiledRoute id="ChatPage">
+                                    <ChatPage />
+                                </ProfiledRoute>
+                            }
+                        />
                         <Route path={ROUTES.FILES} element={<FilesPage />} />
                         <Route
                             path={ROUTES.NOTIFICATIONS}

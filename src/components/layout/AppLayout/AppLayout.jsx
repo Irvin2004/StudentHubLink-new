@@ -13,6 +13,9 @@ export function AppLayout() {
 
     return (
         <div className={styles.shell}>
+            <a className={styles.skipLink} href="#main-content">
+                Skip to main content
+            </a>
             <MobileDrawer
                 open={drawerOpen}
                 onClose={closeDrawer}
@@ -25,7 +28,11 @@ export function AppLayout() {
                     menuButtonRef={menuButtonRef}
                     onMenuToggle={() => setDrawerOpen((open) => !open)}
                 />
-                <div className={styles.pageOutlet}>
+                <div
+                    className={styles.pageOutlet}
+                    id="main-content"
+                    tabIndex="-1"
+                >
                     <Outlet />
                 </div>
             </div>
