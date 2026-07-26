@@ -8,12 +8,8 @@ import {
     updateProfile as updateFirebaseProfile
 } from "firebase/auth";
 
-import { auth, initializeAuthPersistence } from "../firebase/index.js";
+import { auth, initializeAuthPersistence } from "../firebase/auth.js";
 import { normalizeEmail } from "../utils/normalize-email.js";
-import {
-    createUserProfileDocument,
-    updateUserProfileDocument
-} from "./user-profile-service.js";
 
 /**
  * Subscribes to Firebase authentication state.
@@ -84,6 +80,8 @@ export async function register({ fullName, email, password }) {
     const displayName = fullName.trim();
 
     try {
+        const { createUserProfileDocument } =
+            await import("./user-profile-service.js");
         await updateFirebaseProfile(user, { displayName });
         await createUserProfileDocument(user, { fullName: displayName });
     } catch (error) {
@@ -156,6 +154,8 @@ export async function updateProfile(data = {}) {
     }
 
     await updateFirebaseProfile(user, updates);
+    const { updateUserProfileDocument } =
+        await import("./user-profile-service.js");
     await updateUserProfileDocument(user.uid, updates);
 
     return user;

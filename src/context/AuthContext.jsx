@@ -9,7 +9,13 @@ import {
     resetPassword as requestPasswordReset,
     updateProfile as updateUserProfile
 } from "../services/auth-service.js";
-import { getUserProfile } from "../services/user-profile-service.js";
+
+let userProfileServicePromise;
+
+function loadUserProfileService() {
+    userProfileServicePromise ??= import("../services/user-profile-service.js");
+    return userProfileServicePromise;
+}
 
 export function AuthProvider({ children }) {
     const [user, setUser] = useState(null);
@@ -34,6 +40,7 @@ export function AuthProvider({ children }) {
                 }
 
                 try {
+                    const { getUserProfile } = await loadUserProfileService();
                     const nextProfile = await getUserProfile(nextUser.uid);
 
                     if (active) setProfile(nextProfile);
@@ -66,6 +73,7 @@ export function AuthProvider({ children }) {
     );
     const updateProfile = useCallback(async (data) => {
         const updatedUser = await updateUserProfile(data);
+        const { getUserProfile } = await loadUserProfileService();
         const updatedProfile = await getUserProfile(updatedUser.uid);
 
         setUser(updatedUser);

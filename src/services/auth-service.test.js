@@ -24,7 +24,7 @@ vi.mock("firebase/auth", () => ({
     updateProfile: mocks.updateFirebaseProfile
 }));
 
-vi.mock("../firebase/index.js", () => ({
+vi.mock("../firebase/auth.js", () => ({
     auth: mocks.auth,
     initializeAuthPersistence: mocks.initializePersistence
 }));

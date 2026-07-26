@@ -6,6 +6,7 @@ import { ROUTES } from "../../config/routes.js";
 import { useAuth } from "../../hooks/useAuth.js";
 import { useDocumentTitle } from "../../hooks/useDocumentTitle.js";
 import { useToast } from "../../hooks/useToast.js";
+import { mapAuthError } from "../../utils/auth-error-mapper.js";
 import { AuthLayout } from "./AuthLayout.jsx";
 
 const LOGIN_FEATURES = [
@@ -36,10 +37,8 @@ export default function LoginPage() {
         try {
             await login(form.get("email"), form.get("password"));
             navigate(destination, { replace: true });
-        } catch {
-            setMessage(
-                "We could not sign you in. Check your details and try again."
-            );
+        } catch (error) {
+            setMessage(mapAuthError(error));
         } finally {
             setSubmitting(false);
         }
@@ -58,8 +57,8 @@ export default function LoginPage() {
                 title: "Reset email sent",
                 message: "Check your inbox for password reset instructions."
             });
-        } catch {
-            setMessage("We could not send the reset email. Please try again.");
+        } catch (error) {
+            setMessage(mapAuthError(error));
         }
     }
 

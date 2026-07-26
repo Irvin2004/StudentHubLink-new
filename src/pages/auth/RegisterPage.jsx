@@ -5,6 +5,7 @@ import { FormField } from "../../components/forms/FormField.jsx";
 import { ROUTES } from "../../config/routes.js";
 import { useAuth } from "../../hooks/useAuth.js";
 import { useDocumentTitle } from "../../hooks/useDocumentTitle.js";
+import { mapAuthError } from "../../utils/auth-error-mapper.js";
 import { AuthLayout } from "./AuthLayout.jsx";
 
 const REGISTER_FEATURES = [
@@ -35,10 +36,8 @@ export default function RegisterPage() {
                 password: form.get("password")
             });
             navigate(ROUTES.DASHBOARD, { replace: true });
-        } catch {
-            setMessage(
-                "We could not create your account. Review your details and try again."
-            );
+        } catch (error) {
+            setMessage(mapAuthError(error));
         } finally {
             setSubmitting(false);
         }
