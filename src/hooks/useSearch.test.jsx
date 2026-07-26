@@ -2,8 +2,8 @@ import { act, fireEvent, render, screen } from "@testing-library/react";
 import { MemoryRouter, useLocation } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { SearchProvider } from "../context/SearchContext.jsx";
 import SearchModal from "../components/Search/SearchModal/SearchModal.jsx";
+import { SearchProvider } from "../context/SearchContext.jsx";
 import { useSearch } from "./useSearch.js";
 
 const service = vi.hoisted(() => ({
@@ -14,21 +14,86 @@ vi.mock("../services/search-service.js", () => ({
     globalSearch: service.globalSearch
 }));
 
+function resultSet(term) {
+    return {
+        channels: [
+            {
+                id: `${term}-channel`,
+                title: `${term} channel`,
+                type: "channel",
+                url: `/community/test/channel/${term}`
+            }
+        ],
+        communities: [
+            {
+                id: `${term}-community`,
+                title: `${term} community`,
+                type: "community",
+                url: `/community/${term}`
+            }
+        ],
+        files: []
+    };
+}
+
 function Harness() {
-    const { isOpen, loading, query, results, setQuery } = useSearch();
+    const search = useSearch();
+
     return (
         <>
-            <output data-testid="open">{String(isOpen)}</output>
-            <output data-testid="loading">{String(loading)}</output>
-            <output data-testid="query">{query}</output>
+            <output data-testid="open">{String(search.isOpen)}</output>
+            <output data-testid="loading">{String(search.loading)}</output>
+            <output data-testid="query">{search.query}</output>
+            <output data-testid="error">{search.error}</output>
+            <output data-testid="filter">{search.filter}</output>
+            <output data-testid="selected">{search.selectedIndex}</output>
             <output data-testid="results">
-                {results.communities.map((item) => item.title).join(",")}
+                {search.results.communities.map((item) => item.title).join(",")}
             </output>
-            <button type="button" onClick={() => setQuery("robotics")}>
-                Search
+            <button onClick={search.openSearch} type="button">
+                Open
             </button>
-            <button type="button" onClick={() => setQuery("a")}>
-                Short query
+            <button onClick={search.closeSearch} type="button">
+                Close
+            </button>
+            <button onClick={search.clearSearch} type="button">
+                Clear
+            </button>
+            <button
+                onClick={() => search.performSearch("provider-query")}
+                type="button"
+            >
+                Search provider
+            </button>
+            <button
+                onClick={() => search.performSearch("cache-query")}
+                type="button"
+            >
+                Search cache
+            </button>
+            <button
+                onClick={() => search.performSearch("error-query")}
+                type="button"
+            >
+                Search error
+            </button>
+            <button
+                onClick={() => search.performSearch("navigation-query")}
+                type="button"
+            >
+                Search navigation
+            </button>
+            <button onClick={search.selectNext} type="button">
+                Next
+            </button>
+            <button onClick={search.selectPrevious} type="button">
+                Previous
+            </button>
+            <button onClick={() => search.openSelected()} type="button">
+                Open selected
+            </button>
+            <button onClick={() => search.setFilter("community")} type="button">
+                Communities only
             </button>
         </>
     );
@@ -47,6 +112,7 @@ function renderSearch() {
 function SearchIntegration() {
     const location = useLocation();
     const { closeSearch, isOpen } = useSearch();
+
     return (
         <>
             <button type="button">Previous control</button>
@@ -66,37 +132,69 @@ function renderSearchIntegration() {
     );
 }
 
-describe("useSearch", () => {
+describe("SearchProvider and useSearch", () => {
     beforeEach(() => {
         vi.useFakeTimers();
         service.globalSearch.mockReset();
-        service.globalSearch.mockResolvedValue({
-            channels: [],
-            communities: [
-                {
-                    id: "robotics",
-                    title: "Robotics Club",
-                    type: "community",
-                    url: "/community/robotics"
-                }
-            ],
-            files: []
-        });
+        service.globalSearch.mockImplementation(async (term) =>
+            resultSet(term)
+        );
     });
 
     afterEach(() => {
         vi.useRealTimers();
     });
 
-    it("opens from Ctrl + K anywhere in the application", () => {
+    it("renders children inside the provider", () => {
         renderSearch();
+
+        expect(screen.getByRole("button", { name: "Open" })).toBeVisible();
+    });
+
+    it("throws when useSearch is used outside SearchProvider", () => {
+        function OutsideConsumer() {
+            useSearch();
+            return null;
+        }
+
+        expect(() =>
+            render(
+                <MemoryRouter>
+                    <OutsideConsumer />
+                </MemoryRouter>
+            )
+        ).toThrow("useSearch must be used inside SearchProvider");
+    });
+
+    it("opens, closes, and clears search state through public actions", () => {
+        renderSearch();
+        fireEvent.click(screen.getByRole("button", { name: "Open" }));
+        expect(screen.getByTestId("open")).toHaveTextContent("true");
+
+        fireEvent.click(
+            screen.getByRole("button", { name: "Search provider" })
+        );
+        expect(screen.getByTestId("query")).toHaveTextContent("provider-query");
+        fireEvent.click(screen.getByRole("button", { name: "Clear" }));
+        expect(screen.getByTestId("query")).toBeEmptyDOMElement();
+
+        fireEvent.click(screen.getByRole("button", { name: "Close" }));
+        expect(screen.getByTestId("open")).toHaveTextContent("false");
+    });
+
+    it("opens from Ctrl+K anywhere in the application", () => {
+        renderSearch();
+
         fireEvent.keyDown(document, { ctrlKey: true, key: "k" });
+
         expect(screen.getByTestId("open")).toHaveTextContent("true");
     });
 
-    it("debounces searches for 300 milliseconds", async () => {
+    it("debounces searches for 300 milliseconds and owns loading state", async () => {
         renderSearch();
-        fireEvent.click(screen.getByRole("button", { name: "Search" }));
+        fireEvent.click(
+            screen.getByRole("button", { name: "Search provider" })
+        );
         expect(screen.getByTestId("loading")).toHaveTextContent("true");
         expect(service.globalSearch).not.toHaveBeenCalled();
 
@@ -104,17 +202,66 @@ describe("useSearch", () => {
         expect(service.globalSearch).not.toHaveBeenCalled();
 
         await act(() => vi.advanceTimersByTimeAsync(1));
-        expect(service.globalSearch).toHaveBeenCalledWith("robotics");
-        expect(screen.getByTestId("results")).toHaveTextContent(
-            "Robotics Club"
-        );
+        expect(service.globalSearch).toHaveBeenCalledWith("provider-query");
+        expect(screen.getByTestId("loading")).toHaveTextContent("false");
     });
 
-    it("does not search for fewer than two characters", async () => {
+    it("returns cached results without another service call", async () => {
         renderSearch();
-        fireEvent.click(screen.getByRole("button", { name: "Short query" }));
-        await act(() => vi.advanceTimersByTimeAsync(400));
-        expect(service.globalSearch).not.toHaveBeenCalled();
+        const searchCache = screen.getByRole("button", {
+            name: "Search cache"
+        });
+
+        fireEvent.click(searchCache);
+        await act(() => vi.advanceTimersByTimeAsync(300));
+        expect(service.globalSearch).toHaveBeenCalledTimes(1);
+
+        fireEvent.click(screen.getByRole("button", { name: "Clear" }));
+        fireEvent.click(searchCache);
+
+        expect(service.globalSearch).toHaveBeenCalledTimes(1);
+        expect(screen.getByTestId("results")).toHaveTextContent(
+            "cache-query community"
+        );
+        expect(screen.getByTestId("loading")).toHaveTextContent("false");
+    });
+
+    it("exposes a safe error and clears loading when the service fails", async () => {
+        service.globalSearch.mockRejectedValueOnce(
+            new Error("Firebase permission-denied")
+        );
+        renderSearch();
+
+        fireEvent.click(screen.getByRole("button", { name: "Search error" }));
+        await act(() => vi.advanceTimersByTimeAsync(300));
+
+        expect(screen.getByTestId("error")).toHaveTextContent(
+            "Unable to search StudentHub."
+        );
+        expect(screen.getByTestId("error")).not.toHaveTextContent("Firebase");
+        expect(screen.getByTestId("loading")).toHaveTextContent("false");
+    });
+
+    it("owns filter and wrapped keyboard selection state", async () => {
+        renderSearch();
+        fireEvent.click(
+            screen.getByRole("button", { name: "Search navigation" })
+        );
+        await act(() => vi.advanceTimersByTimeAsync(300));
+
+        expect(screen.getByTestId("selected")).toHaveTextContent("0");
+        fireEvent.click(screen.getByRole("button", { name: "Next" }));
+        expect(screen.getByTestId("selected")).toHaveTextContent("1");
+        fireEvent.click(screen.getByRole("button", { name: "Next" }));
+        expect(screen.getByTestId("selected")).toHaveTextContent("0");
+        fireEvent.click(screen.getByRole("button", { name: "Previous" }));
+        expect(screen.getByTestId("selected")).toHaveTextContent("1");
+
+        fireEvent.click(
+            screen.getByRole("button", { name: "Communities only" })
+        );
+        expect(screen.getByTestId("filter")).toHaveTextContent("community");
+        expect(screen.getByTestId("selected")).toHaveTextContent("0");
     });
 
     it("restores focus after Escape closes the command palette", async () => {
@@ -141,14 +288,16 @@ describe("useSearch", () => {
         const input = screen.getByRole("combobox", {
             name: "Search StudentHub"
         });
-        fireEvent.change(input, { target: { value: "robotics" } });
+        fireEvent.change(input, {
+            target: { value: "integration-query" }
+        });
         await act(() => vi.advanceTimersByTimeAsync(300));
 
         fireEvent.keyDown(input, { key: "ArrowDown" });
         fireEvent.keyDown(input, { key: "Enter" });
 
         expect(screen.getByTestId("location")).toHaveTextContent(
-            "/community/robotics"
+            "/community/test/channel/integration-query"
         );
         expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     });

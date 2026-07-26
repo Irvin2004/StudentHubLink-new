@@ -9,23 +9,28 @@ import styles from "./SearchModal.module.css";
 
 export default function SearchModal({ onClose, open }) {
     const {
-        activateResult,
-        activeIndex,
         clearSearch,
         loading,
-        moveSelection,
+        openSelected,
+        performSearch,
         query,
-        setQuery
+        selectedIndex,
+        selectNext,
+        selectPrevious
     } = useSearch();
     const inputRef = useRef(null);
 
     function handleKeyDown(event) {
         if (event.key === "ArrowDown" || event.key === "ArrowUp") {
             event.preventDefault();
-            moveSelection(event.key === "ArrowDown" ? 1 : -1);
-        } else if (event.key === "Enter" && activeIndex >= 0) {
+            if (event.key === "ArrowDown") {
+                selectNext();
+            } else {
+                selectPrevious();
+            }
+        } else if (event.key === "Enter") {
             event.preventDefault();
-            activateResult();
+            openSelected();
         }
     }
 
@@ -43,14 +48,14 @@ export default function SearchModal({ onClose, open }) {
             <div className={styles.search}>
                 <SearchBar
                     aria-activedescendant={
-                        activeIndex >= 0
-                            ? `global-search-result-${activeIndex}`
+                        selectedIndex >= 0
+                            ? `global-search-result-${selectedIndex}`
                             : undefined
                     }
                     aria-controls="global-search-results"
                     aria-expanded="true"
                     loading={loading}
-                    onChange={setQuery}
+                    onChange={performSearch}
                     onClear={clearSearch}
                     onKeyDown={handleKeyDown}
                     placeholder="Search StudentHub..."

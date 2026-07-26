@@ -2,21 +2,21 @@ import { useSearch } from "../../../hooks/useSearch.js";
 
 const FILTERS = Object.freeze([
     ["all", "All"],
-    ["communities", "Communities"],
-    ["channels", "Channels"],
-    ["files", "Files"]
+    ["community", "Communities"],
+    ["channel", "Channels"],
+    ["file", "Files"]
 ]);
 
 export default function SearchFilters() {
-    const { activeFilter, setActiveFilter } = useSearch();
+    const { filter, setFilter } = useSearch();
 
     return (
         <div aria-label="Filter search results" role="group">
             {FILTERS.map(([value, label]) => (
                 <button
-                    aria-pressed={activeFilter === value}
+                    aria-pressed={filter === value}
                     key={value}
-                    onClick={() => setActiveFilter(value)}
+                    onClick={() => setFilter(value)}
                     type="button"
                 >
                     {label}

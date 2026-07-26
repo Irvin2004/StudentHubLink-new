@@ -4,13 +4,12 @@ import { describe, expect, it, vi } from "vitest";
 import SearchResults from "./SearchResults.jsx";
 
 const search = vi.hoisted(() => ({
-    activateResult: vi.fn(),
-    activeIndex: -1,
     error: "",
     loading: false,
+    openSelected: vi.fn(),
     query: "python",
     results: { channels: [], communities: [], files: [] },
-    setActiveIndex: vi.fn()
+    selectedIndex: 0
 }));
 
 vi.mock("../../../hooks/useSearch.js", () => ({

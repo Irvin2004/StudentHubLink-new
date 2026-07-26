@@ -19,7 +19,13 @@ test("global search is composed through context without presentation data access
     assert.match(app, /<DeferredSearchModal \/>/);
     assert.match(app, /const SearchModal = lazy/);
     assert.match(app, /<SearchModal onClose=\{closeSearch\} open=\{isOpen\}/);
-    assert.match(provider, /useSearchController/);
+    assert.match(provider, /export function SearchProvider/);
+    assert.match(provider, /const SEARCH_DELAY = 300/);
+    assert.match(provider, /const resultCache = new Map/);
+    assert.match(provider, /performSearch/);
+    assert.match(provider, /selectNext/);
+    assert.match(provider, /selectPrevious/);
+    assert.match(provider, /openSelected/);
     assert.match(topbar, /<SearchBar/);
     assert.match(topbar, /onChange=\{updateSearch\}/);
     assert.match(topbar, /value=\{query\}/);
@@ -29,10 +35,9 @@ test("global search is composed through context without presentation data access
         searchBar,
         /useSearch|firebase|firestore|search-service/
     );
-    assert.match(hook, /const SEARCH_DELAY = 300/);
-    assert.match(hook, /const MINIMUM_QUERY_LENGTH = 2/);
-    assert.match(hook, /resultCache/);
-    assert.match(hook, /requestIdRef/);
+    assert.match(hook, /useContext\(SearchContext\)/);
+    assert.match(hook, /useSearch must be used inside SearchProvider/);
+    assert.doesNotMatch(hook, /useState|useEffect|debounce|resultCache/);
 });
 
 test("global search executes bounded parallel prefix queries", async () => {
@@ -47,7 +52,7 @@ test("global search executes bounded parallel prefix queries", async () => {
 });
 
 test("global search provides keyboard and accessible modal behavior", async () => {
-    const hook = await read("src/hooks/useSearch.js");
+    const provider = await read("src/context/SearchContext.jsx");
     const modal = await read(
         "src/components/Search/SearchModal/SearchModal.jsx"
     );
@@ -55,8 +60,8 @@ test("global search provides keyboard and accessible modal behavior", async () =
         "src/components/Search/SearchResults/SearchResults.jsx"
     );
 
-    assert.match(hook, /event\.ctrlKey \|\| event\.metaKey/);
-    assert.match(hook, /event\.key\.toLowerCase\(\) === "k"/);
+    assert.match(provider, /event\.ctrlKey \|\| event\.metaKey/);
+    assert.match(provider, /event\.key\.toLowerCase\(\) === "k"/);
     assert.match(modal, /event\.key === "ArrowDown"/);
     assert.match(modal, /event\.key === "ArrowUp"/);
     assert.match(modal, /event\.key === "Enter"/);

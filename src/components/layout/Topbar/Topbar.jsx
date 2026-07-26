@@ -18,7 +18,13 @@ const THEME_ICONS = Object.freeze({
 });
 
 export function Topbar({ menuButtonRef, onMenuToggle }) {
-    const { loading: searchLoading, openSearch, query, setQuery } = useSearch();
+    const {
+        clearSearch,
+        loading: searchLoading,
+        openSearch,
+        performSearch,
+        query
+    } = useSearch();
     const { updateSettings } = useSettings();
     const { unreadCount } = useNotifications();
     const { setTheme, theme } = useTheme();
@@ -31,7 +37,7 @@ export function Topbar({ menuButtonRef, onMenuToggle }) {
     }
 
     function updateSearch(nextQuery) {
-        setQuery(nextQuery);
+        performSearch(nextQuery);
         openSearch();
     }
 
@@ -53,7 +59,7 @@ export function Topbar({ menuButtonRef, onMenuToggle }) {
                 <SearchBar
                     loading={searchLoading}
                     onChange={updateSearch}
-                    onClear={() => setQuery("")}
+                    onClear={clearSearch}
                     value={query}
                 />
             </div>

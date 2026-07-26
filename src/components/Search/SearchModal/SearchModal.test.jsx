@@ -6,18 +6,18 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import SearchModal from "./SearchModal.jsx";
 
 const search = vi.hoisted(() => ({
-    activateResult: vi.fn(),
-    activeFilter: "all",
-    activeIndex: -1,
     clearSearch: vi.fn(),
     error: "",
+    filter: "all",
     loading: false,
-    moveSelection: vi.fn(),
+    openSelected: vi.fn(),
+    performSearch: vi.fn(),
     query: "",
     results: { channels: [], communities: [], files: [] },
-    setActiveFilter: vi.fn(),
-    setActiveIndex: vi.fn(),
-    setQuery: vi.fn()
+    selectedIndex: 0,
+    selectNext: vi.fn(),
+    selectPrevious: vi.fn(),
+    setFilter: vi.fn()
 }));
 
 vi.mock("../../../hooks/useSearch.js", () => ({
@@ -26,11 +26,12 @@ vi.mock("../../../hooks/useSearch.js", () => ({
 
 describe("SearchModal", () => {
     beforeEach(() => {
-        search.activateResult.mockReset();
-        search.activeIndex = -1;
         search.clearSearch.mockReset();
-        search.moveSelection.mockReset();
-        search.setQuery.mockReset();
+        search.openSelected.mockReset();
+        search.performSearch.mockReset();
+        search.selectedIndex = 0;
+        search.selectNext.mockReset();
+        search.selectPrevious.mockReset();
     });
 
     it("renders the dialog and reusable SearchBar when open", () => {
@@ -90,23 +91,22 @@ describe("SearchModal", () => {
     });
 
     it.each([
-        ["ArrowDown", 1],
-        ["ArrowUp", -1]
-    ])("handles %s result navigation", (key, direction) => {
+        ["ArrowDown", "selectNext"],
+        ["ArrowUp", "selectPrevious"]
+    ])("handles %s result navigation", (key, action) => {
         render(<SearchModal onClose={() => {}} open />);
 
         fireEvent.keyDown(screen.getByRole("combobox"), { key });
 
-        expect(search.moveSelection).toHaveBeenCalledWith(direction);
+        expect(search[action]).toHaveBeenCalledOnce();
     });
 
     it("opens the active result with Enter", () => {
-        search.activeIndex = 0;
         render(<SearchModal onClose={() => {}} open />);
 
         fireEvent.keyDown(screen.getByRole("combobox"), { key: "Enter" });
 
-        expect(search.activateResult).toHaveBeenCalledOnce();
+        expect(search.openSelected).toHaveBeenCalledOnce();
     });
 
     it("restores focus to the opener after closing", async () => {
