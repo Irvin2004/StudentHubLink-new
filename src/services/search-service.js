@@ -6,141 +6,229 @@ import {
     limit,
     orderBy,
     query,
-    startAt
+    startAt,
+    where
 } from "firebase/firestore";
 
+import { toChannelSearchResult } from "../adapters/channel-search-adapter.js";
+import { toCommunitySearchResult } from "../adapters/community-search-adapter.js";
+import { toFileSearchResult } from "../adapters/file-search-adapter.js";
 import { db } from "../firebase/firestore.js";
 
 const COMMUNITIES = "communities";
 const CHANNELS = "channels";
 const FILES = "files";
 const MINIMUM_QUERY_LENGTH = 2;
-const DEFAULT_LIMIT = 6;
-const MAX_LIMIT = 12;
+const RESULT_LIMIT = 5;
+const GLOBAL_RESULT_LIMIT = 15;
+const SEARCH_ERROR_MESSAGE = "Unable to search StudentHub.";
+const ALL_TYPES = Object.freeze(["community", "channel", "file"]);
 
 function normalizeTerm(value) {
     return String(value ?? "")
+        .normalize("NFKC")
         .trim()
-        .toLowerCase();
+        .replace(/\s+/g, " ")
+        .toLocaleLowerCase("en");
 }
 
-function resultLimit(value) {
-    const parsed = Number(value ?? DEFAULT_LIMIT);
-    return Number.isInteger(parsed) && parsed > 0
-        ? Math.min(parsed, MAX_LIMIT)
-        : DEFAULT_LIMIT;
-}
-
-function prefixQuery(reference, field, term, maxResults) {
+function prefixQuery(reference, field, term) {
     return query(
         reference,
         orderBy(field),
         startAt(term),
         endAt(`${term}\uf8ff`),
-        limit(resultLimit(maxResults))
+        limit(RESULT_LIMIT)
     );
 }
 
-function communityResult(snapshot) {
-    const data = snapshot.data();
-    return Object.freeze({
-        id: snapshot.id,
-        type: "community",
-        title: data.name || "Untitled community",
-        subtitle: data.category || data.description || "Community",
-        icon: "community",
-        url: `/community/${snapshot.id}`
-    });
+function exactArrayMatchQuery(reference, field, term) {
+    return query(
+        reference,
+        where(field, "array-contains", term),
+        limit(RESULT_LIMIT)
+    );
 }
 
-function channelResult(snapshot) {
-    const data = snapshot.data();
-    const communityId =
-        data.communityId || snapshot.ref?.parent?.parent?.id || "";
-    return Object.freeze({
-        id: snapshot.id,
-        type: "channel",
-        title: `#${data.name || snapshot.id}`,
-        subtitle: data.description || "Channel",
-        icon: "channel",
-        url: `/community/${communityId}/channel/${snapshot.id}`
+function resultScore(data, term, titleFields, secondaryFields) {
+    const title = titleFields
+        .map((field) => normalizeTerm(data[field]))
+        .find(Boolean);
+
+    if (title?.startsWith(term)) return 100;
+    if (title?.includes(term)) return 70;
+
+    const secondaryMatch = secondaryFields.some((field) => {
+        const value = data[field];
+        const candidates = Array.isArray(value) ? value : [value];
+        return candidates.some((candidate) =>
+            normalizeTerm(candidate).includes(term)
+        );
     });
+
+    return secondaryMatch ? 40 : 0;
 }
 
-function fileResult(snapshot) {
-    const data = snapshot.data();
-    const channelReference = snapshot.ref?.parent?.parent;
-    const channelId = data.channelId || channelReference?.id || "";
-    const communityId =
-        data.communityId || channelReference?.parent?.parent?.id || "";
-    return Object.freeze({
-        id: snapshot.id,
-        type: "file",
-        title:
-            data.filename || data.originalName || data.name || "Untitled file",
-        subtitle: data.uploadedByName || `#${channelId}`,
-        icon: "file",
-        url: `/community/${communityId}/channel/${channelId}?view=files&file=${snapshot.id}`
-    });
+function scoredResult(snapshot, adapter, score) {
+    return {
+        result: adapter(snapshot),
+        score
+    };
 }
 
-async function executePrefixSearch({
-    collectionReference,
-    field,
-    mapper,
-    maxResults,
-    searchTerm
-}) {
+function mergeScoredResults(groups) {
+    const unique = new Map();
+
+    groups.flat().forEach((entry) => {
+        const key = `${entry.result.type}:${entry.result.url}`;
+        const current = unique.get(key);
+        if (!current || entry.score > current.score) unique.set(key, entry);
+    });
+
+    return [...unique.values()]
+        .filter(({ score }) => score > 0)
+        .sort(
+            (left, right) =>
+                right.score - left.score ||
+                left.result.title.localeCompare(right.result.title)
+        )
+        .slice(0, RESULT_LIMIT);
+}
+
+function publicResults(scoredResults) {
+    return scoredResults.map(({ result }) => result);
+}
+
+function selectedTypes(filters) {
+    if (!filters || filters === "all") return ALL_TYPES;
+
+    const requested = Array.isArray(filters)
+        ? filters
+        : Array.isArray(filters.types)
+          ? filters.types
+          : [filters.type || filters.filter || filters];
+
+    return ALL_TYPES.filter((type) => requested.includes(type));
+}
+
+async function findCommunities(term) {
+    const reference = collection(db, COMMUNITIES);
+    const [nameSnapshot, descriptionSnapshot] = await Promise.all([
+        getDocs(prefixQuery(reference, "normalizedName", term)),
+        getDocs(prefixQuery(reference, "normalizedDescription", term))
+    ]);
+
+    return mergeScoredResults(
+        [nameSnapshot.docs, descriptionSnapshot.docs].map((documents) =>
+            documents.map((snapshot) => {
+                const data = snapshot.data();
+                return scoredResult(
+                    snapshot,
+                    toCommunitySearchResult,
+                    resultScore(
+                        data,
+                        term,
+                        ["name", "normalizedName"],
+                        ["description", "normalizedDescription"]
+                    )
+                );
+            })
+        )
+    );
+}
+
+async function findChannels(term) {
+    const snapshot = await getDocs(
+        prefixQuery(collectionGroup(db, CHANNELS), "name", term)
+    );
+
+    return mergeScoredResults([
+        snapshot.docs.map((documentSnapshot) => {
+            const data = documentSnapshot.data();
+            return scoredResult(
+                documentSnapshot,
+                toChannelSearchResult,
+                resultScore(data, term, ["name"], ["description"])
+            );
+        })
+    ]);
+}
+
+async function findFiles(term) {
+    const reference = collectionGroup(db, FILES);
+    const [filenameSnapshot, tagsSnapshot] = await Promise.all([
+        getDocs(prefixQuery(reference, "normalizedFilename", term)),
+        getDocs(exactArrayMatchQuery(reference, "tags", term))
+    ]);
+
+    return mergeScoredResults(
+        [filenameSnapshot.docs, tagsSnapshot.docs].map((documents) =>
+            documents.map((snapshot) => {
+                const data = snapshot.data();
+                return scoredResult(
+                    snapshot,
+                    toFileSearchResult,
+                    resultScore(
+                        data,
+                        term,
+                        ["filename", "originalName", "name"],
+                        ["tags"]
+                    )
+                );
+            })
+        )
+    );
+}
+
+async function safelySearch(searchTerm, search) {
     const term = normalizeTerm(searchTerm);
     if (term.length < MINIMUM_QUERY_LENGTH) return [];
 
-    const snapshot = await getDocs(
-        prefixQuery(collectionReference, field, term, maxResults)
-    );
-    return snapshot.docs.map(mapper);
-}
-
-export function searchCommunities(searchTerm, options = {}) {
-    return executePrefixSearch({
-        collectionReference: collection(db, COMMUNITIES),
-        field: "normalizedName",
-        mapper: communityResult,
-        maxResults: options.maxResults,
-        searchTerm
-    });
-}
-
-export function searchChannels(searchTerm, options = {}) {
-    return executePrefixSearch({
-        collectionReference: collectionGroup(db, CHANNELS),
-        field: "name",
-        mapper: channelResult,
-        maxResults: options.maxResults,
-        searchTerm
-    });
-}
-
-export function searchFiles(searchTerm, options = {}) {
-    return executePrefixSearch({
-        collectionReference: collectionGroup(db, FILES),
-        field: "normalizedFilename",
-        mapper: fileResult,
-        maxResults: options.maxResults,
-        searchTerm
-    });
-}
-
-export async function globalSearch(searchTerm, options = {}) {
-    const term = normalizeTerm(searchTerm);
-    if (term.length < MINIMUM_QUERY_LENGTH) {
-        return { communities: [], channels: [], files: [] };
+    try {
+        return publicResults(await search(term));
+    } catch {
+        throw new Error(SEARCH_ERROR_MESSAGE);
     }
+}
 
-    const [communities, channels, files] = await Promise.all([
-        searchCommunities(term, options),
-        searchChannels(term, options),
-        searchFiles(term, options)
-    ]);
+export function searchCommunities(searchTerm) {
+    return safelySearch(searchTerm, findCommunities);
+}
 
-    return Object.freeze({ communities, channels, files });
+export function searchChannels(searchTerm) {
+    return safelySearch(searchTerm, findChannels);
+}
+
+export function searchFiles(searchTerm) {
+    return safelySearch(searchTerm, findFiles);
+}
+
+export async function globalSearch(searchTerm, filters = "all") {
+    const term = normalizeTerm(searchTerm);
+    if (term.length < MINIMUM_QUERY_LENGTH) return [];
+
+    const types = selectedTypes(filters);
+    const searches = {
+        channel: findChannels,
+        community: findCommunities,
+        file: findFiles
+    };
+
+    try {
+        const groups = await Promise.all(
+            types.map((type) => searches[type](term))
+        );
+
+        return groups
+            .flat()
+            .sort(
+                (left, right) =>
+                    right.score - left.score ||
+                    left.result.title.localeCompare(right.result.title)
+            )
+            .slice(0, GLOBAL_RESULT_LIMIT)
+            .map(({ result }) => result);
+    } catch {
+        throw new Error(SEARCH_ERROR_MESSAGE);
+    }
 }

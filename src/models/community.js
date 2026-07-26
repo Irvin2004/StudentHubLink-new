@@ -46,6 +46,7 @@ export function createCommunityModel(data = {}) {
         name: validated.name,
         normalizedName: validated.normalizedName,
         description: validated.description,
+        normalizedDescription: validated.normalizedDescription,
         avatar: validated.avatar,
         banner: validated.banner,
         ownerId: String(data.ownerId),

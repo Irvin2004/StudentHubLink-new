@@ -41,7 +41,7 @@ export function normalizeCommunityText(value) {
  * requires a remote data query.
  *
  * @param {object} input
- * @returns {{name: string, normalizedName: string, description: string, avatar: string|null, banner: string|null, visibility: string, category: string}}
+ * @returns {{name: string, normalizedName: string, description: string, normalizedDescription: string, avatar: string|null, banner: string|null, visibility: string, category: string}}
  */
 export function validateCommunityInput(input) {
     if (!input || typeof input !== "object" || Array.isArray(input)) {
@@ -87,6 +87,7 @@ export function validateCommunityInput(input) {
         name,
         normalizedName: normalizeCommunityText(name),
         description,
+        normalizedDescription: normalizeCommunityText(description),
         avatar: validateOptionalUrl(input.avatar, "avatar"),
         banner: validateOptionalUrl(input.banner, "banner"),
         visibility: input.visibility,
@@ -138,6 +139,16 @@ export function validateCommunityUpdates(updates, currentCommunity) {
                     return [
                         ["name", validated.name],
                         ["normalizedName", validated.normalizedName]
+                    ];
+                }
+
+                if (field === "description") {
+                    return [
+                        ["description", validated.description],
+                        [
+                            "normalizedDescription",
+                            validated.normalizedDescription
+                        ]
                     ];
                 }
 

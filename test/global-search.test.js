@@ -22,6 +22,7 @@ test("global search is composed through context without presentation data access
     assert.match(provider, /export function SearchProvider/);
     assert.match(provider, /const SEARCH_DELAY = 300/);
     assert.match(provider, /const resultCache = new Map/);
+    assert.match(provider, /groupSearchResults/);
     assert.match(provider, /performSearch/);
     assert.match(provider, /selectNext/);
     assert.match(provider, /selectPrevious/);
@@ -42,13 +43,24 @@ test("global search is composed through context without presentation data access
 
 test("global search executes bounded parallel prefix queries", async () => {
     const service = await read("src/services/search-service.js");
+    const communityAdapter = await read(
+        "src/adapters/community-search-adapter.js"
+    );
+    const channelAdapter = await read("src/adapters/channel-search-adapter.js");
+    const fileAdapter = await read("src/adapters/file-search-adapter.js");
 
     assert.match(service, /Promise\.all/);
     assert.match(service, /collectionGroup\(db, CHANNELS\)/);
     assert.match(service, /collectionGroup\(db, FILES\)/);
     assert.match(service, /orderBy\(field\)/);
     assert.match(service, /endAt\(`\$\{term\}\\uf8ff`\)/);
-    assert.match(service, /limit\(resultLimit\(maxResults\)\)/);
+    assert.match(service, /where\(field, "array-contains", term\)/);
+    assert.match(service, /const RESULT_LIMIT = 5/);
+    assert.match(service, /const GLOBAL_RESULT_LIMIT = 15/);
+    assert.match(service, /Unable to search StudentHub\./);
+    assert.match(communityAdapter, /type: "community"/);
+    assert.match(channelAdapter, /type: "channel"/);
+    assert.match(fileAdapter, /type: "file"/);
 });
 
 test("global search provides keyboard and accessible modal behavior", async () => {

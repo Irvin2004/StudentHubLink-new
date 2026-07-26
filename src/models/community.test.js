@@ -27,6 +27,7 @@ describe("Community model", () => {
         expect(community).toEqual({
             ...validCommunity,
             name: "Robotics Club",
+            normalizedDescription: "build robots together.",
             normalizedName: "robotics club"
         });
         expect(Object.isFrozen(community)).toBe(true);

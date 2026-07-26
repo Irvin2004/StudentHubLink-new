@@ -23,6 +23,7 @@ describe("community validation", () => {
             name: "Robotics Club",
             normalizedName: "robotics club",
             description: "Build together.",
+            normalizedDescription: "build together.",
             avatar: null,
             banner: null,
             visibility: "public",

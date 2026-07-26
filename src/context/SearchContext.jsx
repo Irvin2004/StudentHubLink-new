@@ -22,6 +22,20 @@ const CACHE_LIMIT = 20;
 const SEARCH_ERROR_MESSAGE = "Unable to search StudentHub.";
 const resultCache = new Map();
 
+function groupSearchResults(results) {
+    if (!Array.isArray(results)) return results;
+
+    return Object.freeze({
+        channels: Object.freeze(
+            results.filter(({ type }) => type === "channel")
+        ),
+        communities: Object.freeze(
+            results.filter(({ type }) => type === "community")
+        ),
+        files: Object.freeze(results.filter(({ type }) => type === "file"))
+    });
+}
+
 function filteredGroups(results, filter) {
     const activeGroup = FILTER_GROUPS[filter];
     if (!activeGroup) return results;
@@ -169,7 +183,9 @@ export function SearchProvider({ children }) {
             try {
                 const { globalSearch } =
                     await import("../services/search-service.js");
-                const nextResults = await globalSearch(term);
+                const nextResults = groupSearchResults(
+                    await globalSearch(term)
+                );
                 if (requestIdRef.current !== currentRequest) return;
                 cacheResult(term, nextResults);
                 setResults(nextResults);
