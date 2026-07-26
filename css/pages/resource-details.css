@@ -1,56 +1,97 @@
-.resource-details-page {
-    min-height: 100vh;
-    background: var(--bg);
-    padding: 40px;
-}
+/* Page-owned styles; isolated from other StudentHub screens. */
+@scope (body[data-page="resource-details"]) {
+    .resource-details-page {
+        min-height: 100vh;
+        background: var(--bg);
+        padding: 40px;
+    }
 
-.resource-details-card {
-    max-width: 850px;
-    margin: auto;
-    background: white;
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow);
-    padding: 36px;
-}
+    .resource-details-card {
+        max-width: 850px;
+        margin: auto;
+        background: var(--white);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow);
+        padding: 36px;
+    }
 
-.back-link {
-    display: inline-block;
-    margin-bottom: 24px;
-    color: var(--blue);
-    font-weight: 700;
-}
+    .back-link {
+        display: inline-block;
+        margin-bottom: 24px;
+        color: var(--blue);
+        font-weight: 700;
+    }
 
-.resource-details-card h1 {
-    margin: 18px 0;
-    color: var(--navy);
-}
+    .resource-details-card h1 {
+        margin: 18px 0;
+        color: var(--navy);
+    }
 
-.resource-details-card p {
-    color: var(--text-muted);
-}
+    .resource-details-card p {
+        color: var(--text-muted);
+    }
 
-.resource-details-meta {
-    margin: 28px 0;
-    display: grid;
-    gap: 12px;
-}
+    .resource-details-meta {
+        margin: 28px 0;
+        display: grid;
+        gap: 12px;
+    }
 
-.resource-details-meta a {
-    color: var(--blue);
-    font-weight: 800;
-}
+    .resource-details-meta a {
+        color: var(--blue);
+        font-weight: 800;
+    }
 
-.resource-details-actions {
-    display: flex;
-    gap: 14px;
-}
+    .resource-details-actions {
+        display: flex;
+        gap: 14px;
+    }
 
-.related-section {
-    max-width: 1180px;
-    margin: 32px auto 0;
-}
+    .reviews-section,
+    .comments-section {
+        max-width: 850px;
+        margin: 32px auto 0;
+        background: var(--white);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow);
+        padding: 36px;
+    }
 
-.related-section h2 {
-    color: var(--navy);
-    margin-bottom: 18px;
+    .reviews-section h2,
+    .comments-section h2 {
+        color: var(--navy);
+    }
+
+    .review-form,
+    .comment-form {
+        display: grid;
+        gap: 16px;
+        margin: 32px 0;
+    }
+
+    .review-form textarea,
+    .comment-form textarea {
+        resize: vertical;
+        min-height: 140px;
+    }
+
+    .review-form select,
+    .review-form textarea,
+    .comment-form textarea {
+        padding: 14px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        background: var(--white);
+        color: var(--text-main);
+    }
+
+    .related-section {
+        max-width: 1180px;
+        margin: 32px auto 0;
+    }
+
+    .related-section h2 {
+        color: var(--navy);
+        margin-bottom: 18px;
+    }
 }

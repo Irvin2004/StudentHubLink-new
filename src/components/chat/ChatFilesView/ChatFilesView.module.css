@@ -1,0 +1,10 @@
+.files {
+    min-height: 0;
+    padding: clamp(var(--space-4), 3vw, var(--space-6));
+    overflow: auto;
+    background: color-mix(in srgb, var(--surface-muted) 36%, var(--surface));
+}
+
+.files > * + * {
+    margin-top: var(--space-6);
+}

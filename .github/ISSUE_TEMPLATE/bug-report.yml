@@ -1,0 +1,76 @@
+name: Bug report
+description: Report a reproducible StudentHub defect.
+title: "fix: "
+labels:
+    - bug
+body:
+    - type: markdown
+      attributes:
+          value: |
+              Do not report security vulnerabilities here. Follow SECURITY.md.
+
+    - type: textarea
+      id: summary
+      attributes:
+          label: Summary
+          description: What is broken and where?
+      validations:
+          required: true
+
+    - type: textarea
+      id: steps
+      attributes:
+          label: Steps to reproduce
+          description: Provide the smallest reliable sequence.
+          placeholder: |
+              1. Open...
+              2. Select...
+              3. Observe...
+      validations:
+          required: true
+
+    - type: textarea
+      id: expected
+      attributes:
+          label: Expected behavior
+      validations:
+          required: true
+
+    - type: textarea
+      id: actual
+      attributes:
+          label: Actual behavior
+      validations:
+          required: true
+
+    - type: input
+      id: browser
+      attributes:
+          label: Browser and version
+          placeholder: Chrome 126
+      validations:
+          required: true
+
+    - type: input
+      id: environment
+      attributes:
+          label: Operating system and device
+          placeholder: Windows 11 desktop
+      validations:
+          required: true
+
+    - type: textarea
+      id: evidence
+      attributes:
+          label: Logs or screenshots
+          description: Remove tokens, messages, student data, and credentials.
+
+    - type: checkboxes
+      id: checks
+      attributes:
+          label: Checklist
+          options:
+              - label: I searched for an existing issue.
+                required: true
+              - label: I removed private and security-sensitive information.
+                required: true

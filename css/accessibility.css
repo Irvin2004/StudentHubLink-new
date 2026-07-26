@@ -1,0 +1,109 @@
+html[data-font-size="small"] {
+    font-size: 14px;
+}
+
+html[data-font-size="medium"] {
+    font-size: 16px;
+}
+
+html[data-font-size="large"] {
+    font-size: 18px;
+}
+
+body {
+    font-size: 1rem;
+}
+
+html[data-contrast="high"] {
+    color-scheme: dark;
+    --background: #000000;
+    --surface: #000000;
+    --surface-muted: #171717;
+    --text-primary: #ffffff;
+    --text-secondary: #ffffff;
+    --text: #ffffff;
+    --border: #ffffff;
+    --primary: #ffff00;
+    --primary-hover: #ffff66;
+    --primary-soft: #333300;
+    --success: #00ff66;
+    --warning: #ffff00;
+    --danger: #ff8080;
+    --navy: #ffffff;
+    --focus-ring: #00ffff;
+    --shadow-color-sm: transparent;
+    --shadow-color: transparent;
+    --shadow-color-lg: transparent;
+}
+
+html[data-contrast="high"] .btn-primary,
+html[data-contrast="high"] .primary-btn,
+html[data-contrast="high"] .message-row.outgoing .message-bubble {
+    color: #000000 !important;
+}
+
+html[data-contrast="high"] a {
+    color: var(--primary);
+    text-decoration-thickness: 2px;
+}
+
+:focus-visible {
+    outline: 3px solid var(--focus-ring, var(--primary)) !important;
+    outline-offset: 2px !important;
+}
+
+.visually-hidden {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0 0 0 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+}
+
+html[data-reduced-motion="true"],
+html[data-reduced-motion="true"] *,
+html[data-reduced-motion="true"] *::before,
+html[data-reduced-motion="true"] *::after {
+    scroll-behavior: auto !important;
+    animation: none !important;
+    transition: none !important;
+}
+
+html[data-reduced-motion="true"] .message--highlight {
+    outline: 3px solid var(--warning);
+    outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html,
+    html *,
+    html *::before,
+    html *::after {
+        scroll-behavior: auto !important;
+        animation: none !important;
+        transition: none !important;
+    }
+
+    .message--highlight {
+        outline: 3px solid var(--warning);
+        outline-offset: 3px;
+    }
+}
+
+@media (forced-colors: active) {
+    :focus-visible {
+        outline: 3px solid CanvasText !important;
+    }
+
+    button,
+    a,
+    input,
+    textarea,
+    select {
+        forced-color-adjust: auto;
+    }
+}

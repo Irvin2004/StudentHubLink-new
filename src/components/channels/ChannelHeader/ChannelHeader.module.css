@@ -1,0 +1,41 @@
+.header {
+    min-width: 0;
+    min-height: 7.75rem;
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    padding: var(--space-6) clamp(var(--space-6), 4vw, var(--space-10));
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+}
+
+.icon {
+    flex: 0 0 auto;
+    color: var(--channel-accent);
+}
+
+.header div {
+    min-width: 0;
+}
+
+.header h2 {
+    color: var(--text);
+    font-size: clamp(1.35rem, 2vw, 1.75rem);
+    letter-spacing: -0.025em;
+}
+
+.header p {
+    margin-top: var(--space-2);
+    overflow: hidden;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+@media (max-width: 36rem) {
+    .header {
+        min-height: 6.5rem;
+        padding: var(--space-5);
+    }
+}

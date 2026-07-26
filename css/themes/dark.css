@@ -1,0 +1,22 @@
+[data-theme="dark"] {
+    color-scheme: dark;
+    --background: var(--color-slate-950);
+    --surface: var(--color-slate-900);
+    --surface-muted: var(--color-slate-800);
+    --text-primary: var(--color-slate-50);
+    --text-secondary: var(--color-slate-400);
+    --primary: var(--color-blue-400);
+    --primary-hover: var(--color-blue-300);
+    --primary-soft: var(--color-blue-950);
+    --success: var(--color-green-400);
+    --warning: var(--color-amber-400);
+    --danger: var(--color-red-400);
+    --border: var(--color-slate-700);
+    --on-primary: var(--color-slate-950);
+    --overlay: rgb(2 6 23 / 0.76);
+    --navy: var(--color-slate-50);
+    --focus-ring: var(--color-blue-300);
+    --shadow-color-sm: rgb(0 0 0 / 0.2);
+    --shadow-color: rgb(0 0 0 / 0.28);
+    --shadow-color-lg: rgb(0 0 0 / 0.36);
+}

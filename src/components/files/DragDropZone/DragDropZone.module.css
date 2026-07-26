@@ -1,0 +1,77 @@
+.zone {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--space-4);
+    min-height: 8.5rem;
+    padding: var(--space-5);
+    border: 2px dashed #b8c5d2;
+    border-radius: var(--radius-lg);
+    background: color-mix(in srgb, var(--surface-muted) 55%, var(--surface));
+    transition:
+        border-color 150ms ease,
+        background 150ms ease,
+        transform 150ms ease;
+}
+
+.zone[data-dragging] {
+    border-color: var(--channel-accent);
+    background: color-mix(in srgb, var(--channel-accent) 9%, var(--surface));
+    transform: scale(1.005);
+}
+
+.zone input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+}
+.uploadIcon {
+    display: grid;
+    place-items: center;
+    width: 3.2rem;
+    height: 3.2rem;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--channel-accent) 13%, transparent);
+    color: var(--channel-accent);
+    font-size: 1.6rem;
+}
+.zone strong {
+    color: var(--text);
+    font-size: 0.95rem;
+}
+.zone p {
+    max-width: 38rem;
+    margin-top: 0.25rem;
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    line-height: 1.45;
+}
+.zone button {
+    min-height: 2.65rem;
+    padding: 0 var(--space-4);
+    border: 1px solid var(--channel-accent);
+    border-radius: var(--radius-md);
+    background: var(--channel-accent);
+    color: white;
+    font: inherit;
+    font-size: 0.78rem;
+    font-weight: 750;
+    cursor: pointer;
+}
+.zone button:focus-visible {
+    outline: 3px solid
+        color-mix(in srgb, var(--channel-accent) 30%, transparent);
+    outline-offset: 2px;
+}
+
+@media (max-width: 42rem) {
+    .zone {
+        grid-template-columns: auto minmax(0, 1fr);
+    }
+    .zone button {
+        grid-column: 1 / -1;
+        width: 100%;
+    }
+}

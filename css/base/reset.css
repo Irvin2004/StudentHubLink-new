@@ -1,6 +1,43 @@
-* {
-    margin: 0;
-    padding: 0;
+*,
+*::before,
+*::after {
     box-sizing: border-box;
 }
 
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    min-height: 100vh;
+    margin: 0;
+}
+
+img,
+picture,
+svg,
+video,
+canvas {
+    display: block;
+    max-width: 100%;
+}
+
+button,
+input,
+select,
+textarea {
+    font: inherit;
+}
+
+button,
+[role="button"] {
+    cursor: pointer;
+}
+
+textarea {
+    resize: vertical;
+}
+
+[hidden] {
+    display: none !important;
+}

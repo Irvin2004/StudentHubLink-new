@@ -1,0 +1,49 @@
+name: Feature request
+description: Propose an outcome that solves a student problem.
+title: "feat: "
+labels:
+    - enhancement
+body:
+    - type: textarea
+      id: problem
+      attributes:
+          label: Student problem
+          description: Who experiences the problem and why does it matter?
+      validations:
+          required: true
+
+    - type: textarea
+      id: outcome
+      attributes:
+          label: Proposed outcome
+          description: Describe the behavior, not only an implementation.
+      validations:
+          required: true
+
+    - type: textarea
+      id: alternatives
+      attributes:
+          label: Alternatives considered
+
+    - type: textarea
+      id: impact
+      attributes:
+          label: Accessibility, mobile, data, and security impact
+      validations:
+          required: true
+
+    - type: textarea
+      id: success
+      attributes:
+          label: Success criteria
+          description: How would the team know this solved the problem?
+
+    - type: checkboxes
+      id: checks
+      attributes:
+          label: Checklist
+          options:
+              - label: I searched for an existing issue or roadmap item.
+                required: true
+              - label: This request contains no private student information.
+                required: true

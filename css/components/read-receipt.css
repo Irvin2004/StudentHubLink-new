@@ -1,0 +1,30 @@
+.read-receipt-container {
+    display: inline-flex;
+    align-items: center;
+}
+
+.message-status {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+
+.message-status.sent,
+.message-status.delivered {
+    color: var(--text-secondary);
+}
+
+.message-status.read {
+    color: var(--primary);
+}
+
+.status-icon {
+    font-size: 0.8125rem;
+    font-weight: 800;
+    letter-spacing: -0.18em;
+}
+
+.message-status.sent .status-icon {
+    letter-spacing: normal;
+}

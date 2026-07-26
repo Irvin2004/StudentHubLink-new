@@ -1,0 +1,33 @@
+.message--highlight {
+    border-radius: var(--radius-lg);
+    animation: messageHighlight 2s ease;
+}
+
+@keyframes messageHighlight {
+    0% {
+        background: color-mix(in srgb, var(--warning) 28%, transparent);
+        box-shadow:
+            0 0 0 4px color-mix(in srgb, var(--warning) 42%, transparent),
+            0 0 24px color-mix(in srgb, var(--warning) 34%, transparent);
+    }
+
+    35% {
+        background: color-mix(in srgb, var(--warning) 18%, transparent);
+        box-shadow:
+            0 0 0 3px color-mix(in srgb, var(--warning) 28%, transparent),
+            0 0 14px color-mix(in srgb, var(--warning) 20%, transparent);
+    }
+
+    100% {
+        background: transparent;
+        box-shadow: none;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .message--highlight {
+        animation: none;
+        outline: 3px solid var(--warning);
+        outline-offset: 3px;
+    }
+}

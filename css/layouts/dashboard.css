@@ -1,0 +1,22 @@
+.dashboard-layout {
+    display: grid;
+    grid-template-columns: 260px minmax(0, 1fr);
+    min-height: 100vh;
+}
+.dashboard-main {
+    min-width: 0;
+    padding: var(--space-8);
+}
+@media (max-width: 1023px) {
+    .dashboard-layout {
+        grid-template-columns: 1fr;
+    }
+    .dashboard-main {
+        padding: var(--space-6);
+    }
+}
+@media (max-width: 767px) {
+    .dashboard-main {
+        padding: var(--space-4);
+    }
+}

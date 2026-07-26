@@ -1,0 +1,130 @@
+.topbar {
+    position: sticky;
+    z-index: 20;
+    top: 0;
+    min-width: 0;
+    min-height: 4.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-6);
+    padding: 0 var(--space-6);
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+}
+
+.mobileBrand {
+    display: none;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+.searchSlot {
+    width: min(31.25rem, 48%);
+}
+
+.mobileBrand a {
+    color: var(--text);
+    font-size: 1.1rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    text-decoration: none;
+}
+
+.actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.iconButton,
+.themeButton {
+    position: relative;
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid transparent;
+    border-radius: var(--radius-md);
+    background: transparent;
+    color: var(--text-secondary);
+    font: inherit;
+    text-decoration: none;
+    transition:
+        background var(--transition-fast),
+        color var(--transition-fast);
+}
+
+.notificationBadge {
+    position: absolute;
+    top: -0.2rem;
+    right: -0.25rem;
+    min-width: 1.15rem;
+    height: 1.15rem;
+    display: grid;
+    padding: 0 0.25rem;
+    place-items: center;
+    border: 2px solid var(--surface);
+    border-radius: 999px;
+    background: var(--danger);
+    color: white;
+    font-size: 0.58rem;
+    font-weight: 800;
+}
+
+.iconButton:hover,
+.themeButton:hover {
+    background: var(--surface-muted);
+    color: var(--text);
+}
+
+.themeButton {
+    gap: var(--space-2);
+    padding: 0 var(--space-3);
+    border-color: var(--border);
+    background: var(--surface);
+    color: var(--text);
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: capitalize;
+}
+
+@media (max-width: 47.999rem) {
+    .topbar {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        min-height: 4.25rem;
+        gap: var(--space-2);
+        padding: var(--space-3);
+    }
+
+    .mobileBrand {
+        display: flex;
+    }
+
+    .searchSlot {
+        width: 100%;
+        grid-column: 1 / -1;
+        grid-row: 2;
+    }
+
+    .actions {
+        margin-left: auto;
+    }
+
+    .themeButton {
+        width: 2.75rem;
+        padding: 0;
+    }
+
+    .themeButton span {
+        display: none;
+    }
+}
+
+@media (max-width: 24rem) {
+    .mobileBrand a {
+        display: none;
+    }
+}

@@ -1,0 +1,90 @@
+.presence-badge,
+.typing-indicator {
+    display: inline-flex;
+    min-width: 0;
+    align-items: center;
+    gap: var(--space-2, 0.5rem);
+    color: var(--text-secondary, #64748b);
+    font-size: 0.8125rem;
+    font-weight: 700;
+    line-height: 1.25;
+}
+
+.presence-badge.online {
+    color: var(--success, #15803d);
+}
+
+.presence-badge.offline {
+    color: var(--text-secondary, #64748b);
+}
+
+.presence-dot {
+    width: 0.625rem;
+    height: 0.625rem;
+    flex: 0 0 auto;
+    border: 2px solid var(--surface, #ffffff);
+    border-radius: 50%;
+    background: currentColor;
+    box-shadow: 0 0 0 1px currentColor;
+}
+
+.presence-dot.online {
+    color: var(--success, #22c55e);
+}
+
+.presence-dot.offline {
+    color: var(--text-muted, #94a3b8);
+}
+
+.typing-indicator {
+    color: var(--primary, #2563eb);
+}
+
+.typing-dots {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
+}
+
+.typing-dots > span {
+    width: 0.35rem;
+    height: 0.35rem;
+    border-radius: 50%;
+    background: currentColor;
+    animation: presence-typing-dot 1.2s ease-in-out infinite;
+}
+
+.typing-dots > span:nth-child(2) {
+    animation-delay: 0.15s;
+}
+
+.typing-dots > span:nth-child(3) {
+    animation-delay: 0.3s;
+}
+
+.presence-label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+@keyframes presence-typing-dot {
+    0%,
+    60%,
+    100% {
+        opacity: 0.3;
+        transform: translateY(0);
+    }
+
+    30% {
+        opacity: 1;
+        transform: translateY(-0.18rem);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .typing-dots > span {
+        animation: none;
+        opacity: 1;
+    }
+}

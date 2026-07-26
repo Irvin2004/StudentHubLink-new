@@ -1,140 +1,278 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StudentHub Dashboard</title>
-    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-    <link rel="stylesheet" href="css/base/reset.css">
-    <link rel="stylesheet" href="css/base/theme.css">
-    <link rel="stylesheet" href="css/components/buttons.css">
-    <link rel="stylesheet" href="css/components/cards.css">
-    <link rel="stylesheet" href="css/components/toast.css">
-    <link rel="stylesheet" href="css/components/skeleton.css">
-    <link rel="stylesheet" href="css/pages/dashboard.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-</head>
-<body>
-<div class="dashboard-page">
-    <aside class="sidebar">
-        <div class="sidebar-logo">StudentHub</div>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>StudentHub Dashboard</title>
+        <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+            rel="stylesheet"
+        />
+    </head>
+    <body data-page="dashboard">
+        <div class="dashboard-page">
+            <aside class="sidebar">
+                <div class="sidebar-logo">StudentHub</div>
 
-        <nav class="sidebar-menu">
-            <a href="dashboard.html" class="active">🏠 Dashboard</a>
-            <a href="pages/resources.html">🛒 Marketplace</a>
-            <a href="pages/library.html">📚 My Library</a>
-            <a href="pages/achievements.html">🏆 Achievements</a>
-            <a href="pages/leaderboard.html">🏅 Leaderboard</a>
-            <a href="pages/upload.html">📤 Upload</a>
-            <a href="pages/profile.html">👤 Profile</a>
-        </nav>
-    </aside>
+                <nav class="sidebar-menu">
+                    <a href="dashboard.html" class="active">Dashboard</a>
+                    <a href="pages/resources.html">Marketplace</a>
+                    <a href="pages/library.html">My Library</a>
+                    <a href="pages/messages.html">Messages</a>
+                    <a href="pages/groups.html">Study Groups</a>
+                    <a href="pages/favorites.html">&#10084; Favorites</a>
+                    <a href="pages/achievements.html">Achievements</a>
+                    <a href="pages/leaderboard.html">Leaderboard</a>
+                    <a href="pages/upload.html">Upload</a>
+                    <a href="pages/profile.html">Profile</a>
+                </nav>
+            </aside>
 
-    <main class="dashboard-main">
-        <div class="dashboard-header">
-            <div class="header-left">
-                <h1 id="greeting">Good morning</h1>
-                <p>Ready to continue your learning journey?</p>
-            </div>
+            <main class="dashboard-main">
+                <div class="dashboard-header">
+                    <div class="header-left">
+                        <h1 id="greeting">Good morning</h1>
+                        <p>Ready to continue your learning journey?</p>
+                    </div>
 
-            <div class="header-right">
-                <div class="search-box">
-                    <input type="text" id="dashboardSearch" placeholder="Search resources...">
-                </div>
+                    <div class="header-right">
+                        <button
+                            id="openCreateGroup"
+                            class="btn btn-primary"
+                            type="button"
+                        >
+                            Create Study Group
+                        </button>
+                        <button
+                            class="theme-toggle"
+                            type="button"
+                            data-theme-toggle
+                            aria-label="Switch to dark mode"
+                            title="Switch to dark mode"
+                        >
+                            Dark
+                        </button>
 
-                <div class="notification-menu">
-                    <button class="notification-btn" id="notificationBtn" aria-label="Notifications" type="button">
-                        N
-                        <span id="notificationCount">0</span>
-                    </button>
-
-                    <div class="notification-dropdown" id="notificationDropdown">
-                        <div class="notification-header">
-                            <h3>Notifications</h3>
+                        <div class="search-box">
+                            <input
+                                type="text"
+                                id="dashboardSearch"
+                                placeholder="Search resources..."
+                            />
                         </div>
 
-                        <div id="notificationList" class="notification-list">
-                            <p class="empty-state">No notifications yet.</p>
+                        <div class="notification-menu">
+                            <button
+                                class="notification-btn"
+                                id="notificationBtn"
+                                aria-label="Notifications, none unread"
+                                aria-controls="notificationDropdown"
+                                aria-expanded="false"
+                                type="button"
+                            >
+                                <span
+                                    class="notification-bell"
+                                    aria-hidden="true"
+                                    >&#128276;</span
+                                >
+                                <span id="notificationCount" hidden>0</span>
+                            </button>
+
+                            <div
+                                class="notification-dropdown"
+                                id="notificationDropdown"
+                                aria-label="Notifications"
+                            >
+                                <div class="notification-header">
+                                    <h3>Notifications</h3>
+                                </div>
+
+                                <div
+                                    id="notificationList"
+                                    class="notification-list"
+                                >
+                                    <p class="notification-loading">
+                                        Loading notifications...
+                                    </p>
+                                </div>
+
+                                <div class="notification-footer">
+                                    <button
+                                        id="markAllNotificationsRead"
+                                        type="button"
+                                        disabled
+                                    >
+                                        Mark all read
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="profile-menu">
+                            <button
+                                id="profileButton"
+                                aria-label="Open profile menu"
+                            >
+                                <div class="avatar">A</div>
+                                <span id="userName">Student</span>
+                                <span aria-hidden="true">v</span>
+                            </button>
+
+                            <div class="profile-dropdown" id="profileDropdown">
+                                <a href="pages/profile.html">My Profile</a>
+                                <a href="#">Settings</a>
+                                <button id="logoutBtn">Logout</button>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="profile-menu">
-                    <button id="profileButton" aria-label="Open profile menu">
-                        <div class="avatar">A</div>
-                        <span id="userName">Student</span>
-                        <span aria-hidden="true">v</span>
-                    </button>
-
-                    <div class="profile-dropdown" id="profileDropdown">
-                        <a href="pages/profile.html">My Profile</a>
-                        <a href="#">Settings</a>
-                        <button id="logoutBtn">Logout</button>
+                <section class="stats-grid">
+                    <div class="stat-box">
+                        <span>RES</span>
+                        <p>Uploaded Resources</p>
+                        <h2 id="totalUploads">0</h2>
                     </div>
-                </div>
-            </div>
+
+                    <div class="stat-box">
+                        <span>DL</span>
+                        <p>Total Downloads</p>
+                        <h2 id="totalDownloads">0</h2>
+                    </div>
+
+                    <div class="stat-box">
+                        <span>R</span>
+                        <p>Total Earnings</p>
+                        <h2 id="totalEarnings">R0</h2>
+                    </div>
+
+                    <div class="stat-box">
+                        <span>4.8</span>
+                        <p>Rating</p>
+                        <h2>4.8</h2>
+                    </div>
+                </section>
+
+                <section class="dashboard-grid">
+                    <div class="panel">
+                        <h3>Analytics</h3>
+
+                        <div class="chart-preview">
+                            <canvas id="analyticsChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="panel">
+                            <h3>Recently Added</h3>
+
+                            <div
+                                id="recentlyAddedList"
+                                class="recently-added-list"
+                            >
+                                <p class="empty-state">
+                                    Loading recently added resources...
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="panel recent-activity-panel">
+                            <h3>Recent Activity</h3>
+
+                            <div
+                                id="recentActivityList"
+                                class="recent-activity-list"
+                            >
+                                <p class="empty-state">
+                                    No recent activity yet.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </main>
         </div>
 
-        <section class="stats-grid">
-            <div class="stat-box">
-                <span>RES</span>
-                <p>Uploaded Resources</p>
-                <h2 id="totalUploads">0</h2>
-            </div>
+        <div
+            id="createGroupModal"
+            class="modal hidden"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="createGroupTitle"
+        >
+            <div class="modal-content">
+                <h2 id="createGroupTitle">Create Study Group</h2>
 
-            <div class="stat-box">
-                <span>DL</span>
-                <p>Total Downloads</p>
-                <h2 id="totalDownloads">0</h2>
-            </div>
+                <form id="createGroupForm">
+                    <label for="groupName">Group Name</label>
+                    <input
+                        id="groupName"
+                        type="text"
+                        maxlength="60"
+                        placeholder="Example: Robotics Assignment Squad"
+                        required
+                    />
 
-            <div class="stat-box">
-                <span>R</span>
-                <p>Total Earnings</p>
-                <h2 id="totalEarnings">R0</h2>
-            </div>
+                    <label for="moduleName">Module or Subject</label>
+                    <input
+                        id="moduleName"
+                        type="text"
+                        maxlength="80"
+                        placeholder="Example: Robotics Fundamentals"
+                        required
+                    />
 
-            <div class="stat-box">
-                <span>4.8</span>
-                <p>Rating</p>
-                <h2>4.8</h2>
-            </div>
-        </section>
+                    <label for="moduleCode">Module Code</label>
+                    <input
+                        id="moduleCode"
+                        type="text"
+                        maxlength="20"
+                        placeholder="Example: RFS"
+                    />
 
-        <section class="dashboard-grid">
-            <div class="panel">
-                <h3>Analytics</h3>
+                    <label for="groupDescription">Description</label>
+                    <textarea
+                        id="groupDescription"
+                        rows="4"
+                        maxlength="300"
+                        placeholder="Explain what students will use this group for."
+                    ></textarea>
 
-                <div class="chart-preview">
-                    <canvas id="analyticsChart"></canvas>
-                </div>
-            </div>
+                    <label for="groupTags">Tags</label>
+                    <input
+                        id="groupTags"
+                        type="text"
+                        maxlength="130"
+                        placeholder="Assignments, Semester2, Arduino"
+                    />
+                    <label for="groupVisibility">Visibility</label>
+                    <select id="groupVisibility">
+                        <option value="public">Public</option>
+                        <option value="private">Private</option>
+                    </select>
 
-            <div>
-                <div class="panel">
-                    <h3>Recently Added</h3>
+                    <div class="modal-actions">
+                        <button
+                            class="btn btn-secondary"
+                            type="button"
+                            id="cancelGroup"
+                        >
+                            Cancel
+                        </button>
 
-                    <div id="recentlyAddedList" class="recently-added-list">
-                        <p class="empty-state">Loading recently added resources...</p>
+                        <button class="btn btn-primary" type="submit">
+                            Create Group
+                        </button>
                     </div>
-                </div>
-
-                <div class="panel recent-activity-panel">
-                    <h3>Recent Activity</h3>
-
-                    <div id="recentActivityList" class="recent-activity-list">
-                        <p class="empty-state">No recent activity yet.</p>
-                    </div>
-                </div>
+                </form>
             </div>
-        </section>
-    </main>
-</div>
-
-<script type="module" src="js/service/auth.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script type="module" src="js/service/dashboard.js"></script>
-</body>
+        </div>
+        <script type="module" src="js/pages/auth-page.js?security=1"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script type="module" src="js/pages/dashboard-page.js"></script>
+        <script type="module" src="/src/main.js"></script>
+    </body>
 </html>

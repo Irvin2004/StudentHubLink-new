@@ -1,0 +1,32 @@
+.form {
+    display: grid;
+    gap: var(--space-6);
+}
+
+.nameField [aria-hidden="true"] {
+    color: #f97316;
+    font-size: 1.15rem;
+    font-weight: 800;
+}
+
+.nameField > div > div:focus-within {
+    border-color: #f97316;
+    box-shadow: 0 0 0 4px rgb(249 115 22 / 0.16);
+}
+
+.primaryAction {
+    background: #f97316;
+    box-shadow: 0 6px 16px rgb(249 115 22 / 0.22);
+}
+
+.primaryAction:hover:not(:disabled) {
+    background: #ea580c;
+}
+
+.formError {
+    padding: var(--space-3);
+    border-radius: var(--radius-sm);
+    background: color-mix(in srgb, var(--danger) 10%, transparent);
+    color: var(--danger);
+    font-size: 0.875rem;
+}

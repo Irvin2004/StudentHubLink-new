@@ -1,0 +1,62 @@
+.item {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: 0.75rem;
+    border: 0;
+    border-radius: var(--radius-md);
+    background: transparent;
+    color: var(--text);
+    font: inherit;
+    text-align: left;
+}
+
+.item:hover,
+.item[aria-selected="true"] {
+    background: color-mix(in srgb, var(--primary) 10%, var(--surface-muted));
+}
+
+.item:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: -2px;
+}
+
+.icon {
+    width: 2rem;
+    height: 2rem;
+    display: grid;
+    flex: 0 0 auto;
+    place-items: center;
+    border-radius: var(--radius-sm);
+    background: var(--surface-muted);
+    color: var(--primary);
+    font-weight: 800;
+}
+
+.copy {
+    min-width: 0;
+    display: grid;
+    flex: 1;
+    gap: 0.15rem;
+}
+
+.copy strong,
+.copy small {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.copy strong {
+    font-size: 0.925rem;
+}
+
+.copy small {
+    color: var(--text-secondary);
+    font-size: 0.78rem;
+}
+
+.arrow {
+    color: var(--text-secondary);
+}

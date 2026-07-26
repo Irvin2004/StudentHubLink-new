@@ -11,9 +11,73 @@
     font-weight: 700;
     border: none;
     cursor: pointer;
-    transition: 0.25s ease;
+    transition:
+        transform var(--transition-fast),
+        background var(--transition-fast),
+        border-color var(--transition-fast),
+        color var(--transition-fast);
     text-decoration: none;
     font-size: 15px;
+}
+
+.btn-danger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 20px;
+    border: 1px solid var(--danger);
+    border-radius: var(--radius-md);
+    background: var(--danger);
+    color: #fff;
+    font-size: 15px;
+    font-weight: 700;
+    text-decoration: none;
+    transition:
+        transform var(--transition-fast),
+        filter var(--transition-fast);
+}
+
+.btn-danger:hover {
+    filter: brightness(0.92);
+    transform: translateY(-2px);
+}
+.btn-sm {
+    min-height: 34px;
+    padding: 7px 12px;
+    font-size: 0.8125rem;
+}
+.btn-md {
+    min-height: 44px;
+}
+.btn-lg {
+    min-height: 52px;
+    padding: 14px 24px;
+    font-size: 1rem;
+}
+.btn:disabled,
+.btn[disabled],
+.btn-danger:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+    transform: none;
+}
+.btn:focus-visible,
+.btn-danger:focus-visible,
+.theme-toggle:focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--primary) 35%, transparent);
+    outline-offset: 2px;
+}
+.pagination {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+}
+.pagination .is-active {
+    border-color: var(--primary);
+    background: var(--primary);
+    color: #fff;
 }
 
 .btn-primary,
@@ -31,7 +95,7 @@
 
 .btn-outline,
 .btn-secondary {
-    background: white;
+    background: var(--white);
     color: var(--navy);
     border: 1px solid var(--border);
 }
@@ -41,4 +105,25 @@
     border-color: var(--blue);
     color: var(--blue);
     transform: translateY(-2px);
+}
+
+.theme-toggle {
+    width: 44px;
+    height: 44px;
+    display: grid;
+    place-items: center;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--white);
+    color: var(--text-main);
+    box-shadow: var(--shadow);
+    cursor: pointer;
+    font-size: 20px;
+    transition: 0.25s ease;
+}
+
+.theme-toggle:hover {
+    transform: translateY(-2px);
+    border-color: var(--blue);
+    color: var(--blue);
 }

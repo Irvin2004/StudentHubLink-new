@@ -1,0 +1,103 @@
+.assignment-card {
+    display: grid;
+    gap: var(--space-5);
+    padding: var(--space-6);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    box-shadow: var(--shadow-sm);
+}
+
+.assignment-header,
+.assignment-footer {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-5);
+}
+
+.assignment-header h3,
+.assignment-header p {
+    margin: 0;
+}
+
+.assignment-header h3 {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    color: var(--text-primary);
+    font-size: 1.125rem;
+}
+
+.assignment-header p {
+    margin-top: var(--space-2);
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+.assignment-status {
+    display: inline-flex;
+    align-items: center;
+    flex: 0 0 auto;
+    gap: var(--space-2);
+    min-height: 30px;
+    padding: 5px 12px;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.assignment-footer {
+    align-items: center;
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--border);
+}
+
+.assignment-meta,
+.assignment-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+.assignment-meta {
+    color: var(--text-secondary);
+    font-size: 0.8125rem;
+}
+
+.assignment-due-date {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-1);
+}
+
+.assignment-due-date strong {
+    color: var(--text-primary);
+}
+
+.assignment-actions .btn {
+    min-height: 36px;
+    padding: 8px 12px;
+}
+
+@media (max-width: 640px) {
+    .assignment-header,
+    .assignment-footer {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .assignment-status {
+        align-self: flex-start;
+    }
+
+    .assignment-actions .btn {
+        flex: 1;
+    }
+
+    .assignment-due-date-exact {
+        display: none;
+    }
+}

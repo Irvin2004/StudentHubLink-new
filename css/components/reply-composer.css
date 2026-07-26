@@ -1,0 +1,80 @@
+.reply-composer {
+    position: relative;
+    display: grid;
+    gap: var(--space-1);
+    padding: var(--space-3) calc(var(--space-6) + 44px) var(--space-3)
+        var(--space-6);
+    border-top: 1px solid var(--border);
+    border-left: 4px solid var(--primary);
+    background: var(--surface-muted);
+    color: var(--text-primary);
+}
+
+.reply-composer[hidden] {
+    display: none;
+}
+
+.reply-composer__header,
+.reply-composer__preview {
+    min-width: 0;
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.reply-composer__header {
+    color: var(--text-secondary);
+    font-size: 0.82rem;
+}
+
+.reply-composer__sender {
+    color: var(--primary);
+    font-weight: 700;
+}
+
+.reply-composer__preview {
+    font-size: 0.9rem;
+}
+
+.reply-composer__cancel {
+    position: absolute;
+    top: 50%;
+    right: var(--space-6);
+    width: 36px;
+    height: 36px;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 1rem;
+    transform: translateY(-50%);
+    transition:
+        background var(--transition-fast),
+        color var(--transition-fast);
+}
+
+.reply-composer__cancel:hover {
+    background: var(--primary-soft);
+    color: var(--text-primary);
+}
+
+.reply-composer__cancel:focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--primary) 30%, transparent);
+    outline-offset: 2px;
+}
+
+@media (max-width: 600px) {
+    .reply-composer {
+        padding-right: calc(var(--space-4) + 44px);
+        padding-left: var(--space-4);
+    }
+
+    .reply-composer__cancel {
+        right: var(--space-4);
+    }
+}

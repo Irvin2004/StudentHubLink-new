@@ -1,0 +1,42 @@
+.emptyState {
+    display: grid;
+    justify-items: center;
+    gap: var(--space-3);
+    padding: var(--space-10) var(--space-6);
+    color: var(--text-primary);
+    text-align: center;
+    animation: appear var(--transition);
+}
+
+.icon {
+    width: 4rem;
+    height: 4rem;
+    display: grid;
+    place-items: center;
+    margin-bottom: var(--space-2);
+    border: 1px dashed var(--border);
+    border-radius: var(--radius-pill);
+    background: var(--surface-muted);
+    color: var(--primary);
+}
+
+.emptyState h2,
+.emptyState p {
+    margin: 0;
+}
+
+.emptyState h2 {
+    font-size: 1.15rem;
+}
+
+.emptyState p {
+    max-width: 28rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+@keyframes appear {
+    from {
+        opacity: 0;
+    }
+}

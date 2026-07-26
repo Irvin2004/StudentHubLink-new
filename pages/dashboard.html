@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+        <title>Dashboard | StudentHub</title>
+        <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
+
+        <!-- Existing global styles -->
+
+        <!-- Existing shared component styles -->
+
+        <!-- Dashboard styles -->
+    </head>
+
+    <body>
+        <header class="dashboard-header">
+            <a href="./dashboard.html" class="dashboard-logo"> StudentHub </a>
+
+            <nav class="dashboard-navigation" aria-label="Primary navigation">
+                <a href="./dashboard.html" aria-current="page"> Dashboard </a>
+
+                <a href="./groups.html"> Groups </a>
+
+                <a href="./profile.html"> Friends </a>
+
+                <a href="./messages.html"> Messages </a>
+            </nav>
+
+            <div
+                id="searchDropdown"
+                class="dashboard-global-search"
+                role="search"
+            >
+                <label class="sr-only" for="globalSearchInput">
+                    Search StudentHub
+                </label>
+                <span class="dashboard-search-icon" aria-hidden="true">
+                    &#128269;
+                </span>
+                <input
+                    id="globalSearchInput"
+                    type="search"
+                    placeholder="Search StudentHub"
+                    aria-label="Search StudentHub"
+                />
+            </div>
+
+            <div class="dashboard-header-actions">
+                <button
+                    id="notificationBellButton"
+                    class="notification-bell-button"
+                    type="button"
+                    aria-label="Open notifications"
+                    aria-expanded="false"
+                >
+                    <span aria-hidden="true">&#128276;</span>
+
+                    <span
+                        id="notificationBadge"
+                        class="notification-badge"
+                        hidden
+                    >
+                        0
+                    </span>
+                </button>
+
+                <a href="./profile.html" class="dashboard-profile-link">
+                    Profile
+                </a>
+            </div>
+        </header>
+
+        <main class="dashboard-page">
+            <section
+                id="dashboardLoadingState"
+                class="dashboard-status"
+                aria-busy="true"
+            ></section>
+
+            <section
+                id="dashboardErrorState"
+                class="dashboard-status dashboard-error-state"
+                hidden
+            >
+                <h1>We couldn't load your dashboard</h1>
+
+                <p id="dashboardErrorMessage">
+                    Please check your connection and try again.
+                </p>
+
+                <button
+                    id="retryDashboardButton"
+                    class="btn btn-primary"
+                    type="button"
+                >
+                    Try Again
+                </button>
+            </section>
+
+            <div id="dashboardContent" class="dashboard-content" hidden>
+                <section class="dashboard-welcome">
+                    <div>
+                        <p class="dashboard-welcome-label">Student dashboard</p>
+
+                        <h1 id="dashboardGreeting">Welcome back</h1>
+
+                        <p class="dashboard-welcome-message">
+                            Here's what is happening in your StudentHub
+                            community.
+                        </p>
+                    </div>
+
+                    <div class="dashboard-welcome-actions">
+                        <time id="dashboardDate" class="dashboard-date"></time>
+
+                        <button
+                            id="refreshDashboardButton"
+                            class="btn btn-secondary dashboard-refresh-button"
+                            type="button"
+                        >
+                            <span data-refresh-icon aria-hidden="true"
+                                >&#8635;</span
+                            >
+                            Refresh
+                        </button>
+                    </div>
+                </section>
+
+                <section
+                    class="dashboard-section"
+                    aria-labelledby="dashboardStatsHeading"
+                >
+                    <div class="dashboard-section-heading">
+                        <div>
+                            <p class="dashboard-section-label">Overview</p>
+
+                            <h2 id="dashboardStatsHeading">Your activity</h2>
+                        </div>
+                    </div>
+
+                    <div id="dashboardStats" class="dashboard-stats-grid">
+                        <!-- Rendered by dashboard-renderer.js -->
+                    </div>
+                </section>
+
+                <div class="dashboard-primary-grid">
+                    <section
+                        class="dashboard-card dashboard-assignments-card"
+                        aria-labelledby="upcomingAssignmentsHeading"
+                    >
+                        <div class="dashboard-card-header">
+                            <div>
+                                <p class="dashboard-section-label">Deadlines</p>
+
+                                <h2 id="upcomingAssignmentsHeading">
+                                    Upcoming assignments
+                                </h2>
+                            </div>
+
+                            <a href="./groups.html"> View all </a>
+                        </div>
+
+                        <div
+                            id="dashboardAssignments"
+                            class="dashboard-card-content"
+                        >
+                            <!-- Rendered by dashboard-renderer.js -->
+                        </div>
+                    </section>
+
+                    <section
+                        class="dashboard-card dashboard-notifications-card"
+                        aria-labelledby="recentNotificationsHeading"
+                    >
+                        <div class="dashboard-card-header">
+                            <div>
+                                <p class="dashboard-section-label">Updates</p>
+
+                                <h2 id="recentNotificationsHeading">
+                                    Recent notifications
+                                </h2>
+                            </div>
+
+                            <button
+                                id="viewNotificationsButton"
+                                class="dashboard-link-button"
+                                type="button"
+                            >
+                                View all
+                            </button>
+                        </div>
+
+                        <div
+                            id="dashboardNotifications"
+                            class="dashboard-card-content"
+                        >
+                            <!-- Rendered by dashboard-renderer.js -->
+                        </div>
+                    </section>
+                </div>
+
+                <div class="dashboard-secondary-grid">
+                    <section
+                        class="dashboard-card"
+                        aria-labelledby="myGroupsHeading"
+                    >
+                        <div class="dashboard-card-header">
+                            <div>
+                                <p class="dashboard-section-label">
+                                    Collaboration
+                                </p>
+
+                                <h2 id="myGroupsHeading">My groups</h2>
+                            </div>
+
+                            <a href="./groups.html"> View all </a>
+                        </div>
+
+                        <div
+                            id="dashboardGroups"
+                            class="dashboard-card-content"
+                        >
+                            <!-- Rendered by dashboard-renderer.js -->
+                        </div>
+                    </section>
+
+                    <section
+                        class="dashboard-card"
+                        aria-labelledby="quickActionsHeading"
+                    >
+                        <div class="dashboard-card-header">
+                            <div>
+                                <p class="dashboard-section-label">Shortcuts</p>
+
+                                <h2 id="quickActionsHeading">Quick actions</h2>
+                            </div>
+                        </div>
+
+                        <div class="dashboard-quick-actions">
+                            <a
+                                href="../dashboard.html#createGroupModal"
+                                class="dashboard-action"
+                            >
+                                <span aria-hidden="true">&#128101;</span>
+
+                                <span>
+                                    <strong>Create a group</strong>
+                                    <small>Start a new study community</small>
+                                </span>
+                            </a>
+
+                            <a href="./groups.html" class="dashboard-action">
+                                <span aria-hidden="true">&#128221;</span>
+
+                                <span>
+                                    <strong>Create assignment</strong>
+                                    <small
+                                        >Add work to one of your groups</small
+                                    >
+                                </span>
+                            </a>
+
+                            <a href="./upload.html" class="dashboard-action">
+                                <span aria-hidden="true">&#128218;</span>
+
+                                <span>
+                                    <strong>Share a resource</strong>
+                                    <small>Help your group study</small>
+                                </span>
+                            </a>
+
+                            <a href="./profile.html" class="dashboard-action">
+                                <span aria-hidden="true">&#129309;</span>
+
+                                <span>
+                                    <strong>Find friends</strong>
+                                    <small>Connect with other students</small>
+                                </span>
+                            </a>
+                        </div>
+                    </section>
+                </div>
+
+                <section
+                    class="dashboard-card dashboard-activity-card"
+                    aria-labelledby="recentActivityHeading"
+                >
+                    <div class="dashboard-card-header">
+                        <div>
+                            <p class="dashboard-section-label">Community</p>
+
+                            <h2 id="recentActivityHeading">Recent activity</h2>
+                        </div>
+
+                        <a href="./groups.html"> View groups </a>
+                    </div>
+
+                    <div
+                        id="activityFeed"
+                        class="dashboard-card-content"
+                        aria-live="polite"
+                    ></div>
+                </section>
+            </div>
+        </main>
+
+        <div id="notificationPanelContainer"></div>
+
+        <div
+            id="toastContainer"
+            class="toast-container"
+            aria-live="polite"
+            aria-atomic="true"
+        ></div>
+
+        <script
+            type="module"
+            src="../js/controllers/dashboard-controller.js?skeletons=1"
+        ></script>
+        <script type="module" src="/src/main.js"></script>
+    </body>
+</html>

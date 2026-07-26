@@ -1,0 +1,9 @@
+/*
+ * Vite style entrypoint.
+ *
+ * Existing styles remain in css/ during the incremental source migration.
+ * New features should use the established base/component/layout/theme layers
+ * and design tokens rather than creating a second design system.
+ */
+@import url("../../css/studenthub.css");
+@import url("./react-app.css");

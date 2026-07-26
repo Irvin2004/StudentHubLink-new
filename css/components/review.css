@@ -1,0 +1,31 @@
+.review-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow);
+}
+
+.review-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+}
+
+.review-text {
+    margin: 16px 0;
+    line-height: 1.6;
+}
+
+.review-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.review-actions {
+    display: flex;
+    gap: 10px;
+}

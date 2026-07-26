@@ -1,0 +1,128 @@
+.item {
+    position: relative;
+    display: grid;
+    grid-template-columns: 2.65rem minmax(0, 1fr);
+    gap: var(--space-3);
+    padding: var(--space-3) clamp(var(--space-4), 4vw, var(--space-8));
+    border-radius: var(--radius-md);
+    content-visibility: auto;
+    contain-intrinsic-size: auto 5rem;
+}
+
+.item:hover,
+.item:focus-within {
+    background: color-mix(in srgb, var(--surface-muted) 62%, transparent);
+}
+
+.item[data-deleted] {
+    opacity: 0.76;
+}
+
+.avatar {
+    margin-top: 0.1rem;
+}
+
+.body {
+    min-width: 0;
+}
+
+.meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--space-2);
+}
+
+.meta strong {
+    color: var(--text);
+    font-size: 0.9rem;
+}
+
+.meta time {
+    color: var(--text-secondary);
+    font-size: 0.72rem;
+}
+
+.pinned {
+    color: var(--channel-accent);
+    font-size: 0.72rem;
+    font-weight: 750;
+}
+
+.pinned {
+    color: var(--channel-accent);
+    font-size: 0.72rem;
+    font-weight: 750;
+}
+
+.pinned {
+    color: var(--channel-accent);
+    font-size: 0.72rem;
+    font-weight: 750;
+}
+
+.text,
+.deleted {
+    max-width: 54rem;
+    margin-top: 0.2rem;
+    color: var(--text);
+    font-size: 0.9rem;
+    line-height: 1.55;
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+}
+
+.deleted {
+    color: var(--text-secondary);
+    font-style: italic;
+}
+
+.editor textarea {
+    width: 100%;
+    min-height: 5rem;
+    margin-top: var(--space-2);
+    padding: var(--space-3);
+    resize: vertical;
+    border: 1px solid var(--channel-accent);
+    border-radius: var(--radius-md);
+    background: var(--surface);
+    color: var(--text);
+    font: inherit;
+}
+
+.editor textarea:focus {
+    outline: 3px solid
+        color-mix(in srgb, var(--channel-accent) 18%, transparent);
+}
+
+.editor div {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-2);
+    margin-top: var(--space-2);
+}
+
+.editor button {
+    padding: 0.4rem 0.7rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    color: var(--text);
+    font: inherit;
+    font-size: 0.75rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.editor button:last-child {
+    border-color: var(--channel-accent);
+    background: var(--channel-accent);
+    color: white;
+}
+
+@media (max-width: 36rem) {
+    .item {
+        grid-template-columns: 2.25rem minmax(0, 1fr);
+        padding-inline: var(--space-3);
+    }
+}

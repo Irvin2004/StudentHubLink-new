@@ -1,28 +1,56 @@
-# OS and editor files
+# Operating-system files
 .DS_Store
 Thumbs.db
+desktop.ini
+
+# Editors and IDEs
 .vscode/
 .idea/
+*.swp
+*.swo
+
+# AI/development agent files
+.agents/
 
 # Logs and temporary files
 *.log
 *.tmp
 *.temp
+firebase-debug.log
+firebase-debug.*.log
+firestore-debug.log
+ui-debug.log
 
-# Dependency and package-manager folders
+# Dependencies
 node_modules/
+functions/node_modules/
 .pnpm-store/
+
+# Firebase local and generated files
+.firebase/
+.firebase-export/
+firebase-export/
+.firebaserc.local
+
+# Emulator data
+emulator-data/
+
+# Environment files
+.env
+.env.*
+!.env.example
 
 # Build and cache output
 dist/
 build/
 .cache/
+.vite/
+.eslintcache
 
-# Environment files
-.env
-.env.*
-
-# Local test artifacts
+# Test output
 coverage/
 playwright-report/
 test-results/
+
+# Local archive files
+*.zip

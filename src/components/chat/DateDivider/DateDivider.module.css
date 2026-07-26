@@ -1,0 +1,17 @@
+.divider {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: var(--space-4);
+    margin: var(--space-3) 0 var(--space-5);
+    color: var(--text-secondary);
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+.divider::before,
+.divider::after {
+    height: 1px;
+    background: var(--border);
+    content: "";
+}

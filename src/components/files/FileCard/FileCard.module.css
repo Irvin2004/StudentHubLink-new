@@ -1,0 +1,49 @@
+.card {
+    display: grid;
+    grid-template-rows: 8.5rem minmax(0, 1fr) auto;
+    min-width: 0;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    box-shadow: 0 2px 8px rgb(15 39 68 / 5%);
+    transition:
+        transform 150ms ease,
+        box-shadow 150ms ease;
+}
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 22px rgb(15 39 68 / 10%);
+}
+.preview {
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    background: color-mix(in srgb, var(--surface-muted) 78%, white);
+}
+.preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.body {
+    min-width: 0;
+    padding: var(--space-4);
+}
+.body h3 {
+    overflow: hidden;
+    color: var(--text);
+    font-size: 0.88rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.body p,
+.body time {
+    display: block;
+    margin-top: 0.35rem;
+    color: var(--text-secondary);
+    font-size: 0.7rem;
+}
+.card > :last-child {
+    margin: 0 var(--space-4) var(--space-4);
+}

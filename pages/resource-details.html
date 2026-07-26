@@ -1,48 +1,123 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StudentHub Resource Details</title>
-    <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
-    <link rel="stylesheet" href="../css/base/reset.css">
-    <link rel="stylesheet" href="../css/base/theme.css">
-    <link rel="stylesheet" href="../css/components/buttons.css">
-    <link rel="stylesheet" href="../css/components/toast.css">
-    <link rel="stylesheet" href="../css/pages/resources.css">
-    <link rel="stylesheet" href="../css/pages/resource-details.css">
-</head>
-<body>
-<main class="resource-details-page">
-    <section class="resource-details-card">
-        <a href="resources.html" class="back-link">&lt; Back to Marketplace</a>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>StudentHub Resource Details</title>
+        <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
+    </head>
+    <body data-page="resource-details">
+        <main class="resource-details-page">
+            <section class="resource-details-card">
+                <a href="resources.html" class="back-link"
+                    >&lt; Back to Marketplace</a
+                >
 
-        <span id="resourceCategory" class="resource-category">Category</span>
+                <span id="resourceCategory" class="resource-category"
+                    >Category</span
+                >
 
-        <h1 id="resourceTitle">Resource title</h1>
+                <h1 id="resourceTitle">Resource title</h1>
 
-        <p id="resourceDescription">Resource description</p>
+                <p id="resourceDescription">Resource description</p>
 
-        <div class="resource-details-meta">
-            <p><strong>Author:</strong> <a id="resourceOwner" href="#">Unknown</a></p>
-            <p><strong>Price:</strong> <span id="resourcePrice">FREE</span></p>
-            <p><strong>Downloads:</strong> <span id="resourceDownloads">0</span></p>
-            <p><strong>Status:</strong> <span id="resourceStatus">Approved</span></p>
-        </div>
+                <div class="resource-details-meta">
+                    <p>
+                        <strong>Author:</strong>
+                        <a id="resourceOwner" href="#">Unknown</a>
+                    </p>
+                    <p>
+                        <strong>Price:</strong>
+                        <span id="resourcePrice">FREE</span>
+                    </p>
+                    <p>
+                        <strong>Downloads:</strong>
+                        <span id="resourceDownloads">0</span>
+                    </p>
+                    <p>
+                        <strong>Status:</strong>
+                        <span id="resourceStatus">Approved</span>
+                    </p>
+                </div>
 
-        <div class="resource-details-actions">
-            <button class="secondary-btn" id="previewBtn" type="button">Preview</button>
-            <button class="primary-btn" id="resourceActionBtn" type="button">Download</button>
-        </div>
-    </section>
+                <div class="resource-details-actions">
+                    <button class="secondary-btn" id="previewBtn" type="button">
+                        Preview
+                    </button>
+                    <button
+                        class="primary-btn"
+                        id="resourceActionBtn"
+                        type="button"
+                    >
+                        Download
+                    </button>
+                </div>
+            </section>
 
-    <section class="related-section">
-        <h2>Related Resources</h2>
+            <section class="reviews-section">
+                <h2>Reviews</h2>
 
-        <div id="relatedResources" class="resource-grid"></div>
-    </section>
-</main>
+                <div id="reviewSummary"></div>
 
-<script type="module" src="../js/service/resource-details.js"></script>
-</body>
+                <form id="reviewForm" class="review-form">
+                    <label for="ratingSelect"> Rating </label>
+
+                    <select id="ratingSelect" required>
+                        <option value="">Select Rating</option>
+                        <option value="5">5 stars</option>
+                        <option value="4">4 stars</option>
+                        <option value="3">3 stars</option>
+                        <option value="2">2 stars</option>
+                        <option value="1">1 star</option>
+                    </select>
+
+                    <label for="reviewInput"> Review </label>
+
+                    <textarea
+                        id="reviewInput"
+                        rows="5"
+                        placeholder="Share your experience..."
+                        required
+                    ></textarea>
+
+                    <button type="submit" class="primary-btn">
+                        Submit Review
+                    </button>
+                </form>
+
+                <div id="reviewsList"></div>
+            </section>
+
+            <section class="comments-section">
+                <h2>Discussion</h2>
+
+                <form id="commentForm" class="comment-form">
+                    <textarea
+                        id="commentInput"
+                        placeholder="Ask a question or start a discussion..."
+                        rows="4"
+                        required
+                    ></textarea>
+
+                    <button class="primary-btn" type="submit">
+                        Post Comment
+                    </button>
+                </form>
+
+                <div id="commentsList"></div>
+            </section>
+
+            <section class="related-section">
+                <h2>Related Resources</h2>
+
+                <div id="relatedResources" class="resource-grid"></div>
+            </section>
+        </main>
+
+        <script
+            type="module"
+            src="../js/pages/resource-details-page.js?security=1"
+        ></script>
+        <script type="module" src="/src/main.js"></script>
+    </body>
 </html>

@@ -1,109 +1,130 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-<title>Upload Resource</title>
-<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="../css/base/reset.css">
-<link rel="stylesheet" href="../css/base/theme.css">
-<link rel="stylesheet" href="../css/components/navbar.css">
-<link rel="stylesheet" href="../css/components/buttons.css">
-<link rel="stylesheet" href="../css/components/toast.css">
-<link rel="stylesheet" href="../css/pages/upload.css">
-</head>
-<body>
+        <title>Upload Resource</title>
+        <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
+    </head>
+    <body data-page="upload">
+        <nav class="navbar">
+            <div class="logo">
+                <h2>StudentHub</h2>
+            </div>
 
-<nav class="navbar">
-    <div class="logo">
-        <h2>StudentHub</h2>
-    </div>
+            <ul class="nav-links">
+                <li><a href="../dashboard.html">Dashboard</a></li>
+                <li><a href="resources.html">Marketplace</a></li>
+                <li><a href="library.html">My Library</a></li>
+                <li><a href="messages.html">Messages</a></li>
+                <li><a href="achievements.html">Achievements</a></li>
+                <li><a href="leaderboard.html">Leaderboard</a></li>
+                <li><a href="upload.html">Upload</a></li>
+                <li><a href="documents.html">Documents</a></li>
+                <li><a href="profile.html">Profile</a></li>
+                <li>
+                    <button
+                        class="theme-toggle"
+                        type="button"
+                        data-theme-toggle
+                        aria-label="Switch to dark mode"
+                        title="Switch to dark mode"
+                    >
+                        Dark
+                    </button>
+                </li>
+            </ul>
+        </nav>
 
-    <ul class="nav-links">
-        <li><a href="../dashboard.html">Dashboard</a></li>
-        <li><a href="resources.html">Marketplace</a></li>
-        <li><a href="library.html">My Library</a></li>
-        <li><a href="achievements.html">🏆 Achievements</a></li>
-        <li><a href="leaderboard.html">🏅 Leaderboard</a></li>
-        <li><a href="upload.html">Upload</a></li>
-        <li><a href="documents.html">Documents</a></li>
-        <li><a href="profile.html">Profile</a></li>
-    </ul>
-</nav>
+        <main class="upload-page">
+            <section class="upload-header">
+                <p class="eyebrow">Share knowledge</p>
+                <h1>Upload Resource</h1>
+                <p>
+                    Add notes, guides, images, or ZIP packs for review. Approved
+                    resources will appear in the Marketplace.
+                </p>
+            </section>
 
-<main class="upload-page">
-    <section class="upload-header">
-        <p class="eyebrow">Share knowledge</p>
-        <h1>Upload Resource</h1>
-        <p>
-            Add notes, guides, images, or ZIP packs for review. Approved
-            resources will appear in the Marketplace.
-        </p>
-    </section>
+            <section class="upload-card">
+                <form id="resourceUploadForm">
+                    <label for="resourceTitle">Resource title</label>
+                    <input
+                        id="resourceTitle"
+                        type="text"
+                        placeholder="Example: Python beginner notes"
+                        required
+                    />
 
-    <section class="upload-card">
-        <form id="resourceUploadForm">
-            <label for="resourceTitle">Resource title</label>
-            <input
-                id="resourceTitle"
-                type="text"
-                placeholder="Example: Python beginner notes"
-                required
-            >
+                    <label for="resourceDescription">Description</label>
+                    <textarea
+                        id="resourceDescription"
+                        rows="5"
+                        placeholder="Briefly describe what students will learn"
+                        required
+                    ></textarea>
 
-            <label for="resourceDescription">Description</label>
-            <textarea
-                id="resourceDescription"
-                rows="5"
-                placeholder="Briefly describe what students will learn"
-                required
-            ></textarea>
+                    <label for="resourceCategory">Category</label>
+                    <select id="resourceCategory" required>
+                        <option value="">Select a category</option>
+                        <option value="Programming">Programming</option>
+                        <option value="Engineering">Engineering</option>
+                        <option value="Robotics">Robotics</option>
+                        <option value="Business">Business</option>
+                        <option value="Science">Science</option>
+                        <option value="Mathematics">Mathematics</option>
+                        <option value="Life Skills">Life Skills</option>
+                    </select>
 
-            <label for="resourceCategory">Category</label>
-            <select id="resourceCategory" required>
-                <option value="">Select a category</option>
-                <option value="Programming">Programming</option>
-                <option value="Engineering">Engineering</option>
-                <option value="Robotics">Robotics</option>
-                <option value="Business">Business</option>
-                <option value="Science">Science</option>
-                <option value="Mathematics">Mathematics</option>
-                <option value="Life Skills">Life Skills</option>
-            </select>
+                    <label for="resourcePrice">Price in rand</label>
+                    <input
+                        id="resourcePrice"
+                        type="number"
+                        min="0"
+                        step="1"
+                        value="0"
+                        required
+                    />
 
-            <label for="resourcePrice">Price in rand</label>
-            <input
-                id="resourcePrice"
-                type="number"
-                min="0"
-                step="1"
-                value="0"
-                required
-            >
+                    <label for="resourceFile">Resource file</label>
+                    <input
+                        id="resourceFile"
+                        type="file"
+                        accept=".jpg,.jpeg,.png,.webp,.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.zip"
+                        required
+                    />
 
-            <label for="resourceFile">Resource file</label>
-            <input
-                id="resourceFile"
-                type="file"
-                accept=".pdf,.jpg,.jpeg,.png,.zip,application/pdf,image/jpeg,image/png,application/zip"
-                required
-            >
+                    <p class="upload-help">
+                        Accepted files: PDF, images, Word, PowerPoint, Excel,
+                        and ZIP. Maximum size: 25 MB.
+                    </p>
 
-            <p class="upload-help">
-                Accepted files: PDF, JPG, PNG, and ZIP. Maximum size: 20MB.
-            </p>
+                    <button
+                        id="uploadResourceBtn"
+                        class="btn-primary"
+                        type="submit"
+                    >
+                        Upload Resource
+                    </button>
 
-            <button id="uploadResourceBtn" class="btn-primary" type="submit">
-                Upload Resource
-            </button>
+                    <p
+                        id="uploadMessage"
+                        class="form-message"
+                        role="status"
+                    ></p>
+                </form>
+            </section>
+        </main>
 
-            <p id="uploadMessage" class="form-message" role="status"></p>
-        </form>
-    </section>
-</main>
-
-<script type="module" src="../js/service/auth.js"></script>
-<script type="module" src="../js/service/resources.js"></script>
-</body>
+        <script
+            type="module"
+            src="../js/pages/auth-page.js?security=1"
+        ></script>
+        <script
+            type="module"
+            src="../js/pages/upload-page.js?security=1"
+        ></script>
+        <script type="module" src="/src/main.js"></script>
+    </body>
 </html>

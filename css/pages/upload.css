@@ -1,142 +1,146 @@
-body {
-    background: #f4f6f9;
-    color: var(--text-main);
-}
+/* Page-owned styles; isolated from other StudentHub screens. */
+@scope (body[data-page="upload"]) {
+    body {
+        background: var(--bg);
+        color: var(--text-main);
+    }
 
-.navbar {
-    max-width: none;
-    margin: 0;
-    padding: 15px 30px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 24px;
-    background: #003366;
-    color: white;
-}
-
-.navbar .logo h2 {
-    color: white;
-    font-size: 28px;
-    font-weight: 800;
-}
-
-.navbar .nav-links {
-    margin: 0;
-    padding: 0;
-    list-style: none;
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 24px;
-    flex-wrap: wrap;
-}
-
-.navbar .nav-links a {
-    color: white;
-    font-weight: 700;
-    text-decoration: none;
-}
-
-.navbar .nav-links a:hover {
-    color: #dbeafe;
-}
-
-.upload-page {
-    max-width: 760px;
-    margin: 0 auto;
-    padding: 34px 24px 72px;
-}
-
-.upload-header {
-    margin-bottom: 24px;
-}
-
-.eyebrow {
-    color: #28a745;
-    font-size: 13px;
-    font-weight: 800;
-    letter-spacing: 0;
-    text-transform: uppercase;
-    margin-bottom: 10px;
-}
-
-.upload-header h1 {
-    color: #003366;
-    font-size: 44px;
-    line-height: 1.05;
-    margin-bottom: 12px;
-}
-
-.upload-header p {
-    color: var(--text-muted);
-    font-size: 17px;
-    line-height: 1.6;
-}
-
-.upload-card {
-    background: white;
-    border: 1px solid rgba(148, 163, 184, 0.32);
-    border-radius: 8px;
-    padding: 28px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.10);
-}
-
-.upload-card label {
-    display: block;
-    color: #003366;
-    font-weight: 800;
-    margin-bottom: 8px;
-}
-
-.upload-card input,
-.upload-card textarea,
-.upload-card select {
-    width: 100%;
-    margin-bottom: 18px;
-    padding: 13px 15px;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    background: white;
-    font-size: 15px;
-}
-
-.upload-card input:focus,
-.upload-card textarea:focus,
-.upload-card select:focus {
-    border-color: #003366;
-    box-shadow: 0 0 0 4px rgba(0, 51, 102, 0.12);
-    outline: none;
-}
-
-.upload-help {
-    color: var(--text-muted);
-    font-size: 14px;
-    margin: -6px 0 20px;
-}
-
-#uploadResourceBtn {
-    border-radius: 6px;
-}
-
-.form-message {
-    min-height: 22px;
-    margin-top: 16px;
-    color: #003366;
-    font-weight: 700;
-}
-
-@media (max-width: 760px) {
     .navbar {
-        flex-direction: column;
+        max-width: none;
+        margin: 0;
+        padding: 15px 30px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 24px;
+        background: var(--blue);
+        color: white;
+    }
+
+    .navbar .logo h2 {
+        color: white;
+        font-size: 28px;
+        font-weight: 800;
     }
 
     .navbar .nav-links {
-        justify-content: center;
-        gap: 14px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 24px;
+        flex-wrap: wrap;
+    }
+
+    .navbar .nav-links a {
+        color: white;
+        font-weight: 700;
+        text-decoration: none;
+    }
+
+    .navbar .nav-links a:hover {
+        color: #dbeafe;
+    }
+
+    .upload-page {
+        max-width: 760px;
+        margin: 0 auto;
+        padding: 34px 24px 72px;
+    }
+
+    .upload-header {
+        margin-bottom: 24px;
+    }
+
+    .eyebrow {
+        color: #28a745;
+        font-size: 13px;
+        font-weight: 800;
+        letter-spacing: 0;
+        text-transform: uppercase;
+        margin-bottom: 10px;
     }
 
     .upload-header h1 {
-        font-size: 36px;
+        color: var(--navy);
+        font-size: 44px;
+        line-height: 1.05;
+        margin-bottom: 12px;
+    }
+
+    .upload-header p {
+        color: var(--text-muted);
+        font-size: 17px;
+        line-height: 1.6;
+    }
+
+    .upload-card {
+        background: var(--white);
+        border: 1px solid rgba(148, 163, 184, 0.32);
+        border-radius: 8px;
+        padding: 28px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .upload-card label {
+        display: block;
+        color: var(--navy);
+        font-weight: 800;
+        margin-bottom: 8px;
+    }
+
+    .upload-card input,
+    .upload-card textarea,
+    .upload-card select {
+        width: 100%;
+        margin-bottom: 18px;
+        padding: 13px 15px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        background: var(--white);
+        font-size: 15px;
+    }
+
+    .upload-card input:focus,
+    .upload-card textarea:focus,
+    .upload-card select:focus {
+        border-color: var(--navy);
+        box-shadow: 0 0 0 4px rgba(0, 51, 102, 0.12);
+        outline: 2px solid transparent;
+        outline-offset: 2px;
+    }
+
+    .upload-help {
+        color: var(--text-muted);
+        font-size: 14px;
+        margin: -6px 0 20px;
+    }
+
+    #uploadResourceBtn {
+        border-radius: 6px;
+    }
+
+    .form-message {
+        min-height: 22px;
+        margin-top: 16px;
+        color: var(--navy);
+        font-weight: 700;
+    }
+
+    @media (max-width: 760px) {
+        .navbar {
+            flex-direction: column;
+        }
+
+        .navbar .nav-links {
+            justify-content: center;
+            gap: 14px;
+        }
+
+        .upload-header h1 {
+            font-size: 36px;
+        }
     }
 }

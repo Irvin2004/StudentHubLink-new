@@ -1,0 +1,23 @@
+:root,
+[data-theme="light"] {
+    color-scheme: light;
+    --background: var(--color-slate-50);
+    --surface: var(--color-white);
+    --surface-muted: var(--color-slate-100);
+    --text-primary: var(--color-slate-900);
+    --text-secondary: var(--color-slate-500);
+    --primary: var(--color-blue-600);
+    --primary-hover: var(--color-blue-700);
+    --primary-soft: var(--color-blue-100);
+    --success: var(--color-green-600);
+    --warning: var(--color-amber-600);
+    --danger: var(--color-red-600);
+    --border: var(--color-slate-200);
+    --on-primary: var(--color-white);
+    --overlay: rgb(2 6 23 / 0.58);
+    --navy: var(--color-slate-900);
+    --focus-ring: var(--color-blue-700);
+    --shadow-color-sm: rgb(15 23 42 / 0.06);
+    --shadow-color: rgb(15 23 42 / 0.09);
+    --shadow-color-lg: rgb(15 23 42 / 0.14);
+}

@@ -1,0 +1,54 @@
+.page {
+    min-height: 100vh;
+    display: grid;
+    max-width: 42rem;
+    margin-inline: auto;
+    place-content: center;
+    justify-items: start;
+    gap: var(--space-4);
+    padding: var(--space-8);
+}
+
+.page > span {
+    display: grid;
+    width: 3rem;
+    height: 3rem;
+    place-items: center;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--danger) 15%, transparent);
+    color: var(--danger);
+    font-size: 1.5rem;
+    font-weight: 800;
+}
+
+.page p {
+    color: var(--text-secondary);
+}
+
+.page div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+}
+
+.page button,
+.page a {
+    min-height: 2.75rem;
+    display: inline-flex;
+    align-items: center;
+    padding: 0 var(--space-4);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface);
+    color: var(--text);
+    font: inherit;
+    font-weight: 750;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.page button {
+    border-color: var(--primary);
+    background: var(--primary);
+    color: white;
+}

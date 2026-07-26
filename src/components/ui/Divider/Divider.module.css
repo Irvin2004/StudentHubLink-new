@@ -1,0 +1,41 @@
+.divider {
+    border-color: var(--border);
+    color: var(--text-secondary);
+}
+
+.horizontal {
+    width: 100%;
+    border-top-width: 1px;
+    border-top-style: solid;
+}
+
+.vertical {
+    min-height: 1.5rem;
+    align-self: stretch;
+    border-left-width: 1px;
+    border-left-style: solid;
+}
+
+.dashed {
+    border-style: dashed;
+}
+
+.dotted {
+    border-style: dotted;
+}
+
+.labelled {
+    display: flex;
+    align-items: center;
+    border: 0;
+    gap: var(--space-3);
+    font-size: 0.78rem;
+}
+
+.labelled::before,
+.labelled::after {
+    height: 1px;
+    flex: 1;
+    background: var(--border);
+    content: "";
+}

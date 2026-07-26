@@ -1,0 +1,258 @@
+/* Page-owned styles; isolated from other StudentHub screens. */
+@scope (body[data-page="messages"]) {
+    .messages-page {
+        min-height: calc(100vh - 72px);
+        padding: 48px 32px;
+        background: var(--bg);
+    }
+
+    .messages-panel {
+        max-width: 850px;
+        margin: auto;
+    }
+
+    .messages-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: end;
+        gap: 20px;
+        margin-bottom: 28px;
+    }
+
+    .messages-header h1 {
+        margin: 4px 0 8px;
+        font-size: clamp(2rem, 5vw, 3rem);
+        line-height: 1.05;
+    }
+
+    .messages-header p {
+        color: var(--text-muted);
+    }
+
+    .messages-eyebrow {
+        color: var(--blue) !important;
+        font-size: 0.75rem;
+        font-weight: 800;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+    }
+
+    .conversation-search {
+        width: min(320px, 100%);
+    }
+
+    .conversation-search input {
+        padding: 13px 16px;
+        border-radius: var(--radius-md);
+    }
+
+    .conversation-list {
+        display: grid;
+        gap: 12px;
+    }
+
+    .conversation-view-tabs {
+        display: flex;
+        gap: var(--space-2);
+        margin-bottom: var(--space-4);
+        border-bottom: 1px solid var(--border);
+    }
+
+    .conversation-view-tabs button {
+        position: relative;
+        padding: var(--space-3) var(--space-4);
+        border: 0;
+        background: transparent;
+        color: var(--text-muted);
+        cursor: pointer;
+        font: inherit;
+        font-weight: 700;
+    }
+
+    .conversation-view-tabs button[aria-selected="true"] {
+        color: var(--blue);
+    }
+
+    .conversation-view-tabs button[aria-selected="true"]::after {
+        position: absolute;
+        right: 0;
+        bottom: -1px;
+        left: 0;
+        height: 3px;
+        border-radius: 3px 3px 0 0;
+        background: var(--blue);
+        content: "";
+    }
+
+    .conversation-view-tabs button:focus-visible {
+        border-radius: var(--radius-sm);
+        outline: 2px solid var(--blue);
+        outline-offset: 2px;
+    }
+
+    .conversation-item {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 18px;
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        color: var(--text-main);
+        text-decoration: none;
+        transition: 0.2s ease;
+    }
+
+    .conversation-item:hover,
+    .conversation-item:focus-visible {
+        transform: translateY(-2px);
+        border-color: var(--blue);
+        box-shadow: var(--shadow);
+    }
+
+    .conversation-item:focus-visible {
+        outline: 3px solid color-mix(in srgb, var(--blue) 28%, transparent);
+        outline-offset: 2px;
+    }
+
+    .conversation-avatar {
+        position: relative;
+        width: 52px;
+        height: 52px;
+        flex-shrink: 0;
+        display: grid;
+        place-items: center;
+        border-radius: 50%;
+        background: var(--blue);
+        color: white;
+        font-size: 20px;
+        font-weight: 700;
+    }
+
+    .online-dot {
+        position: absolute;
+        right: 2px;
+        bottom: 2px;
+        width: 12px;
+        height: 12px;
+        background: var(--success);
+        border: 2px solid var(--white);
+        border-radius: 50%;
+    }
+
+    .conversation-content {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .conversation-top,
+    .conversation-bottom {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+    }
+
+    .conversation-top h3,
+    .conversation-bottom p {
+        margin: 0;
+    }
+
+    .conversation-top small {
+        flex-shrink: 0;
+        color: var(--text-muted);
+    }
+
+    .conversation-bottom {
+        margin-top: 6px;
+    }
+
+    .conversation-bottom p {
+        color: var(--text-muted);
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    }
+
+    .unread-badge {
+        min-width: 24px;
+        height: 24px;
+        padding: 0 7px;
+        flex-shrink: 0;
+        display: grid;
+        place-items: center;
+        border-radius: 999px;
+        background: var(--blue);
+        color: white;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .conversation-loading,
+    .empty-state {
+        padding: 48px 24px;
+        text-align: center;
+        color: var(--text-muted);
+        background: var(--white);
+        border: 1px dashed var(--border);
+        border-radius: var(--radius-lg);
+    }
+
+    .empty-icon {
+        margin-bottom: 12px;
+        font-size: 2rem;
+    }
+
+    .empty-state h2 {
+        margin-bottom: 8px;
+        color: var(--text-main);
+    }
+
+    .visually-hidden {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+    }
+
+    .nav-links a[aria-current="page"] {
+        color: var(--blue);
+    }
+
+    @media (max-width: 700px) {
+        .messages-page {
+            padding: 32px 14px;
+        }
+
+        .messages-header {
+            align-items: stretch;
+            flex-direction: column;
+        }
+
+        .conversation-search {
+            width: 100%;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .conversation-item {
+            gap: 12px;
+            padding: 15px;
+            border-radius: var(--radius-md);
+        }
+
+        .conversation-avatar {
+            width: 44px;
+            height: 44px;
+        }
+
+        .conversation-top {
+            align-items: start;
+        }
+    }
+}

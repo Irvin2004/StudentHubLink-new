@@ -1,0 +1,16 @@
+.form {
+    display: grid;
+    gap: var(--space-6);
+}
+
+.spacer {
+    flex: 1;
+}
+
+.formError {
+    padding: var(--space-3);
+    border-radius: var(--radius-sm);
+    background: color-mix(in srgb, var(--danger) 10%, transparent);
+    color: var(--danger);
+    font-size: 0.875rem;
+}

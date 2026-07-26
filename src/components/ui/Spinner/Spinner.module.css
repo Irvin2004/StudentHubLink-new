@@ -1,0 +1,36 @@
+.spinner {
+    display: inline-block;
+    flex: 0 0 auto;
+    border: 2px solid color-mix(in srgb, currentColor 28%, transparent);
+    border-top-color: currentColor;
+    border-radius: var(--radius-pill);
+    animation: spin 700ms linear infinite;
+}
+
+.small {
+    width: var(--space-4);
+    height: var(--space-4);
+}
+
+.medium {
+    width: var(--space-6);
+    height: var(--space-6);
+}
+
+.large {
+    width: var(--space-8);
+    height: var(--space-8);
+    border-width: 3px;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .spinner {
+        animation-duration: 1.4s;
+    }
+}

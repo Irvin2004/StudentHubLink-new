@@ -1,0 +1,7 @@
+/*
+ * Compatibility entry point for the StudentHub token system.
+ * Keep this path stable while stylesheets migrate to theme terminology.
+ */
+@import url("../themes/theme-tokens.css");
+@import url("../themes/light.css");
+@import url("../themes/dark.css");

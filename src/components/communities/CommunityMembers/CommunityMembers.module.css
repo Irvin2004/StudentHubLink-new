@@ -1,0 +1,48 @@
+.heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-md);
+}
+
+.heading h3 {
+    font-size: 1.1rem;
+}
+
+.heading span {
+    color: var(--text-secondary);
+}
+
+.list {
+    display: grid;
+    gap: var(--spacing-xs);
+}
+
+.member {
+    min-height: 3.75rem;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--spacing-md);
+    padding: var(--spacing-sm);
+    border-radius: var(--radius-md);
+}
+
+.member:hover {
+    background: var(--surface-muted);
+}
+
+.member strong,
+.member span {
+    display: block;
+}
+
+.member div > span {
+    margin-top: var(--spacing-xs);
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+}
+
+.member > span:last-child {
+    text-transform: capitalize;
+}

@@ -1,0 +1,290 @@
+import {
+    addDoc,
+    collection,
+    getDocs,
+    limit,
+    query,
+    serverTimestamp,
+    where
+} from "firebase/firestore";
+
+import { onAuthStateChanged } from "firebase/auth";
+
+import { auth } from "../../src/firebase/auth.js";
+import { db } from "../../src/firebase/firestore.js";
+import { createResourceCard } from "../components/resource-card.js";
+import { getResourceActionLabel, RESOURCE_ACTION } from "../utils/constants.js";
+import { getTimestampMillis } from "../utils/format-date.js";
+import { hideSkeleton, showSkeleton } from "../renderers/skeleton-renderer.js";
+import { SKELETON_TYPES } from "../config/skeleton-types.js";
+import { error as logError, warn } from "../utils/logger.js";
+import { debounce } from "../utils/debounce.js";
+import { createEmptyState } from "../components/empty-state.js?refinement=1";
+
+const LIBRARY_COLLECTION = "libraries";
+const SEARCH_DELAY = 200;
+
+const libraryState = {
+    resources: [],
+    search: "",
+    category: "All",
+    sort: "recent"
+};
+
+export async function addToLibrary(resource, user, action) {
+    if (!resource || !user) {
+        return null;
+    }
+
+    const resourceId = resource.id || resource.resourceId || resource.title;
+
+    if (!resourceId) {
+        warn("FIRESTORE", "Library item skipped: missing resource id.");
+        return null;
+    }
+
+    const existingLibraryItemQuery = query(
+        collection(db, LIBRARY_COLLECTION),
+        where("userId", "==", user.uid),
+        where("resourceId", "==", resourceId),
+        limit(1)
+    );
+
+    const existingLibraryItem = await getDocs(existingLibraryItemQuery);
+
+    if (!existingLibraryItem.empty) {
+        return null;
+    }
+
+    const libraryItemRef = await addDoc(collection(db, LIBRARY_COLLECTION), {
+        userId: user.uid,
+        resourceId,
+        resourceTitle: resource.title || "Untitled Resource",
+        title: resource.title || "Untitled Resource",
+        description: resource.description || "",
+        category: resource.category || "Uncategorized",
+        ownerId: resource.ownerId || "",
+        ownerName: resource.ownerName || "Unknown Author",
+        price: Number(resource.price) || 0,
+        action,
+        type: action,
+        fileUrl: resource.fileUrl || "",
+        downloadUrl: resource.downloadUrl || "",
+        createdAt: resource.createdAt || null,
+        addedAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+    });
+
+    return libraryItemRef.id;
+}
+
+async function getUserLibrary(userId) {
+    if (!userId) {
+        return [];
+    }
+
+    const libraryQuery = query(
+        collection(db, LIBRARY_COLLECTION),
+        where("userId", "==", userId)
+    );
+
+    const snapshot = await getDocs(libraryQuery);
+
+    return snapshot.docs
+        .map((libraryDoc) => ({
+            id: libraryDoc.id,
+            ...libraryDoc.data()
+        }))
+        .sort(
+            (firstResource, secondResource) =>
+                getTimestampMillis(secondResource.addedAt) -
+                getTimestampMillis(firstResource.addedAt)
+        );
+}
+
+function renderLibrary(resources) {
+    const libraryGrid = document.getElementById("libraryGrid");
+
+    if (!libraryGrid) return;
+
+    const count = document.getElementById("libraryCount");
+
+    if (count) {
+        count.textContent = resources.length;
+    }
+
+    if (!resources.length) {
+        const filtering = Boolean(
+            libraryState.search || libraryState.category !== "All"
+        );
+
+        libraryGrid.innerHTML = createEmptyState({
+            icon: "&#128218;",
+            title: filtering ? "No library results" : "Your library is empty",
+            message: filtering
+                ? "Try another search term or category."
+                : "Download or purchase a resource to see it here."
+        });
+
+        return;
+    }
+
+    libraryGrid.innerHTML = resources
+        .map((resource) =>
+            createResourceCard(resource, {
+                actions: "library",
+                showDate: false,
+                showDetails: false,
+                showDownloadCount: false,
+                showMeta: false,
+                showOwner: true,
+                showPrice: false,
+                statusLabel: getResourceActionLabel(
+                    resource.type || resource.action || RESOURCE_ACTION.DOWNLOAD
+                )
+            })
+        )
+        .join("");
+}
+
+function updateLibrary() {
+    let resources = [...libraryState.resources];
+
+    if (libraryState.search) {
+        const search = libraryState.search.toLowerCase().trim();
+
+        resources = resources.filter(
+            (resource) =>
+                (resource.title || resource.resourceTitle || "")
+                    .toLowerCase()
+                    .includes(search) ||
+                (resource.description || "").toLowerCase().includes(search) ||
+                (resource.category || "").toLowerCase().includes(search) ||
+                (resource.ownerName || "").toLowerCase().includes(search)
+        );
+    }
+
+    if (libraryState.category !== "All") {
+        resources = resources.filter(
+            (resource) => resource.category === libraryState.category
+        );
+    }
+
+    switch (libraryState.sort) {
+        case "oldest":
+            resources.sort(
+                (firstResource, secondResource) =>
+                    getTimestampMillis(firstResource.addedAt) -
+                    getTimestampMillis(secondResource.addedAt)
+            );
+            break;
+
+        case "title":
+            resources.sort((firstResource, secondResource) =>
+                String(
+                    firstResource.title || firstResource.resourceTitle || ""
+                ).localeCompare(
+                    String(
+                        secondResource.title ||
+                            secondResource.resourceTitle ||
+                            ""
+                    )
+                )
+            );
+            break;
+
+        case "recent":
+        default:
+            resources.sort(
+                (firstResource, secondResource) =>
+                    getTimestampMillis(secondResource.addedAt) -
+                    getTimestampMillis(firstResource.addedAt)
+            );
+            break;
+    }
+
+    renderLibrary(resources);
+}
+
+function bindLibraryControls() {
+    const searchInput = document.getElementById("librarySearch");
+
+    if (searchInput) {
+        const scheduleSearch = debounce((value) => {
+            libraryState.search = value;
+
+            updateLibrary();
+        }, SEARCH_DELAY);
+
+        searchInput.addEventListener("input", (event) => {
+            scheduleSearch(event.target.value);
+        });
+        window.addEventListener(
+            "pagehide",
+            () => {
+                scheduleSearch.cancel();
+            },
+            { once: true }
+        );
+    }
+
+    const sortSelect = document.getElementById("librarySort");
+
+    if (sortSelect) {
+        sortSelect.addEventListener("change", (event) => {
+            libraryState.sort = event.target.value;
+
+            updateLibrary();
+        });
+    }
+
+    document.querySelectorAll(".library-filter").forEach((button) => {
+        button.addEventListener("click", () => {
+            document
+                .querySelectorAll(".library-filter")
+                .forEach((filterButton) =>
+                    filterButton.classList.remove("active")
+                );
+
+            button.classList.add("active");
+
+            libraryState.category = button.dataset.category || "All";
+
+            updateLibrary();
+        });
+    });
+}
+
+function loadLibraryPage() {
+    const libraryGrid = document.getElementById("libraryGrid");
+
+    if (!libraryGrid) {
+        return;
+    }
+
+    bindLibraryControls();
+
+    showSkeleton(libraryGrid, SKELETON_TYPES.FILE);
+
+    onAuthStateChanged(auth, async (user) => {
+        if (!user) return;
+
+        try {
+            libraryState.resources = await getUserLibrary(user.uid);
+
+            hideSkeleton(libraryGrid);
+            updateLibrary();
+        } catch (error) {
+            logError("FIRESTORE", "Library load failed:", error);
+
+            libraryGrid.innerHTML = `
+                <div class="empty-state">
+                    <h2>Could not load your library</h2>
+                    <p>Please try again.</p>
+                </div>
+            `;
+        }
+    });
+}
+
+loadLibraryPage();

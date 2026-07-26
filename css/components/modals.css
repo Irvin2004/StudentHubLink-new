@@ -1,0 +1,172 @@
+.modal,
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: grid;
+    place-items: center;
+    padding: var(--space-4);
+    background: rgb(15 23 42 / 0.58);
+    animation: fade-in 180ms ease both;
+}
+.modal[hidden],
+.modal-overlay[hidden] {
+    display: none;
+}
+.modal-content,
+.modal-card {
+    width: min(100%, 520px);
+    max-height: min(86vh, 720px);
+    overflow: auto;
+    padding: var(--space-6);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    box-shadow: var(--shadow-lg);
+    animation: slide-up 220ms ease both;
+}
+.modal-header,
+.modal-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+}
+.modal-header {
+    margin-bottom: var(--space-4);
+}
+.modal-actions {
+    justify-content: flex-end;
+    margin-top: var(--space-6);
+}
+
+body.modal-open {
+    overflow: hidden;
+}
+
+.modal-body {
+    display: grid;
+    gap: var(--space-4);
+}
+
+.modal-header h2 {
+    margin: 0;
+}
+
+.modal-close {
+    display: grid;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    place-items: center;
+    background: transparent;
+    color: var(--text-secondary);
+    font: inherit;
+    font-size: 1.6rem;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.modal-close:hover {
+    background: var(--surface-muted);
+    color: var(--text-primary);
+}
+
+.modal-close:focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--primary) 25%, transparent);
+}
+.leave-group-card {
+    width: min(100%, 460px);
+}
+
+.leave-group-card h2 {
+    margin: 0;
+    color: var(--text-primary);
+}
+
+.leave-group-card > p {
+    margin: 0;
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+#createGroupForm {
+    display: grid;
+    gap: var(--space-2);
+    margin-top: var(--space-5);
+}
+
+#createGroupForm label {
+    margin-top: var(--space-2);
+    color: var(--text-primary);
+    font-size: 0.875rem;
+    font-weight: 700;
+}
+
+#createGroupForm input,
+#createGroupForm textarea,
+#createGroupForm select {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface);
+    color: var(--text-primary);
+    font: inherit;
+}
+
+#createGroupForm textarea {
+    resize: vertical;
+}
+
+#createGroupForm input:focus,
+#createGroupForm textarea:focus,
+#createGroupForm select:focus {
+    border-color: var(--primary);
+    outline: 3px solid color-mix(in srgb, var(--primary) 18%, transparent);
+}
+
+.delete-message-card {
+    width: min(100%, 460px);
+}
+
+.delete-message-card h2 {
+    margin: 0;
+}
+
+.delete-message-options {
+    display: grid;
+    gap: var(--space-3);
+    padding: 0;
+    border: 0;
+}
+
+.delete-message-options label {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    padding: var(--space-3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+}
+
+.delete-message-options label:has(input:checked) {
+    border-color: var(--primary);
+    background: var(--primary-soft);
+}
+
+.delete-message-options input {
+    margin-top: 3px;
+    accent-color: var(--primary);
+}
+
+.delete-message-options span {
+    display: grid;
+    gap: var(--space-1);
+}
+
+.delete-message-options small {
+    color: var(--text-secondary);
+}

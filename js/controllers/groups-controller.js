@@ -1,0 +1,264 @@
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "../../src/firebase/auth.js";
+
+import { createGroupCard } from "../components/group-card.js";
+import { openLeaveGroupDialog } from "../components/leave-group-dialog.js";
+import { createEmptyState } from "../components/empty-state.js?refinement=1";
+import { SKELETON_TYPES } from "../config/skeleton-types.js";
+import { hideSkeleton, showSkeleton } from "../renderers/skeleton-renderer.js";
+import {
+    getStudyGroupMemberships,
+    getStudyGroups,
+    joinStudyGroup,
+    leaveStudyGroup
+} from "../services/group-service.js?security=1";
+import { handleError, showToast } from "../services/user-feedback-service.js";
+import { debounce } from "../utils/debounce.js";
+import { appendNodes } from "../utils/dom-batch.js";
+
+const SEARCH_DELAY = 200;
+
+const groupList = document.getElementById("groupList");
+
+const searchInput = document.getElementById("groupSearch");
+
+const moduleFilter = document.getElementById("moduleFilter");
+
+const resultCount = document.getElementById("groupResultCount");
+
+let currentUser = null;
+let groups = [];
+let joinedGroupIds = new Set();
+
+function populateModuleFilter(items) {
+    if (!moduleFilter) {
+        return;
+    }
+
+    const modules = Array.from(
+        new Set(items.map((group) => group.moduleName?.trim()).filter(Boolean))
+    ).sort((firstModule, secondModule) =>
+        firstModule.localeCompare(secondModule)
+    );
+
+    moduleFilter.innerHTML = '<option value="">All subjects</option>';
+
+    const options = modules.map((moduleName) => {
+        const option = document.createElement("option");
+        option.value = moduleName.toLowerCase();
+        option.textContent = moduleName;
+        return option;
+    });
+
+    appendNodes(moduleFilter, options);
+}
+
+function matchesSearch(group, term) {
+    if (!term) {
+        return true;
+    }
+
+    const searchableValues = [
+        group.name,
+        group.moduleName,
+        group.moduleCode,
+        ...(group.tags || [])
+    ];
+
+    return searchableValues.some((value) =>
+        String(value || "")
+            .toLowerCase()
+            .includes(term)
+    );
+}
+
+function renderGroups(items) {
+    if (!groupList) {
+        return;
+    }
+
+    if (groupList.querySelector("[data-skeleton-root]")) {
+        hideSkeleton(groupList);
+    }
+
+    if (resultCount) {
+        resultCount.textContent = `${items.length} ${items.length === 1 ? "group" : "groups"}`;
+    }
+
+    groupList.setAttribute("aria-busy", "false");
+
+    if (!items.length) {
+        const filtering = Boolean(
+            searchInput?.value.trim() || moduleFilter?.value
+        );
+
+        groupList.innerHTML = createEmptyState({
+            title: filtering
+                ? "No matching study groups"
+                : "No study groups yet",
+            message: filtering
+                ? "Try another search term or subject filter."
+                : "Create or join a group to start studying together.",
+            icon: "&#128218;"
+        });
+        return;
+    }
+
+    groupList.innerHTML = items
+        .map((group) =>
+            createGroupCard(group, {
+                joined: joinedGroupIds.has(group.id),
+                owner: group.ownerId === currentUser?.uid
+            })
+        )
+        .join("");
+}
+
+function applyFilters() {
+    const term = searchInput?.value.trim().toLowerCase() || "";
+
+    const selectedModule = moduleFilter?.value || "";
+
+    const filteredGroups = groups.filter((group) => {
+        const matchesModule =
+            !selectedModule ||
+            group.moduleName?.toLowerCase() === selectedModule;
+
+        return matchesModule && matchesSearch(group, term);
+    });
+
+    renderGroups(filteredGroups);
+}
+
+async function loadGroups(user) {
+    if (groupList) {
+        showSkeleton(groupList, SKELETON_TYPES.COMMUNITY);
+    }
+
+    try {
+        groups = await getStudyGroups();
+
+        joinedGroupIds = await getStudyGroupMemberships(
+            groups.map((group) => group.id),
+            user.uid
+        );
+
+        populateModuleFilter(groups);
+        applyFilters();
+    } catch (error) {
+        handleError(error, "Unable to load study groups.");
+
+        if (groupList) {
+            if (groupList.querySelector("[data-skeleton-root]")) {
+                hideSkeleton(groupList);
+            }
+            groupList.innerHTML = createEmptyState(
+                "Study groups are unavailable",
+                "Please try again in a moment.",
+                "&#9888;"
+            );
+        }
+    }
+}
+
+const scheduleGroupFilter = debounce(applyFilters, SEARCH_DELAY);
+
+searchInput?.addEventListener("input", scheduleGroupFilter);
+moduleFilter?.addEventListener("change", applyFilters);
+
+groupList?.addEventListener("click", async (event) => {
+    const button = event.target.closest(
+        '[data-action="toggle-group-membership"]'
+    );
+
+    if (!button || !currentUser || button.disabled) {
+        return;
+    }
+
+    const groupId = button.dataset.groupId;
+    const group = groups.find((item) => item.id === groupId);
+
+    if (!group) {
+        return;
+    }
+
+    const joined = joinedGroupIds.has(groupId);
+
+    if (joined) {
+        button.disabled = true;
+
+        const confirmed = await openLeaveGroupDialog(group.name);
+
+        if (!confirmed) {
+            button.disabled = false;
+            return;
+        }
+
+        button.textContent = "Leaving...";
+
+        try {
+            const left = await leaveStudyGroup({
+                groupId,
+                userId: currentUser.uid
+            });
+
+            joinedGroupIds.delete(groupId);
+
+            if (left) {
+                group.memberCount = Math.max(
+                    1,
+                    Number(group.memberCount || 1) - 1
+                );
+            }
+
+            showToast(`You left ${group.name}.`, "success");
+        } catch (error) {
+            handleError(error, "Unable to leave this group.");
+        } finally {
+            applyFilters();
+        }
+
+        return;
+    }
+
+    button.disabled = true;
+    button.textContent = "Joining...";
+
+    try {
+        const membershipCreated = await joinStudyGroup({
+            groupId,
+            user: currentUser
+        });
+
+        joinedGroupIds.add(groupId);
+
+        if (membershipCreated) {
+            group.memberCount = Number(group.memberCount || 0) + 1;
+        }
+
+        showToast(
+            membershipCreated
+                ? `You joined ${group.name}.`
+                : `You are already a member of ${group.name}.`,
+            "success"
+        );
+    } catch (error) {
+        handleError(error, "Unable to join this group.");
+    } finally {
+        applyFilters();
+    }
+});
+
+onAuthStateChanged(auth, (user) => {
+    if (!user) {
+        window.location.href = "../login.html";
+        return;
+    }
+
+    currentUser = user;
+    loadGroups(user);
+});
+
+window.addEventListener("pagehide", (event) => {
+    if (!event.persisted) scheduleGroupFilter.cancel();
+});
