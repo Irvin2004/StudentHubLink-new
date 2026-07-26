@@ -51,6 +51,13 @@ service cloud.firestore {
         ).data.role in ["owner", "admin"];
     }
 
+    function isCommunityModerator(communityId) {
+      return isCommunityMember(communityId)
+        && get(
+          /databases/$(database)/documents/communities/$(communityId)/members/$(request.auth.uid)
+        ).data.role in ["owner", "admin", "moderator"];
+    }
+
     function unchanged(field) {
       return !(field in request.resource.data)
         || request.resource.data[field] == resource.data[field];
@@ -738,10 +745,31 @@ service cloud.firestore {
       allow update: if signedIn()
         && request.resource.data.ownerId == resource.data.ownerId
         && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.updatedAt == request.time
         && (
           isCommunityManager(communityId)
-          || request.resource.data.diff(resource.data).affectedKeys()
-            .hasOnly(["memberCount", "updatedAt"])
+          || (
+            request.resource.data.diff(resource.data).affectedKeys()
+              .hasOnly(["memberCount", "updatedAt"])
+            && (
+              (
+                !isCommunityMember(communityId)
+                && existsAfter(
+                  /databases/$(database)/documents/communities/$(communityId)/members/$(request.auth.uid)
+                )
+                && request.resource.data.memberCount
+                  == resource.data.memberCount + 1
+              )
+              || (
+                isCommunityMember(communityId)
+                && !existsAfter(
+                  /databases/$(database)/documents/communities/$(communityId)/members/$(request.auth.uid)
+                )
+                && request.resource.data.memberCount
+                  == resource.data.memberCount - 1
+              )
+            )
+          )
         );
       allow delete: if signedIn()
         && resource.data.ownerId == request.auth.uid;
@@ -759,10 +787,43 @@ service cloud.firestore {
             "owner", "admin", "moderator", "member"
           ]
           && (
-            userId == request.auth.uid
-            || isCommunityManagerAfter(communityId)
+            (
+              userId == request.auth.uid
+              && request.resource.data.role == "member"
+            )
+            || (
+              getAfter(
+                /databases/$(database)/documents/communities/$(communityId)
+              ).data.ownerId == userId
+              && request.resource.data.role == "owner"
+            )
+            || (
+              isCommunityManagerAfter(communityId)
+              && request.resource.data.role in [
+                "admin", "moderator", "member"
+              ]
+            )
           );
-        allow update, delete: if signedIn()
+        allow update: if signedIn()
+          && request.resource.data.userId == resource.data.userId
+          && request.resource.data.communityId == resource.data.communityId
+          && request.resource.data.joinedAt == resource.data.joinedAt
+          && (
+            (
+              userId == request.auth.uid
+              && request.resource.data.diff(resource.data).affectedKeys()
+                .hasOnly(["nickname"])
+            )
+            || (
+              isCommunityManager(communityId)
+              && resource.data.role != "owner"
+              && request.resource.data.role in [
+                "admin", "moderator", "member"
+              ]
+            )
+          );
+        allow delete: if signedIn()
+          && resource.data.role != "owner"
           && (
             userId == request.auth.uid
             || isCommunityManager(communityId)
@@ -811,6 +872,8 @@ service cloud.firestore {
               "edited",
               "deleted",
               "deletedAt",
+              "pinnedAt",
+              "pinnedBy",
               "readBy",
               "createdAt",
               "updatedAt"
@@ -837,6 +900,8 @@ service cloud.firestore {
             && request.resource.data.edited == false
             && request.resource.data.deleted == false
             && request.resource.data.deletedAt == null
+            && request.resource.data.pinnedAt == null
+            && request.resource.data.pinnedBy == null
             && request.resource.data.readBy == [request.auth.uid]
             && request.resource.data.createdAt == request.time
             && request.resource.data.updatedAt == request.time
@@ -849,24 +914,71 @@ service cloud.firestore {
           allow update: if isCommunityMember(communityId)
             && request.resource.data.channelId == resource.data.channelId
             && request.resource.data.senderId == resource.data.senderId
+            && request.resource.data.senderName == resource.data.senderName
+            && request.resource.data.senderPhotoURL
+              == resource.data.senderPhotoURL
+            && request.resource.data.replyTo == resource.data.replyTo
+            && request.resource.data.type == resource.data.type
+            && request.resource.data.readBy == resource.data.readBy
             && request.resource.data.createdAt == resource.data.createdAt
             && request.resource.data.updatedAt == request.time
             && (
-              isCommunityManager(communityId)
-              || (
+              (
                 resource.data.senderId == request.auth.uid
+                && resource.data.deleted == false
+                && request.resource.data.deleted == false
+                && request.resource.data.diff(resource.data).affectedKeys()
+                  .hasOnly([
+                    "text",
+                    "edited",
+                    "updatedAt"
+                  ])
+                && request.resource.data.text is string
+                && request.resource.data.text.size() > 0
+                && request.resource.data.text.size() <= 2000
+                && request.resource.data.edited == true
+              )
+              || (
+                (
+                  resource.data.senderId == request.auth.uid
+                  || isCommunityModerator(communityId)
+                )
+                && resource.data.deleted == false
                 && request.resource.data.diff(resource.data).affectedKeys()
                   .hasOnly([
                     "text",
                     "attachments",
-                    "edited",
                     "deleted",
                     "deletedAt",
                     "updatedAt"
                   ])
+                && request.resource.data.text == ""
+                && request.resource.data.attachments == []
+                && request.resource.data.deleted == true
+                && request.resource.data.deletedAt == request.time
               )
-              || request.resource.data.diff(resource.data).affectedKeys()
-                .hasOnly(["reactions", "updatedAt"])
+              || (
+                resource.data.deleted == false
+                && request.resource.data.diff(resource.data).affectedKeys()
+                  .hasOnly(["reactions", "updatedAt"])
+                && request.resource.data.reactions is map
+              )
+              || (
+                isCommunityModerator(communityId)
+                && resource.data.deleted == false
+                && request.resource.data.diff(resource.data).affectedKeys()
+                  .hasOnly(["pinnedAt", "pinnedBy", "updatedAt"])
+                && (
+                  (
+                    request.resource.data.pinnedAt == request.time
+                    && request.resource.data.pinnedBy == request.auth.uid
+                  )
+                  || (
+                    request.resource.data.pinnedAt == null
+                    && request.resource.data.pinnedBy == null
+                  )
+                )
+              )
             );
           allow delete: if isCommunityManager(communityId);
         }
@@ -876,6 +988,8 @@ service cloud.firestore {
           allow create: if isCommunityMember(communityId)
             && request.resource.data.keys().hasOnly([
               "name",
+              "filename",
+              "normalizedFilename",
               "originalName",
               "extension",
               "size",
@@ -887,7 +1001,8 @@ service cloud.firestore {
               "uploadedAt",
               "communityId",
               "channelId",
-              "messageId"
+              "messageId",
+              "tags"
             ])
             && request.resource.data.communityId == communityId
             && request.resource.data.channelId == channelId
@@ -895,6 +1010,13 @@ service cloud.firestore {
             && request.resource.data.originalName is string
             && request.resource.data.originalName.size() > 0
             && request.resource.data.originalName.size() <= 255
+            && request.resource.data.filename is string
+            && request.resource.data.filename == request.resource.data.originalName
+            && request.resource.data.normalizedFilename is string
+            && request.resource.data.normalizedFilename.size() > 0
+            && request.resource.data.normalizedFilename.size() <= 255
+            && request.resource.data.tags is list
+            && request.resource.data.tags.size() <= 10
             && request.resource.data.extension in [
               "png", "jpg", "jpeg", "gif", "webp", "pdf", "doc", "docx",
               "ppt", "pptx", "xls", "xlsx", "zip", "txt", "csv"
@@ -941,7 +1063,10 @@ service cloud.firestore {
           && request.resource.data.actorId == request.auth.uid
           && request.resource.data.communityId == communityId
           && request.resource.data.type in [
-            "message_sent", "file_uploaded", "channel_created", "system"
+            "announcement_posted",
+            "channel_created",
+            "file_uploaded",
+            "member_joined"
           ]
           && request.resource.data.title is string
           && request.resource.data.description is string
