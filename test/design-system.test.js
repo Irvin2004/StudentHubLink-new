@@ -20,7 +20,6 @@ const PUBLIC_COMPONENTS = [
     "Modal",
     "SearchInput",
     "Select",
-    "Skeleton",
     "Spinner",
     "Switch",
     "Tabs",

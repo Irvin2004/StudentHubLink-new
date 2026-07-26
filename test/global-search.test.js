@@ -83,5 +83,5 @@ test("global search provides keyboard and accessible modal behavior", async () =
     assert.match(results, /role="listbox"/);
     assert.match(results, /No results found\./);
     assert.match(results, /Unable to search StudentHub\./);
-    assert.match(results, /<Skeleton/);
+    assert.match(results, /<SearchResultSkeleton/);
 });

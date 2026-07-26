@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 
 import { LoadErrorState } from "../../common/LoadErrorState.jsx";
-import Skeleton from "../../ui/Skeleton/index.js";
+import NotificationSkeleton from "../../Skeleton/NotificationSkeleton.jsx";
 import { ACTIVITY_TYPES } from "../../../config/activity-types.js";
 import styles from "./ActivityFeed.module.css";
 
@@ -23,13 +23,10 @@ function date(value) {
 export default function ActivityFeed({ activities, error, loading }) {
     if (loading) {
         return (
-            <div
-                aria-busy="true"
-                aria-label="Loading community activity"
-                role="status"
-            >
-                <Skeleton count={5} height="4.5rem" />
-            </div>
+            <NotificationSkeleton
+                count={4}
+                label="Loading community activity"
+            />
         );
     }
     if (error && !activities.length) {

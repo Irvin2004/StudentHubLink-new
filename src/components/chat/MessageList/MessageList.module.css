@@ -52,21 +52,3 @@
     font-size: 0.86rem;
     line-height: 1.6;
 }
-
-.skeleton {
-    display: grid;
-    align-content: center;
-    gap: var(--space-6);
-    padding: var(--space-8);
-}
-
-.skeleton > div {
-    display: grid;
-    grid-template-columns: 2.5rem minmax(0, 1fr);
-    gap: var(--space-3);
-}
-
-.skeleton span {
-    display: grid;
-    gap: var(--space-2);
-}

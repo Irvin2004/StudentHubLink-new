@@ -4,30 +4,9 @@ import DateDivider from "../DateDivider/DateDivider.jsx";
 import MessageItem from "../MessageItem/MessageItem.jsx";
 import PinnedMessages from "../PinnedMessages/PinnedMessages.jsx";
 import { LoadErrorState } from "../../common/LoadErrorState.jsx";
-import Skeleton from "../../ui/Skeleton/index.js";
+import ChatMessageSkeleton from "../../Skeleton/ChatMessageSkeleton.jsx";
 import { groupMessagesByDate } from "../../../utils/message-formatter.js";
 import styles from "./MessageList.module.css";
-
-function MessageListSkeleton() {
-    return (
-        <div
-            aria-busy="true"
-            aria-label="Loading messages"
-            className={styles.skeleton}
-            role="status"
-        >
-            {[82, 64, 76, 55].map((width) => (
-                <div key={width}>
-                    <Skeleton height="2.5rem" variant="circle" width="2.5rem" />
-                    <span>
-                        <Skeleton height="0.8rem" width={`${width / 4}rem`} />
-                        <Skeleton height="0.8rem" width={`${width}%`} />
-                    </span>
-                </div>
-            ))}
-        </div>
-    );
-}
 
 export default function MessageList({
     currentUserId,
@@ -88,7 +67,7 @@ export default function MessageList({
         });
     }
 
-    if (loading) return <MessageListSkeleton />;
+    if (loading) return <ChatMessageSkeleton />;
     if (error && !messages.length) {
         return (
             <LoadErrorState

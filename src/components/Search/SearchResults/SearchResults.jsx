@@ -1,5 +1,5 @@
 import { AppIcon } from "../../common/AppIcon.jsx";
-import Skeleton from "../../ui/Skeleton/index.js";
+import SearchResultSkeleton from "../../Skeleton/SearchResultSkeleton.jsx";
 import { useSearch } from "../../../hooks/useSearch.js";
 import SearchResultItem from "../SearchResultItem/SearchResultItem.jsx";
 import styles from "./SearchResults.module.css";
@@ -68,16 +68,7 @@ export default function SearchResults() {
                 <ResultGroups groupOffsets={groupOffsets} results={results} />
             ) : null}
 
-            {loading ? (
-                <div
-                    aria-live="polite"
-                    className={styles.loadingState}
-                    role="status"
-                >
-                    <span className="sr-only">Searching StudentHub</span>
-                    <Skeleton count={3} height="3.5rem" />
-                </div>
-            ) : null}
+            {loading ? <SearchResultSkeleton /> : null}
 
             {!loading && !hasResults ? (
                 <div aria-live="polite" className={styles.state}>

@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 import Button from "../../components/ui/Button/index.js";
 import Modal from "../../components/ui/Modal/index.js";
-import Skeleton from "../../components/ui/Skeleton/index.js";
+import CommunityCardSkeleton from "../../components/Skeleton/CommunityCardSkeleton.jsx";
 import { LoadErrorState } from "../../components/common/LoadErrorState.jsx";
 import CommunityGrid from "../../components/communities/CommunityGrid/index.js";
 import CommunityHeader from "../../components/communities/CommunityHeader/index.js";
@@ -38,27 +38,6 @@ function AddIcon() {
                 strokeWidth="2"
             />
         </svg>
-    );
-}
-
-function CommunityGridSkeleton() {
-    return (
-        <section
-            aria-busy="true"
-            aria-label="Loading communities"
-            className={styles.skeletonGrid}
-        >
-            {Array.from({ length: 6 }, (_, index) => (
-                <div className={styles.skeletonCard} key={index}>
-                    <Skeleton height="9rem" variant="rectangle" />
-                    <div>
-                        <Skeleton height="1.5rem" width="70%" />
-                        <Skeleton count={2} />
-                        <Skeleton height="2.75rem" width="5rem" />
-                    </div>
-                </div>
-            ))}
-        </section>
     );
 }
 
@@ -286,7 +265,7 @@ export default function CommunitiesPage() {
             />
 
             {loading ? (
-                <CommunityGridSkeleton />
+                <CommunityCardSkeleton />
             ) : error && !communities.length ? (
                 <LoadErrorState
                     description="We could not load the community list."

@@ -83,10 +83,6 @@
     white-space: nowrap;
 }
 
-.chatSkeleton {
-    padding: var(--space-6);
-}
-
 @media (max-width: 47.999rem) {
     .page {
         min-height: calc(100dvh - 4.25rem);
