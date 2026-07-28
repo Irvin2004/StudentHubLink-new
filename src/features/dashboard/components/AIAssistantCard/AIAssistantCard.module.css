@@ -1,0 +1,90 @@
+.card {
+    display: grid;
+    gap: var(--space-5);
+    padding: var(--space-6);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background:
+        linear-gradient(
+            135deg,
+            color-mix(in srgb, var(--primary) 8%, transparent),
+            transparent 55%
+        ),
+        var(--surface);
+    box-shadow: var(--shadow-sm);
+}
+
+.header {
+    display: grid;
+    gap: var(--space-1);
+}
+
+.title {
+    margin: 0;
+    color: var(--text);
+    font-size: 1.1rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+}
+
+.hint {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--space-3);
+}
+
+.suggestion {
+    min-width: 0;
+    display: grid;
+    gap: var(--space-2);
+    padding: var(--space-4);
+    border: 1px solid color-mix(in srgb, var(--primary) 12%, var(--border));
+    border-radius: var(--radius-md);
+    background: var(--background);
+    text-align: left;
+}
+
+.suggestionTitle {
+    margin: 0;
+    color: var(--text);
+    font-size: 0.95rem;
+    font-weight: 700;
+}
+
+.suggestionDescription {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 0.84rem;
+    line-height: 1.5;
+}
+
+.skeleton {
+    display: grid;
+    gap: var(--space-4);
+}
+
+.skeletonGrid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--space-3);
+}
+
+@media (max-width: 64rem) {
+    .grid,
+    .skeletonGrid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 47.999rem) {
+    .grid,
+    .skeletonGrid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}

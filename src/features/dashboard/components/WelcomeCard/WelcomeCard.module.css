@@ -1,0 +1,56 @@
+.card {
+    padding: var(--space-6);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background:
+        radial-gradient(
+            circle at top right,
+            color-mix(in srgb, var(--primary) 10%, transparent),
+            transparent 42%
+        ),
+        var(--surface);
+    box-shadow: var(--shadow-sm);
+}
+
+.content {
+    display: grid;
+    gap: var(--space-4);
+}
+
+.eyebrow {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.title {
+    margin: 0;
+    color: var(--text);
+    font-size: clamp(1.6rem, 3vw, 2.4rem);
+    line-height: 1.05;
+    letter-spacing: -0.04em;
+}
+
+.message {
+    max-width: 40rem;
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 1rem;
+    line-height: 1.7;
+}
+
+.skeleton {
+    display: grid;
+    gap: var(--space-3);
+}
+
+.skeletonHero {
+    width: min(22rem, 100%);
+}
+
+.skeletonBody {
+    width: min(36rem, 100%);
+}

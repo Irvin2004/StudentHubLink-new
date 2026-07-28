@@ -1,0 +1,36 @@
+.page {
+    width: min(76rem, 100%);
+    margin-inline: auto;
+    padding: var(--space-8) var(--space-6) var(--space-10);
+    display: grid;
+    gap: var(--space-5);
+}
+
+.contentGrid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-5);
+    align-items: start;
+}
+
+.contentGrid > * {
+    min-width: 0;
+}
+
+.assistant {
+    min-width: 0;
+}
+
+.stats {
+    min-width: 0;
+}
+
+@media (max-width: 47.999rem) {
+    .page {
+        padding: var(--space-6) var(--space-4) var(--space-8);
+    }
+
+    .contentGrid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
