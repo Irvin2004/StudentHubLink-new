@@ -1,20 +1,24 @@
 import EmptyState from "../../../../components/EmptyState/EmptyState.jsx";
 import { LoadErrorState } from "../../../../components/common/LoadErrorState.jsx";
-import Skeleton from "../../../../components/Skeleton/Skeleton.jsx";
+import Card from "../../../../components/ui/Card/Card.jsx";
 import styles from "./ContinueLearning.module.css";
+import { ResourceCard, ResourceCardSkeleton } from "./ResourceCard.jsx";
 
-export function ContinueLearning({ error, items = [], loading, onRetry }) {
+export function ContinueLearning({
+    error,
+    loading,
+    onBrowseResources,
+    onOpenResource,
+    onRetry,
+    resources = []
+}) {
     if (loading) {
         return (
-            <section className={styles.card} aria-busy="true">
-                <div className={styles.skeleton}>
-                    <Skeleton width="40%" />
-                    <Skeleton width="65%" />
-                    <div className={styles.list}>
-                        <Skeleton height="4.75rem" />
-                        <Skeleton height="4.75rem" />
-                        <Skeleton height="4.75rem" />
-                    </div>
+            <section aria-busy="true" className={styles.card}>
+                <div className={styles.skeletonList}>
+                    <ResourceCardSkeleton />
+                    <ResourceCardSkeleton />
+                    <ResourceCardSkeleton />
                 </div>
             </section>
         );
@@ -31,46 +35,41 @@ export function ContinueLearning({ error, items = [], loading, onRetry }) {
         );
     }
 
-    if (!items.length) {
+    if (!resources.length) {
         return (
             <section className={styles.card}>
                 <EmptyState
-                    description="Your next study session will appear here."
-                    icon="!"
-                    title="Nothing to continue yet"
+                    actionLabel="Browse Resources"
+                    actionVariant="outline"
+                    description="You haven't started studying yet."
+                    icon="📚"
+                    onAction={onBrowseResources}
+                    title="Continue Learning"
                 />
             </section>
         );
     }
 
     return (
-        <section aria-label="Continue learning" className={styles.card}>
+        <Card as="section" aria-label="Continue Learning" className={styles.card}>
             <header className={styles.header}>
-                <div>
-                    <h2 className={styles.title}>Continue Learning</h2>
-                </div>
+                <h2 className={styles.title}>📚 Continue Learning</h2>
             </header>
+
             <div className={styles.list}>
-                {items.map((item) => (
-                    <article className={styles.item} key={item.id}>
-                        <div className={styles.itemTop}>
-                            <h3 className={styles.itemTitle}>{item.title}</h3>
-                            <span className={styles.progressLabel}>
-                                {item.progress}%
-                            </span>
-                        </div>
-                        <div
-                            aria-hidden="true"
-                            className={styles.progressTrack}
-                        >
-                            <div
-                                className={styles.progressFill}
-                                style={{ width: `${item.progress}%` }}
-                            />
-                        </div>
-                    </article>
+                {resources.slice(0, 3).map((resource) => (
+                    <ResourceCard
+                        key={resource.id}
+                        lastOpened={resource.lastOpened}
+                        onContinue={() => onOpenResource?.(resource.id)}
+                        progress={resource.progress}
+                        subject={resource.subject}
+                        title={resource.title}
+                    />
                 ))}
             </div>
-        </section>
+        </Card>
     );
 }
+
+export default ContinueLearning;

@@ -1,0 +1,145 @@
+.card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    padding: var(--space-6);
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+}
+
+.title {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    color: var(--text);
+    font-size: 1.05rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+}
+
+.titleIcon {
+    font-size: 1.1em;
+}
+
+.priorityBadge {
+    flex-shrink: 0;
+}
+
+.body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+}
+
+.copy {
+    display: grid;
+    gap: var(--space-1);
+}
+
+.taskTitle {
+    margin: 0;
+    color: var(--text);
+    font-size: clamp(1.2rem, 2.5vw, 1.65rem);
+    font-weight: 800;
+    line-height: 1.2;
+    letter-spacing: -0.03em;
+}
+
+.subject {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.meta {
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-3);
+}
+
+.metaItem {
+    min-width: 0;
+    display: grid;
+    gap: var(--space-1);
+}
+
+.metaLabel {
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+.metaValue {
+    margin: 0;
+    color: var(--text);
+    font-size: 0.95rem;
+    font-weight: 700;
+}
+
+.progressGroup {
+    display: grid;
+    gap: var(--space-2);
+}
+
+.progressTrack {
+    overflow: hidden;
+    height: 0.5rem;
+    border-radius: 999px;
+    background: var(--surface-muted);
+}
+
+.progressFill {
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, var(--primary), color-mix(in srgb, var(--primary) 60%, var(--success)));
+}
+
+.progressValue {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-align: right;
+}
+
+.button {
+    width: 100%;
+    justify-content: space-between;
+}
+
+.button svg {
+    flex-shrink: 0;
+}
+
+.chevron {
+    width: 1rem;
+    height: 1rem;
+}
+
+.loading {
+    display: grid;
+    gap: var(--space-3);
+}
+
+@media (max-width: 47.999rem) {
+    .card {
+        padding: var(--space-5);
+    }
+
+    .header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .meta {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}

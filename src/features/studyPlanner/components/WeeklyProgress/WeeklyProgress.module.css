@@ -1,0 +1,62 @@
+.section {
+    display: grid;
+    gap: var(--space-4);
+}
+
+.header {
+    display: grid;
+    grid-template-columns: auto minmax(2rem, 1fr);
+    gap: var(--space-3);
+    align-items: center;
+}
+
+.header h2 {
+    margin: 0;
+    color: var(--text);
+    font-size: 1rem;
+    font-weight: 800;
+}
+
+.divider {
+    min-width: 0;
+    height: 1px;
+    background: var(--border);
+}
+
+.progressRow {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: var(--space-3);
+    align-items: center;
+}
+
+.label,
+.percent {
+    color: var(--text);
+    font-size: 0.95rem;
+    font-weight: 750;
+}
+
+.progressTrack {
+    overflow: hidden;
+    height: 0.75rem;
+    border-radius: var(--radius-pill);
+    background: var(--surface-muted);
+}
+
+.progressFill {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--primary);
+}
+
+@media (max-width: 35rem) {
+    .progressRow {
+        grid-template-columns: minmax(0, 1fr) auto;
+    }
+
+    .label {
+        grid-column: 1 / -1;
+    }
+}

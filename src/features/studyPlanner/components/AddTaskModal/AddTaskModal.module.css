@@ -1,0 +1,21 @@
+.form {
+    display: grid;
+    gap: var(--space-4);
+}
+
+.actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-3);
+    padding-top: var(--space-2);
+}
+
+@media (max-width: 35rem) {
+    .actions {
+        flex-direction: column-reverse;
+    }
+
+    .actions > button {
+        width: 100%;
+    }
+}

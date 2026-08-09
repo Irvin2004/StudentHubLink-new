@@ -1,27 +1,62 @@
 import EmptyState from "../../../../components/EmptyState/EmptyState.jsx";
 import { LoadErrorState } from "../../../../components/common/LoadErrorState.jsx";
-import Skeleton from "../../../../components/Skeleton/Skeleton.jsx";
+import { StatCard } from "./StatCard.jsx";
 import styles from "./StatsGrid.module.css";
 
-const STAT_ITEMS = [
-    { key: "communities", label: "Communities" },
-    { key: "resources", label: "Resources" },
-    { key: "messages", label: "Messages" },
-    { key: "assignments", label: "Assignments" }
+const DEFAULT_STATS = [
+    {
+        color: "blue",
+        icon: "👥",
+        key: "communities",
+        title: "Communities",
+        value: 8
+    },
+    {
+        color: "gold",
+        icon: "📚",
+        key: "resources",
+        title: "Resources",
+        value: 42
+    },
+    {
+        color: "teal",
+        icon: "💬",
+        key: "messages",
+        title: "Messages",
+        value: 12
+    },
+    {
+        color: "rose",
+        icon: "📝",
+        key: "assignments",
+        title: "Assignments",
+        value: 3
+    }
 ];
 
+function normalizeStats(stats) {
+    return DEFAULT_STATS.map((item) => ({
+        ...item,
+        value: Number(stats?.[item.key] ?? item.value)
+    }));
+}
+
 export function StatsGrid({ error, loading, onRetry, stats }) {
+    const items = normalizeStats(stats);
+
     if (loading) {
         return (
             <section aria-busy="true" className={styles.section}>
-                <div className={styles.skeletonGrid}>
-                    {STAT_ITEMS.map((item) => (
-                        <div className={styles.skeletonCard} key={item.key}>
-                            <div className={styles.skeletonStack}>
-                                <Skeleton width="45%" />
-                                <Skeleton height="2rem" width="55%" />
-                            </div>
-                        </div>
+                <div className={styles.grid}>
+                    {items.map((item) => (
+                        <StatCard
+                            color={item.color}
+                            icon={item.icon}
+                            key={item.key}
+                            loading
+                            title={item.title}
+                            value={item.value}
+                        />
                     ))}
                 </div>
             </section>
@@ -36,7 +71,7 @@ export function StatsGrid({ error, loading, onRetry, stats }) {
         );
     }
 
-    if (!stats) {
+    if (!items.length) {
         return (
             <section className={styles.section}>
                 <EmptyState
@@ -51,11 +86,14 @@ export function StatsGrid({ error, loading, onRetry, stats }) {
     return (
         <section aria-label="Dashboard stats" className={styles.section}>
             <div className={styles.grid}>
-                {STAT_ITEMS.map((item) => (
-                    <article className={styles.stat} key={item.key}>
-                        <p className={styles.label}>{item.label}</p>
-                        <p className={styles.value}>{stats[item.key] ?? 0}</p>
-                    </article>
+                {items.map((item) => (
+                    <StatCard
+                        color={item.color}
+                        icon={item.icon}
+                        key={item.key}
+                        title={item.title}
+                        value={item.value}
+                    />
                 ))}
             </div>
         </section>

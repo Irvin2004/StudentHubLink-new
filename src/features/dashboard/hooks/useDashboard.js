@@ -8,9 +8,15 @@ const EMPTY_DASHBOARD = {
     activity: [],
     continueLearning: [],
     deadlines: [],
+    focusTask: null,
     greeting: {
-        message: "",
-        name: ""
+        name: "",
+        message: ""
+    },
+    studyStreak: {
+        current: 0,
+        longest: 0,
+        progress: 0
     },
     quickActions: [],
     stats: {

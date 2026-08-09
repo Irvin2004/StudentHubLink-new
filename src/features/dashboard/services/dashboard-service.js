@@ -6,66 +6,90 @@ export async function getDashboard(userId) {
             name: "Amogelang",
             message: "Ready to continue learning?"
         },
+        studyStreak: {
+            current: 12,
+            longest: 25,
+            progress: 80
+        },
+        focusTask: {
+            id: "robotics-assignment",
+            title: "Finish Robotics Assignment",
+            subject: "Robotics",
+            due: "Tomorrow",
+            estimatedTime: "45 min",
+            priority: "high",
+            progress: 60
+        },
         stats: {
             communities: 8,
-            resources: 45,
-            messages: 18,
+            resources: 42,
+            messages: 12,
             assignments: 3
         },
         continueLearning: [
             {
-                id: "robotics-level-2",
-                title: "Robotics Level 2",
-                subtitle: "Weekly build session",
-                progress: 78
+                id: "robotics-1",
+                title: "Robotics Fundamentals",
+                subject: "Robotics",
+                progress: 65,
+                lastOpened: "2 hours ago"
             },
             {
-                id: "programming-fundamentals",
-                title: "Programming Fundamentals",
-                subtitle: "Revision and exercises",
-                progress: 64
+                id: "python-1",
+                title: "Python Programming",
+                subject: "Programming",
+                progress: 40,
+                lastOpened: "Yesterday"
             },
             {
-                id: "database-systems",
+                id: "database-1",
                 title: "Database Systems",
-                subtitle: "Schema practice",
-                progress: 41
+                subject: "Database",
+                progress: 90,
+                lastOpened: "3 days ago"
             }
         ],
         activity: [
             {
-                id: "uploaded-robotics-notes",
+                id: "1",
+                type: "upload",
                 title: "Uploaded Robotics Notes",
-                description:
-                    "Shared the latest workshop summary with your community.",
-                time: "2h ago"
+                time: "2 hours ago"
             },
             {
-                id: "joined-community",
+                id: "2",
+                type: "community",
                 title: "Joined Programming Community",
-                description:
-                    "You became part of the intro cohort discussion space.",
                 time: "Yesterday"
             },
             {
-                id: "top-contributor",
-                title: "Received Top Contributor Badge",
-                description: "Your help in the study chat was appreciated.",
-                time: "This week"
+                id: "3",
+                type: "completed",
+                title: "Completed Python Quiz",
+                time: "2 days ago"
             }
         ],
         deadlines: [
             {
                 id: "python-project",
                 title: "Python Project",
+                subject: "Programming",
                 due: "Tomorrow",
-                note: "Submit the final draft and code review notes."
+                priority: "high"
             },
             {
                 id: "robotics-ipo",
-                title: "Robotics IPO",
+                title: "Robotics Practical",
+                subject: "Robotics",
                 due: "Friday",
-                note: "Prepare the input-process-output breakdown."
+                priority: "medium"
+            },
+            {
+                id: "database-assignment",
+                title: "Database Assignment",
+                subject: "Database",
+                due: "Next Monday",
+                priority: "low"
             }
         ],
         quickActions: [

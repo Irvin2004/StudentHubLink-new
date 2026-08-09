@@ -5,6 +5,13 @@ const ICON_PATHS = Object.freeze({
             <path d="M10 21h4" />
         </>
     ),
+    calendar: (
+        <>
+            <path d="M8 2v4M16 2v4" />
+            <rect x="3" y="4" width="18" height="18" rx="2" />
+            <path d="M3 10h18" />
+        </>
+    ),
     chevronDown: <path d="m8 10 4 4 4-4" />,
     close: (
         <>

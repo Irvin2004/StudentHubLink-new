@@ -9,6 +9,7 @@ const NAVIGATION_ITEMS = Object.freeze([
     { icon: "users", label: "Communities", to: ROUTES.COMMUNITIES },
     { icon: "messages", label: "Messages", to: ROUTES.CHAT },
     { icon: "files", label: "Files", to: ROUTES.FILES },
+    { icon: "calendar", label: "Study Planner", to: ROUTES.STUDY_PLANNER },
     {
         icon: "bell",
         label: "Notifications",

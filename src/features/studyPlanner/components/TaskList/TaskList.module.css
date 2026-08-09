@@ -1,0 +1,29 @@
+.section {
+    display: grid;
+    gap: var(--space-3);
+}
+
+.header {
+    display: grid;
+    grid-template-columns: auto minmax(2rem, 1fr);
+    gap: var(--space-3);
+    align-items: center;
+}
+
+.header h2 {
+    margin: 0;
+    color: var(--text);
+    font-size: 1rem;
+    font-weight: 800;
+}
+
+.divider {
+    min-width: 0;
+    height: 1px;
+    background: var(--border);
+}
+
+.list {
+    display: grid;
+    gap: var(--space-1);
+}

@@ -21,6 +21,10 @@
     min-width: 0;
 }
 
+.focus {
+    min-width: 0;
+}
+
 .stats {
     min-width: 0;
 }

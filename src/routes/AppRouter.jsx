@@ -12,7 +12,7 @@ const HomePage = lazy(() => import("../pages/home/HomePage.jsx"));
 const LoginPage = lazy(() => import("../pages/auth/LoginPage.jsx"));
 const RegisterPage = lazy(() => import("../pages/auth/RegisterPage.jsx"));
 const DashboardPage = lazy(
-    () => import("../pages/dashboard/DashboardPage.jsx")
+    () => import("../features/dashboard/DashboardPage.jsx")
 );
 const CommunitiesPage = lazy(
     () => import("../pages/communities/CommunitiesPage.jsx")
@@ -22,6 +22,9 @@ const CommunityPage = lazy(
 );
 const ChatPage = lazy(() => import("../pages/chat/ChatPage.jsx"));
 const FilesPage = lazy(() => import("../pages/files/FilesPage.jsx"));
+const StudyPlannerPage = lazy(
+    () => import("../features/studyPlanner/StudyPlannerPage.jsx")
+);
 const NotificationsPage = lazy(
     () => import("../pages/notifications/NotificationsPage.jsx")
 );
@@ -86,6 +89,14 @@ export function AppRouter() {
                             }
                         />
                         <Route path={ROUTES.FILES} element={<FilesPage />} />
+                        <Route
+                            path={ROUTES.STUDY_PLANNER}
+                            element={
+                                <ProfiledRoute id="StudyPlannerPage">
+                                    <StudyPlannerPage />
+                                </ProfiledRoute>
+                            }
+                        />
                         <Route
                             path={ROUTES.NOTIFICATIONS}
                             element={<NotificationsPage />}
