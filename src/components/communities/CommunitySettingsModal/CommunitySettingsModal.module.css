@@ -1,0 +1,126 @@
+.content {
+    display: grid;
+    gap: var(--space-8);
+}
+.content section {
+    display: grid;
+    gap: var(--space-5);
+}
+.sectionHeading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-4);
+}
+.sectionHeading h3,
+.dangerZone h3 {
+    color: var(--text);
+    font-size: 1rem;
+}
+.sectionHeading p,
+.dangerZone p {
+    margin-top: var(--space-1);
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+.form {
+    display: grid;
+    gap: var(--space-5);
+}
+.formRow {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-4);
+}
+.saveRow {
+    display: flex;
+    justify-content: flex-end;
+}
+.membersSection {
+    padding-top: var(--space-6);
+    border-top: 1px solid var(--border);
+}
+.memberList {
+    display: grid;
+    gap: var(--space-2);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+.member {
+    min-height: 4.5rem;
+    display: grid;
+    grid-template-columns: auto minmax(8rem, 1fr) minmax(8rem, 10rem) auto;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface);
+}
+.memberIdentity {
+    min-width: 0;
+    display: grid;
+    gap: 0.15rem;
+}
+.memberIdentity strong {
+    overflow: hidden;
+    color: var(--text);
+    font-size: 0.9rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.memberIdentity span {
+    color: var(--text-secondary);
+    font-size: 0.78rem;
+}
+.loadMore {
+    display: flex;
+    justify-content: center;
+}
+.state {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-3);
+    min-height: 6rem;
+    padding: var(--space-4);
+    border-radius: var(--radius-md);
+    background: var(--surface-subtle, var(--surface));
+    color: var(--text-secondary);
+    text-align: center;
+}
+.dangerZone {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    padding: var(--space-5);
+    border: 1px solid color-mix(in srgb, var(--danger) 28%, var(--border));
+    border-radius: var(--radius-md);
+    background: color-mix(in srgb, var(--danger) 5%, var(--surface));
+}
+.formError {
+    margin: 0;
+    padding: var(--space-3);
+    border-radius: var(--radius-sm);
+    background: color-mix(in srgb, var(--danger) 10%, transparent);
+    color: var(--danger);
+    font-size: 0.875rem;
+}
+@media (max-width: 40rem) {
+    .formRow,
+    .dangerZone {
+        grid-template-columns: 1fr;
+    }
+    .member {
+        grid-template-columns: auto minmax(0, 1fr);
+    }
+    .member > :nth-child(3),
+    .member > :nth-child(4) {
+        grid-column: 2;
+        width: 100%;
+    }
+    .saveRow button,
+    .dangerZone button {
+        width: 100%;
+    }
+}

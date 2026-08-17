@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components -- the exported message helper is part of this component's public API. */
 import EmptyState from "../../../../components/EmptyState/EmptyState.jsx";
 import Skeleton from "../../../../components/Skeleton/Skeleton.jsx";
 import styles from "./StudyStreak.module.css";
@@ -21,7 +22,10 @@ function ProgressBar({ progress = 0 }) {
             aria-valuemax={100}
             aria-valuenow={value}
         >
-            <div className={styles.progressFill} style={{ width: `${value}%` }} />
+            <div
+                className={styles.progressFill}
+                style={{ width: `${value}%` }}
+            />
         </div>
     );
 }
@@ -41,7 +45,7 @@ export function StudyStreak({ loading, onStart, streak }) {
         );
     }
 
-    if (!streak) {
+    if (!streak || !Number(streak.current)) {
         return (
             <section className={styles.card}>
                 <EmptyState

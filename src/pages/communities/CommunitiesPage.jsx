@@ -57,12 +57,15 @@ export default function CommunitiesPage() {
         communities,
         createCommunity,
         error,
+        hasMore,
         joinedCommunityIds,
         joinCommunity,
         leaveCommunity,
         loading,
+        loadingMore,
+        loadMore,
         refreshCommunities
-    } = useCommunities();
+    } = useCommunities({ visibility: "public" });
     const [searchTerm, setSearchTerm] = useState("");
     const [category, setCategory] = useState("");
     const [createOpen, setCreateOpen] = useState(false);
@@ -286,17 +289,33 @@ export default function CommunitiesPage() {
                     title="Communities unavailable"
                 />
             ) : (
-                <CommunityGrid
-                    communities={filteredCommunities}
-                    createAction={{
-                        label: "Create community",
-                        onClick: () => setCreateOpen(true)
-                    }}
-                    getAction={renderMembershipAction}
-                    onOpenCommunity={(community) =>
-                        navigate(`/community/${community.id}/channel/general`)
-                    }
-                />
+                <>
+                    <CommunityGrid
+                        communities={filteredCommunities}
+                        createAction={{
+                            label: "Create community",
+                            onClick: () => setCreateOpen(true)
+                        }}
+                        getAction={renderMembershipAction}
+                        onOpenCommunity={(community) =>
+                            navigate(
+                                `/community/${community.id}/channel/general`
+                            )
+                        }
+                    />
+                    {hasMore ? (
+                        <div className={styles.loadMore}>
+                            <Button
+                                loading={loadingMore}
+                                loadingLabel="Loading communities"
+                                onClick={() => void loadMore()}
+                                variant="outline"
+                            >
+                                Load more communities
+                            </Button>
+                        </div>
+                    ) : null}
+                </>
             )}
 
             {!loading && error && communities.length ? (

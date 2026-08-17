@@ -12,22 +12,75 @@ import { StudyStreak } from "./components/StudyStreak/StudyStreak.jsx";
 import { UpcomingDeadlines } from "./components/UpcomingDeadlines/UpcomingDeadlines.jsx";
 import { WelcomeCard } from "./components/WelcomeCard/WelcomeCard.jsx";
 import { useDashboard } from "./hooks/useDashboard.js";
-import { LEGACY_ROUTES, ROUTES } from "../../config/routes.js";
+import { ROUTES } from "../../config/routes.js";
+import { useStudySession } from "../studySessions/context/study-session-context.js";
+import AIAssistantDialog from "../aiAssistant/components/AIAssistantDialog.jsx";
+import { AI_ACTIONS } from "../aiAssistant/config/ai-action-types.js";
+import { useAIAssistant } from "../aiAssistant/hooks/useAIAssistant.js";
+
+function getStudyPlannerRoute(taskId) {
+    if (!taskId) return ROUTES.STUDY_PLANNER;
+
+    return `${ROUTES.STUDY_PLANNER}?task=${encodeURIComponent(taskId)}`;
+}
+
+function getResourceRoute(resourceId) {
+    if (!resourceId) return ROUTES.RESOURCES;
+
+    return `${ROUTES.RESOURCES}?resource=${encodeURIComponent(resourceId)}`;
+}
+
+function getFlashcardRoute(deckId, mode) {
+    if (!deckId) return ROUTES.FLASHCARDS;
+    const modeQuery = mode ? `&mode=${encodeURIComponent(mode)}` : "";
+    return `${ROUTES.FLASHCARDS}?deck=${encodeURIComponent(deckId)}${modeQuery}`;
+}
+
+function getQuizRoute(quizId, mode = "take") {
+    if (!quizId) return ROUTES.QUIZZES;
+    const modeQuery = mode ? `&mode=${encodeURIComponent(mode)}` : "";
+    return `${ROUTES.QUIZZES}?quiz=${encodeURIComponent(quizId)}${modeQuery}`;
+}
+
+function getContinueLearningRoute(item) {
+    if (item?.learningType === "quiz") {
+        return getQuizRoute(item.quizId || item.id);
+    }
+    if (item?.learningType === "flashcard" || item?.deckId) {
+        return getFlashcardRoute(item.deckId || item.id);
+    }
+    if (item?.learningType === "resource" || item?.resourceKey) {
+        return getResourceRoute(item.resourceKey || item.id);
+    }
+    return ROUTES.RESOURCES;
+}
 
 export default function DashboardPage() {
+    const { startSession } = useStudySession();
     const { dashboard, error, loading, reload } = useDashboard();
     const { profile, user } = useAuth();
     const navigate = useNavigate();
+    const aiAssistant = useAIAssistant(user?.uid);
     const welcomeUser = profile || user;
-    const handleAIPlaceholder = (action) => {
-        console.info(`AI assistant action selected: ${action}`);
-    };
-
+    const startTaskSession = (task) =>
+        startSession({
+            sourceType: "task",
+            subject: task.subject,
+            taskId: task.id,
+            title: task.title
+        });
+    const startResourceSession = (resource) =>
+        startSession({
+            resourceId: resource.resourceKey || resource.id,
+            sourceType: "resource",
+            subject: resource.subject,
+            title: resource.title
+        });
     const quickActions = [
         {
             label: "Upload Resource",
             icon: "⬆️",
-            onClick: () => navigate(LEGACY_ROUTES.UPLOAD)
+            onClick: () => navigate(`${ROUTES.RESOURCES}?action=upload`)
         },
         {
             label: "Join Community",
@@ -37,7 +90,7 @@ export default function DashboardPage() {
         {
             label: "Browse Resources",
             icon: "📚",
-            onClick: () => navigate(LEGACY_ROUTES.RESOURCES)
+            onClick: () => navigate(ROUTES.RESOURCES)
         },
         {
             label: "Messages",
@@ -49,22 +102,28 @@ export default function DashboardPage() {
         {
             label: "Summarise Notes",
             icon: "📝",
-            onClick: () => handleAIPlaceholder("Summarise Notes")
+            onClick: () => aiAssistant.openAssistant(AI_ACTIONS.SUMMARISE_NOTES)
         },
         {
             label: "Generate Flashcards",
             icon: "🃏",
-            onClick: () => handleAIPlaceholder("Generate Flashcards")
+            onClick: () =>
+                aiAssistant.openAssistant(AI_ACTIONS.GENERATE_FLASHCARDS)
         },
         {
             label: "Create Quiz",
             icon: "✅",
-            onClick: () => handleAIPlaceholder("Create Quiz")
+            onClick: () => aiAssistant.openAssistant(AI_ACTIONS.GENERATE_QUIZ)
         },
         {
             label: "Explain a Topic",
             icon: "💡",
-            onClick: () => handleAIPlaceholder("Explain a Topic")
+            onClick: () => aiAssistant.openAssistant(AI_ACTIONS.EXPLAIN_TOPIC)
+        },
+        {
+            label: "Suggest Study Plan",
+            icon: "🗓️",
+            onClick: () => aiAssistant.openAssistant(AI_ACTIONS.STUDY_PLAN)
         }
     ];
 
@@ -77,6 +136,13 @@ export default function DashboardPage() {
                 greeting={dashboard.greeting}
                 loading={loading}
                 onCompleteProfile={() => navigate(ROUTES.SETTINGS)}
+                onContinueLearning={() =>
+                    navigate(
+                        getContinueLearningRoute(
+                            dashboard.continueLearning?.[0]
+                        )
+                    )
+                }
                 studyStreak={dashboard.studyStreak?.current ?? 0}
                 user={welcomeUser}
                 onRetry={reload}
@@ -94,15 +160,31 @@ export default function DashboardPage() {
             <FocusCard
                 error={error}
                 loading={loading}
-                onBrowseResources={() => navigate(LEGACY_ROUTES.RESOURCES)}
-                onContinue={() => navigate(ROUTES.FILES)}
+                onBrowseResources={() => navigate(ROUTES.STUDY_PLANNER)}
+                onContinue={(taskId) => navigate(getStudyPlannerRoute(taskId))}
+                onReviewFlashcards={(deckId) =>
+                    navigate(getFlashcardRoute(deckId, "due"))
+                }
+                onStartSession={() => startTaskSession(dashboard.focusTask)}
+                onTakeQuiz={(quizId, taskId) =>
+                    navigate(
+                        `${getQuizRoute(quizId)}&task=${encodeURIComponent(taskId)}`
+                    )
+                }
                 onRetry={reload}
                 task={dashboard.focusTask}
+                weeklyGoalMinutes={dashboard.weeklyGoalMinutes}
+                weeklyMinutes={dashboard.weeklyMinutes}
+                weeklyProgress={dashboard.weeklyProgress}
             />
 
             <div className={styles.focus}>
                 <StudyStreak
-                    onStart={() => navigate(LEGACY_ROUTES.RESOURCES)}
+                    onStart={() =>
+                        dashboard.focusTask
+                            ? startTaskSession(dashboard.focusTask)
+                            : navigate(ROUTES.RESOURCES)
+                    }
                     loading={loading}
                     streak={dashboard.studyStreak}
                 />
@@ -111,15 +193,27 @@ export default function DashboardPage() {
             <div className={styles.contentGrid}>
                 <ContinueLearning
                     error={error}
-                    onBrowseResources={() => navigate(LEGACY_ROUTES.RESOURCES)}
-                    onOpenResource={() => navigate(ROUTES.FILES)}
+                    onBrowseResources={() => navigate(ROUTES.RESOURCES)}
+                    onOpenResource={(resourceId) =>
+                        navigate(getResourceRoute(resourceId))
+                    }
+                    onOpenFlashcards={(deckId) =>
+                        navigate(getFlashcardRoute(deckId))
+                    }
+                    onOpenQuiz={(quizId) => navigate(getQuizRoute(quizId))}
+                    onReviewFlashcards={(deckId) =>
+                        navigate(getFlashcardRoute(deckId, "due"))
+                    }
+                    onStartSession={startResourceSession}
                     loading={loading}
                     onRetry={reload}
                     resources={dashboard.continueLearning}
                 />
                 <UpcomingDeadlines
-                    onBrowseResources={() => navigate(LEGACY_ROUTES.RESOURCES)}
-                    onOpenAssignment={() => navigate(ROUTES.FILES)}
+                    onBrowseResources={() => navigate(ROUTES.STUDY_PLANNER)}
+                    onOpenAssignment={(taskId) =>
+                        navigate(getStudyPlannerRoute(taskId))
+                    }
                     deadlines={dashboard.deadlines}
                     error={error}
                     loading={loading}
@@ -144,10 +238,26 @@ export default function DashboardPage() {
                     actions={aiActions}
                     error={error}
                     loading={loading}
-                    onAskAI={() => handleAIPlaceholder("Ask AI")}
+                    onAskAI={() => aiAssistant.openAssistant()}
                     onRetry={reload}
                 />
             </div>
+
+            <AIAssistantDialog
+                action={aiAssistant.action}
+                error={aiAssistant.error}
+                key={`${aiAssistant.action}-${aiAssistant.open}`}
+                loading={aiAssistant.loading}
+                onClose={aiAssistant.closeAssistant}
+                onRetry={aiAssistant.retry}
+                onRun={aiAssistant.run}
+                onSave={aiAssistant.save}
+                open={aiAssistant.open}
+                result={aiAssistant.result}
+                saveError={aiAssistant.saveError}
+                saved={aiAssistant.saved}
+                saving={aiAssistant.saving}
+            />
         </main>
     );
 }

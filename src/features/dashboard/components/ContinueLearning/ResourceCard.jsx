@@ -15,15 +15,21 @@ function ProgressBar({ progress = 0 }) {
             aria-valuemax={100}
             aria-valuenow={value}
         >
-            <div className={styles.progressFill} style={{ width: `${value}%` }} />
+            <div
+                className={styles.progressFill}
+                style={{ width: `${value}%` }}
+            />
         </div>
     );
 }
 
 export function ResourceCard({
+    dueCount = 0,
+    kind = "resource",
     lastOpened,
     onContinue,
-    progress = 0,
+    onStartSession,
+    progress = null,
     subject,
     title
 }) {
@@ -35,12 +41,21 @@ export function ResourceCard({
                     <p className={styles.subject}>{subject}</p>
                 </div>
 
-                <div className={styles.progressGroup}>
-                    <ProgressBar progress={progress} />
-                    <p className={styles.progressValue}>{progress}%</p>
-                </div>
+                {progress !== null && progress !== undefined ? (
+                    <div className={styles.progressGroup}>
+                        <ProgressBar progress={progress} />
+                        <p className={styles.progressValue}>{progress}%</p>
+                    </div>
+                ) : null}
 
-                <p className={styles.lastOpened}>Last opened: {lastOpened}</p>
+                <p className={styles.lastOpened}>
+                    {kind === "flashcard"
+                        ? "Last studied"
+                        : kind === "quiz"
+                          ? "Last taken"
+                          : "Last opened"}
+                    : {lastOpened}
+                </p>
 
                 <Button
                     className={styles.button}
@@ -48,7 +63,25 @@ export function ResourceCard({
                     type="button"
                     variant="secondary"
                 >
-                    Continue
+                    {kind === "flashcard"
+                        ? "Open Deck"
+                        : kind === "quiz"
+                          ? "Open Quiz"
+                          : "Continue"}
+                </Button>
+                <Button
+                    className={styles.button}
+                    disabled={kind === "flashcard" && !dueCount}
+                    onClick={onStartSession}
+                    type="button"
+                >
+                    {kind === "flashcard"
+                        ? dueCount
+                            ? `Review ${dueCount} Due`
+                            : "No Cards Due"
+                        : kind === "quiz"
+                          ? "Try Again"
+                          : "Start Session"}
                 </Button>
             </div>
         </Card>

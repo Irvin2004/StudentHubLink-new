@@ -5,7 +5,7 @@ import { AuthContext } from "../context/auth-context.js";
 
 const mocks = vi.hoisted(() => ({
     createCommunity: vi.fn(),
-    getCommunities: vi.fn(),
+    getCommunitiesPage: vi.fn(),
     getCommunityMembershipIds: vi.fn(),
     joinCommunity: vi.fn(),
     leaveCommunity: vi.fn()
@@ -13,7 +13,7 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock("../services/community-service.js", () => ({
     createCommunity: mocks.createCommunity,
-    getCommunities: mocks.getCommunities,
+    getCommunitiesPage: mocks.getCommunitiesPage,
     getCommunityMembershipIds: mocks.getCommunityMembershipIds,
     joinCommunity: mocks.joinCommunity,
     leaveCommunity: mocks.leaveCommunity
@@ -32,7 +32,11 @@ function wrapper({ children }) {
 describe("useCommunities", () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        mocks.getCommunities.mockResolvedValue([]);
+        mocks.getCommunitiesPage.mockResolvedValue({
+            communities: [],
+            cursor: null,
+            hasMore: false
+        });
         mocks.getCommunityMembershipIds.mockResolvedValue([]);
     });
 
@@ -79,14 +83,14 @@ describe("useCommunities", () => {
             "community-1",
             "user-1"
         );
-        expect(mocks.getCommunities).toHaveBeenCalledOnce();
+        expect(mocks.getCommunitiesPage).toHaveBeenCalledOnce();
         expect(mocks.getCommunityMembershipIds).toHaveBeenCalledOnce();
     });
 
     test("surfaces loading failures without mutating the list", async () => {
         const failure = new Error("Network unavailable");
 
-        mocks.getCommunities.mockRejectedValue(failure);
+        mocks.getCommunitiesPage.mockRejectedValue(failure);
 
         const { result } = renderHook(() => useCommunities(), { wrapper });
 
@@ -107,7 +111,11 @@ describe("useCommunities", () => {
             rejectJoin = reject;
         });
 
-        mocks.getCommunities.mockResolvedValue([community]);
+        mocks.getCommunitiesPage.mockResolvedValue({
+            communities: [community],
+            cursor: { id: community.id },
+            hasMore: false
+        });
         mocks.joinCommunity.mockReturnValue(pendingJoin);
 
         const { result } = renderHook(() => useCommunities(), { wrapper });
@@ -130,6 +138,41 @@ describe("useCommunities", () => {
         expect(result.current.joinedCommunityIds.has("community-1")).toBe(
             false
         );
-        expect(mocks.getCommunities).toHaveBeenCalledOnce();
+        expect(mocks.getCommunitiesPage).toHaveBeenCalledOnce();
+    });
+
+    test("loads another page once when requests overlap", async () => {
+        mocks.getCommunitiesPage.mockResolvedValueOnce({
+            communities: [{ id: "community-1", memberCount: 1 }],
+            cursor: { id: "community-1" },
+            hasMore: true
+        });
+        let resolveNextPage;
+        mocks.getCommunitiesPage.mockReturnValueOnce(
+            new Promise((resolve) => {
+                resolveNextPage = resolve;
+            })
+        );
+        const { result } = renderHook(() => useCommunities(), { wrapper });
+        await waitFor(() => expect(result.current.loading).toBe(false));
+
+        let firstRequest;
+        let duplicateRequest;
+        act(() => {
+            firstRequest = result.current.loadMore();
+            duplicateRequest = result.current.loadMore();
+        });
+        expect(mocks.getCommunitiesPage).toHaveBeenCalledTimes(2);
+
+        await act(async () => {
+            resolveNextPage({
+                communities: [{ id: "community-2", memberCount: 1 }],
+                cursor: { id: "community-2" },
+                hasMore: false
+            });
+            await firstRequest;
+            await duplicateRequest;
+        });
+        expect(result.current.communities).toHaveLength(2);
     });
 });

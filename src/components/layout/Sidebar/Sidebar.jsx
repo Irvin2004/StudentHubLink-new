@@ -7,9 +7,12 @@ import styles from "./Sidebar.module.css";
 const NAVIGATION_ITEMS = Object.freeze([
     { icon: "home", label: "Home", to: ROUTES.DASHBOARD, end: true },
     { icon: "users", label: "Communities", to: ROUTES.COMMUNITIES },
+    { icon: "user", label: "Friends", to: ROUTES.FRIENDS },
     { icon: "messages", label: "Messages", to: ROUTES.CHAT },
-    { icon: "files", label: "Files", to: ROUTES.FILES },
+    { icon: "files", label: "Resources", to: ROUTES.RESOURCES },
     { icon: "calendar", label: "Study Planner", to: ROUTES.STUDY_PLANNER },
+    { icon: "flashcards", label: "Flashcards", to: ROUTES.FLASHCARDS },
+    { icon: "quiz", label: "Quizzes", to: ROUTES.QUIZZES },
     {
         icon: "bell",
         label: "Notifications",

@@ -1,31 +1,26 @@
 import Modal from "../../ui/Modal/index.js";
 import { formatFileSize } from "../../../utils/file-size.js";
-import { isImageFile, isPdfFile } from "../../../utils/file-icons.js";
+import {
+    isImageFile,
+    isPdfFile,
+    isPreviewableFile
+} from "../../../utils/file-icons.js";
 import FileIcon from "../FileIcon/FileIcon.jsx";
 import styles from "./FilePreview.module.css";
 
 export default function FilePreview({ file, onClose, onDownload }) {
     if (!file) return null;
+    const previewable = isPreviewableFile(file);
 
     return (
         <Modal
             description={`${formatFileSize(file.size)} · Uploaded by ${file.uploadedByName}`}
             onClose={onClose}
             open
-            size="large"
+            size="wide"
             title={file.originalName}
             footer={
                 <div className={styles.footer}>
-                    {isPdfFile(file) ? (
-                        <a
-                            className={styles.action}
-                            href={file.url}
-                            rel="noreferrer"
-                            target="_blank"
-                        >
-                            Open PDF in new tab
-                        </a>
-                    ) : null}
                     <button
                         className={`${styles.action} ${styles.primary}`}
                         onClick={() => onDownload(file)}
@@ -42,14 +37,19 @@ export default function FilePreview({ file, onClose, onDownload }) {
                         alt={`Preview of ${file.originalName}`}
                         src={file.url}
                     />
+                ) : isPdfFile(file) ? (
+                    <iframe
+                        src={`${file.url}#toolbar=0&navpanes=0`}
+                        title={`Preview of ${file.originalName}`}
+                    />
                 ) : (
                     <div className={styles.fallback}>
                         <FileIcon extension={file.extension} />
                         <strong>{file.originalName}</strong>
                         <p>
-                            {isPdfFile(file)
-                                ? "PDF previews open safely in a new browser tab."
-                                : "Preview is not available for this file type. Download it to open it."}
+                            {previewable
+                                ? "Preview unavailable. Download the file to open it."
+                                : "This file type does not support an in-app preview. Download it to open it."}
                         </p>
                     </div>
                 )}

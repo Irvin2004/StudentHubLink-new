@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 
 import { AppIcon } from "../../common/AppIcon.jsx";
-import { LEGACY_ROUTES, ROUTES } from "../../../config/routes.js";
+import { ROUTES } from "../../../config/routes.js";
 import { useAuth } from "../../../hooks/useAuth.js";
 import { useToast } from "../../../hooks/useToast.js";
 import styles from "./UserMenu.module.css";
@@ -123,14 +123,14 @@ export function UserMenu() {
                         <strong>{displayName}</strong>
                         <span>{email}</span>
                     </div>
-                    <a
-                        href={LEGACY_ROUTES.PROFILE}
+                    <Link
                         onClick={() => setOpen(false)}
                         role="menuitem"
+                        to={ROUTES.SETTINGS}
                     >
                         <AppIcon name="user" size={18} />
                         Profile
-                    </a>
+                    </Link>
                     <Link
                         onClick={() => setOpen(false)}
                         role="menuitem"

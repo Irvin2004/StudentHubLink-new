@@ -9,35 +9,61 @@ const DEFAULT_STATS = [
         icon: "👥",
         key: "communities",
         title: "Communities",
-        value: 8
+        value: 0
     },
     {
         color: "gold",
         icon: "📚",
         key: "resources",
         title: "Resources",
-        value: 42
+        value: 0
     },
     {
         color: "teal",
         icon: "💬",
         key: "messages",
-        title: "Messages",
-        value: 12
+        title: "Unread Messages",
+        value: 0
     },
     {
         color: "rose",
         icon: "📝",
-        key: "assignments",
-        title: "Assignments",
-        value: 3
+        key: "tasks",
+        title: "Tasks",
+        value: 0
+    },
+    {
+        color: "gold",
+        icon: "🃏",
+        key: "dueFlashcards",
+        title: "Due Flashcards",
+        value: 0
+    },
+    {
+        color: "blue",
+        icon: "🎯",
+        key: "recentQuizScore",
+        title: "Recent Quiz",
+        value: null
+    },
+    {
+        color: "rose",
+        icon: "📊",
+        key: "weakQuizTopics",
+        title: "Weak Quiz Topics",
+        value: 0
     }
 ];
 
 function normalizeStats(stats) {
     return DEFAULT_STATS.map((item) => ({
         ...item,
-        value: Number(stats?.[item.key] ?? item.value)
+        value:
+            item.key === "recentQuizScore"
+                ? stats?.[item.key] == null
+                    ? "—"
+                    : `${Number(stats[item.key])}%`
+                : Number(stats?.[item.key] ?? item.value)
     }));
 }
 

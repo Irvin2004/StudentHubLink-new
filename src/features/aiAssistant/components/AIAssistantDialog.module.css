@@ -1,0 +1,126 @@
+.form,
+.result,
+.state {
+    display: grid;
+    gap: var(--space-4);
+}
+
+.fields {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-4);
+}
+
+.state,
+.result {
+    margin-top: var(--space-5);
+    padding: var(--space-5);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--surface-muted);
+}
+
+.state p,
+.answer p,
+.cards p,
+.plan p {
+    margin: 0;
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+.error,
+.saveError {
+    color: var(--danger);
+}
+
+.resultHeading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-3);
+}
+
+.resultHeading span {
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.resultHeading h3 {
+    margin: var(--space-1) 0 0;
+}
+
+.localBadge {
+    padding: var(--space-1) var(--space-2);
+    border-radius: var(--radius-pill);
+    background: var(--primary-soft);
+    color: var(--primary) !important;
+    white-space: nowrap;
+}
+
+.answer ul,
+.questions,
+.questions ul,
+.cards,
+.plan {
+    margin: 0;
+    padding-left: var(--space-5);
+}
+
+.answer li,
+.questions li,
+.cards li,
+.plan li {
+    margin-block: var(--space-2);
+    line-height: 1.55;
+}
+
+.cards > li,
+.plan > li,
+.questions > li {
+    padding: var(--space-3);
+    border-radius: var(--radius-md);
+    background: var(--surface);
+}
+
+.questions li[data-correct] {
+    color: var(--success);
+    font-weight: 700;
+}
+
+.plan span {
+    display: block;
+    margin-block: var(--space-1);
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-3);
+}
+
+.saveError,
+.saved {
+    margin: var(--space-4) 0 0;
+    font-weight: 700;
+}
+
+.saved {
+    color: var(--success);
+}
+
+@media (max-width: 47.999rem) {
+    .fields {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .resultHeading,
+    .footer {
+        align-items: stretch;
+        flex-direction: column;
+    }
+}

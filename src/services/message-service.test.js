@@ -35,6 +35,7 @@ vi.mock("firebase/firestore", () => ({
     },
     endBefore: (value) => ({ type: "endBefore", value }),
     getDocs: mocks.getDocs,
+    limit: (value) => ({ type: "limit", value }),
     limitToLast: (value) => ({ type: "limitToLast", value }),
     onSnapshot: mocks.onSnapshot,
     orderBy: (field, direction) => ({ type: "orderBy", field, direction }),

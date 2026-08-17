@@ -7,15 +7,13 @@ export const ROUTES = Object.freeze({
     COMMUNITY: "/community/:communityId",
     COMMUNITY_CHANNEL: "/community/:communityId/channel/:channelId",
     CHAT: "/app/chat",
+    FRIENDS: "/app/friends",
     FILES: "/app/files",
+    RESOURCES: "/app/resources",
+    RESOURCES_SHORT: "/resources",
     STUDY_PLANNER: "/app/study-planner",
+    FLASHCARDS: "/app/flashcards",
+    QUIZZES: "/app/quizzes",
     NOTIFICATIONS: "/app/notifications",
     SETTINGS: "/app/settings"
-});
-
-export const LEGACY_ROUTES = Object.freeze({
-    UPLOAD: "/pages/upload.html",
-    RESOURCES: "/pages/resources.html",
-    MESSAGES: "/pages/messages.html",
-    PROFILE: "/pages/profile.html"
 });

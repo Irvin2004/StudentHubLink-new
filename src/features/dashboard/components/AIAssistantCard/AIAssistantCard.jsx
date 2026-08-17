@@ -24,6 +24,11 @@ const defaultActions = [
         label: "Explain a Topic",
         icon: "💡",
         onClick: () => {}
+    },
+    {
+        label: "Suggest Study Plan",
+        icon: "🗓️",
+        onClick: () => {}
     }
 ];
 

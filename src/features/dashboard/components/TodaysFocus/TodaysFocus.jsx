@@ -96,7 +96,11 @@ export function TodaysFocus({
                     </div>
                 </dl>
 
-                <Button className={styles.button} onClick={onContinue} type="button">
+                <Button
+                    className={styles.button}
+                    onClick={onContinue}
+                    type="button"
+                >
                     Continue
                 </Button>
             </div>

@@ -36,6 +36,14 @@
     font-size: 0.9rem;
 }
 
+.communityIdentity {
+    min-width: 0;
+}
+
+.settingsButton {
+    margin-left: auto;
+}
+
 .communityMark {
     width: 3.75rem;
     height: 3.75rem;
@@ -96,6 +104,15 @@
     .communityMark {
         width: 3.25rem;
         height: 3.25rem;
+    }
+
+    .communityHeader {
+        flex-wrap: wrap;
+    }
+
+    .settingsButton {
+        width: 100%;
+        margin-left: 0;
     }
 
     .workspace {

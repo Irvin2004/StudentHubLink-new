@@ -33,6 +33,7 @@ export function createUserProfile(user, data = {}) {
         email,
         displayName,
         photoURL: data.photoURL ?? user.photoURL ?? null,
+        profileVisibility: "public",
         role: DEFAULT_ROLE,
         settings: DEFAULT_SETTINGS
     });

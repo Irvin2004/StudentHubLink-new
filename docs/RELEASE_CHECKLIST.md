@@ -7,6 +7,8 @@ unresolved items in the issue tracker before tagging a release.
 
 - [ ] Release scope is frozen and all included tickets are closed.
 - [ ] `package.json` contains the intended semantic version.
+- [ ] `package.json`, the release tag, archive filename, and `CHANGELOG.md`
+      agree on `v1.0.0`.
 - [ ] `CHANGELOG.md` includes the release date, user-facing changes, fixes, and
       known limitations.
 - [ ] No debug-only code, temporary feature flags, or test accounts remain.
@@ -15,12 +17,20 @@ unresolved items in the issue tracker before tagging a release.
 
 - [ ] `.env`, `.env.local`, credentials, service-account files, and API secrets
       are not tracked.
+- [ ] `git ls-files -- .env .env.local` returns no local environment file, and
+      `git check-ignore .env.local` confirms it is ignored.
+- [ ] Every required `VITE_FIREBASE_*` value is present, and
+      `VITE_FIREBASE_PROJECT_ID` matches `.firebaserc`.
 - [ ] Any secret that was previously exposed has been rotated.
 - [ ] Firestore rules have been reviewed and deployed.
 - [ ] Storage rules have been reviewed and deployed.
+- [ ] Firebase Storage has been initialized once in the target project's
+      console; uploads remain disabled until `storage.rules` deploys.
 - [ ] Authentication and role-based permissions have been tested for allowed and
       denied cases.
 - [ ] File type, file size, and ownership validation have been verified.
+- [ ] Storage access for marketplace resources matches the Firestore approval
+      policy; an unapproved file URL cannot bypass metadata authorization.
 - [ ] User-generated content is rendered safely.
 
 ## 3. Quality gates
@@ -46,6 +56,9 @@ Confirm:
 
 - [ ] Register, sign in, sign out, reset password, and session restoration work.
 - [ ] Protected routes redirect unauthenticated users correctly.
+- [ ] `/app/files` and `/resources` redirect to `/app/resources` and preserve
+      resource query parameters.
+- [ ] `/community/{id}` redirects to the community's `general` channel.
 - [ ] Community creation, joining, leaving, and permissions work.
 - [ ] Channels load and authorised users can create or manage them.
 - [ ] Messages send, update in real time, reply, react, and paginate correctly.
@@ -64,6 +77,8 @@ Confirm:
 - [ ] Form controls have labels and validation messages.
 - [ ] Colour contrast and visible focus indicators have been checked.
 - [ ] Layouts have been tested at 360 px, 768 px, 1024 px, and 1440 px widths.
+- [ ] Dashboard, communities/chat, resources, planner, flashcards, quizzes, and
+      friends have no unintended horizontal overflow at mobile widths.
 - [ ] Reduced-motion preferences are respected where animations are used.
 
 ## 6. Documentation
@@ -81,6 +96,7 @@ Confirm:
 - [ ] GitHub Actions CI is green on the release commit.
 - [ ] Production environment secrets are configured in GitHub.
 - [ ] Firebase project and hosting target are correct.
+- [ ] Required Firestore collection and collection-group indexes report `READY`.
 - [ ] Deployment workflow succeeds.
 - [ ] Live site loads over HTTPS and client-side routes work after refresh.
 - [ ] Firebase Authentication authorised domains include the production domain.

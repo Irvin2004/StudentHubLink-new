@@ -13,13 +13,7 @@ function getPriorityMark(priority) {
     return PRIORITY_MARKS[String(priority || "").toLowerCase()] || "⚪";
 }
 
-export function DeadlineCard({
-    due,
-    onOpen,
-    priority,
-    subject,
-    title
-}) {
+export function DeadlineCard({ due, onOpen, priority, subject, title }) {
     return (
         <Card className={styles.card} padding="none">
             <div className={styles.content}>
@@ -30,7 +24,7 @@ export function DeadlineCard({
                         <span aria-hidden="true">
                             {getPriorityMark(priority)}
                         </span>
-                        <span>Due {due}</span>
+                        <span>{due}</span>
                     </p>
                 </div>
 

@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 const mocks = vi.hoisted(() => ({
     listenToMessages: vi.fn(),
     listenToTyping: vi.fn(),
+    loadOlderMessages: vi.fn(),
     pinMessage: vi.fn(),
     sendMessage: vi.fn(),
     stopTyping: vi.fn(),
@@ -26,7 +27,7 @@ vi.mock("../services/message-service.js", () => ({
     editMessage: vi.fn(),
     listenToMessages: mocks.listenToMessages,
     listenToTyping: mocks.listenToTyping,
-    loadOlderMessages: vi.fn(),
+    loadOlderMessages: mocks.loadOlderMessages,
     removeReaction: vi.fn(),
     sendMessage: mocks.sendMessage,
     sendTyping: vi.fn(),
@@ -176,5 +177,41 @@ describe("useMessages", () => {
         unmount();
         expect(mocks.unsubscribeMessages).toHaveBeenCalledOnce();
         expect(mocks.unsubscribeTyping).toHaveBeenCalledOnce();
+    });
+
+    test("deduplicates concurrent older-message requests", async () => {
+        let resolveHistory;
+        mocks.loadOlderMessages.mockReturnValue(
+            new Promise((resolve) => {
+                resolveHistory = resolve;
+            })
+        );
+        const { result } = renderHook(() =>
+            useMessages("general", { communityId: "community-1" })
+        );
+
+        act(() => {
+            messagesListener({
+                messages: Array.from({ length: 30 }, (_, index) => ({
+                    id: `message-${index}`,
+                    text: "Message"
+                })),
+                oldestSnapshot: { id: "message-0" }
+            });
+        });
+
+        let firstRequest;
+        let duplicateRequest;
+        act(() => {
+            firstRequest = result.current.loadOlder();
+            duplicateRequest = result.current.loadOlder();
+        });
+        expect(mocks.loadOlderMessages).toHaveBeenCalledOnce();
+
+        await act(async () => {
+            resolveHistory({ messages: [], oldestSnapshot: null });
+            await firstRequest;
+            await duplicateRequest;
+        });
     });
 });

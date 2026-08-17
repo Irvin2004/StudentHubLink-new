@@ -27,9 +27,95 @@
     line-height: 1.55;
 }
 
+.headerActions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: var(--space-2);
+}
+
 .plannerCard {
     display: grid;
     gap: var(--space-6);
+}
+
+.controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-4);
+    align-items: flex-end;
+}
+
+.searchField {
+    min-width: min(100%, 17rem);
+    flex: 1 1 18rem;
+}
+
+.filterBlock {
+    display: grid;
+    gap: var(--space-2);
+}
+
+.filterLabel {
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    font-weight: 750;
+}
+
+.filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+    padding: 0.25rem;
+    background: var(--surface);
+}
+
+.filterButton {
+    min-height: 2.75rem;
+    border: 0;
+    border-radius: var(--radius-pill);
+    padding: var(--space-2) var(--space-4);
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font: inherit;
+    font-size: 0.9rem;
+    font-weight: 750;
+    transition:
+        background 160ms ease,
+        color 160ms ease,
+        box-shadow 160ms ease;
+}
+
+.clearButton {
+    min-height: 2.75rem;
+}
+
+.filterButton:hover {
+    color: var(--text);
+}
+
+.filterButton[aria-pressed="true"] {
+    background: var(--primary);
+    color: var(--primary-contrast, #fff);
+    box-shadow: var(--shadow-sm);
+}
+
+.filterButton:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
+.mutationError {
+    margin: 0;
+    border-radius: var(--radius-md);
+    padding: var(--space-3) var(--space-4);
+    background: color-mix(in srgb, var(--danger, #dc2626) 10%, transparent);
+    color: var(--danger, #dc2626);
+    font-size: 0.9rem;
+    font-weight: 650;
 }
 
 @media (max-width: 47.999rem) {
@@ -42,7 +128,23 @@
         flex-direction: column;
     }
 
-    .pageHeader > button {
+    .headerActions,
+    .headerActions > button {
+        width: 100%;
+    }
+
+    .controls,
+    .filterBlock,
+    .filters {
+        width: 100%;
+    }
+
+    .filterButton {
+        flex: 1;
+        padding-inline: var(--space-2);
+    }
+
+    .clearButton {
         width: 100%;
     }
 }

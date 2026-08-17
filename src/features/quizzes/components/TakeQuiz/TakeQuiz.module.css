@@ -1,0 +1,338 @@
+.takePage,
+.resultsPage {
+    width: min(56rem, 100%);
+    margin-inline: auto;
+    padding: var(--space-8) var(--space-6) var(--space-10);
+    display: grid;
+    gap: var(--space-5);
+    overflow-x: clip;
+}
+
+.header,
+.progressRow,
+.controls,
+.resultActions,
+.reviewHeading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+}
+
+.header h1,
+.resultsCard h1,
+.resultsCard p,
+.questionCard h2,
+.reviewSection h2 {
+    margin: 0;
+}
+
+.header h1,
+.resultsCard h1 {
+    color: var(--text);
+    font-size: clamp(1.8rem, 4vw, 2.5rem);
+    letter-spacing: -0.035em;
+}
+
+.eyebrow {
+    display: block;
+    margin-bottom: var(--space-2);
+    color: var(--primary);
+    font-size: 0.78rem;
+    font-weight: 850;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.questionCard,
+.resultsCard,
+.reviewSection {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: clamp(1.25rem, 4vw, 2.5rem);
+    background: var(--surface);
+    box-shadow: var(--shadow-sm);
+}
+
+.questionCard {
+    display: grid;
+    gap: var(--space-5);
+}
+
+.progressRow {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.progressRow strong {
+    color: var(--text);
+}
+
+.progressTrack {
+    height: 0.45rem;
+    overflow: hidden;
+    border-radius: var(--radius-pill);
+    background: var(--surface-muted);
+}
+
+.progressTrack span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--primary);
+    transition: width 180ms ease;
+}
+
+.questionCard h2 {
+    color: var(--text);
+    font-size: clamp(1.3rem, 3vw, 1.8rem);
+    line-height: 1.4;
+}
+
+.answerOptions {
+    display: grid;
+    gap: var(--space-3);
+    margin: 0;
+    border: 0;
+    padding: 0;
+}
+
+.answerOptions legend {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+}
+
+.answerOptions label {
+    min-height: 3.5rem;
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: var(--space-3) var(--space-4);
+    color: var(--text);
+    cursor: pointer;
+    transition:
+        border-color 150ms ease,
+        background 150ms ease;
+}
+
+.answerOptions label:has(input:checked) {
+    border-color: var(--primary);
+    background: color-mix(in srgb, var(--primary) 9%, var(--surface));
+}
+
+.answerOptions input {
+    width: 1.2rem;
+    height: 1.2rem;
+    flex: 0 0 auto;
+    accent-color: var(--primary);
+}
+
+.answerOptions span {
+    overflow-wrap: anywhere;
+}
+
+.error {
+    margin: 0;
+    color: var(--danger);
+    font-weight: 650;
+}
+
+.resultsCard {
+    display: grid;
+    justify-items: center;
+    gap: var(--space-4);
+    text-align: center;
+}
+
+.resultsCard > p {
+    color: var(--text-secondary);
+}
+
+.scoreCircle {
+    width: 12rem;
+    aspect-ratio: 1;
+    display: grid;
+    place-content: center;
+    gap: 0.25rem;
+    border: 0.8rem solid
+        color-mix(in srgb, var(--primary) 18%, var(--surface-muted));
+    border-radius: 50%;
+}
+
+.scoreCircle span {
+    color: var(--text-secondary);
+}
+.scoreCircle strong {
+    color: var(--text);
+    font-size: 1.65rem;
+}
+.scoreCircle b {
+    color: var(--primary);
+    font-size: 1.15rem;
+}
+
+.resultStats {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(8rem, 1fr));
+    gap: var(--space-3);
+    margin: 0;
+}
+
+.resultStats div {
+    border-radius: var(--radius-md);
+    padding: var(--space-3) var(--space-5);
+    background: var(--surface-muted);
+}
+
+.resultStats dt {
+    color: var(--text-secondary);
+    font-size: 0.82rem;
+}
+.resultStats dd {
+    margin: 0.2rem 0 0;
+    color: var(--text);
+    font-size: 1.4rem;
+    font-weight: 850;
+}
+
+.reviewSection > ol {
+    display: grid;
+    gap: var(--space-4);
+    margin: var(--space-4) 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.reviewSection > ol > li {
+    border-left: 0.3rem solid;
+    border-radius: var(--radius-md);
+    padding: var(--space-4);
+    background: var(--surface-muted);
+}
+
+.correct {
+    border-color: var(--success, #168052);
+}
+.incorrect {
+    border-color: var(--danger);
+}
+.reviewHeading span {
+    font-size: 0.8rem;
+    font-weight: 800;
+}
+.reviewSection ul {
+    margin: var(--space-3) 0 0;
+    padding-left: 1.25rem;
+    color: var(--text-secondary);
+}
+
+.reviewSummary {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-3);
+    margin-top: var(--space-3);
+}
+
+.reviewSummary p {
+    display: grid;
+    gap: 0.2rem;
+    margin: 0;
+    border-radius: var(--radius-md);
+    padding: var(--space-3);
+    background: var(--surface);
+}
+
+.reviewSummary span {
+    color: var(--text-secondary);
+    font-size: 0.76rem;
+}
+
+.reviewSummary strong {
+    color: var(--text);
+    overflow-wrap: anywhere;
+}
+.correctOption {
+    color: var(--success, #168052);
+    font-weight: 750;
+}
+.wrongOption {
+    color: var(--danger);
+}
+
+@media (max-width: 47.999rem) {
+    .takePage,
+    .resultsPage {
+        padding: var(--space-6) var(--space-4) var(--space-8);
+    }
+    .header {
+        align-items: stretch;
+        flex-direction: column;
+    }
+    .header button {
+        width: 100%;
+        min-height: 3rem;
+    }
+    .controls button {
+        min-height: 3rem;
+        flex: 1;
+    }
+    .resultActions {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr;
+    }
+    .resultActions button {
+        width: 100%;
+        min-height: 3rem;
+    }
+    .reviewHeading {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .reviewSummary {
+        grid-template-columns: 1fr;
+    }
+
+    .progressRow {
+        flex-wrap: wrap;
+        gap: var(--space-2);
+    }
+
+    .answerOptions label {
+        min-height: 3.75rem;
+        padding: var(--space-3);
+    }
+
+    .reviewSection,
+    .reviewSection li,
+    .reviewSummary strong {
+        min-width: 0;
+        overflow-wrap: anywhere;
+    }
+}
+
+@media (max-width: 34rem) {
+    .questionCard,
+    .resultsCard,
+    .reviewSection {
+        padding: var(--space-4);
+    }
+
+    .resultStats {
+        width: 100%;
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .progressTrack span,
+    .answerOptions label {
+        transition: none;
+    }
+}

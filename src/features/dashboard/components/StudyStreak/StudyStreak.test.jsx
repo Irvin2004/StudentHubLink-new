@@ -14,9 +14,7 @@ test("renders the streak card", () => {
         />
     );
 
-    expect(
-        screen.getByRole("heading", { name: "Study Streak" })
-    ).toBeVisible();
+    expect(screen.getByRole("heading", { name: "Study Streak" })).toBeVisible();
     expect(screen.getByText("12 Days")).toBeVisible();
     expect(screen.getByText("You're building a great habit!")).toBeVisible();
     expect(screen.getByText("80%")).toBeVisible();

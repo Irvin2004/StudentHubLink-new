@@ -62,12 +62,7 @@ test("shows loading skeleton cards", () => {
 });
 
 test("shows the empty state", () => {
-    render(
-        <ContinueLearning
-            onBrowseResources={vi.fn()}
-            resources={[]}
-        />
-    );
+    render(<ContinueLearning onBrowseResources={vi.fn()} resources={[]} />);
 
     expect(
         screen.getByRole("heading", { name: "Continue Learning" })
@@ -92,4 +87,55 @@ test("renders a resource card", () => {
     expect(screen.getByText("Robotics")).toBeVisible();
     expect(screen.getByText("65%")).toBeVisible();
     expect(screen.getByText("Last opened: 2 hours ago")).toBeVisible();
+});
+
+test("opens and reviews a recently studied flashcard deck", () => {
+    const onOpenFlashcards = vi.fn();
+    const onReviewFlashcards = vi.fn();
+    render(
+        <ContinueLearning
+            onOpenFlashcards={onOpenFlashcards}
+            onReviewFlashcards={onReviewFlashcards}
+            resources={[
+                {
+                    deckId: "deck-1",
+                    dueCount: 3,
+                    id: "deck-1",
+                    lastOpenedLabel: "1h ago",
+                    learningType: "flashcard",
+                    subject: "Robotics",
+                    title: "Robot basics"
+                }
+            ]}
+        />
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Open Deck" }));
+    fireEvent.click(screen.getByRole("button", { name: "Review 3 Due" }));
+    expect(onOpenFlashcards).toHaveBeenCalledWith("deck-1");
+    expect(onReviewFlashcards).toHaveBeenCalledWith("deck-1");
+});
+
+test("opens and retries the most recently taken quiz", () => {
+    const onOpenQuiz = vi.fn();
+    render(
+        <ContinueLearning
+            onOpenQuiz={onOpenQuiz}
+            resources={[
+                {
+                    id: "quiz-1",
+                    lastOpenedLabel: "Today",
+                    learningType: "quiz",
+                    progress: 80,
+                    quizId: "quiz-1",
+                    subject: "Programming",
+                    title: "Programming Quiz"
+                }
+            ]}
+        />
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Open Quiz" }));
+    fireEvent.click(screen.getByRole("button", { name: "Try Again" }));
+    expect(onOpenQuiz).toHaveBeenCalledTimes(2);
+    expect(onOpenQuiz).toHaveBeenCalledWith("quiz-1");
 });

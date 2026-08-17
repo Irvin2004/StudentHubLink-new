@@ -6,12 +6,15 @@ import ChannelHeader from "../../components/channels/ChannelHeader/ChannelHeader
 import ChannelList from "../../components/channels/ChannelList/ChannelList.jsx";
 import ChannelSettingsModal from "../../components/channels/ChannelSettingsModal/ChannelSettingsModal.jsx";
 import CreateChannelModal from "../../components/channels/CreateChannelModal/CreateChannelModal.jsx";
+import CommunitySettingsModal from "../../components/communities/CommunitySettingsModal/index.js";
+import Button from "../../components/ui/Button/index.js";
 import { LoadErrorState } from "../../components/common/LoadErrorState.jsx";
 import PerformanceProfiler from "../../components/performance/PerformanceProfiler.jsx";
 import ChatMessageSkeleton from "../../components/Skeleton/ChatMessageSkeleton.jsx";
 import Skeleton from "../../components/Skeleton/Skeleton.jsx";
 import { ROUTES } from "../../config/routes.js";
 import { useChannels } from "../../hooks/useChannels.js";
+import { useAuth } from "../../hooks/useAuth.js";
 import { useCommunity } from "../../hooks/useCommunity.js";
 import { useDocumentTitle } from "../../hooks/useDocumentTitle.js";
 import { useObservability } from "../../hooks/useObservability.js";
@@ -54,10 +57,12 @@ function CommunityHeaderSkeleton() {
 export default function CommunityPage() {
     const { communityId, channelId } = useParams();
     const navigate = useNavigate();
+    const { user } = useAuth();
     const { showToast } = useToast();
     const { captureError, getActionableErrorMessage } = useObservability();
     const [createOpen, setCreateOpen] = useState(false);
     const [managedChannel, setManagedChannel] = useState(null);
+    const [settingsOpen, setSettingsOpen] = useState(false);
     const announcementRef = useRef(null);
     const {
         channels,
@@ -70,9 +75,21 @@ export default function CommunityPage() {
     const {
         community,
         role,
+        members,
         loading: communityLoading,
-        error: communityError
-    } = useCommunity(communityId);
+        membersLoading,
+        membersLoadingMore,
+        hasMoreMembers,
+        error: communityError,
+        membersError,
+        refreshMembers,
+        loadMoreMembers,
+        saveCommunity,
+        deleteCommunity,
+        leaveCommunity,
+        removeCommunityMember,
+        changeCommunityMemberRole
+    } = useCommunity(communityId, { loadMembers: settingsOpen });
 
     const selectedChannel = useMemo(
         () => channels.find((channel) => channel.id === channelId) || null,
@@ -144,6 +161,53 @@ export default function CommunityPage() {
         navigate(`/community/${communityId}/channel/general`);
     }
 
+    async function handleCommunitySave(updates) {
+        await saveCommunity(updates);
+        showToast({
+            title: "Community updated",
+            message: "Community settings were saved.",
+            type: "success"
+        });
+    }
+
+    async function handleRoleChange(member, nextRole) {
+        await changeCommunityMemberRole(member.userId, nextRole);
+        showToast({
+            title: "Role updated",
+            message: `${member.displayName} is now a ${nextRole}.`,
+            type: "success"
+        });
+    }
+
+    async function handleRemoveMember(member) {
+        await removeCommunityMember(member.userId);
+        showToast({
+            title: "Member removed",
+            message: `${member.displayName} was removed from the community.`,
+            type: "info"
+        });
+    }
+
+    async function handleLeaveCommunity() {
+        await leaveCommunity();
+        showToast({
+            title: "Community left",
+            message: `You left ${community.name}.`,
+            type: "info"
+        });
+        navigate(ROUTES.COMMUNITIES);
+    }
+
+    async function handleDeleteCommunity() {
+        await deleteCommunity();
+        showToast({
+            title: "Community deleted",
+            message: `${community.name} was permanently deleted.`,
+            type: "info"
+        });
+        navigate(ROUTES.COMMUNITIES);
+    }
+
     if (!communityLoading && communityError && !community) {
         return (
             <main className={`${styles.page} ${styles.pageState}`}>
@@ -164,7 +228,7 @@ export default function CommunityPage() {
                 ) : (
                     <>
                         <CommunityMark name={community.name} />
-                        <div>
+                        <div className={styles.communityIdentity}>
                             <h1>{community.name}</h1>
                             <p>
                                 {community.memberCount.toLocaleString()}{" "}
@@ -173,6 +237,15 @@ export default function CommunityPage() {
                                     : "members"}
                             </p>
                         </div>
+                        {role ? (
+                            <Button
+                                className={styles.settingsButton}
+                                onClick={() => setSettingsOpen(true)}
+                                variant="outline"
+                            >
+                                Community settings
+                            </Button>
+                        ) : null}
                     </>
                 )}
             </header>
@@ -240,6 +313,27 @@ export default function CommunityPage() {
                 onUpdate={handleUpdate}
                 open={Boolean(managedChannel)}
             />
+            {community ? (
+                <CommunitySettingsModal
+                    community={community}
+                    currentUserId={user?.uid}
+                    error={membersError}
+                    hasMoreMembers={hasMoreMembers}
+                    loading={membersLoading}
+                    loadingMoreMembers={membersLoadingMore}
+                    members={members}
+                    onClose={() => setSettingsOpen(false)}
+                    onDelete={handleDeleteCommunity}
+                    onLeave={handleLeaveCommunity}
+                    onRemoveMember={handleRemoveMember}
+                    onLoadMoreMembers={loadMoreMembers}
+                    onRetry={refreshMembers}
+                    onRoleChange={handleRoleChange}
+                    onSave={handleCommunitySave}
+                    open={settingsOpen}
+                    role={role}
+                />
+            ) : null}
         </main>
     );
 }

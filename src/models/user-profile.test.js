@@ -19,6 +19,7 @@ describe("createUserProfile", () => {
             email: "alice@example.com",
             displayName: "Alice Student",
             photoURL: "https://example.com/alice.jpg",
+            profileVisibility: "public",
             role: "student",
             settings: {
                 theme: "system"

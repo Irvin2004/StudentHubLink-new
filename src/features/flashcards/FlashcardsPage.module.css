@@ -1,0 +1,411 @@
+.page {
+    width: min(76rem, 100%);
+    margin-inline: auto;
+    padding: var(--space-8) var(--space-6) var(--space-10);
+    display: grid;
+    gap: var(--space-6);
+    overflow-x: clip;
+}
+
+.studyPage {
+    width: 100%;
+}
+
+.pageHeader,
+.sectionHeading,
+.cardsHeader {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-4);
+}
+
+.pageHeader h1,
+.pageHeader p,
+.sectionHeading h2,
+.sectionHeading p,
+.cardsHeader h2,
+.cardsHeader p {
+    margin: 0;
+}
+
+.pageHeader h1 {
+    color: var(--text);
+    font-size: clamp(2rem, 3vw, 2.6rem);
+    font-weight: 850;
+    letter-spacing: -0.035em;
+}
+
+.pageHeader p,
+.sectionHeading p,
+.cardsHeader p {
+    margin-top: var(--space-2);
+    color: var(--text-secondary);
+}
+
+.sectionHeading {
+    margin-bottom: var(--space-3);
+}
+
+.deckFilters {
+    display: grid;
+    grid-template-columns: minmax(15rem, 1fr) auto;
+    align-items: end;
+    gap: var(--space-4);
+    margin-bottom: var(--space-4);
+}
+
+.deckFilters fieldset {
+    margin: 0;
+    border: 0;
+    padding: 0;
+}
+
+.deckFilters legend {
+    margin-bottom: var(--space-2);
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    font-weight: 750;
+}
+
+.deckFilters fieldset > div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+}
+
+.deckFilters fieldset button {
+    min-height: 2.75rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+    padding: 0.55rem 0.9rem;
+    background: var(--surface);
+    color: var(--text-secondary);
+    cursor: pointer;
+    font: inherit;
+    font-size: 0.84rem;
+    font-weight: 750;
+}
+
+.deckFilters fieldset button[aria-pressed="true"] {
+    border-color: var(--primary);
+    background: color-mix(in srgb, var(--primary) 10%, var(--surface));
+    color: var(--primary);
+}
+
+.sectionHeading h2,
+.cardsHeader h2 {
+    color: var(--text);
+}
+
+.deckGrid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-4);
+}
+
+.deckCard {
+    overflow: hidden;
+    position: relative;
+    min-height: 11rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    box-shadow: var(--shadow-sm);
+    transition:
+        border-color 160ms ease,
+        transform 160ms ease,
+        box-shadow 160ms ease;
+}
+
+.deckCard:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.selectedDeck {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 18%, transparent);
+}
+
+.deckOpen {
+    width: 100%;
+    min-height: 11rem;
+    display: grid;
+    align-content: start;
+    gap: var(--space-3);
+    border: 0;
+    padding: var(--space-5);
+    background: transparent;
+    color: var(--text);
+    cursor: pointer;
+    text-align: left;
+}
+
+.deckOpen:focus-visible,
+.deleteDeck:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: -3px;
+}
+
+.deckOpen strong {
+    max-width: calc(100% - 3rem);
+    font-size: 1.15rem;
+    line-height: 1.35;
+}
+
+.deckStats {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--space-2);
+    margin: var(--space-1) 0 0;
+}
+
+.deckStats div {
+    min-width: 0;
+}
+
+.deckStats dt {
+    color: var(--text-secondary);
+    font-size: 0.7rem;
+}
+
+.deckStats dd {
+    margin: 0.15rem 0 0;
+    color: var(--text);
+    font-size: 0.92rem;
+    font-weight: 850;
+}
+
+.subject {
+    width: fit-content;
+    border-radius: var(--radius-pill);
+    padding: 0.25rem 0.65rem;
+    background: color-mix(in srgb, var(--primary) 10%, transparent);
+    color: var(--primary);
+    font-size: 0.76rem;
+    font-weight: 800;
+}
+
+.cardCount {
+    color: var(--text-secondary);
+    font-size: 0.88rem;
+}
+
+.dueCount {
+    width: fit-content;
+    border-radius: var(--radius-pill);
+    padding: 0.25rem 0.6rem;
+    background: color-mix(in srgb, var(--warning) 12%, transparent);
+    color: var(--warning);
+    font-size: 0.76rem;
+    font-weight: 800;
+}
+
+.deleteDeck {
+    position: absolute;
+    top: var(--space-3);
+    right: var(--space-3);
+    min-width: 3rem;
+    min-height: 2.75rem;
+    border: 0;
+    border-radius: var(--radius-md);
+    background: transparent;
+    color: var(--danger);
+    cursor: pointer;
+    font: inherit;
+    font-size: 0.8rem;
+    font-weight: 750;
+}
+
+.deleteDeck:hover {
+    background: color-mix(in srgb, var(--danger) 10%, transparent);
+}
+
+.deckSkeleton {
+    display: grid;
+    align-content: start;
+    gap: var(--space-4);
+    min-height: 11rem;
+}
+
+.cardsPanel {
+    display: grid;
+    gap: var(--space-5);
+}
+
+.cardsHeader {
+    align-items: center;
+}
+
+.cardsHeader > div {
+    display: grid;
+    justify-items: start;
+}
+
+.cardsHeader > button:first-of-type {
+    margin-left: auto;
+}
+
+.cardsHeader h2 {
+    margin-top: var(--space-2);
+}
+
+.cardList {
+    display: grid;
+    gap: var(--space-4);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.studyCard {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: start;
+    gap: var(--space-4);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-4);
+    background: var(--surface);
+}
+
+.cardNumber {
+    border-radius: var(--radius-pill);
+    padding: 0.3rem 0.65rem;
+    background: var(--surface-muted);
+    color: var(--text-secondary);
+    font-size: 0.76rem;
+    font-weight: 750;
+}
+
+.cardSides {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-4);
+}
+
+.cardSides section {
+    min-width: 0;
+}
+
+.cardSides section + section {
+    border-left: 1px solid var(--border);
+    padding-left: var(--space-4);
+}
+
+.cardSides h3,
+.cardSides p {
+    margin: 0;
+}
+
+.cardSides h3 {
+    margin-bottom: var(--space-2);
+    color: var(--text-secondary);
+    font-size: 0.76rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.cardSides p {
+    color: var(--text);
+    line-height: 1.55;
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+}
+
+.cardActions {
+    display: flex;
+    gap: var(--space-2);
+}
+
+.mutationError {
+    margin: 0;
+    border-radius: var(--radius-md);
+    padding: var(--space-3) var(--space-4);
+    background: color-mix(in srgb, var(--danger) 10%, transparent);
+    color: var(--danger);
+    font-size: 0.9rem;
+    font-weight: 650;
+}
+
+.caughtUp {
+    margin: 0;
+    border-radius: var(--radius-md);
+    padding: var(--space-3) var(--space-4);
+    background: color-mix(in srgb, var(--success, #168052) 10%, transparent);
+    color: var(--text);
+    font-size: 0.9rem;
+}
+
+@media (max-width: 63rem) {
+    .deckGrid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .studyCard {
+        grid-template-columns: auto minmax(0, 1fr);
+    }
+
+    .cardActions {
+        grid-column: 2;
+    }
+}
+
+@media (max-width: 47.999rem) {
+    .page {
+        padding: var(--space-6) var(--space-4) var(--space-8);
+    }
+
+    .pageHeader,
+    .cardsHeader {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .deckFilters {
+        grid-template-columns: 1fr;
+    }
+
+    .pageHeader > button,
+    .cardsHeader > button {
+        width: 100%;
+    }
+
+    .cardsHeader > button:first-of-type {
+        margin-left: 0;
+    }
+
+    .studyCard {
+        grid-template-columns: 1fr;
+    }
+
+    .cardSides {
+        grid-template-columns: 1fr;
+    }
+
+    .cardSides section + section {
+        border-top: 1px solid var(--border);
+        border-left: 0;
+        padding-top: var(--space-4);
+        padding-left: 0;
+    }
+
+    .cardActions {
+        grid-column: auto;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .deckOpen,
+    .deleteDeck,
+    .cardActions button {
+        min-height: 3rem;
+    }
+}
+
+@media (max-width: 34rem) {
+    .deckGrid {
+        grid-template-columns: 1fr;
+    }
+}

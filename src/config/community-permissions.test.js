@@ -6,6 +6,8 @@ import {
     canDeleteCommunityMessage,
     canEditCommunity,
     canManageMembers,
+    canChangeCommunityMemberRole,
+    canRemoveCommunityMember,
     canModerateContent,
     canPinCommunityMessage,
     COMMUNITY_PERMISSIONS,
@@ -84,6 +86,48 @@ describe("community permissions", () => {
                 { uploadedBy: "user-1" },
                 "user-2",
                 COMMUNITY_ROLES.MODERATOR
+            )
+        ).toBe(false);
+    });
+
+    test("keeps owner and admin member-management boundaries explicit", () => {
+        expect(
+            canChangeCommunityMemberRole(
+                COMMUNITY_ROLES.OWNER,
+                COMMUNITY_ROLES.MEMBER,
+                COMMUNITY_ROLES.ADMIN
+            )
+        ).toBe(true);
+        expect(
+            canChangeCommunityMemberRole(
+                COMMUNITY_ROLES.ADMIN,
+                COMMUNITY_ROLES.MEMBER,
+                COMMUNITY_ROLES.ADMIN
+            )
+        ).toBe(false);
+        expect(
+            canChangeCommunityMemberRole(
+                COMMUNITY_ROLES.ADMIN,
+                COMMUNITY_ROLES.MODERATOR,
+                COMMUNITY_ROLES.MEMBER
+            )
+        ).toBe(true);
+        expect(
+            canRemoveCommunityMember(
+                COMMUNITY_ROLES.ADMIN,
+                COMMUNITY_ROLES.ADMIN
+            )
+        ).toBe(false);
+        expect(
+            canRemoveCommunityMember(
+                COMMUNITY_ROLES.OWNER,
+                COMMUNITY_ROLES.ADMIN
+            )
+        ).toBe(true);
+        expect(
+            canRemoveCommunityMember(
+                COMMUNITY_ROLES.OWNER,
+                COMMUNITY_ROLES.OWNER
             )
         ).toBe(false);
     });

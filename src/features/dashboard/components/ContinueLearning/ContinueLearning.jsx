@@ -1,14 +1,18 @@
 import EmptyState from "../../../../components/EmptyState/EmptyState.jsx";
 import { LoadErrorState } from "../../../../components/common/LoadErrorState.jsx";
 import Card from "../../../../components/ui/Card/Card.jsx";
-import styles from "./ContinueLearning.module.css";
+import styles from "../DashboardListSection.module.css";
 import { ResourceCard, ResourceCardSkeleton } from "./ResourceCard.jsx";
 
 export function ContinueLearning({
     error,
     loading,
     onBrowseResources,
+    onOpenFlashcards,
+    onOpenQuiz,
     onOpenResource,
+    onReviewFlashcards,
+    onStartSession,
     onRetry,
     resources = []
 }) {
@@ -51,7 +55,11 @@ export function ContinueLearning({
     }
 
     return (
-        <Card as="section" aria-label="Continue Learning" className={styles.card}>
+        <Card
+            as="section"
+            aria-label="Continue Learning"
+            className={styles.card}
+        >
             <header className={styles.header}>
                 <h2 className={styles.title}>📚 Continue Learning</h2>
             </header>
@@ -59,9 +67,32 @@ export function ContinueLearning({
             <div className={styles.list}>
                 {resources.slice(0, 3).map((resource) => (
                     <ResourceCard
-                        key={resource.id}
-                        lastOpened={resource.lastOpened}
-                        onContinue={() => onOpenResource?.(resource.id)}
+                        dueCount={resource.dueCount}
+                        kind={resource.learningType}
+                        key={resource.resourceKey || resource.id}
+                        lastOpened={
+                            resource.lastOpenedLabel || resource.lastOpened
+                        }
+                        onContinue={() =>
+                            resource.learningType === "flashcard"
+                                ? onOpenFlashcards?.(
+                                      resource.deckId || resource.id
+                                  )
+                                : resource.learningType === "quiz"
+                                  ? onOpenQuiz?.(resource.quizId || resource.id)
+                                  : onOpenResource?.(
+                                        resource.resourceKey || resource.id
+                                    )
+                        }
+                        onStartSession={() =>
+                            resource.learningType === "flashcard"
+                                ? onReviewFlashcards?.(
+                                      resource.deckId || resource.id
+                                  )
+                                : resource.learningType === "quiz"
+                                  ? onOpenQuiz?.(resource.quizId || resource.id)
+                                  : onStartSession?.(resource)
+                        }
                         progress={resource.progress}
                         subject={resource.subject}
                         title={resource.title}

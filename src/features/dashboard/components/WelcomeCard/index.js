@@ -1,1 +1,5 @@
-export { WelcomeCard, getDailyMotivation, getDisplayName } from "./WelcomeCard.jsx";
+export {
+    WelcomeCard,
+    getDailyMotivation,
+    getDisplayName
+} from "./WelcomeCard.jsx";

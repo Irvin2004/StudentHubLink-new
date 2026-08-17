@@ -78,7 +78,11 @@
 .progressFill {
     height: 100%;
     border-radius: inherit;
-    background: linear-gradient(90deg, var(--danger), color-mix(in srgb, var(--warning) 70%, var(--danger)));
+    background: linear-gradient(
+        90deg,
+        var(--danger),
+        color-mix(in srgb, var(--warning) 70%, var(--danger))
+    );
 }
 
 .loading {

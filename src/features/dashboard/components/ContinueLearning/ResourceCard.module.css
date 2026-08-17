@@ -44,7 +44,11 @@
 .progressFill {
     height: 100%;
     border-radius: inherit;
-    background: linear-gradient(90deg, var(--primary), color-mix(in srgb, var(--primary) 60%, var(--success)));
+    background: linear-gradient(
+        90deg,
+        var(--primary),
+        color-mix(in srgb, var(--primary) 60%, var(--success))
+    );
 }
 
 .progressValue {

@@ -1,5 +1,11 @@
 import { lazy, Suspense } from "react";
-import { Route, Routes } from "react-router-dom";
+import {
+    Navigate,
+    Route,
+    Routes,
+    useLocation,
+    useParams
+} from "react-router-dom";
 
 import { AppLayout } from "../components/layout/AppLayout/AppLayout.jsx";
 import { LoadingScreen } from "../components/feedback/LoadingScreen.jsx";
@@ -21,10 +27,17 @@ const CommunityPage = lazy(
     () => import("../pages/community/CommunityPage.jsx")
 );
 const ChatPage = lazy(() => import("../pages/chat/ChatPage.jsx"));
-const FilesPage = lazy(() => import("../pages/files/FilesPage.jsx"));
+const FriendsPage = lazy(() => import("../features/friends/FriendsPage.jsx"));
+const ResourceLibraryPage = lazy(
+    () => import("../features/resourceLibrary/ResourceLibraryPage.jsx")
+);
 const StudyPlannerPage = lazy(
     () => import("../features/studyPlanner/StudyPlannerPage.jsx")
 );
+const FlashcardsPage = lazy(
+    () => import("../features/flashcards/FlashcardsPage.jsx")
+);
+const QuizPage = lazy(() => import("../features/quizzes/QuizPage.jsx"));
 const NotificationsPage = lazy(
     () => import("../pages/notifications/NotificationsPage.jsx")
 );
@@ -35,6 +48,27 @@ function ProfiledRoute({ children, id }) {
     return <PerformanceProfiler id={id}>{children}</PerformanceProfiler>;
 }
 
+function CanonicalRedirect({ to }) {
+    const { search } = useLocation();
+
+    return <Navigate replace to={{ pathname: to, search }} />;
+}
+
+function CommunityRedirect() {
+    const { communityId } = useParams();
+    const { search } = useLocation();
+
+    return (
+        <Navigate
+            replace
+            to={{
+                pathname: `/community/${communityId}/channel/general`,
+                search
+            }}
+        />
+    );
+}
+
 export function AppRouter() {
     return (
         <Suspense fallback={<LoadingScreen />}>
@@ -42,9 +76,15 @@ export function AppRouter() {
                 <Route path={ROUTES.HOME} element={<HomePage />} />
                 <Route element={<GuestRoute />}>
                     <Route path={ROUTES.LOGIN} element={<LoginPage />} />
-                    <Route path="/login.html" element={<LoginPage />} />
+                    <Route
+                        path="/login.html"
+                        element={<CanonicalRedirect to={ROUTES.LOGIN} />}
+                    />
                     <Route path={ROUTES.REGISTER} element={<RegisterPage />} />
-                    <Route path="/register.html" element={<RegisterPage />} />
+                    <Route
+                        path="/register.html"
+                        element={<CanonicalRedirect to={ROUTES.REGISTER} />}
+                    />
                 </Route>
                 <Route element={<ProtectedRoute />}>
                     <Route element={<AppLayout />}>
@@ -66,11 +106,7 @@ export function AppRouter() {
                         />
                         <Route
                             path={ROUTES.COMMUNITY}
-                            element={
-                                <ProfiledRoute id="CommunityPage">
-                                    <CommunityPage />
-                                </ProfiledRoute>
-                            }
+                            element={<CommunityRedirect />}
                         />
                         <Route
                             path={ROUTES.COMMUNITY_CHANNEL}
@@ -88,12 +124,55 @@ export function AppRouter() {
                                 </ProfiledRoute>
                             }
                         />
-                        <Route path={ROUTES.FILES} element={<FilesPage />} />
+                        <Route
+                            path={ROUTES.FRIENDS}
+                            element={
+                                <ProfiledRoute id="FriendsPage">
+                                    <FriendsPage />
+                                </ProfiledRoute>
+                            }
+                        />
+                        <Route
+                            path={ROUTES.RESOURCES}
+                            element={
+                                <ProfiledRoute id="ResourceLibraryPage">
+                                    <ResourceLibraryPage />
+                                </ProfiledRoute>
+                            }
+                        />
+                        <Route
+                            path={ROUTES.RESOURCES_SHORT}
+                            element={
+                                <CanonicalRedirect to={ROUTES.RESOURCES} />
+                            }
+                        />
+                        <Route
+                            path={ROUTES.FILES}
+                            element={
+                                <CanonicalRedirect to={ROUTES.RESOURCES} />
+                            }
+                        />
                         <Route
                             path={ROUTES.STUDY_PLANNER}
                             element={
                                 <ProfiledRoute id="StudyPlannerPage">
                                     <StudyPlannerPage />
+                                </ProfiledRoute>
+                            }
+                        />
+                        <Route
+                            path={ROUTES.FLASHCARDS}
+                            element={
+                                <ProfiledRoute id="FlashcardsPage">
+                                    <FlashcardsPage />
+                                </ProfiledRoute>
+                            }
+                        />
+                        <Route
+                            path={ROUTES.QUIZZES}
+                            element={
+                                <ProfiledRoute id="QuizPage">
+                                    <QuizPage />
                                 </ProfiledRoute>
                             }
                         />

@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components -- deterministic welcome helpers are exported for focused tests. */
 import { useEffect, useMemo, useState } from "react";
 
 import Avatar from "../../../../components/ui/Avatar/Avatar.jsx";
@@ -66,7 +67,10 @@ export function getDailyMotivation(seed = "", date = new Date()) {
         (seedValue +
             dayKey
                 .split("")
-                .reduce((total, character) => total + character.charCodeAt(0), 0)) %
+                .reduce(
+                    (total, character) => total + character.charCodeAt(0),
+                    0
+                )) %
         MESSAGES.length;
 
     try {
@@ -82,17 +86,14 @@ export function getDailyMotivation(seed = "", date = new Date()) {
 }
 
 export function getDisplayName(user, greeting) {
-    return (
-        user?.displayName?.trim() ||
-        greeting?.name?.trim() ||
-        "StudentHub"
-    );
+    return user?.displayName?.trim() || greeting?.name?.trim() || "StudentHub";
 }
 
 export function WelcomeCard({
     greeting,
     loading,
     onCompleteProfile,
+    onContinueLearning,
     studyStreak = 0,
     user
 }) {
@@ -163,7 +164,9 @@ export function WelcomeCard({
                         <span className={styles.greetingEmoji}>
                             {timeGreeting.icon}
                         </span>
-                        <span>{timeGreeting.label}, {avatarName}</span>
+                        <span>
+                            {timeGreeting.label}, {avatarName}
+                        </span>
                     </h1>
                     <Avatar
                         className={styles.avatar}
@@ -187,7 +190,7 @@ export function WelcomeCard({
 
                 <Button
                     className={styles.primaryAction}
-                    onClick={onCompleteProfile}
+                    onClick={onContinueLearning}
                     type="button"
                 >
                     Continue Learning

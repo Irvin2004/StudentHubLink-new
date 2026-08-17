@@ -9,21 +9,21 @@ const deadlines = [
         id: "python-project",
         title: "Python Project",
         subject: "Programming",
-        due: "Tomorrow",
+        due: "Due tomorrow",
         priority: "high"
     },
     {
         id: "robotics-practical",
         title: "Robotics Practical",
         subject: "Robotics",
-        due: "Friday",
+        due: "Due in 3 days",
         priority: "medium"
     },
     {
         id: "database-assignment",
         title: "Database Assignment",
         subject: "Database",
-        due: "Next Monday",
+        due: "Due in 6 days",
         priority: "low"
     }
 ];
@@ -61,26 +61,29 @@ test("shows loading skeleton cards", () => {
     expect(container.querySelectorAll("[data-skeleton]").length).toBe(12);
 });
 
+test("uses the shared load-error state", () => {
+    render(<UpcomingDeadlines error={new Error("Failed")} onRetry={vi.fn()} />);
+
+    expect(
+        screen.getByRole("heading", { name: "Deadlines unavailable" })
+    ).toBeVisible();
+});
+
 test("shows the empty state", () => {
-    render(
-        <UpcomingDeadlines
-            deadlines={[]}
-            onBrowseResources={vi.fn()}
-        />
-    );
+    render(<UpcomingDeadlines deadlines={[]} onBrowseResources={vi.fn()} />);
 
     expect(
         screen.getByRole("heading", { name: "No Upcoming Deadlines" })
     ).toBeVisible();
     expect(
-        screen.getByRole("button", { name: "Browse Resources" })
+        screen.getByRole("button", { name: "Open Study Planner" })
     ).toBeVisible();
 });
 
 test("renders a deadline card", () => {
     render(
         <DeadlineCard
-            due="Tomorrow"
+            due="Due tomorrow"
             onOpen={vi.fn()}
             priority="high"
             subject="Programming"
@@ -90,6 +93,6 @@ test("renders a deadline card", () => {
 
     expect(screen.getByText("Python Project")).toBeVisible();
     expect(screen.getByText("Programming")).toBeVisible();
-    expect(screen.getByText("Due Tomorrow")).toBeVisible();
+    expect(screen.getByText("Due tomorrow")).toBeVisible();
     expect(screen.getByRole("button", { name: "Open" })).toBeVisible();
 });

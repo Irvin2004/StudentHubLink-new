@@ -1,9 +1,21 @@
-import EmptyState from "../../../../components/EmptyState/EmptyState.jsx";
 import Skeleton from "../../../../components/Skeleton/Skeleton.jsx";
 import { TaskCard } from "../TaskCard/index.js";
 import styles from "./TaskList.module.css";
 
-export function TaskList({ loading, tasks = [], title }) {
+export function TaskList({
+    emphasis = false,
+    highlightedTaskId,
+    loading,
+    onDeleteTask,
+    onEditTask,
+    onStartSession,
+    onStudyFlashcards,
+    onTakeQuiz,
+    onToggleTask,
+    tasks = [],
+    taskCount = tasks.length,
+    title
+}) {
     if (loading) {
         return (
             <section className={styles.section} aria-busy="true">
@@ -15,31 +27,31 @@ export function TaskList({ loading, tasks = [], title }) {
         );
     }
 
-    if (!tasks.length) {
-        return (
-            <section className={styles.section}>
-                <header className={styles.header}>
-                    <h2>{title}</h2>
-                    <span className={styles.divider} />
-                </header>
-                <EmptyState
-                    description="No study tasks scheduled for this view."
-                    icon="📅"
-                    title="Nothing planned"
-                />
-            </section>
-        );
-    }
+    if (!tasks.length) return null;
 
     return (
-        <section className={styles.section}>
+        <section
+            className={`${styles.section} ${emphasis ? styles.emphasis : ""}`}
+        >
             <header className={styles.header}>
-                <h2>{title}</h2>
+                <h2>
+                    {title} <span className={styles.count}>({taskCount})</span>
+                </h2>
                 <span className={styles.divider} />
             </header>
             <div className={styles.list}>
                 {tasks.map((task) => (
-                    <TaskCard key={task.id} task={task} />
+                    <TaskCard
+                        key={task.id}
+                        highlighted={task.id === highlightedTaskId}
+                        onDelete={onDeleteTask}
+                        onEdit={onEditTask}
+                        onStartSession={onStartSession}
+                        onStudyFlashcards={onStudyFlashcards}
+                        onTakeQuiz={onTakeQuiz}
+                        onToggle={onToggleTask}
+                        task={task}
+                    />
                 ))}
             </div>
         </section>

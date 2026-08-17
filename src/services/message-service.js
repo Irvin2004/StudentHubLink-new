@@ -6,6 +6,7 @@ import {
     doc,
     endBefore,
     getDocs,
+    limit,
     limitToLast,
     onSnapshot,
     orderBy,
@@ -81,7 +82,10 @@ function fromSnapshot(snapshot, communityId, channelId) {
 
 async function notifyCommunityMembers(messageId, message) {
     const snapshot = await getDocs(
-        collection(db, COMMUNITIES, message.communityId, "members")
+        query(
+            collection(db, COMMUNITIES, message.communityId, "members"),
+            limit(500)
+        )
     );
     if (!snapshot?.docs) return;
     const mentions = parseMentions(message.text);
@@ -329,7 +333,7 @@ export function listenToTyping(communityId, channelId, onData, onError) {
     );
 
     return onSnapshot(
-        reference,
+        query(reference, limit(50)),
         (snapshot) =>
             onData(
                 snapshot.docs.map((item) => ({

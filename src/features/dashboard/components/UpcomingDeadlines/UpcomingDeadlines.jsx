@@ -1,7 +1,7 @@
 import EmptyState from "../../../../components/EmptyState/EmptyState.jsx";
 import { LoadErrorState } from "../../../../components/common/LoadErrorState.jsx";
 import Card from "../../../../components/ui/Card/Card.jsx";
-import styles from "./UpcomingDeadlines.module.css";
+import styles from "../DashboardListSection.module.css";
 import { DeadlineCard, DeadlineCardSkeleton } from "./DeadlineCard.jsx";
 
 export function UpcomingDeadlines({
@@ -27,7 +27,10 @@ export function UpcomingDeadlines({
     if (error) {
         return (
             <section className={styles.card}>
-                <LoadErrorState onRetry={onRetry} title="Deadlines unavailable" />
+                <LoadErrorState
+                    onRetry={onRetry}
+                    title="Deadlines unavailable"
+                />
             </section>
         );
     }
@@ -36,7 +39,7 @@ export function UpcomingDeadlines({
         return (
             <section className={styles.card}>
                 <EmptyState
-                    actionLabel="Browse Resources"
+                    actionLabel="Open Study Planner"
                     actionVariant="outline"
                     description="You're all caught up!"
                     icon="🎉"
@@ -48,7 +51,11 @@ export function UpcomingDeadlines({
     }
 
     return (
-        <Card as="section" aria-label="Upcoming Deadlines" className={styles.card}>
+        <Card
+            as="section"
+            aria-label="Upcoming Deadlines"
+            className={styles.card}
+        >
             <header className={styles.header}>
                 <h2 className={styles.title}>📅 Upcoming Deadlines</h2>
             </header>

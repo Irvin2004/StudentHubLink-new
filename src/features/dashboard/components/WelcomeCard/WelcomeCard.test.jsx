@@ -1,10 +1,7 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
-import {
-    WelcomeCard,
-    getDailyMotivation
-} from "./WelcomeCard.jsx";
+import { WelcomeCard, getDailyMotivation } from "./WelcomeCard.jsx";
 
 function createStorage() {
     const store = new Map();
@@ -65,6 +62,21 @@ describe("WelcomeCard", () => {
                 "Every study session brings you closer to your goals."
             )
         ).toBeVisible();
+    });
+
+    test("continues to the student's latest learning item", () => {
+        const onContinueLearning = vi.fn();
+        render(
+            <WelcomeCard
+                onContinueLearning={onContinueLearning}
+                user={{ displayName: "Student", uid: "student-1" }}
+            />
+        );
+
+        fireEvent.click(
+            screen.getByRole("button", { name: "Continue Learning" })
+        );
+        expect(onContinueLearning).toHaveBeenCalledOnce();
     });
 
     test("shows the loading skeletons", () => {

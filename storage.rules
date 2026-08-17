@@ -117,14 +117,27 @@ service firebase.storage {
       allow write: if false;
     }
 
-    match /communities/{communityId}/channels/{channelId}/files/{fileName} {
+    match /communities/{communityId}/channels/{channelId}/files/{fileId}/{fileName} {
       allow read: if isCommunityMember(communityId);
       allow create: if isCommunityMember(communityId)
         && isAllowedUpload()
         && request.resource.metadata.communityId == communityId
         && request.resource.metadata.channelId == channelId
+        && request.resource.metadata.fileId == fileId
         && request.resource.metadata.uploadedBy == request.auth.uid;
       allow update: if false;
+      allow delete: if isCommunityMember(communityId)
+        && (
+          resource.metadata.uploadedBy == request.auth.uid
+          || isCommunityManager(communityId)
+        );
+    }
+
+    // Files uploaded before file IDs were added to the object path remain
+    // available, but all new uploads must use the linked path above.
+    match /communities/{communityId}/channels/{channelId}/files/{legacyFileName} {
+      allow read: if isCommunityMember(communityId);
+      allow create, update: if false;
       allow delete: if isCommunityMember(communityId)
         && (
           resource.metadata.uploadedBy == request.auth.uid

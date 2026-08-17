@@ -1,11 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { expect, test, vi } from "vitest";
 
-import {
-    FocusCard,
-    getFocusTitle,
-    getPriorityColor
-} from "./FocusCard.jsx";
+import { FocusCard, getFocusTitle, getPriorityColor } from "./FocusCard.jsx";
 
 test("renders the focus card", () => {
     render(
@@ -16,9 +12,9 @@ test("renders the focus card", () => {
                 subject: "Robotics",
                 due: "Tomorrow",
                 estimatedTime: "45 min",
-                priority: "high",
-                progress: 60
+                priority: "high"
             }}
+            weeklyProgress={60}
         />
     );
 
@@ -32,7 +28,12 @@ test("renders the focus card", () => {
     expect(screen.getByText("⏰ Tomorrow")).toBeVisible();
     expect(screen.getByText("⏱ 45 min")).toBeVisible();
     expect(screen.getByText("60%")).toBeVisible();
-    expect(screen.getByRole("button", { name: "Continue Learning" })).toBeVisible();
+    expect(screen.getByText(/Weekly Goal/)).toBeVisible();
+    expect(screen.getByRole("progressbar")).toHaveAttribute(
+        "aria-valuenow",
+        "60"
+    );
+    expect(screen.getByRole("button", { name: "Open Task" })).toBeVisible();
     expect(screen.getByText("HIGH")).toBeVisible();
 });
 
@@ -48,13 +49,12 @@ test("emits the task id when continuing", () => {
                 subject: "Robotics",
                 due: "Tomorrow",
                 estimatedTime: "45 min",
-                priority: "high",
-                progress: 60
+                priority: "high"
             }}
         />
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Continue Learning" }));
+    fireEvent.click(screen.getByRole("button", { name: "Open Task" }));
 
     expect(onContinue).toHaveBeenCalledWith("robotics-assignment");
 });
@@ -65,6 +65,14 @@ test("shows loading skeletons", () => {
     expect(container.querySelectorAll("[data-skeleton]").length).toBe(6);
 });
 
+test("uses the shared load-error state", () => {
+    render(<FocusCard error={new Error("Failed")} onRetry={vi.fn()} />);
+
+    expect(
+        screen.getByRole("heading", { name: "Today's focus unavailable" })
+    ).toBeVisible();
+});
+
 test("shows the empty state", () => {
     const onBrowseResources = vi.fn();
 
@@ -73,9 +81,11 @@ test("shows the empty state", () => {
     expect(
         screen.getByRole("heading", { name: "You're all caught up!" })
     ).toBeVisible();
-    expect(screen.getByText("No focus task for today.")).toBeVisible();
     expect(
-        screen.getByRole("button", { name: "Browse Resources" })
+        screen.getByText("No active study tasks need your attention.")
+    ).toBeVisible();
+    expect(
+        screen.getByRole("button", { name: "Open Study Planner" })
     ).toBeVisible();
 });
 
@@ -89,4 +99,51 @@ test("maps priority and titles", () => {
     expect(getFocusTitle({ type: "quiz" })).toBe("⚡ Next Priority");
     expect(getFocusTitle({ type: "assignment" })).toBe("🎯 Today's Focus");
     expect(getFocusTitle({})).toBe("🎯 Today's Focus");
+});
+
+test("launches a due flashcard review from flashcard focus", () => {
+    const onReviewFlashcards = vi.fn();
+    render(
+        <FocusCard
+            onReviewFlashcards={onReviewFlashcards}
+            task={{
+                due: "4 cards due",
+                estimatedTime: "8m",
+                flashcardDeckId: "deck-1",
+                id: "deck-1",
+                priority: "Medium",
+                subject: "Robotics",
+                title: "Review Robotics",
+                type: "flashcards"
+            }}
+        />
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /Review Due Cards/ }));
+    expect(onReviewFlashcards).toHaveBeenCalledWith("deck-1");
+    expect(
+        screen.queryByRole("button", { name: "Start Session" })
+    ).not.toBeInTheDocument();
+});
+
+test("opens a pending quiz task directly", () => {
+    const onTakeQuiz = vi.fn();
+    render(
+        <FocusCard
+            onTakeQuiz={onTakeQuiz}
+            task={{
+                due: "Due today",
+                estimatedTime: "20 min",
+                id: "task-1",
+                priority: "High",
+                quizId: "quiz-1",
+                subject: "Programming",
+                title: "Programming Quiz",
+                type: "quiz"
+            }}
+        />
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Take Quiz" }));
+    expect(onTakeQuiz).toHaveBeenCalledWith("quiz-1", "task-1");
 });

@@ -12,6 +12,9 @@ export default function UploadProgress({
     const cancelled = upload.status === "cancelled";
     const complete = upload.status === "complete";
     const extension = upload.file?.name?.split(".").pop();
+    const transferLabel = upload.totalBytes
+        ? `${formatFileSize(upload.bytesTransferred)} of ${formatFileSize(upload.totalBytes)}`
+        : "Preparing upload";
 
     return (
         <div className={styles.item} data-status={upload.status}>
@@ -38,7 +41,7 @@ export default function UploadProgress({
                         ? upload.error || "Upload cancelled."
                         : complete
                           ? `${formatFileSize(upload.file?.size)} uploaded`
-                          : `Uploading ${upload.file?.name}`}
+                          : `${transferLabel} uploaded`}
                 </p>
             </div>
             <div className={styles.actions}>

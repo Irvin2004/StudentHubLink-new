@@ -25,6 +25,13 @@ const ICON_PATHS = Object.freeze({
             <path d="M14 2v6h6" />
         </>
     ),
+    flashcards: (
+        <>
+            <rect x="5" y="4" width="15" height="13" rx="2" />
+            <path d="M5 8H3a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h13a2 2 0 0 0 2-2v-3" />
+            <path d="M9 9h7M9 12h4" />
+        </>
+    ),
     home: (
         <>
             <path d="m3 11 9-8 9 8" />
@@ -55,6 +62,13 @@ const ICON_PATHS = Object.freeze({
     ),
     moon: (
         <path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5 8.5 8.5 0 1 0 20.5 14.2Z" />
+    ),
+    quiz: (
+        <>
+            <rect x="3" y="3" width="18" height="18" rx="3" />
+            <path d="M8 8h8M8 12h5M8 16h3" />
+            <path d="m15 15 1.5 1.5L19 14" />
+        </>
     ),
     search: (
         <>
