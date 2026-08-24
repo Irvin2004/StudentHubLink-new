@@ -19,17 +19,6 @@
     border-radius: var(--radius-lg);
     background: var(--surface);
     box-shadow: var(--shadow-sm);
-    transition:
-        transform var(--transition-fast),
-        box-shadow var(--transition-fast),
-        border-color var(--transition-fast);
-}
-
-.card:hover {
-    cursor: pointer;
-    transform: translateY(-4px);
-    border-color: color-mix(in srgb, var(--primary) 18%, var(--border));
-    box-shadow: var(--shadow-md);
 }
 
 .iconWrap {

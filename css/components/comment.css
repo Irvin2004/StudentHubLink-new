@@ -10,12 +10,12 @@
 .comment-header {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 12px;
+    margin-bottom: var(--space-3);
 }
 
 .comment-message {
     line-height: 1.6;
-    margin-bottom: 16px;
+    margin-bottom: var(--space-4);
 }
 
 .comment-actions {

@@ -40,7 +40,7 @@
     }
 
     .groups-nav a {
-        padding: 12px 14px;
+        padding: var(--space-3) 14px;
         border-radius: var(--radius-md);
         color: var(--text-secondary);
         font-weight: 650;
@@ -282,7 +282,7 @@
     }
 
     .group-tags span {
-        padding: 4px 8px;
+        padding: var(--space-1) var(--space-2);
         border-radius: 6px;
         background: var(--primary-soft);
         color: var(--primary);
@@ -321,7 +321,7 @@
 
     .group-card-actions .btn {
         min-width: 0;
-        padding-inline: 12px;
+        padding-inline: var(--space-3);
         text-align: center;
     }
 
@@ -456,7 +456,7 @@
         display: grid;
         gap: var(--space-3);
         margin: 0;
-        padding-left: 20px;
+        padding-left: var(--space-5);
     }
 
     .group-detail-rail {

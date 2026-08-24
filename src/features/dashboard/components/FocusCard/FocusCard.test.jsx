@@ -19,7 +19,7 @@ test("renders the focus card", () => {
     );
 
     expect(
-        screen.getByRole("heading", { name: "🎯 Today's Focus" })
+        screen.getByRole("heading", { name: "Today's Focus" })
     ).toBeVisible();
     expect(
         screen.getByRole("heading", { name: "Finish Robotics Assignment" })
@@ -95,10 +95,10 @@ test("maps priority and titles", () => {
     expect(getPriorityColor("low")).toBe("success");
     expect(getPriorityColor("anything else")).toBe("neutral");
 
-    expect(getFocusTitle({ type: "resource" })).toBe("📚 Continue Learning");
-    expect(getFocusTitle({ type: "quiz" })).toBe("⚡ Next Priority");
-    expect(getFocusTitle({ type: "assignment" })).toBe("🎯 Today's Focus");
-    expect(getFocusTitle({})).toBe("🎯 Today's Focus");
+    expect(getFocusTitle({ type: "resource" })).toBe("Continue Learning");
+    expect(getFocusTitle({ type: "quiz" })).toBe("Next Priority");
+    expect(getFocusTitle({ type: "assignment" })).toBe("Today's Focus");
+    expect(getFocusTitle({})).toBe("Today's Focus");
 });
 
 test("launches a due flashcard review from flashcard focus", () => {

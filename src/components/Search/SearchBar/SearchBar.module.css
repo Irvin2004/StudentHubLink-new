@@ -86,3 +86,15 @@
         width: 100%;
     }
 }
+
+@media (max-width: 47.999rem) {
+    .container input {
+        font-size: 1rem;
+    }
+
+    .clearButton {
+        width: var(--control-height-md);
+        height: var(--control-height-md);
+        padding: 0;
+    }
+}

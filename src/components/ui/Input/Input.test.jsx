@@ -12,8 +12,9 @@ test("associates labels and errors and toggles password visibility", async () =>
 
     const input = screen.getByLabelText("Password");
     expect(input).toHaveAttribute("aria-invalid", "true");
+    expect(input).toHaveAccessibleDescription("Password is required");
     expect(input).toHaveAttribute("type", "password");
-    expect(screen.getByText("Password is required")).toBeVisible();
+    expect(screen.getByRole("alert")).toHaveTextContent("Password is required");
 
     await user.click(screen.getByRole("button", { name: "Show password" }));
     expect(input).toHaveAttribute("type", "text");

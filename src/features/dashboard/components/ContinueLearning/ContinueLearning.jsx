@@ -3,6 +3,7 @@ import { LoadErrorState } from "../../../../components/common/LoadErrorState.jsx
 import Card from "../../../../components/ui/Card/Card.jsx";
 import styles from "../DashboardListSection.module.css";
 import { ResourceCard, ResourceCardSkeleton } from "./ResourceCard.jsx";
+import { AppIcon } from "../../../../components/common/AppIcon.jsx";
 
 export function ContinueLearning({
     error,
@@ -61,7 +62,10 @@ export function ContinueLearning({
             className={styles.card}
         >
             <header className={styles.header}>
-                <h2 className={styles.title}>📚 Continue Learning</h2>
+                <h2 className={styles.title}>
+                    <AppIcon name="files" size={20} />
+                    <span>Continue Learning</span>
+                </h2>
             </header>
 
             <div className={styles.list}>

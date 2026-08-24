@@ -2,8 +2,8 @@
     background: var(--white);
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
-    padding: 20px;
-    margin-bottom: 20px;
+    padding: var(--space-5);
+    margin-bottom: var(--space-5);
     box-shadow: var(--shadow);
 }
 
@@ -11,11 +11,11 @@
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    margin-bottom: 12px;
+    margin-bottom: var(--space-3);
 }
 
 .review-text {
-    margin: 16px 0;
+    margin: var(--space-4) 0;
     line-height: 1.6;
 }
 

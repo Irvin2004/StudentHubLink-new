@@ -1,25 +1,27 @@
 .page {
     width: min(84rem, 100%);
     margin-inline: auto;
-    padding: clamp(var(--spacing-lg), 4vw, var(--spacing-2xl));
+    padding: var(--space-8) var(--space-6) var(--space-10);
+    display: grid;
+    gap: var(--space-6);
 }
 
 .pageHeader {
-    margin-bottom: var(--spacing-xl);
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
-    gap: var(--spacing-lg);
+    gap: var(--space-6);
 }
 
 .pageHeader h1 {
+    margin: 0;
     color: var(--text);
     font-size: clamp(2rem, 3vw, 2.75rem);
     letter-spacing: -0.035em;
 }
 
 .pageHeader p {
-    margin-top: var(--spacing-sm);
+    margin: var(--space-2) 0 0;
     color: var(--text-secondary);
 }
 
@@ -27,7 +29,7 @@
     min-height: var(--control-height-md);
     display: inline-flex;
     align-items: center;
-    padding-inline: var(--spacing-md);
+    padding-inline: var(--space-4);
     border-radius: var(--radius-md);
     background: color-mix(in srgb, var(--primary) 10%, transparent);
     color: var(--primary);
@@ -36,21 +38,32 @@
 
 .details {
     display: grid;
-    gap: var(--spacing-xl);
+    gap: var(--space-8);
 }
 
 .retry {
-    margin-top: var(--spacing-xl);
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: var(--spacing-md);
+    gap: var(--space-4);
     color: var(--text-secondary);
+}
+
+.loadingGrid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-5);
+}
+
+@media (max-width: 75rem) {
+    .loadingGrid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
 }
 
 @media (max-width: 42rem) {
     .page {
-        padding: var(--spacing-lg);
+        padding: var(--space-6) var(--space-4) var(--space-8);
     }
 
     .pageHeader {
@@ -66,6 +79,10 @@
         align-items: stretch;
         flex-direction: column;
         text-align: center;
+    }
+
+    .loadingGrid {
+        grid-template-columns: minmax(0, 1fr);
     }
 }
 .loadMore {

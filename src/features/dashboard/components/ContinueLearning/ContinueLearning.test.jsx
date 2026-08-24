@@ -32,7 +32,7 @@ test("renders the continue learning widget", () => {
     render(<ContinueLearning resources={resources} />);
 
     expect(
-        screen.getByRole("heading", { name: "📚 Continue Learning" })
+        screen.getByRole("heading", { name: "Continue Learning" })
     ).toBeVisible();
     expect(screen.getByText("Robotics Fundamentals")).toBeVisible();
     expect(screen.getByText("Python Programming")).toBeVisible();

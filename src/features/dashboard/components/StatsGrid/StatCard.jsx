@@ -1,5 +1,6 @@
 import Skeleton from "../../../../components/Skeleton/Skeleton.jsx";
 import styles from "./StatsGrid.module.css";
+import { AppIcon } from "../../../../components/common/AppIcon.jsx";
 
 export function StatCard({
     color = "blue",
@@ -18,7 +19,7 @@ export function StatCard({
                         height="1.75rem"
                     />
                 ) : (
-                    icon
+                    <AppIcon name={icon} size={22} />
                 )}
             </div>
             {loading ? (

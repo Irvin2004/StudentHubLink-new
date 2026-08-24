@@ -94,10 +94,10 @@ export default function ChatPage({ channel, communityId, role }) {
 
     if (!channel || !communityId) {
         return (
-            <div className={styles.unavailable}>
+            <main className={styles.unavailable}>
                 <h1>Open a community channel</h1>
                 <p>Choose a channel to join its conversation.</p>
-            </div>
+            </main>
         );
     }
 

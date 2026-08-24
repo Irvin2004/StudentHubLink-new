@@ -17,6 +17,12 @@
     padding: 0 clamp(var(--space-4), 4vw, var(--space-8));
     border-bottom: 1px solid var(--border);
     background: var(--surface);
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.tabs::-webkit-scrollbar {
+    display: none;
 }
 
 .tabs button {
@@ -34,6 +40,10 @@
 
 .tabs button[aria-current="page"] {
     color: var(--channel-accent);
+}
+
+.tabs button:hover {
+    color: var(--text);
 }
 
 .tabs button[aria-current="page"]::after {
@@ -108,4 +118,16 @@
     overflow: hidden;
     clip: rect(0 0 0 0);
     white-space: nowrap;
+}
+
+@media (max-width: 36rem) {
+    .tabs {
+        gap: var(--space-4);
+        padding-inline: var(--space-3);
+    }
+
+    .tabs button {
+        min-height: 3.25rem;
+        white-space: nowrap;
+    }
 }

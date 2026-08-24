@@ -6,7 +6,7 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 12px 20px;
+    padding: var(--space-3) var(--space-5);
     border-radius: var(--radius-md);
     font-weight: 700;
     border: none;
@@ -24,7 +24,7 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 12px 20px;
+    padding: var(--space-3) var(--space-5);
     border: 1px solid var(--danger);
     border-radius: var(--radius-md);
     background: var(--danger);
@@ -43,7 +43,7 @@
 }
 .btn-sm {
     min-height: 34px;
-    padding: 7px 12px;
+    padding: 7px var(--space-3);
     font-size: 0.8125rem;
 }
 .btn-md {
@@ -51,7 +51,7 @@
 }
 .btn-lg {
     min-height: 52px;
-    padding: 14px 24px;
+    padding: 14px var(--space-6);
     font-size: 1rem;
 }
 .btn:disabled,

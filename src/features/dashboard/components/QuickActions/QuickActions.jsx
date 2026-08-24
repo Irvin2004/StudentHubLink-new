@@ -3,6 +3,7 @@ import { LoadErrorState } from "../../../../components/common/LoadErrorState.jsx
 import Card from "../../../../components/ui/Card/Card.jsx";
 import Skeleton from "../../../../components/Skeleton/Skeleton.jsx";
 import styles from "./QuickActions.module.css";
+import { AppIcon } from "../../../../components/common/AppIcon.jsx";
 
 export function QuickActions({ actions = [], error, loading, onRetry }) {
     if (loading) {
@@ -45,7 +46,10 @@ export function QuickActions({ actions = [], error, loading, onRetry }) {
     return (
         <Card as="section" aria-label="Quick Actions" className={styles.card}>
             <header className={styles.header}>
-                <h2 className={styles.title}>⚡ Quick Actions</h2>
+                <h2 className={styles.title}>
+                    <AppIcon name="sparkles" size={20} />
+                    <span>Quick Actions</span>
+                </h2>
             </header>
             <div className={styles.grid}>
                 {actions.map((action) => (
@@ -56,7 +60,7 @@ export function QuickActions({ actions = [], error, loading, onRetry }) {
                         type="button"
                     >
                         <span aria-hidden="true" className={styles.icon}>
-                            {action.icon}
+                            <AppIcon name={action.icon} size={18} />
                         </span>
                         <span className={styles.actionLabel}>
                             {action.label}

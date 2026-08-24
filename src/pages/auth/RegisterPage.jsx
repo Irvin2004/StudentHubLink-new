@@ -87,7 +87,7 @@ export default function RegisterPage() {
                 >
                     {submitting ? "Creating account…" : "Create Account"}
                 </button>
-                <p className="form-message error" aria-live="polite">
+                <p className="form-message error" role="alert">
                     {message}
                 </p>
                 <p className="auth-switch">

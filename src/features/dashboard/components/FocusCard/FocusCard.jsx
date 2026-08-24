@@ -7,6 +7,7 @@ import { LoadErrorState } from "../../../../components/common/LoadErrorState.jsx
 import Skeleton from "../../../../components/Skeleton/Skeleton.jsx";
 import styles from "./FocusCard.module.css";
 import { formatStudyMinutes } from "../../../studySessions/utils/study-session-selectors.js";
+import { AppIcon } from "../../../../components/common/AppIcon.jsx";
 
 const PRIORITY_VARIANTS = {
     high: "danger",
@@ -15,11 +16,11 @@ const PRIORITY_VARIANTS = {
 };
 
 const FOCUS_TITLES = {
-    assignment: "🎯 Today's Focus",
-    quiz: "⚡ Next Priority",
-    resource: "📚 Continue Learning",
-    study: "⚡ Next Priority",
-    flashcards: "🃏 Flashcards Due"
+    assignment: "Today's Focus",
+    quiz: "Next Priority",
+    resource: "Continue Learning",
+    study: "Next Priority",
+    flashcards: "Flashcards Due"
 };
 
 export function getPriorityColor(priority) {
@@ -29,7 +30,15 @@ export function getPriorityColor(priority) {
 export function getFocusTitle(task) {
     const taskType = String(task?.type || task?.kind || "").toLowerCase();
 
-    return FOCUS_TITLES[taskType] || "🎯 Today's Focus";
+    return FOCUS_TITLES[taskType] || "Today's Focus";
+}
+
+function getFocusIcon(task) {
+    const taskType = String(task?.type || task?.kind || "").toLowerCase();
+    if (taskType === "flashcards") return "flashcards";
+    if (taskType === "resource") return "files";
+    if (taskType === "quiz") return "quiz";
+    return "target";
 }
 
 function ChevronRightIcon() {
@@ -136,6 +145,7 @@ export function FocusCard({
         <Card aria-label={title} className={styles.card}>
             <header className={styles.header}>
                 <h2 className={styles.title}>
+                    <AppIcon name={getFocusIcon(task)} size={20} />
                     <span>{title}</span>
                 </h2>
                 <Badge

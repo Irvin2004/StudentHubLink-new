@@ -281,7 +281,11 @@ export default function CommunitiesPage() {
             />
 
             {loading ? (
-                <CommunityCardSkeleton />
+                <div aria-busy="true" className={styles.loadingGrid}>
+                    {Array.from({ length: 6 }, (_, index) => (
+                        <CommunityCardSkeleton key={index} />
+                    ))}
+                </div>
             ) : error && !communities.length ? (
                 <LoadErrorState
                     description="We could not load the community list."

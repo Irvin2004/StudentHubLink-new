@@ -2,7 +2,7 @@
 @scope (body[data-page="achievements"]) {
     .achievements-page {
         min-height: 100vh;
-        padding: 40px;
+        padding: var(--space-10);
         background: var(--bg);
     }
 
@@ -27,13 +27,13 @@
         margin: 0 auto;
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-        gap: 24px;
+        gap: var(--space-6);
     }
 
     .achievement-card {
         background: var(--white);
         border-radius: var(--radius-lg);
-        padding: 24px;
+        padding: var(--space-6);
         box-shadow: var(--shadow);
         transition: 0.25s;
     }
@@ -44,7 +44,7 @@
 
     .achievement-icon {
         font-size: 40px;
-        margin-bottom: 16px;
+        margin-bottom: var(--space-4);
     }
 
     .achievement-card h3 {
@@ -68,7 +68,7 @@
         background: var(--white);
         border: 1px dashed var(--border);
         border-radius: var(--radius-lg);
-        padding: 32px;
+        padding: var(--space-8);
         color: var(--text-muted);
         text-align: center;
     }
@@ -80,7 +80,7 @@
 
     @media (max-width: 720px) {
         .achievements-page {
-            padding: 24px;
+            padding: var(--space-6);
         }
 
         .page-header h1 {

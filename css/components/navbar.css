@@ -10,7 +10,7 @@
 .nav {
     max-width: 1200px;
     margin: auto;
-    padding: 16px 24px;
+    padding: var(--space-4) var(--space-6);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -45,7 +45,7 @@
 .nav-links {
     display: flex;
     align-items: center;
-    gap: 24px;
+    gap: var(--space-6);
 }
 
 .nav-links a {
@@ -61,7 +61,7 @@
 @media (max-width: 700px) {
     .nav {
         flex-direction: column;
-        gap: 16px;
+        gap: var(--space-4);
     }
 
     .nav-links {

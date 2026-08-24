@@ -21,6 +21,17 @@
     letter-spacing: -0.035em;
 }
 
+.pageTitle {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+.pageTitle svg {
+    flex: 0 0 auto;
+    color: var(--primary);
+}
+
 .pageHeader p {
     margin: var(--space-2) 0 0;
     color: var(--text-secondary);

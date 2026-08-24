@@ -12,7 +12,7 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
-        gap: 24px;
+        gap: var(--space-6);
         background: var(--blue);
         color: white;
     }
@@ -30,7 +30,7 @@
         display: flex;
         align-items: center;
         justify-content: flex-end;
-        gap: 24px;
+        gap: var(--space-6);
         flex-wrap: wrap;
     }
 
@@ -47,11 +47,11 @@
     .upload-page {
         max-width: 760px;
         margin: 0 auto;
-        padding: 34px 24px 72px;
+        padding: 34px var(--space-6) 72px;
     }
 
     .upload-header {
-        margin-bottom: 24px;
+        margin-bottom: var(--space-6);
     }
 
     .eyebrow {
@@ -67,7 +67,7 @@
         color: var(--navy);
         font-size: 44px;
         line-height: 1.05;
-        margin-bottom: 12px;
+        margin-bottom: var(--space-3);
     }
 
     .upload-header p {
@@ -79,7 +79,7 @@
     .upload-card {
         background: var(--white);
         border: 1px solid rgba(148, 163, 184, 0.32);
-        border-radius: 8px;
+        border-radius: var(--radius-sm);
         padding: 28px;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     }
@@ -88,7 +88,7 @@
         display: block;
         color: var(--navy);
         font-weight: 800;
-        margin-bottom: 8px;
+        margin-bottom: var(--space-2);
     }
 
     .upload-card input,
@@ -115,7 +115,7 @@
     .upload-help {
         color: var(--text-muted);
         font-size: 14px;
-        margin: -6px 0 20px;
+        margin: -6px 0 var(--space-5);
     }
 
     #uploadResourceBtn {
@@ -124,7 +124,7 @@
 
     .form-message {
         min-height: 22px;
-        margin-top: 16px;
+        margin-top: var(--space-4);
         color: var(--navy);
         font-weight: 700;
     }

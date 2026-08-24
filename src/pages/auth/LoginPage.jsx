@@ -109,7 +109,7 @@ export default function LoginPage() {
                 >
                     {submitting ? "Signing in…" : "Login"}
                 </button>
-                <p className="form-message error" aria-live="polite">
+                <p className="form-message error" role="alert">
                     {message}
                 </p>
                 <p className="auth-switch">

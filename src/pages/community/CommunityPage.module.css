@@ -1,12 +1,20 @@
 .page {
-    --channel-accent: #f97316;
-    --channel-accent-soft: #fff1e8;
+    --channel-accent: #c2410c;
+    --channel-accent-soft: color-mix(
+        in srgb,
+        var(--channel-accent) 12%,
+        var(--surface)
+    );
     min-height: calc(100vh - 4.75rem);
     min-height: calc(100dvh - 4.75rem);
     display: grid;
     grid-template-rows: auto minmax(0, 1fr);
     background: var(--surface);
     color: var(--text);
+}
+
+:global([data-theme="dark"]) .page {
+    --channel-accent: #fb923c;
 }
 
 .pageState {
@@ -98,7 +106,7 @@
 
     .communityHeader {
         min-height: 6.5rem;
-        padding: var(--space-5);
+        padding: var(--space-5) var(--space-4);
     }
 
     .communityMark {

@@ -29,6 +29,7 @@ export default function Field({
                 <small
                     className={cx(styles.message, error && styles.error)}
                     id={`${id}-message`}
+                    role={error ? "alert" : undefined}
                 >
                     {message}
                 </small>

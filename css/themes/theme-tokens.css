@@ -18,8 +18,10 @@
     --color-blue-950: #172554;
     --color-green-400: #4ade80;
     --color-green-600: #16a34a;
+    --color-green-700: #15803d;
     --color-amber-400: #fbbf24;
     --color-amber-600: #d97706;
+    --color-amber-700: #b45309;
     --color-red-400: #f87171;
     --color-red-600: #dc2626;
     --color-red-100: #fee2e2;
@@ -36,8 +38,8 @@
     --primary: var(--color-blue-600);
     --primary-hover: var(--color-blue-700);
     --primary-soft: var(--color-blue-100);
-    --success: var(--color-green-600);
-    --warning: var(--color-amber-600);
+    --success: var(--color-green-700);
+    --warning: var(--color-amber-700);
     --danger: var(--color-red-600);
     --border: var(--color-slate-200);
     --on-primary: var(--color-white);
@@ -87,15 +89,4 @@
     --bg: var(--background);
     --text-main: var(--text-primary);
     --text-muted: var(--text-secondary);
-    --space-xs: var(--space-1);
-    --space-sm: var(--space-2);
-    --space-md: var(--space-4);
-    --space-lg: var(--space-6);
-    --space-xl: var(--space-8);
-    --spacing-xs: var(--space-1);
-    --spacing-sm: var(--space-2);
-    --spacing-md: var(--space-4);
-    --spacing-lg: var(--space-6);
-    --spacing-xl: var(--space-8);
-    --spacing-2xl: var(--space-10);
 }

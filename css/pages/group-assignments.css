@@ -59,7 +59,7 @@
     .assignment-form input,
     .assignment-form textarea {
         width: 100%;
-        padding: 12px 14px;
+        padding: var(--space-3) 14px;
         border: 1px solid var(--border);
         border-radius: var(--radius-md);
         outline: 2px solid transparent;

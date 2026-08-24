@@ -108,7 +108,7 @@ body.modal-open {
 #createGroupForm textarea,
 #createGroupForm select {
     width: 100%;
-    padding: 12px 14px;
+    padding: var(--space-3) 14px;
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
     background: var(--surface);

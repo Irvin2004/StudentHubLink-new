@@ -6,49 +6,49 @@ import styles from "./StatsGrid.module.css";
 const DEFAULT_STATS = [
     {
         color: "blue",
-        icon: "👥",
+        icon: "users",
         key: "communities",
         title: "Communities",
         value: 0
     },
     {
         color: "gold",
-        icon: "📚",
+        icon: "files",
         key: "resources",
         title: "Resources",
         value: 0
     },
     {
         color: "teal",
-        icon: "💬",
+        icon: "messages",
         key: "messages",
         title: "Unread Messages",
         value: 0
     },
     {
         color: "rose",
-        icon: "📝",
+        icon: "calendar",
         key: "tasks",
         title: "Tasks",
         value: 0
     },
     {
         color: "gold",
-        icon: "🃏",
+        icon: "flashcards",
         key: "dueFlashcards",
         title: "Due Flashcards",
         value: 0
     },
     {
         color: "blue",
-        icon: "🎯",
+        icon: "target",
         key: "recentQuizScore",
         title: "Recent Quiz",
         value: null
     },
     {
         color: "rose",
-        icon: "📊",
+        icon: "chart",
         key: "weakQuizTopics",
         title: "Weak Quiz Topics",
         value: 0

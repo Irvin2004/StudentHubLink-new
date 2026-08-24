@@ -3,31 +3,32 @@ import { LoadErrorState } from "../../../../components/common/LoadErrorState.jsx
 import Card from "../../../../components/ui/Card/Card.jsx";
 import Skeleton from "../../../../components/Skeleton/Skeleton.jsx";
 import styles from "./AIAssistantCard.module.css";
+import { AppIcon } from "../../../../components/common/AppIcon.jsx";
 
 const defaultActions = [
     {
         label: "Summarise Notes",
-        icon: "📝",
+        icon: "note",
         onClick: () => {}
     },
     {
         label: "Generate Flashcards",
-        icon: "🃏",
+        icon: "flashcards",
         onClick: () => {}
     },
     {
         label: "Create Quiz",
-        icon: "✅",
+        icon: "quiz",
         onClick: () => {}
     },
     {
         label: "Explain a Topic",
-        icon: "💡",
+        icon: "sparkles",
         onClick: () => {}
     },
     {
         label: "Suggest Study Plan",
-        icon: "🗓️",
+        icon: "calendar",
         onClick: () => {}
     }
 ];
@@ -85,7 +86,10 @@ export function AIAssistantCard({
             className={styles.card}
         >
             <header className={styles.header}>
-                <h2 className={styles.title}>🤖 AI Study Assistant</h2>
+                <h2 className={styles.title}>
+                    <AppIcon name="sparkles" size={20} />
+                    <span>AI Study Assistant</span>
+                </h2>
                 <p className={styles.prompt}>What do you want help with?</p>
             </header>
             <div className={styles.grid}>
@@ -97,7 +101,7 @@ export function AIAssistantCard({
                         type="button"
                     >
                         <span aria-hidden="true" className={styles.icon}>
-                            {action.icon}
+                            <AppIcon name={action.icon} size={18} />
                         </span>
                         <span className={styles.suggestionTitle}>
                             {action.label}

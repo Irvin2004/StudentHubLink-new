@@ -46,7 +46,12 @@
 .reactionMenu summary:focus-visible {
     background: var(--surface-muted);
     color: var(--text);
-    outline: 0;
+}
+
+.actions button:focus-visible,
+.reactionMenu summary:focus-visible {
+    outline: 2px solid var(--channel-accent);
+    outline-offset: 1px;
 }
 
 .actions .danger {
@@ -85,5 +90,11 @@
         pointer-events: auto;
         transform: none;
         box-shadow: none;
+    }
+
+    .actions button,
+    .reactionMenu summary {
+        min-height: var(--control-height-md);
+        padding-inline: var(--space-3);
     }
 }

@@ -21,6 +21,10 @@ describe("CreateCommunityModal", () => {
             <CreateCommunityModal onClose={vi.fn()} onCreate={onCreate} open />
         );
 
+        expect(
+            screen.getByRole("textbox", { name: /Community name/ })
+        ).toHaveFocus();
+
         await user.click(
             screen.getByRole("button", { name: "Create community" })
         );
@@ -31,6 +35,12 @@ describe("CreateCommunityModal", () => {
         expect(
             screen.getByText("Choose a community category.")
         ).toBeInTheDocument();
+        expect(screen.getAllByRole("alert")).toHaveLength(2);
+        expect(
+            screen.getByRole("textbox", { name: /Community name/ })
+        ).toHaveAccessibleDescription(
+            "Community name must be at least 3 characters."
+        );
         expect(onCreate).not.toHaveBeenCalled();
     });
 

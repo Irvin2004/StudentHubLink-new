@@ -49,18 +49,6 @@
     font-weight: 750;
 }
 
-.pinned {
-    color: var(--channel-accent);
-    font-size: 0.72rem;
-    font-weight: 750;
-}
-
-.pinned {
-    color: var(--channel-accent);
-    font-size: 0.72rem;
-    font-weight: 750;
-}
-
 .text,
 .deleted {
     max-width: 54rem;

@@ -1,12 +1,12 @@
 .form {
     display: grid;
-    gap: var(--spacing-lg);
+    gap: var(--space-6);
 }
 
 .row {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: var(--spacing-lg);
+    gap: var(--space-6);
 }
 
 .formError {

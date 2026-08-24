@@ -23,6 +23,7 @@ import {
     TASK_GROUPS
 } from "./utils/task-grouping.js";
 import { ROUTES } from "../../config/routes.js";
+import { AppIcon } from "../../components/common/AppIcon.jsx";
 import styles from "./StudyPlanner.module.css";
 
 const TASK_FILTERS = Object.freeze([
@@ -208,7 +209,10 @@ export default function StudyPlannerPage() {
         <main className={styles.page}>
             <header className={styles.pageHeader}>
                 <div>
-                    <h1>📅 Study Planner</h1>
+                    <h1 className={styles.pageTitle}>
+                        <AppIcon name="calendar" size={30} />
+                        <span>Study Planner</span>
+                    </h1>
                     <p>Plan your study tasks and track weekly progress.</p>
                 </div>
                 <div className={styles.headerActions}>

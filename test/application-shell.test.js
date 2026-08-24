@@ -91,3 +91,25 @@ test("mobile-critical application pages define compact layouts", () => {
         );
     }
 });
+
+test("shared controls preserve focus visibility and mobile touch geometry", () => {
+    const iconButton = read(
+        "src/components/ui/IconButton/IconButton.module.css"
+    );
+    const modal = read("src/components/ui/Modal/Modal.module.css");
+    const taskCard = read(
+        "src/features/studyPlanner/components/TaskCard/TaskCard.module.css"
+    );
+    const messageActions = read(
+        "src/components/chat/MessageActions/MessageActions.module.css"
+    );
+
+    assert.match(iconButton, /\.button:focus-visible/);
+    assert.match(iconButton, /@media \(pointer: coarse\)/);
+    assert.match(iconButton, /var\(--control-height-md\)/);
+    assert.match(modal, /100dvh/);
+    assert.match(modal, /88dvh/);
+    assert.match(taskCard, /flex-wrap:\s*wrap/);
+    assert.match(messageActions, /@media \(hover: none\)/);
+    assert.match(messageActions, /min-height:\s*var\(--control-height-md\)/);
+});

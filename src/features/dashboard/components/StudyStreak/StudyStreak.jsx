@@ -2,6 +2,7 @@
 import EmptyState from "../../../../components/EmptyState/EmptyState.jsx";
 import Skeleton from "../../../../components/Skeleton/Skeleton.jsx";
 import styles from "./StudyStreak.module.css";
+import { AppIcon } from "../../../../components/common/AppIcon.jsx";
 
 export function getStreakMessage(current = 0) {
     if (current >= 30) return "Amazing consistency! Keep it up!";
@@ -69,7 +70,7 @@ export function StudyStreak({ loading, onStart, streak }) {
         <section aria-label="Study Streak" className={styles.card}>
             <header className={styles.header}>
                 <h2 className={styles.title}>
-                    <span aria-hidden="true">🔥</span>
+                    <AppIcon name="flame" size={20} />
                     <span>Study Streak</span>
                 </h2>
             </header>

@@ -12,6 +12,11 @@ const ICON_PATHS = Object.freeze({
             <path d="M3 10h18" />
         </>
     ),
+    chart: (
+        <>
+            <path d="M4 20V10M10 20V4M16 20v-7M22 20H2" />
+        </>
+    ),
     chevronDown: <path d="m8 10 4 4 4-4" />,
     close: (
         <>
@@ -24,6 +29,9 @@ const ICON_PATHS = Object.freeze({
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z" />
             <path d="M14 2v6h6" />
         </>
+    ),
+    flame: (
+        <path d="M12 22c4 0 7-2.8 7-7 0-3.1-1.7-5.5-4.7-8.6.1 2.3-.8 3.7-2 4.7.1-3.8-1.9-6.8-5-9.1.2 3.5-2.3 5.7-3.4 8.1C1.9 14.4 4.5 22 12 22Z" />
     ),
     flashcards: (
         <>
@@ -44,6 +52,12 @@ const ICON_PATHS = Object.freeze({
             <path d="M10 17 15 12 10 7" />
             <path d="M15 12H3" />
             <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+        </>
+    ),
+    note: (
+        <>
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z" />
+            <path d="M14 2v6h6M8 13h8M8 17h6" />
         </>
     ),
     menu: (
@@ -68,6 +82,25 @@ const ICON_PATHS = Object.freeze({
             <rect x="3" y="3" width="18" height="18" rx="3" />
             <path d="M8 8h8M8 12h5M8 16h3" />
             <path d="m15 15 1.5 1.5L19 14" />
+        </>
+    ),
+    sparkles: (
+        <>
+            <path d="m12 3-1.1 3.1a4 4 0 0 1-2.5 2.5L5 10l3.4 1.4a4 4 0 0 1 2.5 2.5L12 17l1.1-3.1a4 4 0 0 1 2.5-2.5L19 10l-3.4-1.4a4 4 0 0 1-2.5-2.5Z" />
+            <path d="m19 17-.5 1.4a2 2 0 0 1-1.1 1.1L16 20l1.4.5a2 2 0 0 1 1.1 1.1L19 23l.5-1.4a2 2 0 0 1 1.1-1.1L22 20l-1.4-.5a2 2 0 0 1-1.1-1.1Z" />
+        </>
+    ),
+    target: (
+        <>
+            <circle cx="12" cy="12" r="9" />
+            <circle cx="12" cy="12" r="5" />
+            <circle cx="12" cy="12" r="1" />
+        </>
+    ),
+    upload: (
+        <>
+            <path d="M12 16V3M7 8l5-5 5 5" />
+            <path d="M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5" />
         </>
     ),
     search: (

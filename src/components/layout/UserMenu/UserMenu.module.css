@@ -15,11 +15,19 @@
     font: inherit;
     font-size: 0.85rem;
     font-weight: 700;
+    cursor: pointer;
 }
 
 .trigger:hover,
 .trigger[aria-expanded="true"] {
     background: var(--surface-muted);
+}
+
+.trigger:focus-visible,
+.menu a:focus-visible,
+.menu button:focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--focus-ring) 35%, transparent);
+    outline-offset: 2px;
 }
 
 .avatar {
@@ -123,9 +131,9 @@
     }
 
     .menu {
-        position: fixed;
-        top: 4.5rem;
-        right: var(--space-3);
+        position: absolute;
+        top: calc(100% + var(--space-2));
+        right: 0;
         width: min(15.5rem, calc(100vw - 1.5rem));
     }
 }

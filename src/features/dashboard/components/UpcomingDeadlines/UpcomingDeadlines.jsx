@@ -3,6 +3,7 @@ import { LoadErrorState } from "../../../../components/common/LoadErrorState.jsx
 import Card from "../../../../components/ui/Card/Card.jsx";
 import styles from "../DashboardListSection.module.css";
 import { DeadlineCard, DeadlineCardSkeleton } from "./DeadlineCard.jsx";
+import { AppIcon } from "../../../../components/common/AppIcon.jsx";
 
 export function UpcomingDeadlines({
     deadlines = [],
@@ -57,7 +58,10 @@ export function UpcomingDeadlines({
             className={styles.card}
         >
             <header className={styles.header}>
-                <h2 className={styles.title}>📅 Upcoming Deadlines</h2>
+                <h2 className={styles.title}>
+                    <AppIcon name="calendar" size={20} />
+                    <span>Upcoming Deadlines</span>
+                </h2>
             </header>
 
             <div className={styles.list}>

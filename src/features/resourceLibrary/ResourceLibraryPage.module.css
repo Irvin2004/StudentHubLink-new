@@ -67,6 +67,19 @@
     cursor: pointer;
     font: inherit;
     font-weight: 750;
+    transition:
+        background var(--transition-fast),
+        color var(--transition-fast);
+}
+
+.viewToggle button:hover:not([aria-pressed="true"]) {
+    background: var(--surface-muted);
+    color: var(--text);
+}
+
+.viewToggle button:focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--focus-ring) 35%, transparent);
+    outline-offset: 2px;
 }
 
 .viewToggle button[aria-pressed="true"] {

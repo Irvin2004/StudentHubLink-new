@@ -6,11 +6,11 @@
 }
 
 .content {
-    padding: 0 var(--spacing-lg) var(--spacing-lg);
+    padding: 0 var(--space-6) var(--space-6);
     display: grid;
     grid-template-columns: auto minmax(0, 1fr) auto;
     align-items: start;
-    gap: var(--spacing-lg);
+    gap: var(--space-6);
 }
 
 .avatar {
@@ -20,7 +20,7 @@
 }
 
 .summary {
-    padding-top: var(--spacing-lg);
+    padding-top: var(--space-6);
 }
 
 .titleRow,
@@ -28,7 +28,7 @@
 .actions {
     display: flex;
     align-items: center;
-    gap: var(--spacing-sm);
+    gap: var(--space-2);
 }
 
 .titleRow h2 {
@@ -40,25 +40,25 @@
 }
 
 .summary > p {
-    margin-top: var(--spacing-sm);
+    margin-top: var(--space-2);
     color: var(--text-secondary);
     line-height: 1.55;
 }
 
 .metadata {
-    margin-top: var(--spacing-md);
+    margin-top: var(--space-4);
     flex-wrap: wrap;
     color: var(--text-secondary);
     font-size: 0.875rem;
 }
 
 .metadata span + span::before {
-    margin-right: var(--spacing-sm);
+    margin-right: var(--space-2);
     content: "•";
 }
 
 .actions {
-    padding-top: var(--spacing-lg);
+    padding-top: var(--space-6);
 }
 
 @media (max-width: 42rem) {

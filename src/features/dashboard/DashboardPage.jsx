@@ -79,50 +79,50 @@ export default function DashboardPage() {
     const quickActions = [
         {
             label: "Upload Resource",
-            icon: "⬆️",
+            icon: "upload",
             onClick: () => navigate(`${ROUTES.RESOURCES}?action=upload`)
         },
         {
             label: "Join Community",
-            icon: "👥",
+            icon: "users",
             onClick: () => navigate(ROUTES.COMMUNITIES)
         },
         {
             label: "Browse Resources",
-            icon: "📚",
+            icon: "files",
             onClick: () => navigate(ROUTES.RESOURCES)
         },
         {
             label: "Messages",
-            icon: "💬",
+            icon: "messages",
             onClick: () => navigate(ROUTES.CHAT)
         }
     ];
     const aiActions = [
         {
             label: "Summarise Notes",
-            icon: "📝",
+            icon: "note",
             onClick: () => aiAssistant.openAssistant(AI_ACTIONS.SUMMARISE_NOTES)
         },
         {
             label: "Generate Flashcards",
-            icon: "🃏",
+            icon: "flashcards",
             onClick: () =>
                 aiAssistant.openAssistant(AI_ACTIONS.GENERATE_FLASHCARDS)
         },
         {
             label: "Create Quiz",
-            icon: "✅",
+            icon: "quiz",
             onClick: () => aiAssistant.openAssistant(AI_ACTIONS.GENERATE_QUIZ)
         },
         {
             label: "Explain a Topic",
-            icon: "💡",
+            icon: "sparkles",
             onClick: () => aiAssistant.openAssistant(AI_ACTIONS.EXPLAIN_TOPIC)
         },
         {
             label: "Suggest Study Plan",
-            icon: "🗓️",
+            icon: "calendar",
             onClick: () => aiAssistant.openAssistant(AI_ACTIONS.STUDY_PLAN)
         }
     ];

@@ -32,7 +32,7 @@ test("renders the deadlines widget", () => {
     render(<UpcomingDeadlines deadlines={deadlines} />);
 
     expect(
-        screen.getByRole("heading", { name: "📅 Upcoming Deadlines" })
+        screen.getByRole("heading", { name: "Upcoming Deadlines" })
     ).toBeVisible();
     expect(screen.getByText("Python Project")).toBeVisible();
     expect(screen.getByText("Robotics Practical")).toBeVisible();

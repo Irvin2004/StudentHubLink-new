@@ -54,6 +54,20 @@
         border-radius: var(--radius-md);
         background: rgb(255 255 255 / 0.08);
         color: var(--color-white);
+        cursor: pointer;
+        transition:
+            background var(--transition-fast),
+            border-color var(--transition-fast);
+    }
+
+    .closeButton:hover {
+        border-color: rgb(255 255 255 / 0.65);
+        background: rgb(255 255 255 / 0.16);
+    }
+
+    .closeButton:focus-visible {
+        outline: 3px solid rgb(147 197 253 / 0.85);
+        outline-offset: 2px;
     }
 
     .backdrop {

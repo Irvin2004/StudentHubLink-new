@@ -22,6 +22,11 @@
     transform: translateY(-1px);
 }
 
+.button:focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--focus-ring) 35%, transparent);
+    outline-offset: 2px;
+}
+
 .button:active:not(:disabled) {
     transform: translateY(0);
 }
@@ -107,4 +112,10 @@
 
 .success:hover:not(:disabled) {
     background: color-mix(in srgb, var(--success) 84%, black);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .button {
+        transition: none;
+    }
 }
