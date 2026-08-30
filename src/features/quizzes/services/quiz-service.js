@@ -132,6 +132,9 @@ export async function createQuiz(userId, input) {
         ...(input.flashcardDeckId
             ? { flashcardDeckId: cleanText(input.flashcardDeckId) }
             : {}),
+        ...(input.resourceId
+            ? { resourceId: cleanText(input.resourceId) }
+            : {}),
         createdAt: timestamp,
         updatedAt: timestamp
     };

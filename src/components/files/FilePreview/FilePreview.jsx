@@ -8,7 +8,12 @@ import {
 import FileIcon from "../FileIcon/FileIcon.jsx";
 import styles from "./FilePreview.module.css";
 
-export default function FilePreview({ file, onClose, onDownload }) {
+export default function FilePreview({
+    file,
+    onClose,
+    onDownload,
+    onStudyWithThuto
+}) {
     if (!file) return null;
     const previewable = isPreviewableFile(file);
 
@@ -21,6 +26,15 @@ export default function FilePreview({ file, onClose, onDownload }) {
             title={file.originalName}
             footer={
                 <div className={styles.footer}>
+                    {onStudyWithThuto ? (
+                        <button
+                            className={styles.action}
+                            onClick={() => onStudyWithThuto(file)}
+                            type="button"
+                        >
+                            Study with Thuto
+                        </button>
+                    ) : null}
                     <button
                         className={`${styles.action} ${styles.primary}`}
                         onClick={() => onDownload(file)}

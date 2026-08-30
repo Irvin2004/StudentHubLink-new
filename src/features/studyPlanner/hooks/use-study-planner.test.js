@@ -3,6 +3,8 @@ import { beforeEach, expect, test, vi } from "vitest";
 
 const service = vi.hoisted(() => ({
     addStudyTask: vi.fn(),
+    addStudyTasks: vi.fn(),
+    applyStudyTaskChanges: vi.fn(),
     deleteStudyTask: vi.fn(),
     deleteStudyTasks: vi.fn(),
     getStudyPlanner: vi.fn(),
@@ -11,6 +13,8 @@ const service = vi.hoisted(() => ({
 }));
 const flashcards = vi.hoisted(() => ({ getFlashcardDecks: vi.fn() }));
 const quizzes = vi.hoisted(() => ({ getQuizzes: vi.fn() }));
+const memory = vi.hoisted(() => ({ getLearningMemoryOverview: vi.fn() }));
+const files = vi.hoisted(() => ({ getResourceLibraryData: vi.fn() }));
 
 vi.mock("../../../hooks/useAuth.js", () => ({
     useAuth: () => ({ user: { uid: "user-1" } })
@@ -19,6 +23,11 @@ vi.mock("../../../hooks/useAuth.js", () => ({
 vi.mock("../services/study-planner-service.js", () => service);
 vi.mock("../../flashcards/services/flashcard-service.js", () => flashcards);
 vi.mock("../../quizzes/services/quiz-service.js", () => quizzes);
+vi.mock(
+    "../../learningMemory/services/learning-memory-service.js",
+    () => memory
+);
+vi.mock("../../../services/file-service.js", () => files);
 
 import { useStudyPlanner } from "./useStudyPlanner.js";
 
@@ -68,12 +77,64 @@ beforeEach(() => {
         priority: "Low",
         completed: false
     });
+    service.addStudyTasks.mockResolvedValue([
+        {
+            completed: false,
+            dueDate: "2026-09-01",
+            estimatedMinutes: 30,
+            id: "weekly-task",
+            priority: "High",
+            quizId: "quiz-1",
+            subject: "Biology",
+            taskType: "quiz",
+            title: "Retake Biology Quiz"
+        }
+    ]);
+    service.applyStudyTaskChanges.mockResolvedValue({
+        addedTasks: [],
+        deletedTaskIds: [],
+        updatedTasks: []
+    });
     service.toggleStudyTask.mockResolvedValue();
     service.updateStudyTask.mockResolvedValue();
     service.deleteStudyTask.mockResolvedValue();
     service.deleteStudyTasks.mockResolvedValue();
     flashcards.getFlashcardDecks.mockResolvedValue([]);
     quizzes.getQuizzes.mockResolvedValue([]);
+    memory.getLearningMemoryOverview.mockResolvedValue([]);
+    files.getResourceLibraryData.mockResolvedValue({ resources: [] });
+});
+
+test("atomically adds accepted Thuto weekly blocks", async () => {
+    const { result } = renderHook(() => useStudyPlanner());
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    await act(() =>
+        result.current.addTasks([
+            {
+                dueDate: "2026-09-01",
+                duration: 30,
+                estimatedMinutes: 30,
+                priority: "High",
+                quizId: "quiz-1",
+                subject: "Biology",
+                taskType: "quiz",
+                title: "Retake Biology Quiz"
+            }
+        ])
+    );
+
+    expect(service.addStudyTasks).toHaveBeenCalledWith("user-1", [
+        expect.objectContaining({
+            estimatedMinutes: 30,
+            quizId: "quiz-1",
+            taskType: "quiz"
+        })
+    ]);
+    expect(result.current.tasks[0]).toMatchObject({
+        id: "weekly-task",
+        title: "Retake Biology Quiz"
+    });
 });
 
 test("loads the signed-in user's tasks", async () => {

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { useAuth } from "../../../hooks/useAuth.js";
+import { recordQuizLearningMemory } from "../../learningMemory/services/learning-memory-service.js";
 import { completeStudySession } from "../../studySessions/services/study-session-service.js";
 import {
     MINIMUM_SESSION_SECONDS,
@@ -222,6 +223,11 @@ export function useQuizzes() {
                 selectedQuizId,
                 attempt
             );
+            try {
+                await recordQuizLearningMemory(userId, selectedQuiz, saved);
+            } catch {
+                // The quiz attempt remains authoritative if memory sync fails.
+            }
             if (attempt.durationSeconds >= MINIMUM_SESSION_SECONDS) {
                 try {
                     const session = await completeStudySession(userId, {

@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import SearchInput from "../../ui/SearchInput/index.js";
 import Select from "../../ui/Select/index.js";
 import { COMMUNITY_CATEGORIES } from "../../../utils/community-validation.js";
-import { debounce } from "../../../../js/utils/debounce.js";
+import { debounce } from "../../../utils/debounce.js";
 import styles from "./CommunitySearch.module.css";
 
 export default function CommunitySearch({

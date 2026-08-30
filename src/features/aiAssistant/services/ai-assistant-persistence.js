@@ -39,11 +39,18 @@ export async function saveAIResult(userId, result) {
 
     if (result.kind === "study-plan") {
         const tasks = await Promise.all(
-            result.tasks.map((task) => addStudyTask(userId, task))
+            result.tasks.map((task) =>
+                addStudyTask(userId, {
+                    ...task,
+                    ...(result.resourceId
+                        ? { resourceId: result.resourceId }
+                        : {})
+                })
+            )
         );
         window.dispatchEvent(new Event("study-planner-updated"));
         return { count: tasks.length, kind: result.kind };
     }
 
-    throw new TypeError("This AI response does not need to be saved.");
+    throw new TypeError("This Thuto response does not need to be saved.");
 }

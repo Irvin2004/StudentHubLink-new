@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { useAuth } from "../../../hooks/useAuth.js";
 import { useToast } from "../../../hooks/useToast.js";
+import { recordStudySessionLearningMemory } from "../../learningMemory/services/learning-memory-service.js";
 import { StudySessionModal } from "../components/StudySessionModal/StudySessionModal.jsx";
 import { completeStudySession } from "../services/study-session-service.js";
 import {
@@ -208,6 +209,11 @@ export function StudySessionProvider({ children }) {
                 durationSeconds: finalSeconds,
                 actualMinutes: secondsToStudyMinutes(finalSeconds)
             });
+            try {
+                await recordStudySessionLearningMemory(userId, saved);
+            } catch {
+                // Session history remains authoritative if memory sync is unavailable.
+            }
             window.dispatchEvent(
                 new CustomEvent("study-session-completed", { detail: saved })
             );

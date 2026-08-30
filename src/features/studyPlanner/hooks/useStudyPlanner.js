@@ -1,10 +1,14 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { useAuth } from "../../../hooks/useAuth.js";
+import { getResourceLibraryData } from "../../../services/file-service.js";
 import { getFlashcardDecks } from "../../flashcards/services/flashcard-service.js";
+import { getLearningMemoryOverview } from "../../learningMemory/services/learning-memory-service.js";
 import { getQuizzes } from "../../quizzes/services/quiz-service.js";
 import {
     addStudyTask,
+    addStudyTasks,
+    applyStudyTaskChanges,
     deleteStudyTask,
     deleteStudyTasks,
     getStudyPlanner,
@@ -23,6 +27,25 @@ const EMPTY_PLANNER = {
     tasks: []
 };
 
+function toServiceTaskInput(taskInput) {
+    return {
+        title: taskInput.title,
+        subject: taskInput.subject,
+        notes: taskInput.notes,
+        dueDate: taskInput.dueDate,
+        estimatedMinutes: Number(
+            taskInput.estimatedMinutes ?? taskInput.estimatedTime
+        ),
+        priority: taskInput.priority,
+        ...(taskInput.resourceId ? { resourceId: taskInput.resourceId } : {}),
+        ...(taskInput.flashcardDeckId
+            ? { flashcardDeckId: taskInput.flashcardDeckId }
+            : {}),
+        ...(taskInput.taskType ? { taskType: taskInput.taskType } : {}),
+        ...(taskInput.quizId ? { quizId: taskInput.quizId } : {})
+    };
+}
+
 export function useStudyPlanner() {
     const { user } = useAuth();
     const userId = user?.uid ?? null;
@@ -31,7 +54,9 @@ export function useStudyPlanner() {
     const [error, setError] = useState(null);
     const [mutationError, setMutationError] = useState(null);
     const [flashcardDecks, setFlashcardDecks] = useState([]);
+    const [memoryTopics, setMemoryTopics] = useState([]);
     const [quizzes, setQuizzes] = useState([]);
+    const [resources, setResources] = useState([]);
 
     useEffect(() => {
         let active = true;
@@ -47,13 +72,21 @@ export function useStudyPlanner() {
             setError(null);
 
             try {
-                const [nextPlanner, nextDecks, nextQuizzes] = await Promise.all(
-                    [
-                        getStudyPlanner(userId),
-                        getFlashcardDecks(userId).catch(() => []),
-                        getQuizzes(userId).catch(() => [])
-                    ]
-                );
+                const [
+                    nextPlanner,
+                    nextDecks,
+                    nextQuizzes,
+                    nextMemoryTopics,
+                    resourceLibrary
+                ] = await Promise.all([
+                    getStudyPlanner(userId),
+                    getFlashcardDecks(userId).catch(() => []),
+                    getQuizzes(userId).catch(() => []),
+                    getLearningMemoryOverview(userId).catch(() => []),
+                    getResourceLibraryData(userId).catch(() => ({
+                        resources: []
+                    }))
+                ]);
 
                 if (active) {
                     setPlanner({
@@ -62,7 +95,9 @@ export function useStudyPlanner() {
                         )
                     });
                     setFlashcardDecks(nextDecks);
+                    setMemoryTopics(nextMemoryTopics);
                     setQuizzes(nextQuizzes);
+                    setResources(resourceLibrary.resources || []);
                 }
             } catch (nextError) {
                 if (active) {
@@ -90,21 +125,10 @@ export function useStudyPlanner() {
             let savedTask;
 
             try {
-                savedTask = await addStudyTask(userId, {
-                    title: taskInput.title,
-                    subject: taskInput.subject,
-                    notes: taskInput.notes,
-                    dueDate: taskInput.dueDate,
-                    estimatedMinutes: Number(taskInput.estimatedTime),
-                    priority: taskInput.priority,
-                    ...(taskInput.flashcardDeckId
-                        ? { flashcardDeckId: taskInput.flashcardDeckId }
-                        : {}),
-                    ...(taskInput.taskType
-                        ? { taskType: taskInput.taskType }
-                        : {}),
-                    ...(taskInput.quizId ? { quizId: taskInput.quizId } : {})
-                });
+                savedTask = await addStudyTask(
+                    userId,
+                    toServiceTaskInput(taskInput)
+                );
             } catch (nextError) {
                 setMutationError(nextError);
                 throw nextError;
@@ -117,6 +141,75 @@ export function useStudyPlanner() {
             }));
 
             return nextTask;
+        },
+        [userId]
+    );
+
+    const addTasks = useCallback(
+        async (taskInputs) => {
+            if (!userId) throw new Error("Authentication is required.");
+            setMutationError(null);
+
+            let savedTasks;
+            try {
+                savedTasks = await addStudyTasks(
+                    userId,
+                    taskInputs.map(toServiceTaskInput)
+                );
+            } catch (nextError) {
+                setMutationError(nextError);
+                throw nextError;
+            }
+
+            const nextTasks = savedTasks.map((task) =>
+                normalizePlannerTask(task)
+            );
+            setPlanner((current) => ({
+                ...current,
+                tasks: [...nextTasks, ...current.tasks]
+            }));
+            return nextTasks;
+        },
+        [userId]
+    );
+
+    const applyReplan = useCallback(
+        async (changes) => {
+            if (!userId) throw new Error("Authentication is required.");
+            setMutationError(null);
+
+            let result;
+            try {
+                result = await applyStudyTaskChanges(userId, changes);
+            } catch (nextError) {
+                setMutationError(nextError);
+                throw nextError;
+            }
+
+            const deleted = new Set(result.deletedTaskIds);
+            const updated = new Map(
+                result.updatedTasks.map((task) => [task.id, task])
+            );
+            const added = result.addedTasks.map((task) =>
+                normalizePlannerTask(task)
+            );
+            setPlanner((current) => ({
+                ...current,
+                tasks: [
+                    ...added,
+                    ...current.tasks
+                        .filter((task) => !deleted.has(task.id))
+                        .map((task) =>
+                            updated.has(task.id)
+                                ? normalizePlannerTask({
+                                      ...task,
+                                      ...updated.get(task.id)
+                                  })
+                                : task
+                        )
+                ]
+            }));
+            return result;
         },
         [userId]
     );
@@ -261,6 +354,8 @@ export function useStudyPlanner() {
 
     return {
         addTask,
+        addTasks,
+        applyReplan,
         activeStudyMinutes,
         clearCompleted,
         completedTasks,
@@ -269,8 +364,10 @@ export function useStudyPlanner() {
         error,
         flashcardDecks,
         loading,
+        memoryTopics,
         mutationError,
         quizzes,
+        resources,
         progress,
         tasks: planner.tasks,
         todayStudyMinutes,

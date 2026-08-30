@@ -3,6 +3,7 @@ import { afterEach, beforeEach, expect, test, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
     completeStudySession: vi.fn(),
+    recordStudySessionLearningMemory: vi.fn(),
     showToast: vi.fn()
 }));
 
@@ -14,6 +15,9 @@ vi.mock("../../../hooks/useToast.js", () => ({
 }));
 vi.mock("../services/study-session-service.js", () => ({
     completeStudySession: mocks.completeStudySession
+}));
+vi.mock("../../learningMemory/services/learning-memory-service.js", () => ({
+    recordStudySessionLearningMemory: mocks.recordStudySessionLearningMemory
 }));
 
 import {
@@ -145,4 +149,35 @@ test("discards sessions shorter than one minute", async () => {
         message: "Sessions under one minute are not saved or counted.",
         type: "warning"
     });
+});
+
+test("updates learning memory from a completed study session", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-08-10T10:00:00"));
+    const saved = {
+        actualMinutes: 1,
+        id: "session-1",
+        subject: "Robotics",
+        title: "First task"
+    };
+    mocks.completeStudySession.mockResolvedValue(saved);
+    mocks.recordStudySessionLearningMemory.mockResolvedValue(true);
+    render(
+        <StudySessionProvider>
+            <Launcher />
+        </StudySessionProvider>
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Launch first" }));
+    fireEvent.click(screen.getByRole("button", { name: "Start" }));
+    act(() => vi.advanceTimersByTime(60_000));
+    await act(async () => {
+        fireEvent.click(screen.getByRole("button", { name: "Finish Session" }));
+        await Promise.resolve();
+    });
+
+    expect(mocks.recordStudySessionLearningMemory).toHaveBeenCalledWith(
+        "user-1",
+        saved
+    );
 });

@@ -42,6 +42,22 @@ test("previews supported images and keeps a comfortable download action", () => 
     expect(onDownload).toHaveBeenCalledWith(file);
 });
 
+test("opens the previewed resource in Thuto", () => {
+    const onStudyWithThuto = vi.fn();
+    const file = { ...baseFile, extension: "pdf" };
+    render(
+        <FilePreview
+            file={file}
+            onClose={vi.fn()}
+            onDownload={vi.fn()}
+            onStudyWithThuto={onStudyWithThuto}
+        />
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Study with Thuto" }));
+    expect(onStudyWithThuto).toHaveBeenCalledWith(file);
+});
+
 test("falls back to download messaging for unsupported files", () => {
     render(
         <FilePreview

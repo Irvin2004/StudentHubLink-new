@@ -10,7 +10,7 @@ import {
 import { AppLayout } from "../components/layout/AppLayout/AppLayout.jsx";
 import { LoadingScreen } from "../components/feedback/LoadingScreen.jsx";
 import PerformanceProfiler from "../components/performance/PerformanceProfiler.jsx";
-import { ROUTES } from "../config/routes.js";
+import { LEGACY_APP_REDIRECTS, ROUTES } from "../config/routes.js";
 import { GuestRoute } from "./GuestRoute.jsx";
 import { ProtectedRoute } from "./ProtectedRoute.jsx";
 
@@ -87,6 +87,13 @@ export function AppRouter() {
                     />
                 </Route>
                 <Route element={<ProtectedRoute />}>
+                    {LEGACY_APP_REDIRECTS.map(({ from, to }) => (
+                        <Route
+                            key={from}
+                            path={from}
+                            element={<CanonicalRedirect to={to} />}
+                        />
+                    ))}
                     <Route element={<AppLayout />}>
                         <Route
                             path={ROUTES.DASHBOARD}
@@ -112,6 +119,14 @@ export function AppRouter() {
                             path={ROUTES.COMMUNITY_CHANNEL}
                             element={
                                 <ProfiledRoute id="CommunityPage">
+                                    <CommunityPage />
+                                </ProfiledRoute>
+                            }
+                        />
+                        <Route
+                            path={ROUTES.COMMUNITY_QUESTIONS}
+                            element={
+                                <ProfiledRoute id="CommunityQuestionsPage">
                                     <CommunityPage />
                                 </ProfiledRoute>
                             }

@@ -54,6 +54,24 @@ describe("local AI assistant", () => {
         expect(provider).not.toHaveBeenCalled();
     });
 
+    test("answers a question from resource context and preserves its source", async () => {
+        const result = await runAIAssistant({
+            action: AI_ACTIONS.ASK_QUESTION,
+            content: notes,
+            question: "What does RAM store?",
+            source: { id: "computing:notes:ram", title: "Memory notes" },
+            subject: "Memory notes"
+        });
+
+        expect(result).toMatchObject({
+            kind: "answer",
+            question: "What does RAM store?",
+            resourceId: "computing:notes:ram",
+            sourceTitle: "Memory notes"
+        });
+        expect(result.points.join(" ")).toContain("RAM temporarily stores");
+    });
+
     test("normalizes provider failures into a retryable response", async () => {
         await expect(
             runAIAssistant(
@@ -66,8 +84,7 @@ describe("local AI assistant", () => {
             )
         ).rejects.toMatchObject({
             code: "ai/request-failed",
-            message:
-                "The assistant could not complete that request. Please try again."
+            message: "Thuto could not complete that request. Please try again."
         });
     });
 });

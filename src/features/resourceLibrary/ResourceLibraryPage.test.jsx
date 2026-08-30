@@ -24,10 +24,27 @@ const library = vi.hoisted(() => ({
     toggleFavorite: vi.fn()
 }));
 const session = vi.hoisted(() => ({ startSession: vi.fn() }));
+const conversations = vi.hoisted(() => ({
+    addThutoMessage: vi.fn(),
+    loadThutoConversation: vi.fn(),
+    startNewThutoConversation: vi.fn()
+}));
+const memory = vi.hoisted(() => ({
+    loadLearningMemory: vi.fn(),
+    recordThutoLearningMemory: vi.fn()
+}));
 
 vi.mock("../studySessions/context/study-session-context.js", () => ({
     useStudySession: () => session
 }));
+vi.mock("../../hooks/useAuth.js", () => ({
+    useAuth: () => ({ user: { uid: "user-1" } })
+}));
+vi.mock(
+    "../aiAssistant/services/thuto-conversation-service.js",
+    () => conversations
+);
+vi.mock("../learningMemory/services/learning-memory-service.js", () => memory);
 
 vi.mock("./hooks/useResourceLibrary.js", () => ({
     useResourceLibrary: () => library
@@ -42,11 +59,14 @@ vi.mock("../../components/files/FileUploader/FileUploader.jsx", () => ({
 }));
 
 import ResourceLibraryPage from "./ResourceLibraryPage.jsx";
+import { AI_ACTIONS } from "../aiAssistant/config/ai-action-types.js";
 
 const resources = [
     {
         communityId: "science",
         communityName: "Science Club",
+        content:
+            "Acceleration is the rate at which velocity changes over time. Velocity describes motion in a direction.",
         extension: "pdf",
         id: "file-1",
         originalName: "Motion notes.pdf",
@@ -72,6 +92,28 @@ const resources = [
 
 beforeEach(() => {
     vi.clearAllMocks();
+    conversations.loadThutoConversation.mockResolvedValue({
+        messages: [],
+        threadId: "thread-1"
+    });
+    conversations.addThutoMessage.mockImplementation(
+        async (_userId, _resource, threadId, message) => ({
+            ...message,
+            createdAt: new Date(),
+            id: `message-${conversations.addThutoMessage.mock.calls.length}`,
+            threadId
+        })
+    );
+    conversations.startNewThutoConversation.mockResolvedValue({
+        messages: [],
+        threadId: "thread-2"
+    });
+    memory.loadLearningMemory.mockResolvedValue({
+        notices: [],
+        prompt: "",
+        topics: []
+    });
+    memory.recordThutoLearningMemory.mockResolvedValue([]);
     window.history.replaceState({}, "", "/app/resources");
     Object.assign(library, {
         error: null,
@@ -158,6 +200,122 @@ test("starts a study session from a resource", () => {
         subject: "Science Club",
         title: "Motion notes"
     });
+});
+
+test("opens Thuto with the selected resource as context", async () => {
+    render(<ResourceLibraryPage />);
+
+    const motionResource = screen
+        .getByRole("heading", { name: "Motion notes" })
+        .closest("article");
+    fireEvent.click(
+        within(motionResource).getByRole("button", { name: "Study with Thuto" })
+    );
+
+    expect(
+        await screen.findByRole("dialog", {
+            name: "Thuto — Your Learning Companion"
+        })
+    ).toBeVisible();
+    expect(
+        screen.getByLabelText("Active Thuto study materials")
+    ).toHaveTextContent("Motion notes");
+    expect(
+        screen.getByRole("textbox", { name: "Study context" }).value
+    ).toContain("Acceleration is the rate");
+
+    fireEvent.change(screen.getByLabelText("Thuto action"), {
+        target: { value: AI_ACTIONS.ASK_QUESTION }
+    });
+    fireEvent.change(
+        screen.getByRole("textbox", {
+            name: "Question about this resource"
+        }),
+        { target: { value: "What is acceleration?" } }
+    );
+    await waitFor(() =>
+        expect(
+            screen.getByRole("button", { name: "Ask a Question" })
+        ).toBeEnabled()
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Ask a Question" }));
+
+    const answerHeading = await screen.findByRole("heading", {
+        name: "Answer from Motion notes"
+    });
+    expect(answerHeading).toBeVisible();
+    expect(
+        within(answerHeading.closest("section")).getByText(
+            /Acceleration is the rate/
+        )
+    ).toBeVisible();
+    expect(library.runResourceAction).toHaveBeenCalledWith(
+        "open",
+        resources[0]
+    );
+});
+
+test("adds and removes active Thuto study materials without mixing sets", async () => {
+    render(<ResourceLibraryPage />);
+
+    const motionResource = screen
+        .getByRole("heading", { name: "Motion notes" })
+        .closest("article");
+    fireEvent.click(
+        within(motionResource).getByRole("button", { name: "Study with Thuto" })
+    );
+
+    const activeMaterials = await screen.findByLabelText(
+        "Active Thuto study materials"
+    );
+    fireEvent.click(
+        within(activeMaterials).getByRole("button", {
+            name: "Add study material"
+        })
+    );
+    fireEvent.click(
+        within(activeMaterials).getByRole("button", {
+            name: "Add selected material"
+        })
+    );
+
+    await waitFor(() => {
+        const materials = screen.getByLabelText("Active Thuto study materials");
+        expect(within(materials).getByText("Motion notes")).toBeVisible();
+        expect(within(materials).getByText("Algebra sheet")).toBeVisible();
+    });
+    expect(
+        screen.getByRole("textbox", { name: "Study context" }).value
+    ).toContain("Study material 2: Algebra sheet");
+    expect(conversations.loadThutoConversation).toHaveBeenLastCalledWith(
+        "user-1",
+        expect.objectContaining({
+            id: expect.stringContaining("set:"),
+            resources: expect.arrayContaining([
+                expect.objectContaining({ id: "science:general:file-1" }),
+                expect.objectContaining({ id: "maths:general:file-2" })
+            ])
+        })
+    );
+
+    fireEvent.click(
+        screen.getByRole("button", { name: "Remove Motion notes" })
+    );
+    await waitFor(() =>
+        expect(
+            screen.getByLabelText("Active Thuto study materials")
+        ).toHaveTextContent("Algebra sheet")
+    );
+    expect(
+        screen.getByLabelText("Active Thuto study materials")
+    ).not.toHaveTextContent("Motion notes");
+    expect(
+        screen.getByRole("textbox", { name: "Study context" }).value
+    ).not.toContain("Acceleration is the rate");
+    expect(conversations.loadThutoConversation).toHaveBeenLastCalledWith(
+        "user-1",
+        expect.objectContaining({ id: "maths:general:file-2" })
+    );
 });
 
 test("opens and highlights a supported resource deep link", async () => {

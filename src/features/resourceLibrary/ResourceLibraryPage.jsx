@@ -16,8 +16,17 @@ import Button from "../../components/ui/Button/index.js";
 import Input from "../../components/ui/Input/index.js";
 import Select from "../../components/ui/Select/index.js";
 import { useDocumentTitle } from "../../hooks/useDocumentTitle.js";
+import { useAuth } from "../../hooks/useAuth.js";
 import { isPreviewableFile } from "../../utils/file-icons.js";
 import { useStudySession } from "../studySessions/context/study-session-context.js";
+import AIAssistantDialog from "../aiAssistant/components/AIAssistantDialog.jsx";
+import { AI_ACTIONS } from "../aiAssistant/config/ai-action-types.js";
+import { useAIAssistant } from "../aiAssistant/hooks/useAIAssistant.js";
+import {
+    createStudyContext,
+    loadResourceContext,
+    MAX_STUDY_RESOURCES
+} from "../aiAssistant/services/resource-context.js";
 import { ResourceCard } from "./components/ResourceCard/ResourceCard.jsx";
 import { useResourceLibrary } from "./hooks/useResourceLibrary.js";
 import {
@@ -29,7 +38,9 @@ import styles from "./ResourceLibraryPage.module.css";
 
 export default function ResourceLibraryPage() {
     useDocumentTitle("StudentHub - Resources", "react-app");
+    const { user } = useAuth();
     const { startSession } = useStudySession();
+    const aiAssistant = useAIAssistant(user?.uid);
 
     const {
         destinations,
@@ -52,6 +63,7 @@ export default function ResourceLibraryPage() {
     const [sort, setSort] = useState("newest");
     const [view, setView] = useState("grid");
     const [preview, setPreview] = useState(null);
+    const [thutoResourceKey, setThutoResourceKey] = useState(null);
     const searchParameters = useMemo(
         () => new URLSearchParams(window.location.search),
         []
@@ -114,6 +126,25 @@ export default function ResourceLibraryPage() {
     const filtered = Boolean(
         query.trim() || type !== "all" || community !== "all"
     );
+    const activeStudyResourceIds = useMemo(
+        () =>
+            new Set(
+                (aiAssistant.context?.resources || []).map(
+                    (resource) => resource.id
+                )
+            ),
+        [aiAssistant.context]
+    );
+    const availableStudyMaterials = useMemo(
+        () =>
+            resources.filter(
+                (resource) =>
+                    !activeStudyResourceIds.has(
+                        resource.resourceKey || resource.id
+                    )
+            ),
+        [activeStudyResourceIds, resources]
+    );
 
     useEffect(() => {
         const resourceId = searchParameters.get("resource");
@@ -153,7 +184,23 @@ export default function ResourceLibraryPage() {
     }, [resources, runResourceAction, searchParameters]);
 
     const handleResourceAction = useCallback(
-        (action, resource) => {
+        async (action, resource) => {
+            if (action === RESOURCE_ACTIONS.STUDY_WITH_THUTO) {
+                setThutoResourceKey(resource.resourceKey);
+                try {
+                    const context = createStudyContext([
+                        await loadResourceContext(resource)
+                    ]);
+                    aiAssistant.openAssistant(
+                        AI_ACTIONS.SUMMARISE_NOTES,
+                        context
+                    );
+                    void runResourceAction(RESOURCE_ACTIONS.OPEN, resource);
+                } finally {
+                    setThutoResourceKey(null);
+                }
+                return;
+            }
             if (action === RESOURCE_ACTIONS.START_SESSION) {
                 startSession({
                     resourceId: resource.resourceKey,
@@ -175,7 +222,43 @@ export default function ResourceLibraryPage() {
 
             void runResourceAction(action, resource);
         },
-        [runResourceAction, startSession]
+        [aiAssistant, runResourceAction, startSession]
+    );
+
+    const handleAddStudyMaterial = useCallback(
+        async (resource) => {
+            const currentResources = aiAssistant.context?.resources || [];
+            if (currentResources.length >= MAX_STUDY_RESOURCES) return;
+
+            setThutoResourceKey(resource.resourceKey);
+            try {
+                const resourceContext = await loadResourceContext(resource);
+                const context = createStudyContext([
+                    ...currentResources,
+                    resourceContext
+                ]);
+                aiAssistant.openAssistant(aiAssistant.action, context);
+                void runResourceAction(RESOURCE_ACTIONS.OPEN, resource);
+            } finally {
+                setThutoResourceKey(null);
+            }
+        },
+        [aiAssistant, runResourceAction]
+    );
+
+    const handleRemoveStudyMaterial = useCallback(
+        (resourceId) => {
+            const currentResources = aiAssistant.context?.resources || [];
+            if (currentResources.length <= 1) return;
+
+            const context = createStudyContext(
+                currentResources.filter(
+                    (resource) => resource.id !== resourceId
+                )
+            );
+            aiAssistant.openAssistant(aiAssistant.action, context);
+        },
+        [aiAssistant]
     );
 
     return (
@@ -287,6 +370,9 @@ export default function ResourceLibraryPage() {
                                 key={resource.resourceKey}
                                 onAction={handleResourceAction}
                                 resource={resource}
+                                studyingWithThuto={
+                                    thutoResourceKey === resource.resourceKey
+                                }
                                 view="grid"
                             />
                         ))}
@@ -381,6 +467,9 @@ export default function ResourceLibraryPage() {
                             key={resource.resourceKey}
                             onAction={handleResourceAction}
                             resource={resource}
+                            studyingWithThuto={
+                                thutoResourceKey === resource.resourceKey
+                            }
                             view={view}
                         />
                     ))}
@@ -418,6 +507,43 @@ export default function ResourceLibraryPage() {
                 onDownload={(resource) =>
                     handleResourceAction(RESOURCE_ACTIONS.DOWNLOAD, resource)
                 }
+                onStudyWithThuto={(resource) => {
+                    setPreview(null);
+                    void handleResourceAction(
+                        RESOURCE_ACTIONS.STUDY_WITH_THUTO,
+                        resource
+                    );
+                }}
+            />
+
+            <AIAssistantDialog
+                action={aiAssistant.action}
+                availableStudyMaterials={availableStudyMaterials}
+                context={aiAssistant.context}
+                conversationError={aiAssistant.conversationError}
+                conversationLoading={aiAssistant.conversationLoading}
+                conversationMessages={aiAssistant.conversationMessages}
+                error={aiAssistant.error}
+                key={`${aiAssistant.action}-${aiAssistant.open}-${aiAssistant.context?.id || "notes"}`}
+                loading={aiAssistant.loading}
+                learningMemory={aiAssistant.learningMemory}
+                learningMemoryLoading={aiAssistant.learningMemoryLoading}
+                maxStudyMaterials={MAX_STUDY_RESOURCES}
+                memoryError={aiAssistant.memoryError}
+                onAddStudyMaterial={handleAddStudyMaterial}
+                onClose={aiAssistant.closeAssistant}
+                onNewConversation={aiAssistant.newConversation}
+                onRemoveStudyMaterial={handleRemoveStudyMaterial}
+                onRetry={aiAssistant.retry}
+                onRun={aiAssistant.run}
+                onSave={aiAssistant.save}
+                open={aiAssistant.open}
+                newConversationLoading={aiAssistant.newConversationLoading}
+                result={aiAssistant.result}
+                saveError={aiAssistant.saveError}
+                saved={aiAssistant.saved}
+                saving={aiAssistant.saving}
+                studyMaterialLoadingKey={thutoResourceKey}
             />
         </main>
     );

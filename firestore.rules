@@ -528,6 +528,7 @@ service cloud.firestore {
           "subject",
           "questionCount",
           "flashcardDeckId",
+          "resourceId",
           "createdAt",
           "updatedAt"
         ])
@@ -544,6 +545,13 @@ service cloud.firestore {
           || (
             request.resource.data.flashcardDeckId is string
             && request.resource.data.flashcardDeckId.size() > 0
+          )
+        )
+        && (
+          !("resourceId" in request.resource.data)
+          || (
+            request.resource.data.resourceId is string
+            && request.resource.data.resourceId.size() > 0
           )
         )
         && request.resource.data.createdAt is timestamp
@@ -624,6 +632,148 @@ service cloud.firestore {
           )
           && request.resource.data.completedAt is timestamp;
         allow update: if false;
+      }
+    }
+
+    match /users/{userId}/thutoConversations/{resourceKey} {
+      allow read: if isOwner(userId);
+      allow create, update: if isOwner(userId)
+        && request.resource.data.keys().hasOnly([
+          "userId",
+          "resourceId",
+          "sourceTitle",
+          "activeThreadId",
+          "createdAt",
+          "updatedAt"
+        ])
+        && request.resource.data.userId == userId
+        && request.resource.data.resourceId is string
+        && request.resource.data.resourceId.size() > 0
+        && request.resource.data.sourceTitle is string
+        && request.resource.data.sourceTitle.size() > 0
+        && request.resource.data.sourceTitle.size() <= 200
+        && request.resource.data.activeThreadId is string
+        && request.resource.data.activeThreadId.size() > 0
+        && request.resource.data.createdAt is timestamp
+        && request.resource.data.updatedAt is timestamp;
+      allow delete: if false;
+
+      match /messages/{messageId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId)
+          && request.resource.data.keys().hasOnly([
+            "role",
+            "content",
+            "threadId",
+            "createdAt"
+          ])
+          && request.resource.data.role in ["user", "assistant"]
+          && request.resource.data.content is string
+          && request.resource.data.content.size() > 0
+          && request.resource.data.content.size() <= 20000
+          && request.resource.data.threadId is string
+          && request.resource.data.threadId.size() > 0
+          && request.resource.data.createdAt is timestamp;
+        allow update, delete: if false;
+      }
+    }
+
+    match /users/{userId}/learningMemory/{topicKey} {
+      allow read: if isOwner(userId);
+      allow create, update: if isOwner(userId)
+        && request.resource.data.keys().hasOnly([
+          "userId",
+          "topicKey",
+          "topic",
+          "studiedCount",
+          "studyMinutes",
+          "quizAttempts",
+          "quizScoreTotal",
+          "latestQuizPercentage",
+          "flashcardReviews",
+          "correctSignals",
+          "struggleSignals",
+          "updatedAt"
+        ])
+        && request.resource.data.userId == userId
+        && request.resource.data.topicKey == topicKey
+        && request.resource.data.topic is string
+        && request.resource.data.topic.size() > 0
+        && request.resource.data.topic.size() <= 160
+        && request.resource.data.studiedCount is int
+        && request.resource.data.studiedCount >= 0
+        && request.resource.data.studyMinutes is int
+        && request.resource.data.studyMinutes >= 0
+        && request.resource.data.quizAttempts is int
+        && request.resource.data.quizAttempts >= 0
+        && request.resource.data.quizScoreTotal is int
+        && request.resource.data.quizScoreTotal >= 0
+        && request.resource.data.flashcardReviews is int
+        && request.resource.data.flashcardReviews >= 0
+        && request.resource.data.correctSignals is int
+        && request.resource.data.correctSignals >= 0
+        && request.resource.data.struggleSignals is int
+        && request.resource.data.struggleSignals >= 0
+        && (
+          !("latestQuizPercentage" in request.resource.data)
+          || (
+            request.resource.data.latestQuizPercentage is int
+            && request.resource.data.latestQuizPercentage >= 0
+            && request.resource.data.latestQuizPercentage <= 100
+          )
+        )
+        && request.resource.data.updatedAt is timestamp;
+      allow delete: if false;
+
+      match /concepts/{conceptKey} {
+        allow read: if isOwner(userId);
+        allow create, update: if isOwner(userId)
+          && request.resource.data.keys().hasOnly([
+            "userId",
+            "topicKey",
+            "label",
+            "correctSignals",
+            "struggleSignals",
+            "updatedAt"
+          ])
+          && request.resource.data.userId == userId
+          && request.resource.data.topicKey == topicKey
+          && request.resource.data.label is string
+          && request.resource.data.label.size() > 0
+          && request.resource.data.label.size() <= 300
+          && request.resource.data.correctSignals is int
+          && request.resource.data.correctSignals >= 0
+          && request.resource.data.struggleSignals is int
+          && request.resource.data.struggleSignals >= 0
+          && request.resource.data.updatedAt is timestamp;
+        allow delete: if false;
+      }
+
+      match /activities/{activityId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId)
+          && request.resource.data.keys().hasOnly([
+            "userId",
+            "topicKey",
+            "type",
+            "detail",
+            "sourceId",
+            "occurredAt"
+          ])
+          && request.resource.data.userId == userId
+          && request.resource.data.topicKey == topicKey
+          && request.resource.data.type in [
+            "quiz",
+            "flashcard",
+            "study-session",
+            "thuto"
+          ]
+          && request.resource.data.detail is string
+          && request.resource.data.detail.size() <= 500
+          && request.resource.data.sourceId is string
+          && request.resource.data.sourceId.size() <= 200
+          && request.resource.data.occurredAt is timestamp;
+        allow update, delete: if false;
       }
     }
 
@@ -1294,6 +1444,247 @@ service cloud.firestore {
               )
             )
           );
+      }
+
+      match /questions/{questionId} {
+        function questionContentIsValid() {
+          return request.resource.data.title is string
+            && request.resource.data.title.size() > 0
+            && request.resource.data.title.size() <= 160
+            && request.resource.data.description is string
+            && request.resource.data.description.size() > 0
+            && request.resource.data.description.size() <= 5000
+            && request.resource.data.tags is list
+            && request.resource.data.tags.size() > 0
+            && request.resource.data.tags.size() <= 5
+            && (
+              request.resource.data.linkedResource == null
+              || (
+                request.resource.data.linkedResource is map
+                && request.resource.data.linkedResource.keys()
+                  .hasOnly(["id", "title"])
+                && request.resource.data.linkedResource.id is string
+                && request.resource.data.linkedResource.id.size() > 0
+                && request.resource.data.linkedResource.title is string
+                && request.resource.data.linkedResource.title.size() > 0
+                && request.resource.data.linkedResource.title.size() <= 160
+              )
+            );
+        }
+
+        function questionAuthor() {
+          return signedIn() && resource.data.authorId == request.auth.uid;
+        }
+
+        allow read: if isCommunityMember(communityId);
+        allow create: if isCommunityMember(communityId)
+          && request.resource.data.keys().hasOnly([
+            "title", "description", "tags", "linkedResource",
+            "authorId", "authorName", "acceptedAnswerId", "answerCount",
+            "status", "createdAt", "updatedAt"
+          ])
+          && questionContentIsValid()
+          && request.resource.data.authorId == request.auth.uid
+          && request.resource.data.authorName is string
+          && request.resource.data.authorName.size() > 0
+          && request.resource.data.authorName.size() <= 120
+          && request.resource.data.acceptedAnswerId == null
+          && request.resource.data.answerCount == 0
+          && request.resource.data.status == "unanswered"
+          && request.resource.data.createdAt == request.time
+          && request.resource.data.updatedAt == request.time;
+        allow update: if isCommunityMember(communityId)
+          && request.resource.data.authorId == resource.data.authorId
+          && request.resource.data.authorName == resource.data.authorName
+          && request.resource.data.createdAt == resource.data.createdAt
+          && request.resource.data.updatedAt == request.time
+          && (
+            (
+              questionAuthor()
+              && questionContentIsValid()
+              && request.resource.data.diff(resource.data).affectedKeys()
+                .hasOnly([
+                  "title", "description", "tags", "linkedResource",
+                  "updatedAt"
+                ])
+            )
+            || (
+              (questionAuthor() || isCommunityModerator(communityId))
+              && request.resource.data.diff(resource.data).affectedKeys()
+                .hasOnly([
+                  "acceptedAnswerId", "answerCount", "status", "updatedAt"
+                ])
+              && request.resource.data.answerCount >= 0
+              && request.resource.data.status in [
+                "unanswered", "answered", "solved"
+              ]
+            )
+            || (
+              request.resource.data.diff(resource.data).affectedKeys()
+                .hasOnly(["answerCount", "status", "updatedAt"])
+              && request.resource.data.answerCount
+                == resource.data.answerCount + 1
+              && request.resource.data.status in ["answered", "solved"]
+            )
+            || (
+              request.resource.data.diff(resource.data).affectedKeys()
+                .hasOnly([
+                  "acceptedAnswerId", "answerCount", "status", "updatedAt"
+                ])
+              && request.resource.data.answerCount
+                == resource.data.answerCount - 1
+              && request.resource.data.answerCount >= 0
+              && request.resource.data.status in [
+                "unanswered", "answered", "solved"
+              ]
+            )
+          );
+        allow delete: if questionAuthor()
+          || isCommunityModerator(communityId);
+
+        match /answers/{answerId} {
+          function questionDocument() {
+            return get(
+              /databases/$(database)/documents/communities/$(communityId)/questions/$(questionId)
+            );
+          }
+
+          function answerAuthor() {
+            return signedIn() && resource.data.authorId == request.auth.uid;
+          }
+
+          function questionOwner() {
+            return signedIn()
+              && questionDocument().data.authorId == request.auth.uid;
+          }
+
+          function answerOwner() {
+            return signedIn()
+              && get(
+                /databases/$(database)/documents/communities/$(communityId)/questions/$(questionId)/answers/$(answerId)
+              ).data.authorId == request.auth.uid;
+          }
+
+          allow read: if isCommunityMember(communityId);
+          allow create: if isCommunityMember(communityId)
+            && request.resource.data.keys().hasOnly([
+              "authorId", "authorName", "content", "accepted",
+              "upvoteCount", "createdAt", "updatedAt"
+            ])
+            && request.resource.data.authorId == request.auth.uid
+            && request.resource.data.authorName is string
+            && request.resource.data.authorName.size() > 0
+            && request.resource.data.authorName.size() <= 120
+            && request.resource.data.content is string
+            && request.resource.data.content.size() > 0
+            && request.resource.data.content.size() <= 5000
+            && request.resource.data.accepted == false
+            && request.resource.data.upvoteCount == 0
+            && request.resource.data.createdAt == request.time
+            && request.resource.data.updatedAt == request.time;
+          allow update: if isCommunityMember(communityId)
+            && request.resource.data.authorId == resource.data.authorId
+            && request.resource.data.authorName == resource.data.authorName
+            && request.resource.data.createdAt == resource.data.createdAt
+            && request.resource.data.updatedAt == request.time
+            && (
+              (
+                answerAuthor()
+                && request.resource.data.diff(resource.data).affectedKeys()
+                  .hasOnly(["content", "updatedAt"])
+                && request.resource.data.content is string
+                && request.resource.data.content.size() > 0
+                && request.resource.data.content.size() <= 5000
+              )
+              || (
+                questionOwner()
+                && request.resource.data.diff(resource.data).affectedKeys()
+                  .hasOnly(["accepted", "updatedAt"])
+                && request.resource.data.accepted is bool
+              )
+              || (
+                request.resource.data.diff(resource.data).affectedKeys()
+                  .hasOnly(["upvoteCount", "updatedAt"])
+                && request.resource.data.upvoteCount >= 0
+                && (
+                  (
+                    request.resource.data.upvoteCount
+                      == resource.data.upvoteCount + 1
+                    && !exists(
+                      /databases/$(database)/documents/communities/$(communityId)/questions/$(questionId)/answers/$(answerId)/upvotes/$(request.auth.uid)
+                    )
+                    && existsAfter(
+                      /databases/$(database)/documents/communities/$(communityId)/questions/$(questionId)/answers/$(answerId)/upvotes/$(request.auth.uid)
+                    )
+                  )
+                  || (
+                    request.resource.data.upvoteCount
+                      == resource.data.upvoteCount - 1
+                    && exists(
+                      /databases/$(database)/documents/communities/$(communityId)/questions/$(questionId)/answers/$(answerId)/upvotes/$(request.auth.uid)
+                    )
+                    && !existsAfter(
+                      /databases/$(database)/documents/communities/$(communityId)/questions/$(questionId)/answers/$(answerId)/upvotes/$(request.auth.uid)
+                    )
+                  )
+                )
+              )
+            );
+          allow delete: if answerAuthor()
+            || questionOwner()
+            || isCommunityModerator(communityId);
+
+          match /upvotes/{userId} {
+            allow read: if isCommunityMember(communityId);
+            allow create: if isCommunityMember(communityId)
+              && userId == request.auth.uid
+              && request.resource.data.userId == request.auth.uid
+              && request.resource.data.createdAt == request.time;
+            allow update: if false;
+            allow delete: if isCommunityMember(communityId)
+              && (
+                userId == request.auth.uid
+                || answerOwner()
+                || questionOwner()
+                || isCommunityModerator(communityId)
+              );
+          }
+
+          match /comments/{commentId} {
+            function commentAuthor() {
+              return signedIn() && resource.data.authorId == request.auth.uid;
+            }
+
+            allow read: if isCommunityMember(communityId);
+            allow create: if isCommunityMember(communityId)
+              && request.resource.data.keys().hasOnly([
+                "authorId", "authorName", "content", "createdAt", "updatedAt"
+              ])
+              && request.resource.data.authorId == request.auth.uid
+              && request.resource.data.authorName is string
+              && request.resource.data.authorName.size() > 0
+              && request.resource.data.authorName.size() <= 120
+              && request.resource.data.content is string
+              && request.resource.data.content.size() > 0
+              && request.resource.data.content.size() <= 1000
+              && request.resource.data.createdAt == request.time
+              && request.resource.data.updatedAt == request.time;
+            allow update: if commentAuthor()
+              && request.resource.data.authorId == resource.data.authorId
+              && request.resource.data.authorName == resource.data.authorName
+              && request.resource.data.createdAt == resource.data.createdAt
+              && request.resource.data.diff(resource.data).affectedKeys()
+                .hasOnly(["content", "updatedAt"])
+              && request.resource.data.content is string
+              && request.resource.data.content.size() > 0
+              && request.resource.data.content.size() <= 1000
+              && request.resource.data.updatedAt == request.time;
+            allow delete: if commentAuthor()
+              || answerOwner()
+              || questionOwner()
+              || isCommunityModerator(communityId);
+          }
+        }
       }
 
       match /channels/{channelId} {

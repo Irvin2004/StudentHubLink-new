@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useDocumentTitle } from "../../hooks/useDocumentTitle.js";
 import { useAuth } from "../../hooks/useAuth.js";
 import { useNavigate } from "react-router-dom";
@@ -6,6 +7,8 @@ import { AIAssistantCard } from "./components/AIAssistantCard/index.js";
 import { ContinueLearning } from "./components/ContinueLearning/ContinueLearning.jsx";
 import { FocusCard } from "./components/FocusCard/FocusCard.jsx";
 import { QuickActions } from "./components/QuickActions/index.js";
+import RecommendedByThuto from "./components/RecommendedByThuto/RecommendedByThuto.jsx";
+import RecommendationScheduleDialog from "./components/RecommendationScheduleDialog/RecommendationScheduleDialog.jsx";
 import { RecentActivity } from "./components/RecentActivity/index.js";
 import { StatsGrid } from "./components/StatsGrid/StatsGrid.jsx";
 import { StudyStreak } from "./components/StudyStreak/StudyStreak.jsx";
@@ -17,6 +20,7 @@ import { useStudySession } from "../studySessions/context/study-session-context.
 import AIAssistantDialog from "../aiAssistant/components/AIAssistantDialog.jsx";
 import { AI_ACTIONS } from "../aiAssistant/config/ai-action-types.js";
 import { useAIAssistant } from "../aiAssistant/hooks/useAIAssistant.js";
+import { addStudyTask } from "../studyPlanner/services/study-planner-service.js";
 
 function getStudyPlannerRoute(taskId) {
     if (!taskId) return ROUTES.STUDY_PLANNER;
@@ -56,6 +60,8 @@ function getContinueLearningRoute(item) {
 }
 
 export default function DashboardPage() {
+    const [scheduledRecommendation, setScheduledRecommendation] =
+        useState(null);
     const { startSession } = useStudySession();
     const { dashboard, error, loading, reload } = useDashboard();
     const { profile, user } = useAuth();
@@ -100,32 +106,63 @@ export default function DashboardPage() {
     ];
     const aiActions = [
         {
-            label: "Summarise Notes",
+            label: "Summarise with Thuto",
             icon: "note",
             onClick: () => aiAssistant.openAssistant(AI_ACTIONS.SUMMARISE_NOTES)
         },
         {
-            label: "Generate Flashcards",
+            label: "Create Flashcards",
             icon: "flashcards",
             onClick: () =>
                 aiAssistant.openAssistant(AI_ACTIONS.GENERATE_FLASHCARDS)
         },
         {
-            label: "Create Quiz",
+            label: "Create a Quiz",
             icon: "quiz",
             onClick: () => aiAssistant.openAssistant(AI_ACTIONS.GENERATE_QUIZ)
         },
         {
-            label: "Explain a Topic",
+            label: "Explain with Thuto",
             icon: "sparkles",
             onClick: () => aiAssistant.openAssistant(AI_ACTIONS.EXPLAIN_TOPIC)
         },
         {
-            label: "Suggest Study Plan",
+            label: "Plan My Study",
             icon: "calendar",
             onClick: () => aiAssistant.openAssistant(AI_ACTIONS.STUDY_PLAN)
         }
     ];
+    const handleRecommendation = (recommendation) => {
+        const target = recommendation.target;
+        if (target?.kind === "start-session") {
+            startSession({
+                sourceType: "task",
+                subject: target.subject,
+                title: target.title
+            });
+            return;
+        }
+        if (target?.feature === "planner") {
+            navigate(getStudyPlannerRoute(target.id));
+        } else if (target?.feature === "quiz") {
+            const taskQuery = target.taskId
+                ? `&task=${encodeURIComponent(target.taskId)}`
+                : "";
+            navigate(getQuizRoute(target.id, target.mode) + taskQuery);
+        } else if (target?.feature === "flashcards") {
+            navigate(getFlashcardRoute(target.id, target.mode));
+        } else if (target?.feature === "resource") {
+            navigate(getResourceRoute(target.id));
+        }
+    };
+    const saveRecommendationToPlan = async (taskInput) => {
+        if (!user?.uid) {
+            throw new Error("Sign in to add this task to your study plan.");
+        }
+        await addStudyTask(user.uid, taskInput);
+        setScheduledRecommendation(null);
+        window.dispatchEvent(new Event("study-plan-updated"));
+    };
 
     useDocumentTitle("StudentHub - Dashboard", "dashboard");
 
@@ -176,6 +213,15 @@ export default function DashboardPage() {
                 weeklyGoalMinutes={dashboard.weeklyGoalMinutes}
                 weeklyMinutes={dashboard.weeklyMinutes}
                 weeklyProgress={dashboard.weeklyProgress}
+            />
+
+            <RecommendedByThuto
+                error={error}
+                loading={loading}
+                onAction={handleRecommendation}
+                onAddToPlan={setScheduledRecommendation}
+                onRetry={reload}
+                recommendations={dashboard.recommendations}
             />
 
             <div className={styles.focus}>
@@ -257,6 +303,13 @@ export default function DashboardPage() {
                 saveError={aiAssistant.saveError}
                 saved={aiAssistant.saved}
                 saving={aiAssistant.saving}
+            />
+            <RecommendationScheduleDialog
+                key={scheduledRecommendation?.id || "closed"}
+                onClose={() => setScheduledRecommendation(null)}
+                onSave={saveRecommendationToPlan}
+                open={Boolean(scheduledRecommendation)}
+                recommendation={scheduledRecommendation}
             />
         </main>
     );

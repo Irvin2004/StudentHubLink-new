@@ -6,6 +6,7 @@ export const ROUTES = Object.freeze({
     COMMUNITIES: "/app/communities",
     COMMUNITY: "/community/:communityId",
     COMMUNITY_CHANNEL: "/community/:communityId/channel/:channelId",
+    COMMUNITY_QUESTIONS: "/community/:communityId/questions",
     CHAT: "/app/chat",
     FRIENDS: "/app/friends",
     FILES: "/app/files",
@@ -17,3 +18,25 @@ export const ROUTES = Object.freeze({
     NOTIFICATIONS: "/app/notifications",
     SETTINGS: "/app/settings"
 });
+
+export const LEGACY_APP_REDIRECTS = Object.freeze([
+    { from: "/dashboard.html", to: ROUTES.DASHBOARD },
+    { from: "/pages/dashboard.html", to: ROUTES.DASHBOARD },
+    { from: "/pages/chat.html", to: ROUTES.CHAT },
+    { from: "/pages/messages.html", to: ROUTES.CHAT },
+    { from: "/pages/groups.html", to: ROUTES.COMMUNITIES },
+    { from: "/pages/group-details.html", to: ROUTES.COMMUNITIES },
+    { from: "/pages/group-resources.html", to: ROUTES.COMMUNITIES },
+    { from: "/pages/group-assignments.html", to: ROUTES.COMMUNITIES },
+    { from: "/pages/resources.html", to: ROUTES.RESOURCES },
+    { from: "/pages/resource-details.html", to: ROUTES.RESOURCES },
+    { from: "/pages/library.html", to: ROUTES.RESOURCES },
+    { from: "/pages/documents.html", to: ROUTES.RESOURCES },
+    { from: "/pages/favorites.html", to: ROUTES.RESOURCES },
+    { from: "/pages/upload.html", to: ROUTES.RESOURCES },
+    { from: "/pages/profile.html", to: ROUTES.SETTINGS },
+    { from: "/pages/user-profile.html", to: ROUTES.SETTINGS },
+    { from: "/pages/achievements.html", to: ROUTES.DASHBOARD },
+    { from: "/pages/leaderboard.html", to: ROUTES.DASHBOARD },
+    { from: "/Admin/admin-dashboard.html", to: ROUTES.DASHBOARD }
+]);

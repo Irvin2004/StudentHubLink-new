@@ -19,6 +19,7 @@ export const RESOURCE_ACTIONS = Object.freeze({
     OPEN: "open",
     PREVIEW: "preview",
     START_SESSION: "start-session",
+    STUDY_WITH_THUTO: "study-with-thuto",
     TOGGLE_FAVORITE: "toggle-favorite"
 });
 

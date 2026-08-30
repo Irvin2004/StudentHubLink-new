@@ -1,7 +1,6 @@
 "use strict";
 
 import { THEMES } from "../config/theme-config.js";
-import { logError } from "./error-service.js";
 
 const THEME_STORAGE_KEY = "studenthub-theme";
 const SETTINGS_CHANGE_EVENT = "studenthub:settings-changed";
@@ -28,8 +27,8 @@ function resolveTheme(theme) {
 function saveTheme(theme) {
     try {
         window.localStorage.setItem(THEME_STORAGE_KEY, theme);
-    } catch (error) {
-        logError(error, "Unable to save theme preference");
+    } catch {
+        // Storage can be unavailable in privacy modes; the applied theme remains valid.
     }
 }
 
@@ -38,8 +37,7 @@ function getSavedTheme() {
         const savedTheme = window.localStorage.getItem(THEME_STORAGE_KEY);
 
         return isValidTheme(savedTheme) ? savedTheme : THEMES.SYSTEM;
-    } catch (error) {
-        logError(error, "Unable to read theme preference");
+    } catch {
         return THEMES.SYSTEM;
     }
 }

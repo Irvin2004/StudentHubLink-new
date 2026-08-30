@@ -1,9 +1,10 @@
-/*
- * Vite style entrypoint.
- *
- * Existing styles remain in css/ during the incremental source migration.
- * New features should use the established base/component/layout/theme layers
- * and design tokens rather than creating a second design system.
- */
-@import url("../../css/studenthub.css");
+/* Canonical global style entrypoint for the React application. */
+@import url("./themes/theme-tokens.css");
+@import url("./themes/light.css");
+@import url("./themes/dark.css");
+@import url("./foundation/reset.css");
+@import url("./foundation/typography.css");
+@import url("./foundation/utilities.css");
+@import url("./landing-navigation.css");
+@import url("./accessibility.css");
 @import url("./react-app.css");

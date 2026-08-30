@@ -243,12 +243,55 @@ export async function deleteCommunity(communityId) {
 
     const channelsReference = collection(reference, "channels");
     await deleteCommunityChannels(channelsReference);
+    await deleteCommunityQuestions(collection(reference, "questions"));
 
     for (const collectionName of CHILD_COLLECTIONS) {
         await deleteCollectionDocuments(collection(reference, collectionName));
     }
     await deleteCollectionDocuments(collection(reference, MEMBERS_COLLECTION));
     await deleteDoc(reference);
+}
+
+async function deleteCommunityQuestions(questionsReference) {
+    let hasMore = true;
+
+    while (hasMore) {
+        const questionsSnapshot = await getDocs(
+            query(questionsReference, limit(DELETE_BATCH_SIZE))
+        );
+        if (questionsSnapshot.empty) return;
+
+        for (const questionSnapshot of questionsSnapshot.docs) {
+            const answersSnapshot = await getDocs(
+                query(
+                    collection(questionSnapshot.ref, "answers"),
+                    limit(DELETE_BATCH_SIZE)
+                )
+            );
+            for (const answerSnapshot of answersSnapshot.docs) {
+                await Promise.all([
+                    deleteCollectionDocuments(
+                        collection(answerSnapshot.ref, "comments")
+                    ),
+                    deleteCollectionDocuments(
+                        collection(answerSnapshot.ref, "upvotes")
+                    )
+                ]);
+            }
+            const answersBatch = writeBatch(db);
+            answersSnapshot.docs.forEach((answerSnapshot) =>
+                answersBatch.delete(answerSnapshot.ref)
+            );
+            await answersBatch.commit();
+        }
+
+        const questionsBatch = writeBatch(db);
+        questionsSnapshot.docs.forEach((questionSnapshot) =>
+            questionsBatch.delete(questionSnapshot.ref)
+        );
+        await questionsBatch.commit();
+        hasMore = questionsSnapshot.size === DELETE_BATCH_SIZE;
+    }
 }
 
 /**

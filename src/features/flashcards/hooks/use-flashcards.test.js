@@ -16,12 +16,19 @@ const quizzes = vi.hoisted(() => ({
     createQuizFromFlashcardDeck: vi.fn(),
     getQuizzes: vi.fn()
 }));
+const memory = vi.hoisted(() => ({
+    recordFlashcardLearningMemory: vi.fn()
+}));
 
 vi.mock("../../../hooks/useAuth.js", () => ({
     useAuth: () => ({ user: { uid: "user-1" } })
 }));
 vi.mock("../services/flashcard-service.js", () => services);
 vi.mock("../../quizzes/services/quiz-service.js", () => quizzes);
+vi.mock(
+    "../../learningMemory/services/learning-memory-service.js",
+    () => memory
+);
 
 import { useFlashcards } from "./useFlashcards.js";
 
@@ -56,6 +63,7 @@ beforeEach(() => {
     services.recordFlashcardDeckStudied.mockResolvedValue({
         lastStudiedAt: new Date()
     });
+    memory.recordFlashcardLearningMemory.mockResolvedValue(true);
 });
 
 test("persists a rating and immediately refreshes the due count", async () => {
@@ -74,6 +82,12 @@ test("persists a rating and immediately refreshes the due count", async () => {
         "card-1",
         "Good",
         1
+    );
+    expect(memory.recordFlashcardLearningMemory).toHaveBeenCalledWith(
+        "user-1",
+        expect.objectContaining({ id: "deck-1" }),
+        expect.objectContaining({ id: "card-1" }),
+        "Good"
     );
     expect(result.current.cards[0].easeRating).toBe("good");
     expect(result.current.selectedDeck.dueCount).toBe(0);

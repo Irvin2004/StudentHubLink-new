@@ -36,6 +36,48 @@ function requireDueDate(value) {
     return dueDate;
 }
 
+function createStudyTask(taskInput, timestamp) {
+    return {
+        title: taskInput.title,
+        subject: taskInput.subject,
+        notes: String(taskInput.notes || "").trim(),
+        dueDate: requireDueDate(taskInput.dueDate),
+        estimatedMinutes: Number(taskInput.estimatedMinutes),
+        priority: taskInput.priority,
+        completed: false,
+        createdAt: timestamp,
+        updatedAt: timestamp,
+        ...(taskInput.resourceId
+            ? { resourceId: String(taskInput.resourceId) }
+            : {}),
+        ...(taskInput.flashcardDeckId
+            ? { flashcardDeckId: String(taskInput.flashcardDeckId) }
+            : {}),
+        ...(taskInput.quizId ? { quizId: String(taskInput.quizId) } : {}),
+        ...(taskInput.taskType ? { taskType: String(taskInput.taskType) } : {})
+    };
+}
+
+function createStudyTaskChanges(taskInput, timestamp) {
+    return {
+        title: taskInput.title,
+        subject: taskInput.subject,
+        notes: String(taskInput.notes || "").trim(),
+        dueDate: requireDueDate(taskInput.dueDate),
+        estimatedMinutes: Number(taskInput.estimatedMinutes),
+        priority: taskInput.priority,
+        updatedAt: timestamp,
+        resourceId: taskInput.resourceId
+            ? String(taskInput.resourceId)
+            : deleteField(),
+        flashcardDeckId: taskInput.flashcardDeckId
+            ? String(taskInput.flashcardDeckId)
+            : deleteField(),
+        quizId: taskInput.quizId ? String(taskInput.quizId) : deleteField(),
+        taskType: String(taskInput.taskType || "study")
+    };
+}
+
 export async function getStudyPlanner(userId) {
     const snapshot = await getDocs(
         query(
@@ -56,25 +98,7 @@ export async function getStudyPlanner(userId) {
 export async function addStudyTask(userId, taskInput) {
     const reference = doc(studyTasksReference(userId));
     const timestamp = serverTimestamp();
-    const task = {
-        title: taskInput.title,
-        subject: taskInput.subject,
-        notes: String(taskInput.notes || "").trim(),
-        dueDate: requireDueDate(taskInput.dueDate),
-        estimatedMinutes: Number(taskInput.estimatedMinutes),
-        priority: taskInput.priority,
-        completed: false,
-        createdAt: timestamp,
-        updatedAt: timestamp,
-        ...(taskInput.resourceId
-            ? { resourceId: String(taskInput.resourceId) }
-            : {}),
-        ...(taskInput.flashcardDeckId
-            ? { flashcardDeckId: String(taskInput.flashcardDeckId) }
-            : {}),
-        ...(taskInput.quizId ? { quizId: String(taskInput.quizId) } : {}),
-        ...(taskInput.taskType ? { taskType: String(taskInput.taskType) } : {})
-    };
+    const task = createStudyTask(taskInput, timestamp);
 
     await setDoc(reference, task);
 
@@ -82,6 +106,87 @@ export async function addStudyTask(userId, taskInput) {
         id: reference.id,
         ...task
     };
+}
+
+export async function addStudyTasks(userId, taskInputs) {
+    if (!Array.isArray(taskInputs) || !taskInputs.length) return [];
+    if (taskInputs.length > 500) {
+        throw new RangeError(
+            "A maximum of 500 study tasks can be added at once."
+        );
+    }
+
+    const reference = studyTasksReference(userId);
+    const batch = writeBatch(db);
+    const timestamp = serverTimestamp();
+    const tasks = taskInputs.map((taskInput) => {
+        const taskReference = doc(reference);
+        const task = createStudyTask(taskInput, timestamp);
+        batch.set(taskReference, task);
+        return { id: taskReference.id, ...task };
+    });
+
+    await batch.commit();
+    return tasks;
+}
+
+export async function applyStudyTaskChanges(userId, changes) {
+    if (!Array.isArray(changes) || !changes.length) {
+        return { addedTasks: [], deletedTaskIds: [], updatedTasks: [] };
+    }
+    const operationCount = changes.reduce(
+        (count, change) =>
+            count + (change.kind === "split" ? change.after.length + 1 : 1),
+        0
+    );
+    if (operationCount > 500) {
+        throw new RangeError(
+            "A maximum of 500 planner changes can be applied at once."
+        );
+    }
+
+    const reference = studyTasksReference(userId);
+    const batch = writeBatch(db);
+    const timestamp = serverTimestamp();
+    const result = {
+        addedTasks: [],
+        deletedTaskIds: [],
+        updatedTasks: []
+    };
+
+    changes.forEach((change) => {
+        if (change.kind === "add") {
+            const taskReference = doc(reference);
+            const task = createStudyTask(change.after, timestamp);
+            batch.set(taskReference, task);
+            result.addedTasks.push({ id: taskReference.id, ...task });
+        } else if (change.kind === "update") {
+            const task = createStudyTaskChanges(change.after, timestamp);
+            batch.update(studyTaskReference(userId, change.taskId), task);
+            result.updatedTasks.push({
+                id: change.taskId,
+                ...change.after,
+                estimatedMinutes: Number(change.after.estimatedMinutes),
+                notes: String(change.after.notes || "").trim(),
+                updatedAt: timestamp
+            });
+        } else if (change.kind === "delete") {
+            batch.delete(studyTaskReference(userId, change.taskId));
+            result.deletedTaskIds.push(change.taskId);
+        } else if (change.kind === "split") {
+            batch.delete(studyTaskReference(userId, change.taskId));
+            result.deletedTaskIds.push(change.taskId);
+            change.after.forEach((taskInput) => {
+                const taskReference = doc(reference);
+                const task = createStudyTask(taskInput, timestamp);
+                batch.set(taskReference, task);
+                result.addedTasks.push({ id: taskReference.id, ...task });
+            });
+        }
+    });
+
+    await batch.commit();
+    return result;
 }
 
 export async function toggleStudyTask(userId, taskId, completed) {

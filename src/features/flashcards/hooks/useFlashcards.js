@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { useAuth } from "../../../hooks/useAuth.js";
+import { recordFlashcardLearningMemory } from "../../learningMemory/services/learning-memory-service.js";
 import {
     createQuizFromFlashcardDeck,
     getQuizzes
@@ -248,6 +249,16 @@ export function useFlashcards() {
                     rating,
                     reviewCount
                 );
+                try {
+                    await recordFlashcardLearningMemory(
+                        userId,
+                        selectedDeck,
+                        currentCard,
+                        rating
+                    );
+                } catch {
+                    // The card review remains authoritative if memory sync fails.
+                }
                 const nextCard = { ...currentCard, ...update };
                 const nextCards = cards.map((card) =>
                     card.id === cardId ? nextCard : card
@@ -270,7 +281,7 @@ export function useFlashcards() {
                 throw nextError;
             }
         },
-        [cards, selectedDeckId, userId]
+        [cards, selectedDeck, selectedDeckId, userId]
     );
 
     const finishStudy = useCallback(async () => {

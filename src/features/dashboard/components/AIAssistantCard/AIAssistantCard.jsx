@@ -7,27 +7,27 @@ import { AppIcon } from "../../../../components/common/AppIcon.jsx";
 
 const defaultActions = [
     {
-        label: "Summarise Notes",
+        label: "Summarise with Thuto",
         icon: "note",
         onClick: () => {}
     },
     {
-        label: "Generate Flashcards",
+        label: "Create Flashcards",
         icon: "flashcards",
         onClick: () => {}
     },
     {
-        label: "Create Quiz",
+        label: "Create a Quiz",
         icon: "quiz",
         onClick: () => {}
     },
     {
-        label: "Explain a Topic",
+        label: "Explain with Thuto",
         icon: "sparkles",
         onClick: () => {}
     },
     {
-        label: "Suggest Study Plan",
+        label: "Plan My Study",
         icon: "calendar",
         onClick: () => {}
     }
@@ -61,7 +61,7 @@ export function AIAssistantCard({
             <Card as="section" className={styles.card}>
                 <LoadErrorState
                     onRetry={onRetry}
-                    title="AI assistant unavailable"
+                    title="Thuto is unavailable"
                 />
             </Card>
         );
@@ -71,9 +71,9 @@ export function AIAssistantCard({
         return (
             <Card as="section" className={styles.card}>
                 <EmptyState
-                    description="Assistant shortcuts will appear here soon."
+                    description="Thuto shortcuts will appear here soon."
                     icon="🤖"
-                    title="No assistant actions yet"
+                    title="No Thuto actions yet"
                 />
             </Card>
         );
@@ -82,15 +82,17 @@ export function AIAssistantCard({
     return (
         <Card
             as="section"
-            aria-label="AI Study Assistant"
+            aria-label="Thuto — Your Learning Companion"
             className={styles.card}
         >
             <header className={styles.header}>
                 <h2 className={styles.title}>
                     <AppIcon name="sparkles" size={20} />
-                    <span>AI Study Assistant</span>
+                    <span>Thuto — Your Learning Companion</span>
                 </h2>
-                <p className={styles.prompt}>What do you want help with?</p>
+                <p className={styles.prompt}>
+                    Hi, I’m Thuto 👋 What would you like to learn today?
+                </p>
             </header>
             <div className={styles.grid}>
                 {actions.map((action) => (
@@ -115,7 +117,7 @@ export function AIAssistantCard({
                     onClick={onAskAI}
                     type="button"
                 >
-                    Ask AI <span aria-hidden="true">→</span>
+                    Ask Thuto <span aria-hidden="true">→</span>
                 </button>
             </div>
         </Card>

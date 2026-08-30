@@ -12,6 +12,7 @@ const quizService = vi.hoisted(() => ({
     updateQuizQuestion: vi.fn()
 }));
 const sessions = vi.hoisted(() => ({ completeStudySession: vi.fn() }));
+const memory = vi.hoisted(() => ({ recordQuizLearningMemory: vi.fn() }));
 
 vi.mock("../../../hooks/useAuth.js", () => ({
     useAuth: () => ({ user: { uid: "user-1" } })
@@ -20,6 +21,10 @@ vi.mock("../services/quiz-service.js", () => quizService);
 vi.mock(
     "../../studySessions/services/study-session-service.js",
     () => sessions
+);
+vi.mock(
+    "../../learningMemory/services/learning-memory-service.js",
+    () => memory
 );
 
 import { useQuizzes } from "./useQuizzes.js";
@@ -42,6 +47,7 @@ beforeEach(() => {
         percentage: 80
     });
     sessions.completeStudySession.mockResolvedValue({ id: "quiz-attempt-1" });
+    memory.recordQuizLearningMemory.mockResolvedValue(true);
 });
 
 test("records one stable study activity for a planner-linked quiz attempt", async () => {
@@ -64,6 +70,11 @@ test("records one stable study activity for a planner-linked quiz attempt", asyn
     );
 
     expect(quizService.saveQuizAttempt).toHaveBeenCalledTimes(1);
+    expect(memory.recordQuizLearningMemory).toHaveBeenCalledWith(
+        "user-1",
+        expect.objectContaining({ id: "quiz-1" }),
+        expect.objectContaining({ id: "attempt-1", percentage: 80 })
+    );
     expect(sessions.completeStudySession).toHaveBeenCalledTimes(1);
     expect(sessions.completeStudySession).toHaveBeenCalledWith(
         "user-1",

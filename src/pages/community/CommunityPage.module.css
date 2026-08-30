@@ -52,6 +52,14 @@
     margin-left: auto;
 }
 
+.headerActions {
+    display: flex;
+    margin-left: auto;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: var(--space-3);
+}
+
 .communityMark {
     width: 3.75rem;
     height: 3.75rem;

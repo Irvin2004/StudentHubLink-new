@@ -55,6 +55,7 @@ beforeEach(() => {
 
 test("creates and loads quizzes and ordered questions", async () => {
     await createQuiz("user-1", {
+        resourceId: "computing:general:cpu",
         subject: " Programming ",
         title: " CPU Quiz "
     });
@@ -62,6 +63,7 @@ test("creates and loads quizzes and ordered questions", async () => {
         expect.objectContaining({ id: "generated-id" }),
         expect.objectContaining({
             questionCount: 0,
+            resourceId: "computing:general:cpu",
             subject: "Programming",
             title: "CPU Quiz"
         })

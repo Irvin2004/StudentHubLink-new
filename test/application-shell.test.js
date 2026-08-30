@@ -60,6 +60,7 @@ test("responsive breakpoints and theme choices are centralized", () => {
 
 test("legacy application URLs resolve to canonical React routes", () => {
     const router = read("src/routes/AppRouter.jsx");
+    const routes = read("src/config/routes.js");
     const userMenu = read("src/components/layout/UserMenu/UserMenu.jsx");
 
     assert.match(router, /path=\{ROUTES\.FILES\}/);
@@ -68,6 +69,10 @@ test("legacy application URLs resolve to canonical React routes", () => {
     assert.match(router, /CommunityRedirect/);
     assert.match(router, /channel\/general/);
     assert.match(router, /const \{ search \} = useLocation\(\)/);
+    assert.match(router, /LEGACY_APP_REDIRECTS\.map/);
+    assert.match(routes, /\/pages\/resources\.html/);
+    assert.match(routes, /\/pages\/chat\.html/);
+    assert.match(routes, /\/dashboard\.html/);
     assert.doesNotMatch(userMenu, /pages\/profile\.html|LEGACY_ROUTES/);
     assert.match(userMenu, /to=\{ROUTES\.SETTINGS\}/);
 });

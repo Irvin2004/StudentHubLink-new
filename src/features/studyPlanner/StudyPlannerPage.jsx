@@ -14,9 +14,16 @@ import { useStudySessions } from "../studySessions/hooks/useStudySessions.js";
 import { AddTaskModal } from "./components/AddTaskModal/index.js";
 import { ClearCompletedModal } from "./components/ClearCompletedModal/index.js";
 import { DeleteTaskModal } from "./components/DeleteTaskModal/index.js";
+import ReplanPreviewDialog from "./components/ReplanPreviewDialog/ReplanPreviewDialog.jsx";
 import { TaskList } from "./components/TaskList/index.js";
 import { WeeklyProgress } from "./components/WeeklyProgress/index.js";
+import WeeklyPlanPreviewDialog from "./components/WeeklyPlanPreviewDialog/WeeklyPlanPreviewDialog.jsx";
 import { useStudyPlanner } from "./hooks/useStudyPlanner.js";
+import { generateThutoWeeklyPlan } from "./utils/thuto-weekly-plan.js";
+import {
+    detectThutoPlanAttention,
+    generateThutoReplan
+} from "./utils/thuto-replan.js";
 import {
     getDateKey,
     sortTasksByDueDate,
@@ -65,6 +72,8 @@ export default function StudyPlannerPage() {
 
     const {
         addTask,
+        addTasks,
+        applyReplan,
         activeStudyMinutes,
         clearCompleted,
         completedTasks,
@@ -73,8 +82,10 @@ export default function StudyPlannerPage() {
         error,
         flashcardDecks,
         loading,
+        memoryTopics,
         mutationError,
         quizzes,
+        resources,
         tasks,
         todayStudyMinutes,
         totalTasks,
@@ -88,6 +99,8 @@ export default function StudyPlannerPage() {
     const [clearCompletedOpen, setClearCompletedOpen] = useState(false);
     const [deletingTask, setDeletingTask] = useState(null);
     const [newTaskDefaults, setNewTaskDefaults] = useState(null);
+    const [weeklyPlan, setWeeklyPlan] = useState(null);
+    const [replan, setReplan] = useState(null);
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const linkedTaskId = searchParams.get("task");
@@ -183,6 +196,23 @@ export default function StudyPlannerPage() {
         taskFilter === "all" && priorityFilter === "all" && !searchTerm.trim()
             ? "Add a study task to start planning your week."
             : "No tasks match your current search and filters.";
+    const availableMinutes = Math.max(
+        0,
+        sessionHistory.weeklyGoalMinutes - sessionHistory.weeklyMinutes
+    );
+    const planAttention = useMemo(
+        () =>
+            detectThutoPlanAttention({
+                dailyCap: Math.min(
+                    120,
+                    Math.max(45, Math.ceil(availableMinutes / 5 / 15) * 15)
+                ),
+                memoryTopics,
+                plannerTasks: tasks,
+                quizzes
+            }),
+        [availableMinutes, memoryTopics, quizzes, tasks]
+    );
 
     function startTaskSession(task) {
         startSession({
@@ -205,6 +235,44 @@ export default function StudyPlannerPage() {
         );
     }
 
+    function generateWeek() {
+        setWeeklyPlan(
+            generateThutoWeeklyPlan({
+                availableMinutes,
+                flashcardDecks,
+                memoryTopics,
+                plannerTasks: tasks,
+                quizzes,
+                resources
+            })
+        );
+    }
+
+    function replanWeek() {
+        setReplan(
+            generateThutoReplan({
+                availableMinutes,
+                flashcardDecks,
+                memoryTopics,
+                plannerTasks: tasks,
+                quizzes,
+                resources
+            })
+        );
+    }
+
+    async function acceptWeek(blocks) {
+        await addTasks(blocks);
+        setWeeklyPlan(null);
+        window.dispatchEvent(new Event("study-plan-updated"));
+    }
+
+    async function approveReplan(changes) {
+        await applyReplan(changes);
+        setReplan(null);
+        window.dispatchEvent(new Event("study-plan-updated"));
+    }
+
     return (
         <main className={styles.page}>
             <header className={styles.pageHeader}>
@@ -216,6 +284,20 @@ export default function StudyPlannerPage() {
                     <p>Plan your study tasks and track weekly progress.</p>
                 </div>
                 <div className={styles.headerActions}>
+                    <Button
+                        disabled={loading || sessionHistory.loading}
+                        onClick={generateWeek}
+                        variant="secondary"
+                    >
+                        Generate My Week with Thuto
+                    </Button>
+                    <Button
+                        disabled={loading || sessionHistory.loading}
+                        onClick={replanWeek}
+                        variant="outline"
+                    >
+                        Re-plan my week
+                    </Button>
                     <Button onClick={openFlashcardTask} variant="outline">
                         Study Flashcards
                     </Button>
@@ -224,6 +306,18 @@ export default function StudyPlannerPage() {
                     </Button>
                 </div>
             </header>
+
+            {planAttention.needsAttention ? (
+                <section className={styles.attention} role="status">
+                    <div>
+                        <strong>Thuto says your plan needs attention</strong>
+                        <p>{planAttention.reasons.join(" ")}</p>
+                    </div>
+                    <Button onClick={replanWeek} size="small">
+                        Review an updated plan
+                    </Button>
+                </section>
+            ) : null}
 
             <div className={styles.controls}>
                 <div className={styles.searchField}>
@@ -385,6 +479,20 @@ export default function StudyPlannerPage() {
                 onConfirm={deleteTask}
                 open={Boolean(deletingTask)}
                 task={deletingTask}
+            />
+            <WeeklyPlanPreviewDialog
+                key={weeklyPlan ? "weekly-plan-open" : "weekly-plan-closed"}
+                onClose={() => setWeeklyPlan(null)}
+                onSave={acceptWeek}
+                open={Boolean(weeklyPlan)}
+                plan={weeklyPlan}
+            />
+            <ReplanPreviewDialog
+                key={replan ? "replan-open" : "replan-closed"}
+                onClose={() => setReplan(null)}
+                onSave={approveReplan}
+                open={Boolean(replan)}
+                replan={replan}
             />
         </main>
     );

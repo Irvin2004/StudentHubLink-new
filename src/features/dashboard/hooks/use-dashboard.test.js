@@ -4,6 +4,7 @@ import { beforeEach, expect, test, vi } from "vitest";
 const services = vi.hoisted(() => ({
     getDashboard: vi.fn(),
     getFlashcardDecks: vi.fn(),
+    getLearningMemoryOverview: vi.fn(),
     getQuizLibraryData: vi.fn(),
     getResourceLibraryData: vi.fn(),
     getStudyPreferences: vi.fn(),
@@ -19,6 +20,9 @@ vi.mock("../../studyPlanner/services/study-planner-service.js", () => ({
 }));
 vi.mock("../../flashcards/services/flashcard-service.js", () => ({
     getFlashcardDecks: services.getFlashcardDecks
+}));
+vi.mock("../../learningMemory/services/learning-memory-service.js", () => ({
+    getLearningMemoryOverview: services.getLearningMemoryOverview
 }));
 vi.mock("../../quizzes/services/quiz-service.js", () => ({
     getQuizLibraryData: services.getQuizLibraryData
@@ -93,6 +97,7 @@ beforeEach(() => {
     });
     services.getFlashcardDecks.mockResolvedValue([]);
     services.getQuizLibraryData.mockResolvedValue([]);
+    services.getLearningMemoryOverview.mockResolvedValue([]);
 });
 
 test("loads planner tasks through the shared service and composes dashboard data", async () => {
@@ -107,6 +112,7 @@ test("loads planner tasks through the shared service and composes dashboard data
     expect(services.getStudyPreferences).toHaveBeenCalledWith("user-1");
     expect(services.getFlashcardDecks).toHaveBeenCalledWith("user-1");
     expect(services.getQuizLibraryData).toHaveBeenCalledWith("user-1");
+    expect(services.getLearningMemoryOverview).toHaveBeenCalledWith("user-1");
     expect(result.current.dashboard.focusTask.id).toBe("active-task");
     expect(result.current.dashboard.deadlines).toHaveLength(1);
     expect(result.current.dashboard.stats.tasks).toBe(1);
@@ -118,6 +124,48 @@ test("loads planner tasks through the shared service and composes dashboard data
     expect(result.current.dashboard.weeklyProgress).toBe(13);
     expect(result.current.dashboard.weeklyGoalMinutes).toBe(480);
     expect(result.current.dashboard.studyStreak.current).toBe(1);
+    expect(
+        result.current.dashboard.recommendations.length
+    ).toBeGreaterThanOrEqual(1);
+});
+
+test("uses learning memory when generating dashboard recommendations", async () => {
+    services.getLearningMemoryOverview.mockResolvedValue([
+        {
+            correctSignals: 1,
+            id: "programming",
+            latestQuizPercentage: 45,
+            level: "struggling",
+            struggleSignals: 4,
+            topic: "Programming",
+            updatedAt: new Date("2026-08-01")
+        }
+    ]);
+
+    const { result } = renderHook(() => useDashboard());
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    expect(result.current.dashboard.recommendations).toEqual(
+        expect.arrayContaining([
+            expect.objectContaining({
+                target: expect.objectContaining({
+                    kind: "start-session",
+                    subject: "Programming"
+                }),
+                title: "Review Programming"
+            })
+        ])
+    );
+});
+
+test("still builds recommendations when learning memory is unavailable", async () => {
+    services.getLearningMemoryOverview.mockRejectedValue(new Error("offline"));
+
+    const { result } = renderHook(() => useDashboard());
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    expect(result.current.error).toBeNull();
+    expect(result.current.dashboard.recommendations.length).toBeGreaterThan(0);
 });
 
 test("reloads planner data when the dashboard is revisited", async () => {

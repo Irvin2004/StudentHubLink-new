@@ -1,36 +1,6 @@
-import { readdirSync } from "node:fs";
 import { resolve } from "node:path";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
-
-const IGNORED_DIRECTORIES = new Set([
-    ".firebase",
-    ".git",
-    "coverage",
-    "dist",
-    "functions",
-    "node_modules",
-    "playwright-report",
-    "test-results"
-]);
-
-function findHtmlEntries(directory) {
-    return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
-        if (entry.isDirectory() && IGNORED_DIRECTORIES.has(entry.name)) {
-            return [];
-        }
-
-        const entryPath = resolve(directory, entry.name);
-
-        if (entry.isDirectory()) {
-            return findHtmlEntries(entryPath);
-        }
-
-        return entry.isFile() && entry.name.endsWith(".html")
-            ? [entryPath]
-            : [];
-    });
-}
 
 function splitFirebasePackages(id) {
     if (!id.includes("node_modules")) {
@@ -67,7 +37,6 @@ export default defineConfig({
         emptyOutDir: true,
         outDir: "dist",
         rollupOptions: {
-            input: findHtmlEntries(process.cwd()),
             output: {
                 manualChunks: splitFirebasePackages
             }

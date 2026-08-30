@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "../../../hooks/useAuth.js";
 import { getResourceLibraryData } from "../../../services/file-service.js";
 import { getFlashcardDecks } from "../../flashcards/services/flashcard-service.js";
+import { getLearningMemoryOverview } from "../../learningMemory/services/learning-memory-service.js";
 import {
     getFlashcardDashboardData,
     toFlashcardFocus
@@ -25,6 +26,7 @@ import {
 } from "../../studySessions/utils/study-session-selectors.js";
 import { getDashboard } from "../services/dashboard-service.js";
 import { getPlannerDashboardData } from "../utils/planner-dashboard-data.js";
+import { generateThutoRecommendations } from "../utils/thuto-recommendations.js";
 
 const EMPTY_DASHBOARD = {
     aiSuggestions: [],
@@ -43,6 +45,7 @@ const EMPTY_DASHBOARD = {
         progress: 0
     },
     quickActions: [],
+    recommendations: [],
     stats: {
         communities: 0,
         messages: 0,
@@ -84,7 +87,8 @@ export function useDashboard() {
                     sessions,
                     preferences,
                     flashcardDecks,
-                    quizLibrary
+                    quizLibrary,
+                    memoryTopics
                 ] = await Promise.all([
                     getDashboard(userId),
                     userId ? getStudyPlanner(userId) : { tasks: [] },
@@ -96,7 +100,10 @@ export function useDashboard() {
                         ? getStudyPreferences(userId)
                         : { weeklyGoalMinutes: WEEKLY_GOAL_MINUTES },
                     userId ? getFlashcardDecks(userId) : [],
-                    userId ? getQuizLibraryData(userId) : []
+                    userId ? getQuizLibraryData(userId) : [],
+                    userId
+                        ? getLearningMemoryOverview(userId).catch(() => [])
+                        : []
                 ]);
                 const plannerData = getPlannerDashboardData(planner.tasks);
                 const resourceData = {
@@ -169,6 +176,14 @@ export function useDashboard() {
                         focusTask:
                             plannerData.focusTask ||
                             toFlashcardFocus(flashcardData.dueDeck),
+                        recommendations: generateThutoRecommendations({
+                            flashcardDecks,
+                            memoryTopics,
+                            plannerTasks: planner.tasks,
+                            quizzes: quizLibrary,
+                            resources: library.resources,
+                            sessions
+                        }),
                         stats: {
                             ...nextDashboard.stats,
                             resources: resourceData.resourceCount,
@@ -206,11 +221,13 @@ export function useDashboard() {
         window.addEventListener("study-goal-updated", reload);
         window.addEventListener("flashcards-updated", reload);
         window.addEventListener("quiz-attempt-completed", reload);
+        window.addEventListener("study-plan-updated", reload);
         return () => {
             window.removeEventListener("study-session-completed", reload);
             window.removeEventListener("study-goal-updated", reload);
             window.removeEventListener("flashcards-updated", reload);
             window.removeEventListener("quiz-attempt-completed", reload);
+            window.removeEventListener("study-plan-updated", reload);
         };
     }, [reload]);
 

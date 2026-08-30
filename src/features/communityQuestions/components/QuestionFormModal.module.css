@@ -1,0 +1,17 @@
+.form {
+    display: grid;
+    gap: var(--space-5);
+}
+
+.actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-3);
+}
+
+@media (max-width: 640px) {
+    .actions {
+        align-items: stretch;
+        flex-direction: column-reverse;
+    }
+}

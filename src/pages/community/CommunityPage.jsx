@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 
 import ChannelEmptyState from "../../components/channels/ChannelEmptyState/ChannelEmptyState.jsx";
 import ChannelHeader from "../../components/channels/ChannelHeader/ChannelHeader.jsx";
@@ -22,6 +22,10 @@ import { useToast } from "../../hooks/useToast.js";
 import styles from "./CommunityPage.module.css";
 
 const ChatPage = lazy(() => import("../chat/ChatPage.jsx"));
+const CommunityQuestions = lazy(
+    () =>
+        import("../../features/communityQuestions/components/CommunityQuestions.jsx")
+);
 
 function CommunityMark({ name }) {
     const initials = name
@@ -56,8 +60,9 @@ function CommunityHeaderSkeleton() {
 
 export default function CommunityPage() {
     const { communityId, channelId } = useParams();
+    const location = useLocation();
     const navigate = useNavigate();
-    const { user } = useAuth();
+    const { profile, user } = useAuth();
     const { showToast } = useToast();
     const { captureError, getActionableErrorMessage } = useObservability();
     const [createOpen, setCreateOpen] = useState(false);
@@ -95,19 +100,20 @@ export default function CommunityPage() {
         () => channels.find((channel) => channel.id === channelId) || null,
         [channelId, channels]
     );
+    const questionsView = location.pathname.endsWith("/questions");
 
     useDocumentTitle(
         community
-            ? `StudentHub - ${community.name}${selectedChannel ? ` #${selectedChannel.name}` : ""}`
+            ? `StudentHub - ${community.name}${questionsView ? " Q&A" : selectedChannel ? ` #${selectedChannel.name}` : ""}`
             : "StudentHub - Community",
         "react-app"
     );
 
     useEffect(() => {
-        if (!selectedChannel) return;
+        if (!selectedChannel || questionsView) return;
 
         announcementRef.current.textContent = `Selected channel ${selectedChannel.name}.`;
-    }, [selectedChannel]);
+    }, [questionsView, selectedChannel]);
 
     useEffect(() => {
         if (!error) return;
@@ -238,13 +244,30 @@ export default function CommunityPage() {
                             </p>
                         </div>
                         {role ? (
-                            <Button
-                                className={styles.settingsButton}
-                                onClick={() => setSettingsOpen(true)}
-                                variant="outline"
-                            >
-                                Community settings
-                            </Button>
+                            <div className={styles.headerActions}>
+                                <Button
+                                    onClick={() =>
+                                        navigate(
+                                            questionsView
+                                                ? `/community/${communityId}/channel/${channels[0]?.id || "general"}`
+                                                : `/community/${communityId}/questions`
+                                        )
+                                    }
+                                    variant={
+                                        questionsView ? "outline" : "primary"
+                                    }
+                                >
+                                    {questionsView
+                                        ? "Back to channels"
+                                        : "Questions & Answers"}
+                                </Button>
+                                <Button
+                                    onClick={() => setSettingsOpen(true)}
+                                    variant="outline"
+                                >
+                                    Community settings
+                                </Button>
+                            </div>
                         ) : null}
                     </>
                 )}
@@ -269,7 +292,24 @@ export default function CommunityPage() {
                     }
                     className={styles.channelArea}
                 >
-                    {!channelsLoading && error && !channels.length ? (
+                    {questionsView ? (
+                        <Suspense fallback={<ChatMessageSkeleton count={4} />}>
+                            <PerformanceProfiler id="CommunityQuestions">
+                                <CommunityQuestions
+                                    actor={{
+                                        communityId,
+                                        displayName:
+                                            profile?.displayName ||
+                                            profile?.fullName ||
+                                            user?.displayName ||
+                                            "Student",
+                                        id: user?.uid
+                                    }}
+                                    role={role}
+                                />
+                            </PerformanceProfiler>
+                        </Suspense>
+                    ) : !channelsLoading && error && !channels.length ? (
                         <LoadErrorState
                             description="We could not load this community's channels."
                             title="Channels unavailable"

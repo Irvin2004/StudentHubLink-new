@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 
 import SearchInput from "../../ui/SearchInput/index.js";
-import { debounce } from "../../../../js/utils/debounce.js";
+import { debounce } from "../../../utils/debounce.js";
 import styles from "./ChannelSearch.module.css";
 
 export default function ChannelSearch({ onSearch }) {

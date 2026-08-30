@@ -60,6 +60,60 @@ function buildExplanation(subject, content) {
     };
 }
 
+function questionKeywords(question) {
+    const ignored = new Set([
+        "about",
+        "does",
+        "from",
+        "have",
+        "resource",
+        "that",
+        "this",
+        "what",
+        "when",
+        "where",
+        "which",
+        "with"
+    ]);
+    return unique(
+        String(question || "")
+            .toLowerCase()
+            .match(/[a-z0-9]+/g) || []
+    ).filter((word) => word.length >= 3 && !ignored.has(word));
+}
+
+function buildAnswer(subject, content, question) {
+    const keywords = questionKeywords(question);
+    const ranked = sentences(content)
+        .map((sentence, index) => ({
+            index,
+            score: keywords.reduce(
+                (total, keyword) =>
+                    total + (sentence.toLowerCase().includes(keyword) ? 1 : 0),
+                0
+            ),
+            sentence
+        }))
+        .filter((item) => item.score > 0)
+        .sort(
+            (first, second) =>
+                second.score - first.score || first.index - second.index
+        )
+        .slice(0, 4)
+        .map((item) => item.sentence);
+    const points = ranked.length ? ranked : keyPoints(content, 3);
+
+    return {
+        action: AI_ACTIONS.ASK_QUESTION,
+        kind: "answer",
+        overview: `Based on ${subject}, these parts of your active study materials best answer your question.`,
+        points,
+        question,
+        subject,
+        title: `Answer from ${subject}`
+    };
+}
+
 function buildFlashcards(subject, content) {
     const points = keyPoints(content, 8);
     return {
@@ -137,8 +191,10 @@ function buildStudyPlan(subject, content) {
     };
 }
 
-export async function runLocalAI({ action, content, subject }) {
+export async function runLocalAI({ action, content, question, subject }) {
     const builders = {
+        [AI_ACTIONS.ASK_QUESTION]: (nextSubject, nextContent) =>
+            buildAnswer(nextSubject, nextContent, question),
         [AI_ACTIONS.EXPLAIN_TOPIC]: buildExplanation,
         [AI_ACTIONS.GENERATE_FLASHCARDS]: buildFlashcards,
         [AI_ACTIONS.GENERATE_QUIZ]: buildQuiz,
@@ -146,6 +202,6 @@ export async function runLocalAI({ action, content, subject }) {
         [AI_ACTIONS.SUMMARISE_NOTES]: buildSummary
     };
     const builder = builders[action];
-    if (!builder) throw new TypeError("Choose a supported AI study action.");
+    if (!builder) throw new TypeError("Choose a supported Thuto study action.");
     return builder(subject, content);
 }

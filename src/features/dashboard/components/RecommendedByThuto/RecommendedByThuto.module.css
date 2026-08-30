@@ -1,0 +1,128 @@
+.section {
+    display: grid;
+    gap: var(--space-4);
+    padding: var(--space-5);
+    border: 1px solid color-mix(in srgb, var(--primary) 30%, var(--border));
+    border-radius: var(--radius-xl);
+    background: linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--primary) 10%, var(--surface)),
+        var(--surface) 58%
+    );
+    box-shadow: var(--shadow-sm);
+}
+
+.header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-5);
+}
+
+.header span {
+    color: var(--primary);
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+.header h2,
+.header p,
+.list,
+.list p,
+.empty p {
+    margin: 0;
+}
+
+.header h2 {
+    margin-top: var(--space-1);
+    font-size: 1.2rem;
+}
+
+.header > p {
+    max-width: 30rem;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    line-height: 1.5;
+    text-align: right;
+}
+
+.list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-3);
+    padding: 0;
+    list-style: none;
+}
+
+.list li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    min-width: 0;
+    padding: var(--space-4);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+}
+
+.list li > div {
+    min-width: 0;
+}
+
+.list li > .actions {
+    display: flex;
+    flex: 0 0 auto;
+    gap: var(--space-2);
+}
+
+.list strong {
+    display: block;
+    color: var(--text);
+    line-height: 1.35;
+}
+
+.list p {
+    margin-top: var(--space-1);
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    line-height: 1.45;
+}
+
+.loading,
+.empty {
+    padding: var(--space-5);
+    border: 1px dashed var(--border);
+    border-radius: var(--radius-lg);
+    color: var(--text-secondary);
+    text-align: center;
+}
+
+.empty {
+    display: grid;
+    justify-items: center;
+    gap: var(--space-3);
+}
+
+@media (max-width: 47.999rem) {
+    .header,
+    .list li {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .list li > .actions {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .header > p {
+        text-align: left;
+    }
+
+    .list {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}

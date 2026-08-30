@@ -31,6 +31,7 @@ export const ResourceCard = memo(function ResourceCard({
     highlighted = false,
     onAction,
     resource,
+    studyingWithThuto,
     view = "grid"
 }) {
     return (
@@ -128,6 +129,16 @@ export const ResourceCard = memo(function ResourceCard({
                     variant="secondary"
                 >
                     Create Flashcard Deck
+                </Button>
+                <Button
+                    loading={studyingWithThuto}
+                    loadingLabel="Opening Thuto"
+                    onClick={() =>
+                        onAction(RESOURCE_ACTIONS.STUDY_WITH_THUTO, resource)
+                    }
+                    variant="secondary"
+                >
+                    Study with Thuto
                 </Button>
                 <Button
                     onClick={() =>

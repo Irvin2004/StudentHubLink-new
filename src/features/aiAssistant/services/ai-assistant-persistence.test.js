@@ -72,7 +72,15 @@ test("saves generated quiz questions through the quiz service", async () => {
 test("saves every suggested planner task", async () => {
     const tasks = [{ title: "Review" }, { title: "Practise" }];
     await expect(
-        saveAIResult("user-1", { kind: "study-plan", tasks })
+        saveAIResult("user-1", {
+            kind: "study-plan",
+            resourceId: "science:general:file-1",
+            tasks
+        })
     ).resolves.toEqual({ count: 2, kind: "study-plan" });
     expect(mocks.addStudyTask).toHaveBeenCalledTimes(2);
+    expect(mocks.addStudyTask).toHaveBeenCalledWith(
+        "user-1",
+        expect.objectContaining({ resourceId: "science:general:file-1" })
+    );
 });

@@ -161,6 +161,36 @@ Path: groups/{groupId}
 | createdAt   | timestamp | Group creation time.                  |
 | updatedAt   | timestamp | Last group update time.               |
 
+## Community Questions & Answers
+
+Question path: `communities/{communityId}/questions/{questionId}`
+
+| Field              | Type        | Notes                                                    |
+| ------------------ | ----------- | -------------------------------------------------------- |
+| `title`            | string      | Focused question title, limited to 160 characters.       |
+| `description`      | string      | Detailed question body, limited to 5,000 characters.     |
+| `tags`             | array       | One to five normalized subject/topic tags.               |
+| `linkedResource`   | map/null    | Optional `{ id, title }` snapshot of community material. |
+| `authorId`         | string      | Firebase Auth UID of the question author.                |
+| `authorName`       | string      | Display-name snapshot.                                   |
+| `acceptedAnswerId` | string/null | Answer selected by the question author.                  |
+| `answerCount`      | number      | Maintained transactionally when answers change.          |
+| `status`           | string      | `unanswered`, `answered`, or `solved`.                   |
+| `createdAt`        | timestamp   | Creation time.                                           |
+| `updatedAt`        | timestamp   | Last question or answer-state change.                    |
+
+Answer path:
+`communities/{communityId}/questions/{questionId}/answers/{answerId}`. Answers
+store `authorId`, `authorName`, `content`, `accepted`, `upvoteCount`, and
+timestamps. Upvotes use one idempotent document per member at
+`answers/{answerId}/upvotes/{userId}`.
+
+Comment path: `answers/{answerId}/comments/{commentId}`. Comments store the
+author snapshot, content, and timestamps. Community membership gates all reads
+and writes. Authors manage their own content; community owners, admins, and
+moderators can remove questions, answers, or comments. Only a question author
+can select its accepted answer.
+
 Member path: groups/{groupId}/members/{userId}
 
 | Field       | Type      | Notes                               |
