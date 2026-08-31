@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { QUESTION_STATUS } from "../models/community-question.js";
+import { flagQuestionAsDuplicate as flagQuestionAsDuplicateRecord } from "../../../services/community-trust-service.js";
 import {
     acceptAnswer as acceptAnswerRecord,
     createAnswer as createAnswerRecord,
@@ -14,6 +15,7 @@ import {
     subscribeToComments,
     subscribeToQuestions,
     toggleAnswerUpvote as toggleAnswerUpvoteRecord,
+    toggleQuestionUpvote as toggleQuestionUpvoteRecord,
     updateAnswer as updateAnswerRecord,
     updateComment as updateCommentRecord,
     updateQuestion as updateQuestionRecord
@@ -108,6 +110,10 @@ export function useCommunityQuestions(communityId, actor) {
                 answerId,
                 actor.id
             ),
+        toggleQuestionUpvote: (questionId) =>
+            toggleQuestionUpvoteRecord(communityId, questionId, actor.id),
+        flagQuestionAsDuplicate: (question) =>
+            flagQuestionAsDuplicateRecord(communityId, question, actor),
         subscribeAnswers,
         createComment: (questionId, answerId, content) =>
             createCommentRecord(

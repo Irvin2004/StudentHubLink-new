@@ -132,6 +132,14 @@ export function AppRouter() {
                             }
                         />
                         <Route
+                            path={ROUTES.COMMUNITY_COLLECTIONS}
+                            element={
+                                <ProfiledRoute id="CommunityKnowledgeCollectionsPage">
+                                    <CommunityPage />
+                                </ProfiledRoute>
+                            }
+                        />
+                        <Route
                             path={ROUTES.CHAT}
                             element={
                                 <ProfiledRoute id="ChatPage">

@@ -79,6 +79,7 @@ export async function createQuestion(communityId, actor, input) {
         ...actorData(actor),
         acceptedAnswerId: null,
         answerCount: 0,
+        upvoteCount: 0,
         status: QUESTION_STATUS.UNANSWERED,
         createdAt: timestamp,
         updatedAt: timestamp
@@ -117,6 +118,7 @@ export async function createAnswer(communityId, questionId, actor, content) {
         const question = questionSnapshot.data();
         transaction.set(answerRef, {
             ...actorData(actor),
+            questionAuthorId: question.authorId,
             content: validateAnswerContent(content),
             accepted: false,
             upvoteCount: 0,
@@ -220,14 +222,56 @@ export async function toggleAnswerUpvote(
             transaction.get(voteRef)
         ]);
         if (!answerSnapshot.exists()) throw new Error("Answer not found.");
+        if (answerSnapshot.data().authorId === userId) {
+            throw new Error("You cannot upvote your own answer.");
+        }
         const voted = voteSnapshot.exists();
         if (voted) transaction.delete(voteRef);
-        else transaction.set(voteRef, { userId, createdAt: serverTimestamp() });
+        else
+            transaction.set(voteRef, {
+                userId,
+                recipientId: answerSnapshot.data().authorId,
+                recipientName: answerSnapshot.data().authorName,
+                createdAt: serverTimestamp()
+            });
         transaction.update(answerRef, {
             upvoteCount: Math.max(
                 0,
                 Number(answerSnapshot.data().upvoteCount || 0) +
                     (voted ? -1 : 1)
+            ),
+            updatedAt: serverTimestamp()
+        });
+        return !voted;
+    });
+}
+
+export async function toggleQuestionUpvote(communityId, questionId, userId) {
+    const questionRef = questionReference(communityId, questionId);
+    const voteRef = doc(questionRef, "upvotes", userId);
+    return runTransaction(db, async (transaction) => {
+        const [questionSnapshot, voteSnapshot] = await Promise.all([
+            transaction.get(questionRef),
+            transaction.get(voteRef)
+        ]);
+        if (!questionSnapshot.exists()) throw new Error("Question not found.");
+        const question = questionSnapshot.data();
+        if (question.authorId === userId) {
+            throw new Error("You cannot upvote your own question.");
+        }
+        const voted = voteSnapshot.exists();
+        if (voted) transaction.delete(voteRef);
+        else
+            transaction.set(voteRef, {
+                userId,
+                recipientId: question.authorId,
+                recipientName: question.authorName,
+                createdAt: serverTimestamp()
+            });
+        transaction.update(questionRef, {
+            upvoteCount: Math.max(
+                0,
+                Number(question.upvoteCount || 0) + (voted ? -1 : 1)
             ),
             updatedAt: serverTimestamp()
         });
@@ -332,6 +376,7 @@ export async function deleteQuestion(communityId, questionId) {
         query(answerCollection(communityId, questionId), limit(PAGE_LIMIT))
     );
     const batch = writeBatch(db);
+    await deleteNestedDocuments(collection(questionRef, "upvotes"), batch);
     for (const answer of answersSnapshot.docs) {
         await Promise.all([
             deleteNestedDocuments(collection(answer.ref, "comments"), batch),

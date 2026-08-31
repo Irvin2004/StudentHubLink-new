@@ -7,6 +7,7 @@ export const ROUTES = Object.freeze({
     COMMUNITY: "/community/:communityId",
     COMMUNITY_CHANNEL: "/community/:communityId/channel/:channelId",
     COMMUNITY_QUESTIONS: "/community/:communityId/questions",
+    COMMUNITY_COLLECTIONS: "/community/:communityId/collections",
     CHAT: "/app/chat",
     FRIENDS: "/app/friends",
     FILES: "/app/files",

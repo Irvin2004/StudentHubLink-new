@@ -1,0 +1,74 @@
+.form {
+    display: grid;
+    gap: var(--space-5);
+}
+
+.addItem {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+    gap: var(--space-3);
+}
+
+.items {
+    display: grid;
+    gap: var(--space-2);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.items li {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+}
+
+.items li > span {
+    display: grid;
+    width: 2rem;
+    height: 2rem;
+    place-items: center;
+    border-radius: var(--radius-pill);
+    background: var(--primary-soft);
+    color: var(--primary);
+    font-weight: 700;
+}
+
+.items small {
+    display: block;
+    color: var(--text-secondary);
+}
+
+.itemActions,
+.actions {
+    display: flex;
+    gap: var(--space-2);
+}
+
+.itemActions button {
+    min-height: 2rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    cursor: pointer;
+}
+
+.actions {
+    justify-content: flex-end;
+}
+
+@media (max-width: 640px) {
+    .addItem,
+    .items li {
+        grid-template-columns: 1fr;
+    }
+
+    .actions {
+        flex-direction: column-reverse;
+    }
+}

@@ -5,6 +5,12 @@ import Button from "../../../components/ui/Button/index.js";
 import Textarea from "../../../components/ui/Textarea/index.js";
 import { COMMUNITY_ROLES } from "../../../config/community-roles.js";
 import { ROUTES } from "../../../config/routes.js";
+import CommunityLeaderboard from "../../communityReputation/components/CommunityLeaderboard.jsx";
+import CommunityTrustPanel from "../../communityReputation/components/CommunityTrustPanel.jsx";
+import {
+    hasTrustCapability,
+    TRUST_CAPABILITIES
+} from "../../../models/community-reputation.js";
 import {
     useCommunityQuestions,
     useQuestionAnswers
@@ -203,6 +209,7 @@ function Answer({ answer, api, canAccept, canModerate, questionId, userId }) {
             <div className={styles.answerActions}>
                 <Button
                     aria-label={`Upvote answer by ${answer.authorName}`}
+                    disabled={answer.authorId === userId}
                     onClick={() =>
                         api.toggleAnswerUpvote(questionId, answer.id)
                     }
@@ -252,12 +259,20 @@ function Answer({ answer, api, canAccept, canModerate, questionId, userId }) {
     );
 }
 
-function QuestionDetail({ api, canModerate, onEdit, question, userId }) {
+function QuestionDetail({
+    api,
+    canFlagDuplicate,
+    canModerate,
+    onEdit,
+    question,
+    userId
+}) {
     const { answers, loading } = useQuestionAnswers(
         question.id,
         api.subscribeAnswers
     );
     const [answer, setAnswer] = useState("");
+    const [flagMessage, setFlagMessage] = useState("");
     const ownsQuestion = question.authorId === userId;
 
     return (
@@ -300,6 +315,45 @@ function QuestionDetail({ api, canModerate, onEdit, question, userId }) {
                 {question.tags.map((tag) => (
                     <span key={tag}>{tag}</span>
                 ))}
+            </div>
+            <div className={styles.questionActions}>
+                <Button
+                    disabled={ownsQuestion}
+                    onClick={() => api.toggleQuestionUpvote(question.id)}
+                    size="small"
+                    variant="outline"
+                >
+                    ▲ {question.upvoteCount || 0} helpful
+                </Button>
+                {ownsQuestion ? (
+                    <small>
+                        Community members can mark this question helpful.
+                    </small>
+                ) : null}
+                {canFlagDuplicate && !ownsQuestion ? (
+                    <Button
+                        onClick={async () => {
+                            try {
+                                const created =
+                                    await api.flagQuestionAsDuplicate(question);
+                                setFlagMessage(
+                                    created
+                                        ? "Sent to the curation queue for moderator review."
+                                        : "You already flagged this question."
+                                );
+                            } catch (error) {
+                                setFlagMessage(error.message);
+                            }
+                        }}
+                        size="small"
+                        variant="outline"
+                    >
+                        Flag possible duplicate
+                    </Button>
+                ) : null}
+                {flagMessage ? (
+                    <small role="status">{flagMessage}</small>
+                ) : null}
             </div>
             {question.linkedResource ? (
                 <p className={styles.resource}>
@@ -357,6 +411,8 @@ export default function CommunityQuestions({ actor, role }) {
     const [selectedId, setSelectedId] = useState(null);
     const [formOpen, setFormOpen] = useState(false);
     const [editingQuestion, setEditingQuestion] = useState(null);
+    const [reputation, setReputation] = useState(null);
+    const [topicTags, setTopicTags] = useState([]);
     const selectedQuestion = useMemo(
         () =>
             api.questions.find((question) => question.id === selectedId) ||
@@ -368,6 +424,12 @@ export default function CommunityQuestions({ actor, role }) {
         COMMUNITY_ROLES.ADMIN,
         COMMUNITY_ROLES.MODERATOR
     ].includes(role);
+    const canFlagDuplicate =
+        canModerate ||
+        hasTrustCapability(
+            reputation,
+            TRUST_CAPABILITIES.FLAG_DUPLICATE_QUESTIONS
+        );
 
     return (
         <div className={styles.board}>
@@ -381,6 +443,17 @@ export default function CommunityQuestions({ actor, role }) {
                     Ask a question
                 </Button>
             </header>
+            <CommunityLeaderboard
+                communityId={actor.communityId}
+                currentUserId={actor.id}
+            />
+            <CommunityTrustPanel
+                actor={actor}
+                communityId={actor.communityId}
+                onReputationChange={setReputation}
+                onTopicTagsChange={setTopicTags}
+                role={role}
+            />
             <div
                 aria-label="Filter questions"
                 className={styles.filters}
@@ -434,7 +507,10 @@ export default function CommunityQuestions({ actor, role }) {
                         >
                             <span className={styles.cardTop}>
                                 <StatusBadge status={question.status} />
-                                <span>{question.answerCount || 0} answers</span>
+                                <span>
+                                    {question.answerCount || 0} answers ·{" "}
+                                    {question.upvoteCount || 0} helpful
+                                </span>
                             </span>
                             <strong>{question.title}</strong>
                             <span className={styles.preview}>
@@ -451,6 +527,7 @@ export default function CommunityQuestions({ actor, role }) {
                 {selectedQuestion ? (
                     <QuestionDetail
                         api={api}
+                        canFlagDuplicate={canFlagDuplicate}
                         canModerate={canModerate}
                         onEdit={() => {
                             setEditingQuestion(selectedQuestion);
@@ -484,6 +561,7 @@ export default function CommunityQuestions({ actor, role }) {
                     }
                     open
                     resources={api.resources}
+                    suggestedTags={topicTags}
                 />
             ) : null}
         </div>

@@ -1,0 +1,127 @@
+.panel {
+    display: grid;
+    gap: var(--space-4);
+    padding: var(--space-5);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+}
+
+.heading,
+.badge > div {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+}
+
+.heading p,
+.heading h3,
+.badge p,
+.capabilities p,
+.curation p {
+    margin: 0;
+}
+
+.heading p {
+    color: var(--primary);
+    font-size: 0.875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.heading span,
+.badge span,
+.curation li span {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
+.authorityNote {
+    margin: 0;
+    padding: var(--space-3);
+    border-radius: var(--radius-md);
+    background: var(--surface-muted);
+    color: var(--text-secondary);
+}
+
+.badges {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: var(--space-3);
+}
+
+.badge {
+    display: grid;
+    gap: var(--space-2);
+    padding: var(--space-3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    opacity: 0.78;
+}
+
+.badge[data-earned="true"] {
+    border-color: var(--primary);
+    background: var(--primary-soft);
+    opacity: 1;
+}
+
+.badge p {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
+.badge progress {
+    width: 100%;
+    accent-color: var(--primary);
+}
+
+.capabilities h4,
+.curation h4 {
+    margin: 0 0 var(--space-2);
+}
+
+.capabilities ul,
+.curation ul {
+    margin: 0;
+    padding-left: var(--space-5);
+}
+
+.tagTools form {
+    display: flex;
+    align-items: end;
+    gap: var(--space-3);
+}
+
+.tagTools form > :first-child {
+    flex: 1;
+}
+
+.tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+}
+
+.tags span {
+    padding: 0.25rem 0.6rem;
+    border-radius: 999px;
+    background: var(--surface-muted);
+    font-size: 0.875rem;
+}
+
+.curation li {
+    margin-bottom: var(--space-2);
+}
+
+.curation li span {
+    display: block;
+}
+
+@media (max-width: 640px) {
+    .heading,
+    .tagTools form {
+        align-items: stretch;
+        flex-direction: column;
+    }
+}

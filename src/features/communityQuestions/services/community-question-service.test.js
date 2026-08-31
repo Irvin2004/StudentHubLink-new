@@ -42,7 +42,8 @@ import {
     acceptAnswer,
     createAnswer,
     createQuestion,
-    toggleAnswerUpvote
+    toggleAnswerUpvote,
+    toggleQuestionUpvote
 } from "./community-question-service.js";
 
 beforeEach(() => {
@@ -76,7 +77,11 @@ describe("community question service", () => {
 
     test("adds an answer and advances an unanswered question", async () => {
         mocks.transaction.get.mockResolvedValueOnce({
-            data: () => ({ answerCount: 0, status: "unanswered" }),
+            data: () => ({
+                answerCount: 0,
+                authorId: "user-1",
+                status: "unanswered"
+            }),
             exists: () => true
         });
 
@@ -89,7 +94,11 @@ describe("community question service", () => {
 
         expect(mocks.transaction.set).toHaveBeenCalledWith(
             expect.anything(),
-            expect.objectContaining({ authorId: "user-2", upvoteCount: 0 })
+            expect.objectContaining({
+                authorId: "user-2",
+                questionAuthorId: "user-1",
+                upvoteCount: 0
+            })
         );
         expect(mocks.transaction.update).toHaveBeenCalledWith(
             expect.anything(),
@@ -121,7 +130,11 @@ describe("community question service", () => {
     test("stores one upvote document and increments the answer count", async () => {
         mocks.transaction.get
             .mockResolvedValueOnce({
-                data: () => ({ upvoteCount: 2 }),
+                data: () => ({
+                    authorId: "user-2",
+                    authorName: "Mpho",
+                    upvoteCount: 2
+                }),
                 exists: () => true
             })
             .mockResolvedValueOnce({ exists: () => false });
@@ -137,11 +150,45 @@ describe("community question service", () => {
 
         expect(mocks.transaction.set).toHaveBeenCalledWith(
             expect.objectContaining({ id: "user-3" }),
-            expect.objectContaining({ userId: "user-3" })
+            expect.objectContaining({
+                recipientId: "user-2",
+                recipientName: "Mpho",
+                userId: "user-3"
+            })
         );
         expect(mocks.transaction.update).toHaveBeenCalledWith(
             expect.anything(),
             expect.objectContaining({ upvoteCount: 3 })
+        );
+    });
+
+    test("marks a question helpful without allowing self-upvotes", async () => {
+        mocks.transaction.get
+            .mockResolvedValueOnce({
+                data: () => ({
+                    authorId: "user-1",
+                    authorName: "Neo",
+                    upvoteCount: 4
+                }),
+                exists: () => true
+            })
+            .mockResolvedValueOnce({ exists: () => false });
+
+        await expect(
+            toggleQuestionUpvote("community-1", "question-1", "user-3")
+        ).resolves.toBe(true);
+
+        expect(mocks.transaction.set).toHaveBeenCalledWith(
+            expect.objectContaining({ id: "user-3" }),
+            expect.objectContaining({
+                recipientId: "user-1",
+                recipientName: "Neo",
+                userId: "user-3"
+            })
+        );
+        expect(mocks.transaction.update).toHaveBeenCalledWith(
+            expect.anything(),
+            expect.objectContaining({ upvoteCount: 5 })
         );
     });
 });

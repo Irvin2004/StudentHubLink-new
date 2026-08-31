@@ -8,6 +8,7 @@ import {
     canRemoveCommunityMember
 } from "../../../config/community-permissions.js";
 import { COMMUNITY_VISIBILITY } from "../../../models/community.js";
+import { getCommunityBadgeLabel } from "../../../models/community-reputation.js";
 import { COMMUNITY_CATEGORIES } from "../../../utils/community-validation.js";
 import Avatar from "../../ui/Avatar/index.js";
 import Badge from "../../ui/Badge/index.js";
@@ -338,8 +339,26 @@ export default function CommunitySettingsModal({
                                                 {isCurrentUser ? " (you)" : ""}
                                             </strong>
                                             <span>
-                                                {ROLE_LABELS[member.role]}
+                                                {ROLE_LABELS[member.role]} ·{" "}
+                                                {member.reputationPoints || 0}{" "}
+                                                pts ·{" "}
+                                                {member.reputationLevel ||
+                                                    "Newcomer"}{" "}
+                                                ·{" "}
+                                                {member.trustLevel ||
+                                                    "Community Member"}
                                             </span>
+                                            {member.reputationBadges?.length ? (
+                                                <span>
+                                                    Badges:{" "}
+                                                    {member.reputationBadges
+                                                        .map(
+                                                            getCommunityBadgeLabel
+                                                        )
+                                                        .filter(Boolean)
+                                                        .join(", ")}
+                                                </span>
+                                            ) : null}
                                         </div>
                                         {canChange ? (
                                             <Select

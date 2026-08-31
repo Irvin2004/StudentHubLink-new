@@ -19,7 +19,8 @@ export default function QuestionFormModal({
     onClose,
     onSave,
     open,
-    resources
+    resources,
+    suggestedTags = []
 }) {
     const [form, setForm] = useState(() =>
         initialQuestion
@@ -102,6 +103,40 @@ export default function QuestionFormModal({
                     required
                     value={form.tags}
                 />
+                {suggestedTags.length ? (
+                    <div
+                        aria-label="Suggested community topic tags"
+                        className={styles.suggestedTags}
+                    >
+                        {suggestedTags.map((tag) => (
+                            <button
+                                key={tag.id}
+                                onClick={() =>
+                                    setForm((current) => {
+                                        const tags = current.tags
+                                            .split(",")
+                                            .map((item) => item.trim())
+                                            .filter(Boolean);
+                                        if (
+                                            tags.includes(tag.label) ||
+                                            tags.length >= 5
+                                        )
+                                            return current;
+                                        return {
+                                            ...current,
+                                            tags: [...tags, tag.label].join(
+                                                ", "
+                                            )
+                                        };
+                                    })
+                                }
+                                type="button"
+                            >
+                                + {tag.label}
+                            </button>
+                        ))}
+                    </div>
+                ) : null}
                 <Select
                     label="Linked resource (optional)"
                     onChange={update("linkedResourceId")}

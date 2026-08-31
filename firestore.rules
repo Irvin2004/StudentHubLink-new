@@ -635,6 +635,21 @@ service cloud.firestore {
       }
     }
 
+    function hasCommunityTrust(communityId, minimumRank) {
+      return isCommunityMember(communityId)
+        && exists(
+          /databases/$(database)/documents/communities/$(communityId)/reputation/$(request.auth.uid)
+        )
+        && get(
+          /databases/$(database)/documents/communities/$(communityId)/reputation/$(request.auth.uid)
+        ).data.trustRank >= minimumRank;
+    }
+
+    function canCurateCommunityKnowledge(communityId) {
+      return isCommunityModerator(communityId)
+        || hasCommunityTrust(communityId, 1);
+    }
+
     match /users/{userId}/thutoConversations/{resourceKey} {
       allow read: if isOwner(userId);
       allow create, update: if isOwner(userId)
@@ -1446,6 +1461,210 @@ service cloud.firestore {
           );
       }
 
+      match /reputation/{userId} {
+        allow read: if isCommunityMember(communityId);
+        allow create, update, delete: if false;
+      }
+
+      match /reputationEvents/{eventId} {
+        allow read: if isCommunityMember(communityId);
+        allow create, update, delete: if false;
+      }
+
+      match /reputationSignals/{signalId} {
+        allow read, create, update, delete: if false;
+      }
+
+      match /topicTags/{tagId} {
+        allow read: if isCommunityMember(communityId);
+        allow create: if isCommunityMember(communityId)
+          && (
+            isCommunityModerator(communityId)
+            || hasCommunityTrust(communityId, 1)
+          )
+          && request.resource.data.keys().hasOnly([
+            "label", "createdBy", "createdByName", "createdAt"
+          ])
+          && request.resource.data.label is string
+          && request.resource.data.label.size() > 0
+          && request.resource.data.label.size() <= 30
+          && request.resource.data.createdBy == request.auth.uid
+          && request.resource.data.createdByName is string
+          && request.resource.data.createdByName.size() > 0
+          && request.resource.data.createdByName.size() <= 120
+          && request.resource.data.createdAt == request.time;
+        allow update: if false;
+        allow delete: if isCommunityModerator(communityId);
+      }
+
+      match /curationFlags/{flagId} {
+        function flaggedQuestion() {
+          return get(
+            /databases/$(database)/documents/communities/$(communityId)/questions/$(request.resource.data.questionId)
+          );
+        }
+
+        allow get: if isCommunityMember(communityId)
+          && (
+            isCommunityModerator(communityId)
+            || hasCommunityTrust(communityId, 2)
+          );
+        allow list: if isCommunityMember(communityId)
+          && (
+            isCommunityModerator(communityId)
+            || hasCommunityTrust(communityId, 3)
+          );
+        allow create: if isCommunityMember(communityId)
+          && (
+            isCommunityModerator(communityId)
+            || hasCommunityTrust(communityId, 2)
+          )
+          && request.resource.data.keys().hasOnly([
+            "type", "questionId", "questionTitle", "status",
+            "createdBy", "createdByName", "createdAt"
+          ])
+          && request.resource.data.type == "possible_duplicate"
+          && request.resource.data.status == "open"
+          && request.resource.data.createdBy == request.auth.uid
+          && request.resource.data.createdByName is string
+          && request.resource.data.createdByName.size() > 0
+          && request.resource.data.createdByName.size() <= 120
+          && request.resource.data.questionId is string
+          && request.resource.data.questionId.size() > 0
+          && flaggedQuestion().data.title
+            == request.resource.data.questionTitle
+          && request.resource.data.createdAt == request.time;
+        allow update: if false;
+        allow delete: if isCommunityModerator(communityId);
+      }
+
+      match /knowledgeCollections/{collectionId} {
+        function collectionFieldsAreValid() {
+          return request.resource.data.keys().hasOnly([
+              "title", "description", "tags", "items", "itemCount",
+              "contributors", "createdBy", "createdByName", "createdAt",
+              "updatedBy", "updatedAt"
+            ])
+            && request.resource.data.title is string
+            && request.resource.data.title.size() > 0
+            && request.resource.data.title.size() <= 120
+            && request.resource.data.description is string
+            && request.resource.data.description.size() > 0
+            && request.resource.data.description.size() <= 2000
+            && request.resource.data.tags is list
+            && request.resource.data.tags.size() > 0
+            && request.resource.data.tags.size() <= 5
+            && request.resource.data.items is list
+            && request.resource.data.items.size() > 0
+            && request.resource.data.items.size() <= 20
+            && request.resource.data.itemCount
+              == request.resource.data.items.size()
+            && request.resource.data.contributors is list
+            && request.resource.data.contributors.size() > 0
+            && request.resource.data.contributors.size() <= 30;
+        }
+
+        function suggestedItemIsValid(item) {
+          return item is map
+            && item.keys().hasOnly([
+              "id", "sourceId", "sourceType", "title", "content", "url",
+              "extension", "originalName", "addedBy", "addedByName"
+            ])
+            && item.id is string
+            && item.id.size() > 0
+            && item.id.size() <= 400
+            && item.sourceId is string
+            && item.sourceId.size() > 0
+            && item.sourceId.size() <= 300
+            && item.sourceType in [
+              "resource", "question", "answer", "quiz", "flashcard_set"
+            ]
+            && item.title is string
+            && item.title.size() > 0
+            && item.title.size() <= 160
+            && item.content is string
+            && item.content.size() <= 5000
+            && item.url is string
+            && item.url.size() <= 2000
+            && item.extension is string
+            && item.extension.size() <= 20
+            && item.originalName is string
+            && item.originalName.size() <= 255
+            && item.addedBy == request.auth.uid
+            && item.addedByName is string
+            && item.addedByName.size() > 0
+            && item.addedByName.size() <= 120;
+        }
+
+        allow read: if isCommunityMember(communityId);
+        allow create: if canCurateCommunityKnowledge(communityId)
+          && collectionFieldsAreValid()
+          && request.resource.data.createdBy == request.auth.uid
+          && request.resource.data.createdByName is string
+          && request.resource.data.createdByName.size() > 0
+          && request.resource.data.createdByName.size() <= 120
+          && request.resource.data.updatedBy == request.auth.uid
+          && request.resource.data.createdAt == request.time
+          && request.resource.data.updatedAt == request.time;
+        allow update: if canCurateCommunityKnowledge(communityId)
+          && collectionFieldsAreValid()
+          && request.resource.data.createdBy == resource.data.createdBy
+          && request.resource.data.createdByName == resource.data.createdByName
+          && request.resource.data.createdAt == resource.data.createdAt
+          && request.resource.data.updatedBy == request.auth.uid
+          && request.resource.data.updatedAt == request.time;
+        allow delete: if isCommunityModerator(communityId);
+
+        match /saves/{userId} {
+          allow read: if isCommunityMember(communityId)
+            && userId == request.auth.uid;
+          allow create: if isCommunityMember(communityId)
+            && userId == request.auth.uid
+            && request.resource.data.keys().hasOnly([
+              "collectionId", "communityId", "userId", "savedAt"
+            ])
+            && request.resource.data.collectionId == collectionId
+            && request.resource.data.communityId == communityId
+            && request.resource.data.userId == request.auth.uid
+            && request.resource.data.savedAt == request.time;
+          allow update: if false;
+          allow delete: if userId == request.auth.uid
+            || isCommunityModerator(communityId);
+        }
+
+        match /suggestions/{suggestionId} {
+          allow read: if isCommunityMember(communityId)
+            && (
+              resource.data.proposedBy == request.auth.uid
+              || canCurateCommunityKnowledge(communityId)
+            );
+          allow create: if isCommunityMember(communityId)
+            && request.resource.data.keys().hasOnly([
+              "item", "note", "proposedBy", "proposedByName", "status",
+              "createdAt", "reviewedAt", "reviewedBy"
+            ])
+            && suggestedItemIsValid(request.resource.data.item)
+            && request.resource.data.proposedBy == request.auth.uid
+            && request.resource.data.proposedByName is string
+            && request.resource.data.proposedByName.size() > 0
+            && request.resource.data.proposedByName.size() <= 120
+            && request.resource.data.note is string
+            && request.resource.data.note.size() <= 500
+            && request.resource.data.status == "pending"
+            && request.resource.data.createdAt == request.time
+            && request.resource.data.reviewedAt == null
+            && request.resource.data.reviewedBy == null;
+          allow update: if canCurateCommunityKnowledge(communityId)
+            && resource.data.status == "pending"
+            && request.resource.data.diff(resource.data).affectedKeys()
+              .hasOnly(["status", "reviewedAt", "reviewedBy"])
+            && request.resource.data.status in ["approved", "rejected"]
+            && request.resource.data.reviewedAt == request.time
+            && request.resource.data.reviewedBy == request.auth.uid;
+          allow delete: if isCommunityModerator(communityId);
+        }
+      }
+
       match /questions/{questionId} {
         function questionContentIsValid() {
           return request.resource.data.title is string
@@ -1481,7 +1700,7 @@ service cloud.firestore {
           && request.resource.data.keys().hasOnly([
             "title", "description", "tags", "linkedResource",
             "authorId", "authorName", "acceptedAnswerId", "answerCount",
-            "status", "createdAt", "updatedAt"
+            "upvoteCount", "status", "createdAt", "updatedAt"
           ])
           && questionContentIsValid()
           && request.resource.data.authorId == request.auth.uid
@@ -1490,6 +1709,7 @@ service cloud.firestore {
           && request.resource.data.authorName.size() <= 120
           && request.resource.data.acceptedAnswerId == null
           && request.resource.data.answerCount == 0
+          && request.resource.data.upvoteCount == 0
           && request.resource.data.status == "unanswered"
           && request.resource.data.createdAt == request.time
           && request.resource.data.updatedAt == request.time;
@@ -1521,6 +1741,33 @@ service cloud.firestore {
             )
             || (
               request.resource.data.diff(resource.data).affectedKeys()
+                .hasOnly(["upvoteCount", "updatedAt"])
+              && request.resource.data.upvoteCount >= 0
+              && (
+                (
+                  request.resource.data.upvoteCount
+                    == resource.data.upvoteCount + 1
+                  && !exists(
+                    /databases/$(database)/documents/communities/$(communityId)/questions/$(questionId)/upvotes/$(request.auth.uid)
+                  )
+                  && existsAfter(
+                    /databases/$(database)/documents/communities/$(communityId)/questions/$(questionId)/upvotes/$(request.auth.uid)
+                  )
+                )
+                || (
+                  request.resource.data.upvoteCount
+                    == resource.data.upvoteCount - 1
+                  && exists(
+                    /databases/$(database)/documents/communities/$(communityId)/questions/$(questionId)/upvotes/$(request.auth.uid)
+                  )
+                  && !existsAfter(
+                    /databases/$(database)/documents/communities/$(communityId)/questions/$(questionId)/upvotes/$(request.auth.uid)
+                  )
+                )
+              )
+            )
+            || (
+              request.resource.data.diff(resource.data).affectedKeys()
                 .hasOnly(["answerCount", "status", "updatedAt"])
               && request.resource.data.answerCount
                 == resource.data.answerCount + 1
@@ -1542,6 +1789,35 @@ service cloud.firestore {
         allow delete: if questionAuthor()
           || isCommunityModerator(communityId);
 
+        match /upvotes/{userId} {
+          function parentQuestion() {
+            return get(
+              /databases/$(database)/documents/communities/$(communityId)/questions/$(questionId)
+            );
+          }
+
+          allow read: if isCommunityMember(communityId);
+          allow create: if isCommunityMember(communityId)
+            && userId == request.auth.uid
+            && request.resource.data.keys().hasOnly([
+              "userId", "recipientId", "recipientName", "createdAt"
+            ])
+            && request.resource.data.userId == request.auth.uid
+            && request.resource.data.recipientId
+              == parentQuestion().data.authorId
+            && request.resource.data.recipientId != request.auth.uid
+            && request.resource.data.recipientName
+              == parentQuestion().data.authorName
+            && request.resource.data.createdAt == request.time;
+          allow update: if false;
+          allow delete: if isCommunityMember(communityId)
+            && (
+              userId == request.auth.uid
+              || parentQuestion().data.authorId == request.auth.uid
+              || isCommunityModerator(communityId)
+            );
+        }
+
         match /answers/{answerId} {
           function questionDocument() {
             return get(
@@ -1553,6 +1829,20 @@ service cloud.firestore {
             return signedIn() && resource.data.authorId == request.auth.uid;
           }
 
+          function answerDocument() {
+            return get(
+              /databases/$(database)/documents/communities/$(communityId)/questions/$(questionId)/answers/$(answerId)
+            );
+          }
+
+          function answerOwnerId() {
+            return answerDocument().data.authorId;
+          }
+
+          function answerOwnerName() {
+            return answerDocument().data.authorName;
+          }
+
           function questionOwner() {
             return signedIn()
               && questionDocument().data.authorId == request.auth.uid;
@@ -1560,21 +1850,21 @@ service cloud.firestore {
 
           function answerOwner() {
             return signedIn()
-              && get(
-                /databases/$(database)/documents/communities/$(communityId)/questions/$(questionId)/answers/$(answerId)
-              ).data.authorId == request.auth.uid;
+              && answerOwnerId() == request.auth.uid;
           }
 
           allow read: if isCommunityMember(communityId);
           allow create: if isCommunityMember(communityId)
             && request.resource.data.keys().hasOnly([
               "authorId", "authorName", "content", "accepted",
-              "upvoteCount", "createdAt", "updatedAt"
+              "questionAuthorId", "upvoteCount", "createdAt", "updatedAt"
             ])
             && request.resource.data.authorId == request.auth.uid
             && request.resource.data.authorName is string
             && request.resource.data.authorName.size() > 0
             && request.resource.data.authorName.size() <= 120
+            && request.resource.data.questionAuthorId
+              == questionDocument().data.authorId
             && request.resource.data.content is string
             && request.resource.data.content.size() > 0
             && request.resource.data.content.size() <= 5000
@@ -1585,6 +1875,8 @@ service cloud.firestore {
           allow update: if isCommunityMember(communityId)
             && request.resource.data.authorId == resource.data.authorId
             && request.resource.data.authorName == resource.data.authorName
+            && request.resource.data.questionAuthorId
+              == resource.data.questionAuthorId
             && request.resource.data.createdAt == resource.data.createdAt
             && request.resource.data.updatedAt == request.time
             && (
@@ -1638,7 +1930,13 @@ service cloud.firestore {
             allow read: if isCommunityMember(communityId);
             allow create: if isCommunityMember(communityId)
               && userId == request.auth.uid
+              && request.resource.data.keys().hasOnly([
+                "userId", "recipientId", "recipientName", "createdAt"
+              ])
               && request.resource.data.userId == request.auth.uid
+              && request.resource.data.recipientId == answerOwnerId()
+              && request.resource.data.recipientId != request.auth.uid
+              && request.resource.data.recipientName == answerOwnerName()
               && request.resource.data.createdAt == request.time;
             allow update: if false;
             allow delete: if isCommunityMember(communityId)

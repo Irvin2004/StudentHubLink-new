@@ -1,5 +1,5 @@
 const MAX_CONTEXT_LENGTH = 12_000;
-export const MAX_STUDY_RESOURCES = 3;
+export const MAX_STUDY_RESOURCES = 5;
 const TEXT_EXTENSIONS = new Set(["csv", "json", "md", "text", "txt"]);
 const INLINE_CONTENT_FIELDS = [
     "content",

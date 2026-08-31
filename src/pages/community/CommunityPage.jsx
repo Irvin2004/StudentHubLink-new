@@ -26,6 +26,10 @@ const CommunityQuestions = lazy(
     () =>
         import("../../features/communityQuestions/components/CommunityQuestions.jsx")
 );
+const CommunityKnowledgeCollections = lazy(
+    () =>
+        import("../../features/knowledgeCollections/components/CommunityKnowledgeCollections.jsx")
+);
 
 function CommunityMark({ name }) {
     const initials = name
@@ -101,19 +105,20 @@ export default function CommunityPage() {
         [channelId, channels]
     );
     const questionsView = location.pathname.endsWith("/questions");
+    const collectionsView = location.pathname.endsWith("/collections");
 
     useDocumentTitle(
         community
-            ? `StudentHub - ${community.name}${questionsView ? " Q&A" : selectedChannel ? ` #${selectedChannel.name}` : ""}`
+            ? `StudentHub - ${community.name}${questionsView ? " Q&A" : collectionsView ? " Knowledge Collections" : selectedChannel ? ` #${selectedChannel.name}` : ""}`
             : "StudentHub - Community",
         "react-app"
     );
 
     useEffect(() => {
-        if (!selectedChannel || questionsView) return;
+        if (!selectedChannel || questionsView || collectionsView) return;
 
         announcementRef.current.textContent = `Selected channel ${selectedChannel.name}.`;
-    }, [questionsView, selectedChannel]);
+    }, [collectionsView, questionsView, selectedChannel]);
 
     useEffect(() => {
         if (!error) return;
@@ -248,18 +253,40 @@ export default function CommunityPage() {
                                 <Button
                                     onClick={() =>
                                         navigate(
-                                            questionsView
-                                                ? `/community/${communityId}/channel/${channels[0]?.id || "general"}`
-                                                : `/community/${communityId}/questions`
+                                            `/community/${communityId}/channel/${channels[0]?.id || "general"}`
                                         )
                                     }
                                     variant={
-                                        questionsView ? "outline" : "primary"
+                                        !questionsView && !collectionsView
+                                            ? "primary"
+                                            : "outline"
                                     }
                                 >
-                                    {questionsView
-                                        ? "Back to channels"
-                                        : "Questions & Answers"}
+                                    Channels
+                                </Button>
+                                <Button
+                                    onClick={() =>
+                                        navigate(
+                                            `/community/${communityId}/questions`
+                                        )
+                                    }
+                                    variant={
+                                        questionsView ? "primary" : "outline"
+                                    }
+                                >
+                                    Questions & Answers
+                                </Button>
+                                <Button
+                                    onClick={() =>
+                                        navigate(
+                                            `/community/${communityId}/collections`
+                                        )
+                                    }
+                                    variant={
+                                        collectionsView ? "primary" : "outline"
+                                    }
+                                >
+                                    Knowledge Collections
                                 </Button>
                                 <Button
                                     onClick={() => setSettingsOpen(true)}
@@ -286,9 +313,13 @@ export default function CommunityPage() {
                 />
                 <section
                     aria-label={
-                        selectedChannel
-                            ? `${selectedChannel.name} channel`
-                            : "Channel content"
+                        questionsView
+                            ? "Community questions and answers"
+                            : collectionsView
+                              ? "Community knowledge collections"
+                              : selectedChannel
+                                ? `${selectedChannel.name} channel`
+                                : "Channel content"
                     }
                     className={styles.channelArea}
                 >
@@ -296,6 +327,23 @@ export default function CommunityPage() {
                         <Suspense fallback={<ChatMessageSkeleton count={4} />}>
                             <PerformanceProfiler id="CommunityQuestions">
                                 <CommunityQuestions
+                                    actor={{
+                                        communityId,
+                                        displayName:
+                                            profile?.displayName ||
+                                            profile?.fullName ||
+                                            user?.displayName ||
+                                            "Student",
+                                        id: user?.uid
+                                    }}
+                                    role={role}
+                                />
+                            </PerformanceProfiler>
+                        </Suspense>
+                    ) : collectionsView ? (
+                        <Suspense fallback={<ChatMessageSkeleton count={4} />}>
+                            <PerformanceProfiler id="CommunityKnowledgeCollections">
+                                <CommunityKnowledgeCollections
                                     actor={{
                                         communityId,
                                         displayName:

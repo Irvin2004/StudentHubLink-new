@@ -197,6 +197,18 @@
     font-weight: 800;
 }
 
+.questionActions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-top: var(--space-4);
+}
+
+.questionActions small {
+    color: var(--text-secondary);
+}
+
 .answers {
     display: grid;
     gap: var(--space-4);

@@ -32,6 +32,7 @@ import {
     validateCommunityUpdates
 } from "../utils/community-validation.js";
 import { createActivity } from "./activity-service.js";
+import { getCommunityReputation } from "./community-reputation-service.js";
 
 const COMMUNITIES_COLLECTION = "communities";
 const MEMBERS_COLLECTION = "members";
@@ -244,6 +245,9 @@ export async function deleteCommunity(communityId) {
     const channelsReference = collection(reference, "channels");
     await deleteCommunityChannels(channelsReference);
     await deleteCommunityQuestions(collection(reference, "questions"));
+    await deleteCommunityKnowledgeCollections(
+        collection(reference, "knowledgeCollections")
+    );
 
     for (const collectionName of CHILD_COLLECTIONS) {
         await deleteCollectionDocuments(collection(reference, collectionName));
@@ -283,6 +287,9 @@ async function deleteCommunityQuestions(questionsReference) {
                 answersBatch.delete(answerSnapshot.ref)
             );
             await answersBatch.commit();
+            await deleteCollectionDocuments(
+                collection(questionSnapshot.ref, "upvotes")
+            );
         }
 
         const questionsBatch = writeBatch(db);
@@ -291,6 +298,33 @@ async function deleteCommunityQuestions(questionsReference) {
         );
         await questionsBatch.commit();
         hasMore = questionsSnapshot.size === DELETE_BATCH_SIZE;
+    }
+}
+
+async function deleteCommunityKnowledgeCollections(collectionsReference) {
+    let hasMore = true;
+
+    while (hasMore) {
+        const snapshot = await getDocs(
+            query(collectionsReference, limit(DELETE_BATCH_SIZE))
+        );
+        if (snapshot.empty) return;
+
+        for (const collectionSnapshot of snapshot.docs) {
+            await Promise.all([
+                deleteCollectionDocuments(
+                    collection(collectionSnapshot.ref, "saves")
+                ),
+                deleteCollectionDocuments(
+                    collection(collectionSnapshot.ref, "suggestions")
+                )
+            ]);
+        }
+
+        const batch = writeBatch(db);
+        snapshot.docs.forEach((item) => batch.delete(item.ref));
+        await batch.commit();
+        hasMore = snapshot.size === DELETE_BATCH_SIZE;
     }
 }
 
@@ -400,9 +434,10 @@ export async function getCommunityMembersPage(
     const members = await Promise.all(
         snapshot.docs.map(async (memberSnapshot) => {
             const member = memberFromSnapshot(memberSnapshot, communityId);
-            const profileSnapshot = await getDoc(
-                doc(db, "users", member.userId)
-            );
+            const [profileSnapshot, reputation] = await Promise.all([
+                getDoc(doc(db, "users", member.userId)),
+                getCommunityReputation(communityId, member.userId)
+            ]);
             const profile = profileSnapshot.exists()
                 ? profileSnapshot.data()
                 : {};
@@ -414,7 +449,12 @@ export async function getCommunityMembersPage(
                     profile.fullName ||
                     member.nickname ||
                     "Student",
-                photoURL: profile.photoURL || null
+                photoURL: profile.photoURL || null,
+                reputationBadges: reputation.badges,
+                reputationPoints: reputation.points,
+                reputationLevel: reputation.level,
+                trustLevel: reputation.trustLevel,
+                trustRank: reputation.trustRank
             };
         })
     );
