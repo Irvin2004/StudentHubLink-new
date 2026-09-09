@@ -18,6 +18,11 @@
     opacity: 0.5;
 }
 
+.button:focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--focus-ring) 35%, transparent);
+    outline-offset: 2px;
+}
+
 .small {
     width: var(--control-height-sm);
     height: var(--control-height-sm);
@@ -54,4 +59,11 @@
 .primary {
     background: var(--primary);
     color: var(--on-primary);
+}
+
+@media (pointer: coarse) {
+    .small {
+        width: var(--control-height-md);
+        height: var(--control-height-md);
+    }
 }

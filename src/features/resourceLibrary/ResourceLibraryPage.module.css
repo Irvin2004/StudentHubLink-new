@@ -1,0 +1,225 @@
+.page {
+    width: min(82rem, 100%);
+    margin-inline: auto;
+    padding: var(--space-8) var(--space-6) var(--space-10);
+    display: grid;
+    gap: var(--space-6);
+}
+
+.pageHeader {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--space-5);
+}
+
+.pageHeader > :first-child {
+    flex: 1 1 auto;
+}
+
+.pageHeader > button {
+    flex: 0 0 auto;
+}
+
+.pageHeader h1,
+.pageHeader p,
+.resultsHeader h2,
+.resultsHeader p {
+    margin: 0;
+}
+
+.pageHeader h1 {
+    color: var(--text);
+    font-size: clamp(2rem, 5vw, 3.25rem);
+    letter-spacing: -0.04em;
+}
+
+.pageHeader > div:first-child > p:last-child {
+    max-width: 42rem;
+    margin-top: var(--space-2);
+    color: var(--text-secondary);
+}
+
+.eyebrow {
+    margin-bottom: var(--space-2) !important;
+    color: var(--primary);
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.viewToggle {
+    display: inline-flex;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 0.2rem;
+    background: var(--surface);
+}
+
+.viewToggle button {
+    min-height: 2.75rem;
+    border: 0;
+    border-radius: calc(var(--radius-md) - 0.2rem);
+    padding: 0.55rem 1rem;
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font: inherit;
+    font-weight: 750;
+    transition:
+        background var(--transition-fast),
+        color var(--transition-fast);
+}
+
+.viewToggle button:hover:not([aria-pressed="true"]) {
+    background: var(--surface-muted);
+    color: var(--text);
+}
+
+.viewToggle button:focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--focus-ring) 35%, transparent);
+    outline-offset: 2px;
+}
+
+.viewToggle button[aria-pressed="true"] {
+    background: var(--primary);
+    color: var(--text-inverse, white);
+}
+
+.controls {
+    display: grid;
+    grid-template-columns: minmax(15rem, 2fr) repeat(3, minmax(10rem, 1fr));
+    gap: var(--space-3);
+    align-items: end;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-4);
+    background: var(--surface);
+}
+
+.uploadPanel {
+    display: grid;
+    gap: var(--space-4);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-5);
+    background: var(--surface);
+}
+
+.uploadHeading {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(15rem, 24rem);
+    align-items: end;
+    gap: var(--space-5);
+}
+
+.uploadHeading h2,
+.uploadHeading p,
+.uploadEmpty {
+    margin: 0;
+}
+
+.uploadHeading p,
+.uploadEmpty {
+    margin-top: var(--space-1);
+    color: var(--text-secondary);
+}
+
+.search {
+    min-width: 0;
+}
+
+.resultsHeader {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-4);
+}
+
+.resultsHeader h2 {
+    color: var(--text);
+    font-size: 1.25rem;
+}
+
+.resultsHeader p {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.resources {
+    min-width: 0;
+    display: grid;
+    gap: var(--space-4);
+}
+
+.grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.list {
+    grid-template-columns: minmax(0, 1fr);
+}
+
+.favorites {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin-top: var(--space-3);
+}
+
+@media (max-width: 68rem) {
+    .controls {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .favorites {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 47.999rem) {
+    .page {
+        padding: var(--space-6) var(--space-4) var(--space-8);
+    }
+
+    .pageHeader {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .uploadHeading {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .viewToggle {
+        width: 100%;
+    }
+
+    .viewToggle button {
+        flex: 1 1 50%;
+    }
+
+    .pageHeader > button {
+        width: 100%;
+    }
+
+    .controls,
+    .grid,
+    .favorites {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .viewToggle button,
+    .controls select,
+    .controls input {
+        min-height: 2.875rem;
+    }
+}
+.loadMore {
+    display: flex;
+    justify-content: center;
+    padding: var(--space-4) 0;
+}

@@ -15,7 +15,7 @@
 }
 
 .body {
-    padding: 0 var(--spacing-lg) var(--spacing-lg);
+    padding: 0 var(--space-6) var(--space-6);
 }
 
 .metaRow {
@@ -23,7 +23,7 @@
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
-    gap: var(--spacing-sm);
+    gap: var(--space-2);
 }
 
 .avatar {
@@ -33,18 +33,19 @@
 }
 
 .metaRow > span:last-child {
-    margin-top: var(--spacing-sm);
+    margin-top: var(--space-2);
     text-transform: capitalize;
 }
 
 .titleButton {
     max-width: 100%;
-    margin-top: var(--spacing-sm);
+    margin-top: var(--space-2);
     padding: 0;
     border: 0;
     background: transparent;
     color: var(--text);
     text-align: left;
+    cursor: pointer;
 }
 
 .titleButton h2 {
@@ -59,15 +60,21 @@
     color: var(--primary);
 }
 
+.titleButton:focus-visible {
+    border-radius: var(--radius-sm);
+    outline: 3px solid color-mix(in srgb, var(--focus-ring) 35%, transparent);
+    outline-offset: 3px;
+}
+
 .members {
-    margin-top: var(--spacing-xs);
+    margin-top: var(--space-1);
     color: var(--text-secondary);
     font-size: 0.875rem;
 }
 
 .description {
     min-height: 3rem;
-    margin-top: var(--spacing-md);
+    margin-top: var(--space-4);
     display: -webkit-box;
     overflow: hidden;
     color: var(--text-secondary);
@@ -77,7 +84,7 @@
 }
 
 .footer {
-    margin-top: var(--spacing-lg);
+    margin-top: var(--space-6);
     display: flex;
     justify-content: flex-end;
 }

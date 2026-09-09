@@ -1,9 +1,6 @@
 import { useCallback, useMemo, useState } from "react";
 
-import {
-    applyTheme,
-    getCurrentTheme
-} from "../../js/services/theme-service.js";
+import { applyTheme, getCurrentTheme } from "../services/theme-service.js";
 import { ThemeContext } from "./theme-context.js";
 
 export function ThemeProvider({ children }) {

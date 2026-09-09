@@ -1,0 +1,106 @@
+.review {
+    display: grid;
+    gap: var(--space-4);
+}
+.review > header {
+    align-items: flex-start;
+    display: flex;
+    gap: var(--space-4);
+    justify-content: space-between;
+}
+.review > header span {
+    color: var(--color-primary);
+    font-size: var(--font-size-xs);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+.review > header h3 {
+    margin: var(--space-1) 0;
+}
+.review > header p {
+    color: var(--color-text-secondary);
+    margin: 0;
+}
+.review > header > strong {
+    background: color-mix(in srgb, var(--color-primary) 12%, transparent);
+    border-radius: 999px;
+    color: var(--color-primary);
+    font-size: var(--font-size-sm);
+    padding: 0.45rem 0.75rem;
+    white-space: nowrap;
+}
+.source {
+    background: var(--color-surface-secondary);
+    border-radius: var(--radius-md);
+    color: var(--color-text-secondary);
+    margin: 0;
+    padding: var(--space-3);
+}
+.tasks {
+    display: grid;
+    gap: var(--space-4);
+    list-style: none;
+    margin: 0;
+    max-height: min(58vh, 42rem);
+    overflow: auto;
+    padding: 0 var(--space-2) 0 0;
+}
+.tasks > li {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    display: grid;
+    gap: var(--space-3);
+    padding: var(--space-4);
+    transition:
+        opacity var(--transition-fast),
+        background var(--transition-fast);
+}
+.tasks > li.skipped {
+    background: var(--color-surface-secondary);
+    opacity: 0.62;
+}
+.include {
+    align-items: center;
+    display: flex;
+    font-size: var(--font-size-sm);
+    font-weight: 700;
+    gap: var(--space-2);
+}
+.include input {
+    accent-color: var(--color-primary);
+    height: 1.1rem;
+    width: 1.1rem;
+}
+.fields {
+    display: grid;
+    gap: var(--space-3);
+    grid-template-columns: 2fr 1.2fr repeat(3, 1fr);
+}
+.actions {
+    display: flex;
+    gap: var(--space-3);
+    justify-content: flex-end;
+    margin-top: var(--space-4);
+}
+.error {
+    color: var(--color-danger);
+    margin: var(--space-3) 0 0;
+}
+@media (max-width: 64rem) {
+    .fields {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+@media (max-width: 40rem) {
+    .review > header {
+        flex-direction: column;
+    }
+    .fields {
+        grid-template-columns: 1fr;
+    }
+    .actions {
+        align-items: stretch;
+        flex-direction: column-reverse;
+    }
+}

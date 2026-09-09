@@ -87,7 +87,11 @@ describe("SearchModal", () => {
 
         fireEvent.keyDown(document, { key: "Tab", shiftKey: true });
 
-        expect(screen.getByRole("button", { name: "Files" })).toHaveFocus();
+        expect(
+            screen.getByRole("link", {
+                name: "Search all knowledge in Discover"
+            })
+        ).toHaveFocus();
     });
 
     it.each([

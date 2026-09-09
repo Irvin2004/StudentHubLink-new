@@ -1,0 +1,163 @@
+.card {
+    display: grid;
+    gap: var(--space-5);
+    background:
+        linear-gradient(
+            135deg,
+            color-mix(in srgb, var(--primary) 8%, transparent),
+            transparent 55%
+        ),
+        var(--surface);
+    box-shadow: var(--shadow-sm);
+}
+
+.header {
+    display: grid;
+    gap: var(--space-1);
+}
+
+.title {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    color: var(--text);
+    font-size: 1.1rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+}
+
+.prompt {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+    gap: var(--space-3);
+}
+
+.suggestion {
+    min-width: 0;
+    min-height: 4.75rem;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-4);
+    border: 1px solid color-mix(in srgb, var(--primary) 12%, var(--border));
+    border-radius: var(--radius-md);
+    background: var(--background);
+    color: var(--text);
+    font: inherit;
+    font-weight: 700;
+    text-align: left;
+    cursor: pointer;
+    transition:
+        background var(--transition-fast),
+        border-color var(--transition-fast),
+        box-shadow var(--transition-fast),
+        transform var(--transition-fast);
+}
+
+.suggestion:hover {
+    border-color: var(--primary);
+    background: var(--primary-soft);
+    box-shadow: var(--shadow-sm);
+    transform: translateY(-1px);
+}
+
+.suggestion:focus-visible,
+.askButton:focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--primary) 30%, transparent);
+    outline-offset: 2px;
+}
+
+.suggestion:active,
+.askButton:active {
+    transform: translateY(0);
+}
+
+.icon {
+    flex: 0 0 auto;
+    display: inline-grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: var(--radius-pill);
+    background: var(--surface);
+    font-size: 1.05rem;
+}
+
+.suggestionTitle {
+    min-width: 0;
+    font-size: 0.95rem;
+    line-height: 1.35;
+}
+
+.skeleton {
+    display: grid;
+    gap: var(--space-4);
+}
+
+.skeletonGrid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--space-3);
+}
+
+.footer {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.askButton {
+    min-height: var(--control-height-md);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    padding: 0 var(--space-5);
+    border: 1px solid transparent;
+    border-radius: var(--radius-md);
+    background: var(--primary);
+    color: var(--on-primary);
+    font: inherit;
+    font-size: 0.95rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition:
+        background var(--transition-fast),
+        box-shadow var(--transition-fast),
+        transform var(--transition-fast);
+}
+
+.askButton:hover {
+    background: var(--primary-hover);
+    box-shadow: 0 6px 16px color-mix(in srgb, var(--primary) 22%, transparent);
+    transform: translateY(-1px);
+}
+
+@media (max-width: 64rem) {
+    .grid,
+    .skeletonGrid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 47.999rem) {
+    .grid,
+    .skeletonGrid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .footer {
+        justify-content: stretch;
+    }
+
+    .askButton {
+        width: 100%;
+    }
+}

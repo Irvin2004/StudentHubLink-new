@@ -6,12 +6,16 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { MobileDrawer } from "./MobileDrawer.jsx";
 
 function DrawerHarness() {
-    const [open, setOpen] = useState(true);
+    const [open, setOpen] = useState(false);
     const menuButtonRef = useRef(null);
 
     return (
         <>
-            <button ref={menuButtonRef} type="button">
+            <button
+                onClick={() => setOpen(true)}
+                ref={menuButtonRef}
+                type="button"
+            >
                 Menu
             </button>
             <MobileDrawer
@@ -21,6 +25,7 @@ function DrawerHarness() {
             >
                 <a href="/app">Home</a>
             </MobileDrawer>
+            <input aria-label="Background search" />
         </>
     );
 }
@@ -40,6 +45,9 @@ describe("MobileDrawer", () => {
 
         render(<DrawerHarness />);
 
+        await user.tab();
+        await user.keyboard("{Enter}");
+
         await waitFor(() =>
             expect(
                 screen.getByRole("button", { name: "Close navigation" })
@@ -54,5 +62,35 @@ describe("MobileDrawer", () => {
         expect(
             screen.getByRole("complementary", { hidden: true })
         ).toHaveAttribute("aria-hidden", "true");
+    });
+
+    it("wraps Tab in both directions and recovers focus from outside", async () => {
+        const user = userEvent.setup();
+        render(<DrawerHarness />);
+        await user.click(screen.getByRole("button", { name: "Menu" }));
+
+        const close = screen.getByRole("button", { name: "Close navigation" });
+        const home = screen.getByRole("link", { name: "Home" });
+        expect(close).toHaveFocus();
+        await user.tab({ shift: true });
+        expect(home).toHaveFocus();
+        await user.tab();
+        expect(close).toHaveFocus();
+        await user.tab();
+        expect(home).toHaveFocus();
+
+        screen.getByRole("textbox", { name: "Background search" }).focus();
+        await user.tab();
+        expect(close).toHaveFocus();
+        screen.getByRole("textbox", { name: "Background search" }).focus();
+        await user.tab({ shift: true });
+        expect(home).toHaveFocus();
+
+        await user.click(close);
+        expect(screen.getByRole("button", { name: "Menu" })).toHaveFocus();
+        await user.keyboard(" ");
+        expect(close).toHaveFocus();
+        await user.keyboard("{Escape}");
+        expect(screen.getByRole("button", { name: "Menu" })).toHaveFocus();
     });
 });

@@ -6,6 +6,7 @@ import SearchBar from "../SearchBar/index.js";
 import SearchFilters from "../SearchFilters/SearchFilters.jsx";
 import SearchResults from "../SearchResults/SearchResults.jsx";
 import styles from "./SearchModal.module.css";
+import { ROUTES } from "../../../config/routes.js";
 
 export default function SearchModal({ onClose, open }) {
     const {
@@ -38,7 +39,7 @@ export default function SearchModal({ onClose, open }) {
         <Modal
             className={styles.dialog}
             closeLabel="Close Search"
-            description="Search communities, channels, and shared files."
+            description="Quick-find communities, channels, and shared files, or open Discover for all study knowledge."
             initialFocusRef={inputRef}
             onClose={onClose}
             open={open}
@@ -67,6 +68,13 @@ export default function SearchModal({ onClose, open }) {
                     <SearchFilters />
                 </div>
                 <SearchResults />
+                <a
+                    className={styles.discoverLink}
+                    href={`${ROUTES.DISCOVER}?q=${encodeURIComponent(query.trim())}`}
+                    onClick={onClose}
+                >
+                    Search all knowledge in Discover
+                </a>
                 <footer className={styles.hints} aria-hidden="true">
                     <span>Up / Down Navigate</span>
                     <span>Enter Open</span>

@@ -2,6 +2,7 @@ import Avatar from "../../ui/Avatar/index.js";
 import Badge from "../../ui/Badge/index.js";
 import Divider from "../../ui/Divider/index.js";
 import { COMMUNITY_ROLES } from "../../../config/community-roles.js";
+import { getCommunityBadgeLabel } from "../../../models/community-reputation.js";
 import styles from "./CommunityMembers.module.css";
 
 const ROLE_ORDER = [
@@ -42,9 +43,22 @@ export default function CommunityMembers({ members = [] }) {
                                     </strong>
                                     <span>
                                         {member.nickname
-                                            ? `@${member.nickname}`
-                                            : "Community member"}
+                                            ? `@${member.nickname} · `
+                                            : ""}
+                                        {member.reputationPoints || 0} pts ·{" "}
+                                        {member.reputationLevel || "Newcomer"} ·{" "}
+                                        {member.trustLevel ||
+                                            "Community Member"}
                                     </span>
+                                    {member.reputationBadges?.length ? (
+                                        <span>
+                                            Badges:{" "}
+                                            {member.reputationBadges
+                                                .map(getCommunityBadgeLabel)
+                                                .filter(Boolean)
+                                                .join(", ")}
+                                        </span>
+                                    ) : null}
                                 </div>
                                 <Badge
                                     variant={

@@ -580,7 +580,7 @@
     .sidebar {
         background: var(--navy);
         color: white;
-        padding: 24px;
+        padding: var(--space-6);
     }
 
     .sidebar-logo {
@@ -596,7 +596,7 @@
 
     .sidebar-menu a {
         color: #cbd5e1;
-        padding: 14px 16px;
+        padding: 14px var(--space-4);
         border-radius: 14px;
         font-weight: 600;
         transition: 0.25s;
@@ -609,15 +609,15 @@
     }
 
     .dashboard-main {
-        padding: 32px;
+        padding: var(--space-8);
     }
 
     .dashboard-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        gap: 24px;
-        margin-bottom: 32px;
+        gap: var(--space-6);
+        margin-bottom: var(--space-8);
     }
 
     .dashboard-header h1 {
@@ -632,12 +632,12 @@
     .header-right {
         display: flex;
         align-items: center;
-        gap: 20px;
+        gap: var(--space-5);
     }
 
     .search-box input {
         width: 280px;
-        padding: 12px 18px;
+        padding: var(--space-3) 18px;
         border: 1px solid var(--border);
         border-radius: 14px;
         background: var(--white);
@@ -697,7 +697,7 @@
     }
 
     .notification-header {
-        padding: 16px 18px;
+        padding: var(--space-4) 18px;
         border-bottom: 1px solid var(--border);
     }
 
@@ -746,7 +746,7 @@
 
     .notification-content {
         display: grid;
-        gap: 4px;
+        gap: var(--space-1);
     }
 
     .notification-item strong {
@@ -804,7 +804,7 @@
     }
 
     .notification-footer {
-        padding: 12px 18px;
+        padding: var(--space-3) 18px;
         border-top: 1px solid var(--border);
     }
 
@@ -830,8 +830,8 @@
     #profileButton {
         display: flex;
         align-items: center;
-        gap: 12px;
-        padding: 8px 14px;
+        gap: var(--space-3);
+        padding: var(--space-2) 14px;
         background: var(--white);
         border: none;
         border-radius: 16px;
@@ -871,7 +871,7 @@
     .profile-dropdown button {
         display: block;
         width: 100%;
-        padding: 14px 20px;
+        padding: 14px var(--space-5);
         border: none;
         background: none;
         text-align: left;
@@ -882,14 +882,14 @@
         display: grid;
         grid-template-columns: repeat(4, 1fr);
         gap: 22px;
-        margin-bottom: 32px;
+        margin-bottom: var(--space-8);
     }
 
     .stat-box {
         background: var(--white);
         border: 1px solid var(--border);
         border-radius: 22px;
-        padding: 24px;
+        padding: var(--space-6);
         box-shadow: var(--shadow);
     }
 
@@ -899,7 +899,7 @@
 
     .stat-box p {
         color: var(--text-muted);
-        margin-top: 12px;
+        margin-top: var(--space-3);
     }
 
     .stat-box h2 {
@@ -944,7 +944,7 @@
 
     .stat-skeleton-line {
         display: block;
-        margin: 12px 0 0;
+        margin: var(--space-3) 0 0;
     }
 
     .chart-loading canvas {
@@ -956,7 +956,7 @@
         inset: 22px;
         display: grid;
         align-content: center;
-        gap: 12px;
+        gap: var(--space-3);
     }
 
     .chart-skeleton .skeleton-line {
@@ -1000,7 +1000,7 @@
         background: var(--danger);
         color: white;
         border: none;
-        padding: 12px 18px;
+        padding: var(--space-3) 18px;
         border-radius: 14px;
         cursor: pointer;
         font-weight: 700;
@@ -1039,7 +1039,7 @@
     .activity-content h4 {
         color: var(--navy);
         font-size: 15px;
-        margin-bottom: 4px;
+        margin-bottom: var(--space-1);
     }
 
     .activity-content h4 a {

@@ -16,6 +16,7 @@ describe("Sidebar", () => {
         );
 
         const home = screen.getByRole("link", { name: "Home" });
+        const discover = screen.getByRole("link", { name: "Discover" });
         const communities = screen.getByRole("link", {
             name: "Communities"
         });
@@ -23,6 +24,8 @@ describe("Sidebar", () => {
         expect(home).toHaveAttribute("aria-current", "page");
 
         home.focus();
+        await user.keyboard("{ArrowDown}");
+        expect(discover).toHaveFocus();
         await user.keyboard("{ArrowDown}");
         expect(communities).toHaveFocus();
 

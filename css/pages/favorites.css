@@ -3,12 +3,12 @@
     .favorites-page {
         max-width: 1180px;
         margin: 0 auto;
-        padding: 32px 24px 72px;
+        padding: var(--space-8) var(--space-6) 72px;
         min-height: 100vh;
     }
 
     .page-header {
-        margin-bottom: 32px;
+        margin-bottom: var(--space-8);
     }
 
     .page-header h1 {

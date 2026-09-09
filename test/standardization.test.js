@@ -47,9 +47,7 @@ test("Firebase configuration has one canonical location", () => {
     );
 
     const source = readMany(
-        [...filesIn("js"), ...filesIn("src")].filter((path) =>
-            path.endsWith(".js")
-        )
+        filesIn("src").filter((path) => path.endsWith(".js"))
     );
 
     assert.doesNotMatch(source, /gstatic\.com\/firebasejs/);
@@ -59,9 +57,6 @@ test("Firebase configuration has one canonical location", () => {
 test("presentation and model layers stay behind service boundaries", () => {
     const presentation = readMany(
         [
-            ...filesIn("js/components"),
-            ...filesIn("js/renderers"),
-            ...filesIn("js/models"),
             ...filesIn("src/components"),
             ...filesIn("src/pages"),
             ...filesIn("src/models")
@@ -78,9 +73,7 @@ test("presentation and model layers stay behind service boundaries", () => {
 
 test("utilities do not depend on application layers", () => {
     const utilities = readMany(
-        [...filesIn("js/utils"), ...filesIn("src/utils")].filter((path) =>
-            path.endsWith(".js")
-        )
+        filesIn("src/utils").filter((path) => path.endsWith(".js"))
     );
 
     assert.doesNotMatch(
@@ -91,22 +84,18 @@ test("utilities do not depend on application layers", () => {
 });
 
 test("standard lifecycle spelling and centralized errors are enforced", () => {
-    const sourceFiles = filesIn("js").filter((path) => path.endsWith(".js"));
-    const source = readMany([
-        ...sourceFiles,
-        ...filesIn("src").filter((path) => path.endsWith(".js"))
-    ]);
-    const logger = read("js/utils/logger.js");
-    const sourceWithoutLogger = source.replace(logger, "");
+    const source = readMany(
+        filesIn("src").filter((path) => /\.(?:js|jsx)$/.test(path))
+    );
 
     assert.doesNotMatch(source, /\binitialise[A-Z]/);
     assert.doesNotMatch(source, /\bdispose\s*\(/);
     assert.doesNotMatch(source, /\balert\s*\(/);
-    assert.doesNotMatch(sourceWithoutLogger, /console\.error\s*\(/);
+    assert.doesNotMatch(source, /console\.error\s*\(/);
 });
 
 test("JavaScript filenames use lowercase kebab-case", () => {
-    const invalid = [...filesIn("js"), ...filesIn("src")]
+    const invalid = filesIn("src")
         .filter((path) => path.endsWith(".js"))
         .map((path) => path.split("/").at(-1))
         .filter(

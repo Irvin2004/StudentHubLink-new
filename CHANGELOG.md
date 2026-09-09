@@ -8,6 +8,72 @@ semantic versioning while it matures.
 
 ## [Unreleased]
 
+No additional changes recorded after the 2.0.0 release preparation.
+
+## [2.0.0] - 2026-09-09
+
+Release preparation from 2.0.0-rc.1. Version and documentation are updated;
+archive, commit, tag, push, and production publication remain pending. See
+[release notes](docs/releases/2.0.0.md) for the current gate status.
+
+### Added
+
+- Includes V2 Discover, Learning Memory, Thuto study plans, community
+  reputation, knowledge collections, and the integration fixes recorded under
+  rc.1 below.
+- Live real-account authorization evidence and populated Chat, Resources,
+  Friends, and Notifications QA reports.
+
+### Fixed
+
+- Mobile drawer focus entry during its opening animation, with Tab/Shift+Tab
+  containment, Escape dismissal, and focus restoration verified locally.
+
+### Known limitations
+
+- New friend requests remain blocked by denied reads of missing connection and
+  request documents. This is an unresolved release blocker, not a passed gate.
+- Resource file-content previews remain unverified; metadata, favourites,
+  filtering, and Study Planner integration passed.
+- Cloud Functions deployment is deferred until Blaze is available. Storage
+  initialization, rules deployment, and transfer checks are post-release
+  infrastructure items. These features must not be represented as deployed.
+- The drawer fix still requires Hosting deployment and a live smoke check.
+- Thuto uses the local deterministic provider; analytics remains locally
+  buffered.
+
+## [2.0.0-rc.1] - 2026-09-08
+
+Release candidate; production deployment and manual sign-off are pending. The
+July 3 entry below is a historical version label, not a published V2 tag.
+
+### Added
+
+- Discover for community resources, solved questions, collections, and private
+  quizzes and flashcards.
+- Learning Memory and evidence-based Thuto recommendations.
+- Editable Thuto study plans integrated with the Study Planner.
+- Community reputation, trusted curation, and knowledge collections.
+- Firebase emulator authorization regressions in CI.
+
+### Fixed
+
+- Authorized community file collection-group queries with bounded batches.
+- Retired public access to legacy marketplace Storage objects.
+- Corrected learning-memory classification when quiz evidence is absent.
+- Kept memory metadata out of generated study material.
+- Made generated quiz and flashcard saves atomic.
+
+### Known limitations
+
+- Live rules deployment and legacy download-token revocation remain required.
+- Thuto uses the local deterministic provider; analytics remains locally
+  buffered.
+- Live role authorization, mobile/accessibility, and rollout sign-off are
+  pending.
+
+### Earlier unreleased work included in this candidate
+
 ### Added
 
 - Added recipient-owned real-time notifications with assignment, message, and
@@ -66,7 +132,7 @@ semantic versioning while it matures.
 - Fixed dark-theme contrast on authentication marketing panels.
 - Removed the unauthorized legacy activity-collection query.
 
-## [2.0.0] - 2026-07-03
+## Historical V2 draft - 2026-07-03
 
 ### Added
 

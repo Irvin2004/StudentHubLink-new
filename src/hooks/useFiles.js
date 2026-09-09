@@ -78,11 +78,11 @@ export function useFiles(channelId, { communityId, subscribe = true } = {}) {
                     channelId,
                     uploadedBy: userId,
                     uploadedByName,
-                    onProgress: (progress) =>
+                    onProgress: (progress, transfer) =>
                         setUploads((current) =>
                             current.map((item) =>
                                 item.id === localId
-                                    ? { ...item, progress }
+                                    ? { ...item, progress, ...transfer }
                                     : item
                             )
                         )

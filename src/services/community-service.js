@@ -12,16 +12,18 @@ import {
     runTransaction,
     serverTimestamp,
     setDoc,
+    startAfter,
     startAt,
     updateDoc,
     where,
     writeBatch
 } from "firebase/firestore";
+import { deleteObject, ref } from "firebase/storage";
 
 import { COMMUNITY_ROLES } from "../config/community-roles.js";
 import { ACTIVITY_TYPES } from "../config/activity-types.js";
 import { CHANNEL_TYPES } from "../config/channel-types.js";
-import { auth, db } from "../firebase/index.js";
+import { auth, db, storage } from "../firebase/index.js";
 import { createCommunityModel } from "../models/community.js";
 import { createCommunityMemberModel } from "../models/community-member.js";
 import {
@@ -30,16 +32,17 @@ import {
     validateCommunityUpdates
 } from "../utils/community-validation.js";
 import { createActivity } from "./activity-service.js";
+import { getCommunityReputation } from "./community-reputation-service.js";
 
 const COMMUNITIES_COLLECTION = "communities";
 const MEMBERS_COLLECTION = "members";
-const CHILD_COLLECTIONS = Object.freeze([
-    MEMBERS_COLLECTION,
-    "channels",
-    "settings"
-]);
+const CHILD_COLLECTIONS = Object.freeze(["settings", "activities"]);
+const CHANNEL_CHILD_COLLECTIONS = Object.freeze(["messages", "typing"]);
 const DELETE_BATCH_SIZE = 400;
+const CHANNEL_DELETE_PAGE_SIZE = 50;
 const DEFAULT_RESULT_LIMIT = 50;
+const DEFAULT_COMMUNITY_PAGE_SIZE = 24;
+const DEFAULT_MEMBER_PAGE_SIZE = 30;
 const DEFAULT_CHANNEL_ID = "general";
 
 function getAuthenticatedUserId(userId) {
@@ -89,10 +92,20 @@ function memberFromSnapshot(snapshot, communityId) {
     });
 }
 
-async function assertUniqueCommunityName(normalizedName, excludedId = null) {
+async function assertUniquePublicCommunityName(
+    normalizedName,
+    visibility,
+    excludedId = null
+) {
+    // Firestore cannot safely authorize a global scan that could reveal
+    // private communities. Public names are unique within the discoverable
+    // directory; private community names remain scoped to their members.
+    if (visibility !== "public") return;
+
     const nameQuery = query(
         collection(db, COMMUNITIES_COLLECTION),
         where("normalizedName", "==", normalizedName),
+        where("visibility", "==", "public"),
         limit(2)
     );
     const snapshot = await getDocs(nameQuery);
@@ -119,7 +132,10 @@ export async function createCommunity(input, ownerId) {
         ...input
     });
 
-    await assertUniqueCommunityName(validated.normalizedName);
+    await assertUniquePublicCommunityName(
+        validated.normalizedName,
+        validated.visibility
+    );
 
     const communityReference = doc(collection(db, COMMUNITIES_COLLECTION));
     const ownerReference = getMemberReference(
@@ -196,8 +212,9 @@ export async function updateCommunity(communityId, updates) {
         validatedUpdates.normalizedName &&
         validatedUpdates.normalizedName !== currentCommunity.normalizedName
     ) {
-        await assertUniqueCommunityName(
+        await assertUniquePublicCommunityName(
             validatedUpdates.normalizedName,
+            validatedUpdates.visibility || currentCommunity.visibility,
             communityId
         );
     }
@@ -225,12 +242,90 @@ export async function updateCommunity(communityId, updates) {
 export async function deleteCommunity(communityId) {
     const reference = getCommunityReference(communityId);
 
-    await Promise.all(
-        CHILD_COLLECTIONS.map((collectionName) =>
-            deleteCollectionDocuments(collection(reference, collectionName))
-        )
+    const channelsReference = collection(reference, "channels");
+    await deleteCommunityChannels(channelsReference);
+    await deleteCommunityQuestions(collection(reference, "questions"));
+    await deleteCommunityKnowledgeCollections(
+        collection(reference, "knowledgeCollections")
     );
+
+    for (const collectionName of CHILD_COLLECTIONS) {
+        await deleteCollectionDocuments(collection(reference, collectionName));
+    }
+    await deleteCollectionDocuments(collection(reference, MEMBERS_COLLECTION));
     await deleteDoc(reference);
+}
+
+async function deleteCommunityQuestions(questionsReference) {
+    let hasMore = true;
+
+    while (hasMore) {
+        const questionsSnapshot = await getDocs(
+            query(questionsReference, limit(DELETE_BATCH_SIZE))
+        );
+        if (questionsSnapshot.empty) return;
+
+        for (const questionSnapshot of questionsSnapshot.docs) {
+            const answersSnapshot = await getDocs(
+                query(
+                    collection(questionSnapshot.ref, "answers"),
+                    limit(DELETE_BATCH_SIZE)
+                )
+            );
+            for (const answerSnapshot of answersSnapshot.docs) {
+                await Promise.all([
+                    deleteCollectionDocuments(
+                        collection(answerSnapshot.ref, "comments")
+                    ),
+                    deleteCollectionDocuments(
+                        collection(answerSnapshot.ref, "upvotes")
+                    )
+                ]);
+            }
+            const answersBatch = writeBatch(db);
+            answersSnapshot.docs.forEach((answerSnapshot) =>
+                answersBatch.delete(answerSnapshot.ref)
+            );
+            await answersBatch.commit();
+            await deleteCollectionDocuments(
+                collection(questionSnapshot.ref, "upvotes")
+            );
+        }
+
+        const questionsBatch = writeBatch(db);
+        questionsSnapshot.docs.forEach((questionSnapshot) =>
+            questionsBatch.delete(questionSnapshot.ref)
+        );
+        await questionsBatch.commit();
+        hasMore = questionsSnapshot.size === DELETE_BATCH_SIZE;
+    }
+}
+
+async function deleteCommunityKnowledgeCollections(collectionsReference) {
+    let hasMore = true;
+
+    while (hasMore) {
+        const snapshot = await getDocs(
+            query(collectionsReference, limit(DELETE_BATCH_SIZE))
+        );
+        if (snapshot.empty) return;
+
+        for (const collectionSnapshot of snapshot.docs) {
+            await Promise.all([
+                deleteCollectionDocuments(
+                    collection(collectionSnapshot.ref, "saves")
+                ),
+                deleteCollectionDocuments(
+                    collection(collectionSnapshot.ref, "suggestions")
+                )
+            ]);
+        }
+
+        const batch = writeBatch(db);
+        snapshot.docs.forEach((item) => batch.delete(item.ref));
+        await batch.commit();
+        hasMore = snapshot.size === DELETE_BATCH_SIZE;
+    }
 }
 
 /**
@@ -311,6 +406,67 @@ export async function getCommunityMember(communityId, userId) {
 }
 
 /**
+ * Loads all community memberships with the public profile fields needed by the
+ * member-management UI.
+ *
+ * @param {string} communityId
+ * @returns {Promise<object[]>}
+ */
+export async function getCommunityMembers(communityId) {
+    const page = await getCommunityMembersPage(communityId);
+    return page.members;
+}
+
+export async function getCommunityMembersPage(
+    communityId,
+    { cursor = null, pageSize = DEFAULT_MEMBER_PAGE_SIZE } = {}
+) {
+    const constraints = [orderBy("joinedAt", "asc")];
+    if (cursor) constraints.push(startAfter(cursor));
+    constraints.push(limit(toResultLimit(pageSize)));
+    const snapshot = await getDocs(
+        query(
+            collection(getCommunityReference(communityId), MEMBERS_COLLECTION),
+            ...constraints
+        )
+    );
+
+    const members = await Promise.all(
+        snapshot.docs.map(async (memberSnapshot) => {
+            const member = memberFromSnapshot(memberSnapshot, communityId);
+            const [profileSnapshot, reputation] = await Promise.all([
+                getDoc(doc(db, "users", member.userId)),
+                getCommunityReputation(communityId, member.userId)
+            ]);
+            const profile = profileSnapshot.exists()
+                ? profileSnapshot.data()
+                : {};
+
+            return {
+                ...member,
+                displayName:
+                    profile.displayName ||
+                    profile.fullName ||
+                    member.nickname ||
+                    "Student",
+                photoURL: profile.photoURL || null,
+                reputationBadges: reputation.badges,
+                reputationPoints: reputation.points,
+                reputationLevel: reputation.level,
+                trustLevel: reputation.trustLevel,
+                trustRank: reputation.trustRank
+            };
+        })
+    );
+
+    return {
+        cursor: snapshot.docs.at(-1) || cursor,
+        hasMore: snapshot.size === pageSize,
+        members
+    };
+}
+
+/**
  * Loads community IDs for memberships owned by one user.
  *
  * @param {string} userId
@@ -337,6 +493,11 @@ export async function getCommunityMembershipIds(userId) {
  * @returns {Promise<Readonly<object>[]>}
  */
 export async function getCommunities(options = {}) {
+    const page = await getCommunitiesPage(options);
+    return page.communities;
+}
+
+export async function getCommunitiesPage(options = {}) {
     const constraints = [];
 
     if (options.visibility) {
@@ -349,16 +510,22 @@ export async function getCommunities(options = {}) {
         );
     }
 
-    constraints.push(
-        orderBy("updatedAt", "desc"),
-        limit(toResultLimit(options.maxResults))
+    const pageSize = toResultLimit(
+        options.pageSize ?? options.maxResults ?? DEFAULT_COMMUNITY_PAGE_SIZE
     );
+    constraints.push(orderBy("updatedAt", "desc"));
+    if (options.cursor) constraints.push(startAfter(options.cursor));
+    constraints.push(limit(pageSize));
 
     const snapshot = await getDocs(
         query(collection(db, COMMUNITIES_COLLECTION), ...constraints)
     );
 
-    return snapshot.docs.map(communityFromSnapshot);
+    return {
+        communities: snapshot.docs.map(communityFromSnapshot),
+        cursor: snapshot.docs.at(-1) || options.cursor || null,
+        hasMore: snapshot.size === pageSize
+    };
 }
 
 /**
@@ -548,6 +715,65 @@ async function deleteCollectionDocuments(collectionReference) {
         });
         await batch.commit();
 
+        hasMore = snapshot.size === DELETE_BATCH_SIZE;
+    }
+}
+
+async function deleteCommunityChannels(channelsReference) {
+    let hasMore = true;
+
+    while (hasMore) {
+        const snapshot = await getDocs(
+            query(channelsReference, limit(CHANNEL_DELETE_PAGE_SIZE))
+        );
+        if (snapshot.empty) return;
+
+        await Promise.all(
+            snapshot.docs.flatMap((channelSnapshot) => [
+                deleteChannelStorageFiles(channelSnapshot),
+                ...CHANNEL_CHILD_COLLECTIONS.map((collectionName) =>
+                    deleteCollectionDocuments(
+                        collection(channelSnapshot.ref, collectionName)
+                    )
+                )
+            ])
+        );
+
+        const batch = writeBatch(db);
+        snapshot.docs.forEach((channelSnapshot) =>
+            batch.delete(channelSnapshot.ref)
+        );
+        await batch.commit();
+        hasMore = snapshot.size === CHANNEL_DELETE_PAGE_SIZE;
+    }
+}
+
+async function deleteChannelStorageFiles(channelSnapshot) {
+    const filesReference = collection(channelSnapshot.ref, "files");
+    let hasMore = true;
+
+    while (hasMore) {
+        const snapshot = await getDocs(
+            query(filesReference, limit(DELETE_BATCH_SIZE))
+        );
+        if (snapshot.empty) return;
+
+        await Promise.all(
+            snapshot.docs.map(async (fileSnapshot) => {
+                const storagePath = fileSnapshot.data().storagePath;
+                if (!storagePath) return;
+
+                try {
+                    await deleteObject(ref(storage, storagePath));
+                } catch (error) {
+                    if (error?.code !== "storage/object-not-found") throw error;
+                }
+            })
+        );
+
+        const batch = writeBatch(db);
+        snapshot.docs.forEach((fileSnapshot) => batch.delete(fileSnapshot.ref));
+        await batch.commit();
         hasMore = snapshot.size === DELETE_BATCH_SIZE;
     }
 }

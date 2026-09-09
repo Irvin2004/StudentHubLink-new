@@ -31,6 +31,21 @@
     font-size: 0.95rem;
     font-weight: 700;
     text-decoration: none;
+    transition:
+        background var(--transition-fast),
+        border-color var(--transition-fast),
+        box-shadow var(--transition-fast),
+        color var(--transition-fast),
+        transform var(--transition-fast);
+}
+
+#root .btn:hover {
+    transform: translateY(-1px);
+}
+
+#root .btn:focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--focus-ring) 35%, transparent);
+    outline-offset: 2px;
 }
 
 #root .btn-primary {
@@ -461,17 +476,18 @@ body:is([data-page="login"], [data-page="register"]) .auth-switch a {
 .react-page {
     width: min(72rem, 100%);
     margin-inline: auto;
-    padding: var(--space-10);
+    padding: var(--space-8) var(--space-6) var(--space-10);
 }
 
 .react-page__heading {
-    margin-bottom: var(--space-8);
+    margin-bottom: var(--space-6);
 }
 
 .react-page__heading h1 {
     margin-bottom: var(--space-2);
     color: var(--text);
-    font-size: clamp(2rem, 4vw, 3rem);
+    font-size: clamp(2rem, 4vw, 2.75rem);
+    letter-spacing: -0.04em;
 }
 
 .react-page__heading p {
@@ -518,8 +534,15 @@ body:is([data-page="login"], [data-page="register"]) .auth-switch a {
 
 .react-settings-panel {
     display: grid;
-    max-width: 36rem;
+    max-width: 40rem;
     gap: var(--space-3);
+}
+
+.react-settings-panel > label:not(.react-setting-toggle) {
+    margin-top: var(--space-2);
+    color: var(--text-secondary);
+    font-size: 0.82rem;
+    font-weight: 750;
 }
 
 .react-settings-panel select {
@@ -529,13 +552,37 @@ body:is([data-page="login"], [data-page="register"]) .auth-switch a {
     border-radius: var(--radius-md);
     background: var(--surface);
     color: var(--text);
+    font: inherit;
+}
+
+.react-settings-panel select:focus-visible {
+    border-color: var(--focus-ring);
+    outline: 3px solid color-mix(in srgb, var(--focus-ring) 22%, transparent);
+    outline-offset: 1px;
 }
 
 .react-setting-toggle {
     display: flex;
     align-items: center;
     gap: var(--space-3);
-    margin-top: var(--space-3);
+    min-height: 3rem;
+    margin-top: var(--space-2);
+    padding: var(--space-3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface-muted);
+    cursor: pointer;
+}
+
+.react-setting-toggle:focus-within {
+    border-color: var(--focus-ring);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--focus-ring) 20%, transparent);
+}
+
+.react-setting-toggle input {
+    width: 1.15rem;
+    height: 1.15rem;
+    accent-color: var(--primary);
 }
 
 .react-not-found > span {
@@ -572,7 +619,7 @@ body:is([data-page="login"], [data-page="register"]) .auth-switch a {
     }
 
     .react-page {
-        padding: var(--space-6);
+        padding: var(--space-6) var(--space-4) var(--space-8);
     }
 
     .react-action-grid {

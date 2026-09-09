@@ -11,6 +11,7 @@ const mocks = vi.hoisted(() => {
             set: vi.fn()
         },
         deleteDoc: vi.fn(),
+        deleteObject: vi.fn(),
         createActivity: vi.fn(),
         getDoc: vi.fn(),
         getDocs: vi.fn(),
@@ -71,6 +72,7 @@ vi.mock("firebase/firestore", () => ({
     serverTimestamp: () => mocks.timestamp,
     setDoc: mocks.setDoc,
     startAt: (value) => ({ type: "startAt", value }),
+    startAfter: (value) => ({ type: "startAfter", value }),
     updateDoc: mocks.updateDoc,
     where: (field, operator, value) => ({
         type: "where",
@@ -81,9 +83,15 @@ vi.mock("firebase/firestore", () => ({
     writeBatch: () => mocks.batch
 }));
 
+vi.mock("firebase/storage", () => ({
+    deleteObject: mocks.deleteObject,
+    ref: (_storage, path) => ({ path })
+}));
+
 vi.mock("../firebase/index.js", () => ({
     auth: mocks.auth,
-    db: { name: "test-db" }
+    db: { name: "test-db" },
+    storage: { name: "test-storage" }
 }));
 
 vi.mock("./activity-service.js", () => ({
@@ -93,6 +101,7 @@ vi.mock("./activity-service.js", () => ({
 import { COMMUNITY_ROLES } from "../config/community-roles.js";
 import {
     createCommunity,
+    getCommunityMembers,
     getCommunityMembershipIds,
     joinCommunity,
     leaveCommunity,
@@ -185,6 +194,7 @@ describe("community service", () => {
             })
         );
         expect(mocks.batch.commit).toHaveBeenCalledOnce();
+        expect(mocks.getDocs).not.toHaveBeenCalled();
     });
 
     test("rejects duplicate normalized names before writing", async () => {
@@ -201,6 +211,17 @@ describe("community service", () => {
             })
         ).rejects.toThrow(/already exists/);
         expect(mocks.batch.commit).not.toHaveBeenCalled();
+        expect(mocks.getDocs).toHaveBeenCalledWith(
+            expect.objectContaining({
+                constraints: expect.arrayContaining([
+                    expect.objectContaining({
+                        field: "visibility",
+                        operator: "==",
+                        value: "public"
+                    })
+                ])
+            })
+        );
     });
 
     test("joins once and increments the community member count", async () => {
@@ -328,5 +349,26 @@ describe("community service", () => {
             operator: "==",
             value: "user-2"
         });
+    });
+
+    test("loads members with the profile fields needed by management UI", async () => {
+        mocks.getDocs.mockResolvedValue({
+            docs: [memberSnapshot({ userId: "user-2", nickname: "Builder" })]
+        });
+        mocks.getDoc.mockResolvedValue({
+            exists: () => true,
+            data: () => ({
+                displayName: "Ada Student",
+                photoURL: "https://example.com/ada.jpg"
+            })
+        });
+
+        await expect(getCommunityMembers("community-1")).resolves.toEqual([
+            expect.objectContaining({
+                userId: "user-2",
+                displayName: "Ada Student",
+                photoURL: "https://example.com/ada.jpg"
+            })
+        ]);
     });
 });

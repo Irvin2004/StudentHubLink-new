@@ -59,3 +59,9 @@
     margin-right: var(--space-3);
     color: var(--text-secondary);
 }
+
+@media (max-width: 47.999rem) {
+    .input {
+        font-size: 1rem;
+    }
+}

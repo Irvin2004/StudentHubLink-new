@@ -1,7 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { useAuth } from "./useAuth.js";
-import { MESSAGE_DELIVERY_STATUS } from "../config/message-types.js";
+import {
+    MESSAGE_DELIVERY_STATUS,
+    MESSAGE_PAGE_SIZE
+} from "../config/message-types.js";
 import { REACTION_KEYS } from "../config/reaction-types.js";
 import { createMessageModel } from "../models/message.js";
 import { captureError, trackEvent } from "../services/observability-service.js";
@@ -40,6 +43,7 @@ export function useMessages(channelId, { communityId, enabled = true } = {}) {
         value: null
     });
     const oldestSnapshotRef = useRef(null);
+    const loadingOlderRef = useRef(false);
     const historyRef = useRef([]);
     const optimisticMessagesRef = useRef(new Map());
     const retryInputsRef = useRef(new Map());
@@ -86,7 +90,7 @@ export function useMessages(channelId, { communityId, enabled = true } = {}) {
                     ...nextMessages,
                     ...optimisticMessagesRef.current.values()
                 ]);
-                setHasOlder(nextMessages.length >= 30);
+                setHasOlder(nextMessages.length >= MESSAGE_PAGE_SIZE);
                 setLoadedSubscription(subscriptionKey);
                 setErrorState({ key: subscriptionKey, value: null });
             },
@@ -135,6 +139,7 @@ export function useMessages(channelId, { communityId, enabled = true } = {}) {
             }
             optimisticMessages.clear();
             retryInputs.clear();
+            loadingOlderRef.current = false;
         };
     }, [channelId, communityId, shouldSubscribe, subscriptionKey, userId]);
 
@@ -330,8 +335,9 @@ export function useMessages(channelId, { communityId, enabled = true } = {}) {
     );
 
     const loadOlder = useCallback(async () => {
-        if (loadingOlder || !hasOlder) return [];
+        if (loadingOlderRef.current || !hasOlder) return [];
 
+        loadingOlderRef.current = true;
         setLoadingOlder(true);
         try {
             const result = await loadOlderMessages(
@@ -357,15 +363,16 @@ export function useMessages(channelId, { communityId, enabled = true } = {}) {
                     ...current
                 ];
             });
-            setHasOlder(result.messages.length >= 30);
+            setHasOlder(result.messages.length >= MESSAGE_PAGE_SIZE);
             return result.messages;
         } catch (nextError) {
             setErrorState({ key: subscriptionKey, value: nextError });
             throw nextError;
         } finally {
+            loadingOlderRef.current = false;
             setLoadingOlder(false);
         }
-    }, [channelId, communityId, hasOlder, loadingOlder, subscriptionKey]);
+    }, [channelId, communityId, hasOlder, subscriptionKey]);
 
     const notifyTyping = useCallback(() => {
         if (!userId) return;

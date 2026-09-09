@@ -1,0 +1,189 @@
+.page {
+    width: min(76rem, 100%);
+    margin-inline: auto;
+    padding: var(--space-8) var(--space-6) var(--space-10);
+    display: grid;
+    gap: var(--space-5);
+}
+
+.pageHeader {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-4);
+}
+
+.pageHeader h1 {
+    margin: 0;
+    color: var(--text);
+    font-size: clamp(2rem, 3vw, 2.6rem);
+    font-weight: 850;
+    letter-spacing: -0.035em;
+}
+
+.pageTitle {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+.pageTitle svg {
+    flex: 0 0 auto;
+    color: var(--primary);
+}
+
+.pageHeader p {
+    margin: var(--space-2) 0 0;
+    color: var(--text-secondary);
+    line-height: 1.55;
+}
+
+.headerActions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: var(--space-2);
+}
+
+.attention {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    padding: var(--space-4);
+    border: 1px solid
+        color-mix(in srgb, var(--warning, #d97706) 35%, var(--border));
+    border-radius: var(--radius-lg);
+    background: color-mix(in srgb, var(--warning, #d97706) 9%, var(--surface));
+}
+
+.attention strong {
+    color: var(--text);
+}
+
+.attention p {
+    margin: var(--space-1) 0 0;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    line-height: 1.45;
+}
+
+.plannerCard {
+    display: grid;
+    gap: var(--space-6);
+}
+
+.controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-4);
+    align-items: flex-end;
+}
+
+.searchField {
+    min-width: min(100%, 17rem);
+    flex: 1 1 18rem;
+}
+
+.filterBlock {
+    display: grid;
+    gap: var(--space-2);
+}
+
+.filterLabel {
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    font-weight: 750;
+}
+
+.filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+    padding: 0.25rem;
+    background: var(--surface);
+}
+
+.filterButton {
+    min-height: 2.75rem;
+    border: 0;
+    border-radius: var(--radius-pill);
+    padding: var(--space-2) var(--space-4);
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font: inherit;
+    font-size: 0.9rem;
+    font-weight: 750;
+    transition:
+        background 160ms ease,
+        color 160ms ease,
+        box-shadow 160ms ease;
+}
+
+.clearButton {
+    min-height: 2.75rem;
+}
+
+.filterButton:hover {
+    color: var(--text);
+}
+
+.filterButton[aria-pressed="true"] {
+    background: var(--primary);
+    color: var(--primary-contrast, #fff);
+    box-shadow: var(--shadow-sm);
+}
+
+.filterButton:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
+.mutationError {
+    margin: 0;
+    border-radius: var(--radius-md);
+    padding: var(--space-3) var(--space-4);
+    background: color-mix(in srgb, var(--danger, #dc2626) 10%, transparent);
+    color: var(--danger, #dc2626);
+    font-size: 0.9rem;
+    font-weight: 650;
+}
+
+@media (max-width: 47.999rem) {
+    .page {
+        padding: var(--space-6) var(--space-4) var(--space-8);
+    }
+
+    .pageHeader {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .headerActions,
+    .headerActions > button {
+        width: 100%;
+    }
+
+    .attention {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .controls,
+    .filterBlock,
+    .filters {
+        width: 100%;
+    }
+
+    .filterButton {
+        flex: 1;
+        padding-inline: var(--space-2);
+    }
+
+    .clearButton {
+        width: 100%;
+    }
+}

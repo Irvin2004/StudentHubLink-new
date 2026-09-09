@@ -98,7 +98,7 @@ test("controllers and services avoid direct console error handling", () => {
         "js/services/download-service.js",
         "js/services/message-service.js",
         "js/services/storage-service.js",
-        "js/services/theme-service.js"
+        "src/services/theme-service.js"
     ].forEach((path) => {
         assert.doesNotMatch(read(path), /console\.(?:error|warn)\(/);
     });

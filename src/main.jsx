@@ -4,7 +4,7 @@ import { createRoot } from "react-dom/client";
 import {
     destroy as destroyTheme,
     initializeTheme
-} from "../js/services/theme-service.js";
+} from "./services/theme-service.js";
 import App from "./App.jsx";
 import "./styles/index.css";
 

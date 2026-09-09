@@ -20,12 +20,12 @@
         padding: 25px;
         border-radius: 10px;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        margin-bottom: 20px;
+        margin-bottom: var(--space-5);
     }
 
     .profile-card > p,
     #profileSummaryContent > p {
-        margin: 8px 0;
+        margin: var(--space-2) 0;
         color: var(--text-main);
     }
 
@@ -42,7 +42,7 @@
     .profile-edit-form input,
     .profile-edit-form textarea {
         width: 100%;
-        padding: 12px 14px;
+        padding: var(--space-3) 14px;
         border: 1px solid var(--border);
         border-radius: 10px;
         background: var(--surface);
@@ -58,18 +58,18 @@
 
     .profile-edit-form button {
         justify-self: start;
-        margin-top: 8px;
+        margin-top: var(--space-2);
     }
 
     .stats {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 20px;
+        gap: var(--space-5);
     }
 
     .stat {
         background: var(--white);
-        padding: 20px;
+        padding: var(--space-5);
         border-radius: 10px;
         text-align: center;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);

@@ -1,0 +1,45 @@
+.section {
+    display: grid;
+    gap: var(--space-3);
+}
+
+.emphasis {
+    border-left: 0.25rem solid var(--danger, #dc2626);
+    border-radius: var(--radius-md);
+    padding: var(--space-3) var(--space-4);
+    background: color-mix(in srgb, var(--danger, #dc2626) 7%, transparent);
+}
+
+.emphasis .header h2 {
+    color: var(--danger, #dc2626);
+}
+
+.header {
+    display: grid;
+    grid-template-columns: auto minmax(2rem, 1fr);
+    gap: var(--space-3);
+    align-items: center;
+}
+
+.header h2 {
+    margin: 0;
+    color: var(--text);
+    font-size: 1rem;
+    font-weight: 800;
+}
+
+.count {
+    color: var(--text-secondary);
+    font-weight: 700;
+}
+
+.divider {
+    min-width: 0;
+    height: 1px;
+    background: var(--border);
+}
+
+.list {
+    display: grid;
+    gap: var(--space-1);
+}

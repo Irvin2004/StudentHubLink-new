@@ -52,6 +52,8 @@ preferences without moving between disconnected platforms.
 ### Academic resources
 
 - Upload and discover study material
+- Search resources, solved questions, knowledge collections, quizzes, flashcard
+  sets, and communities from the unified Discover experience
 - Search, filter, and sort resources
 - Preview and download shared files
 - Save favorites to a personal library
@@ -67,6 +69,8 @@ preferences without moving between disconnected platforms.
 - Reduced-motion and high-contrast modes
 - Responsive desktop, tablet, and mobile layouts
 - Keyboard and screen-reader support
+- Review and edit Thuto-generated study plans before adding them to the Study
+  Planner
 
 ## Technology
 
@@ -170,11 +174,11 @@ git clone https://github.com/Irvin2004/StudentHubLink-new.git
 cd StudentHubLink-new
 ```
 
-Install the project metadata and Cloud Functions dependencies:
+Install the exact locked application and Cloud Functions dependencies:
 
 ```bash
-npm install
-npm --prefix functions install
+npm ci
+npm --prefix functions ci
 ```
 
 Create a local environment file:
@@ -206,6 +210,12 @@ Functions. To use your own Firebase project:
 6. Provide every required `VITE_FIREBASE_*` value.
 7. Restrict the Firebase web API key and deploy the repository's Firestore and
    Storage rules.
+
+Firebase Storage requires a one-time console initialization before its rules can
+be deployed. In **Firebase Console → Build → Storage**, click **Get started**
+for the same project configured in `.firebaserc`, complete the bucket setup, and
+then deploy `storage.rules`. See the [deployment guide](docs/DEPLOYMENT.md) for
+the release-safe sequence.
 
 Vite validates Firebase configuration through `src/config/environment.js`.
 Firebase initialization is split across `src/firebase/app.js`, `auth.js`,
@@ -277,6 +287,12 @@ Storage rules, and Cloud Functions. Review the
 `firebase.json` publishes `dist/` to Firebase Hosting. The deployment workflow
 is manual and requires the documented GitHub environment secrets.
 
+The authenticated React application uses `/app` as its route namespace. The
+canonical resources URL is `/app/resources`; older `/app/files` and `/resources`
+links redirect there while preserving deep-link query parameters. Community root
+URLs redirect to their `general` channel. Firebase Hosting's catch-all rewrite
+serves `index.html` so these client routes also work after a hard refresh.
+
 ## Accessibility
 
 StudentHub includes:
@@ -302,21 +318,30 @@ should be tested with a keyboard and, where practical, a screen reader.
 - [Firebase](docs/firebase.md)
 - [Service API](docs/API.md)
 - [Firestore schema](docs/firestore-schema.md)
+- [V2 integration review](docs/v2-integration-review.md)
 - [Deployment](docs/DEPLOYMENT.md)
 - [Security](SECURITY.md)
 - [Code of conduct](CODE_OF_CONDUCT.md)
 - [Roadmap](docs/roadmap.md)
 - [Contributing](CONTRIBUTING.md)
 - [Changelog](CHANGELOG.md)
+- [2.0.0 release notes](docs/releases/2.0.0.md)
+- [Release checklist](docs/RELEASE_CHECKLIST.md)
 
 ## Roadmap
 
-The current priority is production readiness:
+The current production-readiness baseline includes:
 
-- Complete contributor and operational documentation
-- Expand integration and end-to-end coverage
-- Complete security and performance audits
-- Run a structured student beta
+- locked, reproducible dependency installs with `npm ci`
+- a single `npm run check` release gate for lint, formatting, syntax, tests, and
+  the production build
+- deny-by-default Firestore and Storage rules with owner-scoped private writes
+- canonical React routes with compatibility redirects for retired URLs
+- responsive layouts and touch targets on mobile-critical study and social
+  screens
+
+Browser end-to-end coverage and a structured student beta remain release
+follow-ups.
 
 Future product work includes richer message editing, drag-and-drop uploads,
 calendar and poll features, collaborative documents, and study-room tools.

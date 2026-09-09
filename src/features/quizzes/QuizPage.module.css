@@ -1,0 +1,407 @@
+.page {
+    width: min(76rem, 100%);
+    margin-inline: auto;
+    padding: var(--space-8) var(--space-6) var(--space-10);
+    display: grid;
+    gap: var(--space-6);
+    overflow-x: clip;
+}
+
+.pageHeader,
+.sectionHeading,
+.questionsHeader {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-4);
+}
+
+.pageHeader h1,
+.pageHeader p,
+.sectionHeading h2,
+.sectionHeading p,
+.questionsHeader h2,
+.questionsHeader p {
+    margin: 0;
+}
+
+.pageHeader h1 {
+    color: var(--text);
+    font-size: clamp(2rem, 3vw, 2.6rem);
+    font-weight: 850;
+    letter-spacing: -0.035em;
+}
+
+.pageHeader p,
+.sectionHeading p,
+.questionsHeader p,
+.openQuiz > span:last-of-type {
+    margin-top: var(--space-2);
+    color: var(--text-secondary);
+}
+
+.sectionHeading {
+    margin-bottom: var(--space-3);
+}
+
+.quizGrid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-4);
+}
+
+.quizCard {
+    position: relative;
+    min-height: 10.5rem;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    box-shadow: var(--shadow-sm);
+}
+
+.selectedQuiz {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 18%, transparent);
+}
+
+.openQuiz {
+    width: 100%;
+    min-height: 10.5rem;
+    display: grid;
+    align-content: start;
+    justify-items: start;
+    gap: var(--space-3);
+    border: 0;
+    padding: var(--space-5);
+    background: transparent;
+    color: var(--text);
+    cursor: pointer;
+    text-align: left;
+}
+
+.openQuiz strong {
+    max-width: calc(100% - 3rem);
+    font-size: 1.15rem;
+    line-height: 1.35;
+}
+.openQuiz b {
+    color: var(--primary);
+    font-size: 0.8rem;
+}
+
+.quizStatsCompact {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--space-2);
+    margin: var(--space-1) 0 0;
+}
+
+.quizStatsCompact dt {
+    color: var(--text-secondary);
+    font-size: 0.68rem;
+}
+
+.quizStatsCompact dd {
+    margin: 0.15rem 0 0;
+    color: var(--text);
+    font-size: 0.86rem;
+    font-weight: 850;
+}
+
+.subject {
+    width: fit-content;
+    border-radius: var(--radius-pill);
+    padding: 0.25rem 0.65rem;
+    background: color-mix(in srgb, var(--primary) 10%, transparent);
+    color: var(--primary);
+    font-size: 0.76rem;
+    font-weight: 800;
+}
+
+.deleteQuiz {
+    position: absolute;
+    top: var(--space-3);
+    right: var(--space-3);
+    min-width: 3rem;
+    min-height: 2.75rem;
+    border: 0;
+    border-radius: var(--radius-md);
+    background: transparent;
+    color: var(--danger);
+    cursor: pointer;
+    font: inherit;
+    font-size: 0.8rem;
+    font-weight: 750;
+}
+
+.deleteQuiz:hover {
+    background: color-mix(in srgb, var(--danger) 10%, transparent);
+}
+.openQuiz:focus-visible,
+.deleteQuiz:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: -3px;
+}
+.skeleton {
+    min-height: 10.5rem;
+    display: grid;
+    align-content: start;
+    gap: var(--space-4);
+}
+
+.questionsPanel {
+    display: grid;
+    gap: var(--space-5);
+}
+
+.linkedPanel {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-4);
+    background: var(--surface-muted);
+}
+
+.linkedPanel > div {
+    display: grid;
+    gap: var(--space-1);
+}
+
+.linkedPanel strong {
+    color: var(--text);
+}
+
+.linkedPanel span {
+    color: var(--text-secondary);
+    font-size: 0.86rem;
+}
+.questionsHeader {
+    align-items: center;
+}
+.questionsHeader > div {
+    display: grid;
+    justify-items: start;
+}
+.questionsHeader > button:first-of-type {
+    margin-left: auto;
+}
+.questionsHeader h2 {
+    margin-top: var(--space-2);
+    color: var(--text);
+}
+
+.statsPanel,
+.weakPanel {
+    display: grid;
+    gap: var(--space-3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-4);
+    background: var(--surface-muted);
+}
+
+.statsPanel h3,
+.weakPanel h3,
+.weakPanel p {
+    margin: 0;
+}
+
+.statsPanel > dl {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--space-3);
+    margin: 0;
+}
+
+.statsPanel dl div {
+    border-radius: var(--radius-md);
+    padding: var(--space-3);
+    background: var(--surface);
+}
+
+.statsPanel dt {
+    color: var(--text-secondary);
+    font-size: 0.76rem;
+}
+
+.statsPanel dd {
+    margin: 0.2rem 0 0;
+    color: var(--text);
+    font-size: 1.2rem;
+    font-weight: 850;
+}
+
+.weakPanel {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+}
+
+.weakPanel p {
+    margin-top: var(--space-1);
+    color: var(--text-secondary);
+    font-size: 0.86rem;
+}
+
+.weakPanel ol {
+    grid-column: 1 / -1;
+    display: grid;
+    gap: var(--space-2);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.weakPanel li {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-3);
+    border-top: 1px solid var(--border);
+    padding-top: var(--space-2);
+    color: var(--text);
+}
+
+.weakPanel li span {
+    overflow-wrap: anywhere;
+}
+
+.weakPanel li strong {
+    flex: 0 0 auto;
+    color: var(--danger);
+    font-size: 0.8rem;
+}
+
+.questionList {
+    display: grid;
+    gap: var(--space-4);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+.questionCard {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: start;
+    gap: var(--space-4);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-4);
+    background: var(--surface);
+}
+
+.questionNumber {
+    border-radius: var(--radius-pill);
+    padding: 0.3rem 0.65rem;
+    background: var(--surface-muted);
+    color: var(--text-secondary);
+    font-size: 0.76rem;
+    font-weight: 750;
+}
+
+.questionContent {
+    min-width: 0;
+}
+.questionContent h3 {
+    margin: 0;
+    color: var(--text);
+    line-height: 1.45;
+    overflow-wrap: anywhere;
+}
+.questionContent ol {
+    display: grid;
+    gap: var(--space-1);
+    margin: var(--space-3) 0 0;
+    padding-left: 1.5rem;
+    color: var(--text-secondary);
+}
+.correctAnswer {
+    color: var(--success, #168052);
+    font-weight: 750;
+}
+.questionActions {
+    display: flex;
+    gap: var(--space-2);
+}
+
+.errorBanner {
+    margin: 0;
+    border-radius: var(--radius-md);
+    padding: var(--space-3) var(--space-4);
+    background: color-mix(in srgb, var(--danger) 10%, transparent);
+    color: var(--danger);
+    font-weight: 650;
+}
+
+@media (max-width: 63rem) {
+    .quizGrid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .questionCard {
+        grid-template-columns: auto minmax(0, 1fr);
+    }
+    .questionActions {
+        grid-column: 2;
+    }
+}
+
+@media (max-width: 47.999rem) {
+    .page {
+        padding: var(--space-6) var(--space-4) var(--space-8);
+    }
+    .pageHeader,
+    .questionsHeader {
+        align-items: stretch;
+        flex-direction: column;
+    }
+    .pageHeader button,
+    .questionsHeader button {
+        width: 100%;
+        min-height: 3rem;
+    }
+    .questionsHeader > button:first-of-type {
+        margin-left: 0;
+    }
+    .questionCard {
+        grid-template-columns: 1fr;
+    }
+    .questionActions {
+        grid-column: auto;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .questionActions button {
+        min-height: 3rem;
+    }
+
+    .statsPanel > dl {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .weakPanel {
+        grid-template-columns: 1fr;
+    }
+
+    .linkedPanel {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .linkedPanel button {
+        width: 100%;
+        min-height: 3rem;
+    }
+
+    .weakPanel > button {
+        width: 100%;
+    }
+}
+
+@media (max-width: 34rem) {
+    .quizGrid {
+        grid-template-columns: 1fr;
+    }
+}

@@ -3,7 +3,7 @@
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow);
-    padding: 24px;
+    padding: var(--space-6);
     transition:
         transform 0.25s ease,
         box-shadow 0.25s ease;
@@ -18,14 +18,14 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 20px;
+    gap: var(--space-5);
 }
 
 .stat-info h4 {
     color: var(--text-muted);
     font-size: 14px;
     font-weight: 600;
-    margin-bottom: 8px;
+    margin-bottom: var(--space-2);
 }
 
 .stat-info h2 {
@@ -78,7 +78,7 @@
 
 .resource-description {
     color: var(--text-muted);
-    margin-bottom: 20px;
+    margin-bottom: var(--space-5);
 }
 
 .resource-footer {
@@ -97,12 +97,12 @@
     background: var(--white);
     border-radius: 20px;
     border: 1px solid var(--border);
-    padding: 24px;
+    padding: var(--space-6);
     box-shadow: var(--shadow);
 }
 
 .dashboard-card h3 {
-    margin-bottom: 20px;
+    margin-bottom: var(--space-5);
     color: var(--navy);
 }
 
@@ -117,7 +117,7 @@
     background: var(--white);
     border-radius: 18px;
     border: 1px solid var(--border);
-    padding: 20px;
+    padding: var(--space-5);
     cursor: pointer;
     transition: 0.25s;
 }

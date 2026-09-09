@@ -12,6 +12,13 @@
     object-fit: contain;
     border-radius: var(--radius-md);
 }
+.preview iframe {
+    width: 100%;
+    min-height: min(60vh, 34rem);
+    border: 0;
+    border-radius: var(--radius-md);
+    background: white;
+}
 .fallback {
     display: grid;
     justify-items: center;
@@ -50,4 +57,20 @@
 .primary {
     background: var(--channel-accent);
     color: white;
+}
+
+@media (max-width: 47.999rem) {
+    .preview,
+    .preview iframe {
+        min-height: 60vh;
+    }
+
+    .footer,
+    .action {
+        width: 100%;
+    }
+
+    .action {
+        min-height: 3rem;
+    }
 }

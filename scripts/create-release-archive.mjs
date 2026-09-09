@@ -70,16 +70,20 @@ function quotePowerShell(value) {
 function createZip(stagingParent, stagingDirectory) {
     if (process.platform === "win32") {
         const command = [
-            "Compress-Archive",
-            `-LiteralPath ${quotePowerShell(stagingDirectory)}`,
-            `-DestinationPath ${quotePowerShell(archivePath)}`,
-            "-Force"
-        ].join(" ");
+            "Add-Type -AssemblyName System.IO.Compression.FileSystem",
+            "[System.AppContext]::SetSwitch('Switch.System.IO.Compression.ZipFile.UseBackslash', $false)",
+            `[System.IO.Compression.ZipFile]::CreateFromDirectory(${quotePowerShell(stagingDirectory)}, ${quotePowerShell(archivePath)}, [System.IO.Compression.CompressionLevel]::Optimal, $true)`
+        ].join("; ");
 
         execFileSync(
             "powershell",
             ["-NoProfile", "-NonInteractive", "-Command", command],
-            { stdio: "inherit" }
+            {
+                stdio: "inherit",
+                // Let Windows PowerShell load its own modules, not inherited
+                // PowerShell 7 modules from the calling terminal.
+                env: { ...process.env, PSModulePath: undefined }
+            }
         );
         return;
     }

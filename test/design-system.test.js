@@ -57,7 +57,7 @@ test("UI components stay independent from application domains and Firebase", asy
 
 test("design tokens define semantic control geometry and color contracts", async () => {
     const tokens = await readFile(
-        join(process.cwd(), "css", "themes", "theme-tokens.css"),
+        join(process.cwd(), "src", "styles", "themes", "theme-tokens.css"),
         "utf8"
     );
 

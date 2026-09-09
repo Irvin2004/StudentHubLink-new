@@ -24,3 +24,9 @@
 .input:disabled {
     cursor: not-allowed;
 }
+
+@media (max-width: 47.999rem) {
+    .input {
+        font-size: 1rem;
+    }
+}

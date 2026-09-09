@@ -3,7 +3,7 @@
     .hero {
         max-width: 1200px;
         margin: auto;
-        padding: 90px 24px;
+        padding: 90px var(--space-6);
         display: grid;
         grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
         gap: 55px;
@@ -15,7 +15,7 @@
         display: inline-block;
         background: rgba(59, 130, 246, 0.12);
         color: var(--blue);
-        padding: 8px 14px;
+        padding: var(--space-2) 14px;
         border-radius: 999px;
         font-weight: 700;
         margin-bottom: 18px;
@@ -68,7 +68,7 @@
     .dashboard-mockup aside {
         background: var(--navy);
         color: white;
-        padding: 24px;
+        padding: var(--space-6);
     }
 
     .dashboard-mockup aside h3 {
@@ -77,9 +77,9 @@
 
     .dashboard-mockup aside p {
         color: #cbd5e1;
-        padding: 12px;
+        padding: var(--space-3);
         border-radius: 10px;
-        margin-bottom: 8px;
+        margin-bottom: var(--space-2);
     }
 
     .dashboard-mockup aside .active {
@@ -95,7 +95,7 @@
     .mock-top {
         display: flex;
         justify-content: space-between;
-        margin-bottom: 24px;
+        margin-bottom: var(--space-6);
     }
 
     .mock-top h3 {
@@ -111,7 +111,7 @@
         background: rgba(34, 197, 94, 0.12);
         color: var(--success);
         height: fit-content;
-        padding: 8px 12px;
+        padding: var(--space-2) var(--space-3);
         border-radius: 999px;
         font-weight: 700;
     }
@@ -126,7 +126,7 @@
     .mock-stats div {
         background: var(--bg);
         border: 1px solid var(--border);
-        padding: 16px;
+        padding: var(--space-4);
         border-radius: 16px;
     }
 
@@ -143,7 +143,7 @@
     .mock-card {
         border: 1px solid var(--border);
         border-radius: 16px;
-        padding: 16px;
+        padding: var(--space-4);
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -182,7 +182,7 @@
     .mock-bars span {
         flex: 1;
         background: var(--blue);
-        border-radius: 8px 8px 0 0;
+        border-radius: var(--radius-sm) var(--radius-sm) 0 0;
     }
 
     .mock-bars span:nth-child(1) {
@@ -204,7 +204,7 @@
     .stats-section {
         max-width: 1100px;
         margin: auto;
-        padding: 30px 24px;
+        padding: 30px var(--space-6);
         display: grid;
         grid-template-columns: repeat(4, 1fr);
         gap: 18px;
@@ -214,7 +214,7 @@
         background: var(--white);
         border: 1px solid var(--border);
         border-radius: 20px;
-        padding: 24px;
+        padding: var(--space-6);
         text-align: center;
     }
 
@@ -230,7 +230,7 @@
     .section {
         max-width: 1200px;
         margin: auto;
-        padding: 80px 24px;
+        padding: 80px var(--space-6);
     }
 
     .section-heading {
@@ -280,13 +280,13 @@
     .cta {
         max-width: 1100px;
         margin: 80px auto;
-        padding: 60px 24px;
+        padding: 60px var(--space-6);
     }
 
     .marketplace-section {
         display: grid;
         grid-template-columns: 1fr 420px;
-        gap: 40px;
+        gap: var(--space-10);
         align-items: center;
     }
 
@@ -295,7 +295,7 @@
     .cta h2 {
         font-size: 42px;
         color: var(--navy);
-        margin-bottom: 16px;
+        margin-bottom: var(--space-4);
     }
 
     .market-text p,
@@ -317,7 +317,7 @@
         width: fit-content;
         background: var(--navy);
         color: white;
-        padding: 8px 12px;
+        padding: var(--space-2) var(--space-3);
         border-radius: 999px;
         margin-bottom: 18px;
     }
@@ -365,7 +365,7 @@
     .ai-box {
         background: var(--white);
         border-radius: 22px;
-        padding: 24px;
+        padding: var(--space-6);
     }
 
     .ai-box p {
@@ -407,7 +407,7 @@
 
     @media (max-width: 600px) {
         .hero {
-            padding: 64px 16px;
+            padding: 64px var(--space-4);
             gap: 36px;
         }
 
@@ -416,7 +416,7 @@
         }
 
         .hero-right {
-            padding: 16px;
+            padding: var(--space-4);
             border-radius: 24px;
         }
 
@@ -429,21 +429,21 @@
         }
 
         .mock-content {
-            padding: 20px 16px;
+            padding: var(--space-5) var(--space-4);
         }
 
         .mock-top,
         .mock-card {
-            gap: 12px;
+            gap: var(--space-3);
             flex-wrap: wrap;
         }
 
         .mock-stats {
-            gap: 8px;
+            gap: var(--space-2);
         }
 
         .mock-stats div {
-            padding: 12px 10px;
+            padding: var(--space-3) 10px;
         }
 
         .mock-stats strong {

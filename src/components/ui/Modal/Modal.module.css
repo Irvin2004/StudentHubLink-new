@@ -10,7 +10,7 @@
 
 .dialog {
     width: min(32rem, 100%);
-    max-height: min(42rem, calc(100vh - var(--space-8)));
+    max-height: min(42rem, calc(100dvh - var(--space-8)));
     overflow: auto;
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
@@ -73,7 +73,17 @@
 
     .dialog {
         width: 100%;
-        max-height: 88vh;
+        max-height: 88dvh;
         border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    }
+
+    .header,
+    .content {
+        padding: var(--space-5) var(--space-4);
+    }
+
+    .footer {
+        padding-inline: var(--space-4);
+        padding-bottom: max(var(--space-4), env(safe-area-inset-bottom));
     }
 }

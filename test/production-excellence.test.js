@@ -58,7 +58,7 @@ test("Firestore listeners are bounded and notification resubscriptions are stabl
 test("the React shell supports skip navigation and accessibility preferences", async () => {
     const layout = await read("src/components/layout/AppLayout/AppLayout.jsx");
     const settings = await read("src/context/SettingsContext.jsx");
-    const accessibility = await read("css/accessibility.css");
+    const accessibility = await read("src/styles/accessibility.css");
 
     assert.match(layout, /href="#main-content"/);
     assert.match(layout, /id="main-content"/);

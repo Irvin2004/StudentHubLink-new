@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-import { SETTINGS_DEFAULTS } from "../../js/config/settings-defaults.js";
+import { SETTINGS_DEFAULTS } from "../config/settings-defaults.js";
 import { SettingsContext } from "./settings-context.js";
 
 const STORAGE_KEY = "studenthub:settings:v1";

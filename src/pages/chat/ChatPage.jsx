@@ -5,7 +5,9 @@ import MessageComposer from "../../components/chat/MessageComposer/MessageCompos
 import MessageList from "../../components/chat/MessageList/MessageList.jsx";
 import TypingIndicator from "../../components/chat/TypingIndicator/TypingIndicator.jsx";
 import ChatMessageSkeleton from "../../components/Skeleton/ChatMessageSkeleton.jsx";
+import { ANALYTICS_EVENTS } from "../../config/analytics-events.js";
 import { canPostInChannel } from "../../config/channel-permissions.js";
+import { useAnalytics } from "../../hooks/useAnalytics.js";
 import { useAuth } from "../../hooks/useAuth.js";
 import { useMessages } from "../../hooks/useMessages.js";
 import { useObservability } from "../../hooks/useObservability.js";
@@ -25,6 +27,7 @@ function TabLoadingState() {
 
 export default function ChatPage({ channel, communityId, role }) {
     const [searchParams, setSearchParams] = useSearchParams();
+    const { track } = useAnalytics();
     const { user } = useAuth();
     const { showToast } = useToast();
     const { captureError, getActionableErrorMessage } = useObservability();
@@ -91,10 +94,10 @@ export default function ChatPage({ channel, communityId, role }) {
 
     if (!channel || !communityId) {
         return (
-            <div className={styles.unavailable}>
+            <main className={styles.unavailable}>
                 <h1>Open a community channel</h1>
                 <p>Choose a channel to join its conversation.</p>
-            </div>
+            </main>
         );
     }
 
@@ -102,6 +105,12 @@ export default function ChatPage({ channel, communityId, role }) {
         await sendMessage(text, {
             ...options,
             channelType: channel.type
+        });
+        track(ANALYTICS_EVENTS.MESSAGE_SENT, {
+            attachmentCount: options?.attachments?.length || 0,
+            channelId: channel.id,
+            communityId,
+            reply: Boolean(options?.replyTo)
         });
         clearTyping();
     }

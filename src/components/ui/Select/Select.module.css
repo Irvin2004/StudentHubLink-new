@@ -20,3 +20,9 @@
 .invalid {
     border-color: var(--danger);
 }
+
+@media (max-width: 47.999rem) {
+    .select {
+        font-size: 1rem;
+    }
+}

@@ -1,0 +1,167 @@
+.card {
+    padding: var(--space-6);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background:
+        radial-gradient(
+            circle at top right,
+            color-mix(in srgb, var(--primary) 10%, transparent),
+            transparent 42%
+        ),
+        var(--surface);
+    box-shadow: var(--shadow-sm);
+    animation: welcome-card-enter 300ms ease-out both;
+}
+
+.content {
+    display: grid;
+    gap: var(--space-4);
+}
+
+.headerRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+}
+
+.greeting {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    color: var(--text);
+    font-size: clamp(1.25rem, 2.6vw, 1.9rem);
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.04em;
+}
+
+.greetingEmoji {
+    font-size: 1.1em;
+}
+
+.avatar {
+    flex-shrink: 0;
+    border: 3px solid var(--surface);
+    box-shadow: 0 8px 20px color-mix(in srgb, var(--primary) 16%, transparent);
+}
+
+.backText {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+.motivation,
+.streak {
+    margin: 0;
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    color: var(--text);
+    font-size: 1rem;
+    line-height: 1.7;
+}
+
+.motivation span,
+.streak span {
+    min-width: 0;
+}
+
+.motivation {
+    max-width: 34rem;
+}
+
+.streak {
+    color: var(--text-secondary);
+    font-weight: 700;
+}
+
+.primaryAction {
+    width: fit-content;
+}
+
+.loading {
+    display: flex;
+    align-items: center;
+    gap: var(--space-5);
+}
+
+.loadingAvatar {
+    width: 4rem;
+    height: 4rem;
+    flex-shrink: 0;
+}
+
+.loadingCopy {
+    flex: 1;
+    display: grid;
+    gap: var(--space-3);
+}
+
+.emptyState {
+    display: grid;
+    gap: var(--space-5);
+    justify-items: start;
+}
+
+.emptyCopy {
+    display: grid;
+    gap: var(--space-2);
+}
+
+.emptyTitle {
+    margin: 0;
+    color: var(--text);
+    font-size: clamp(1.5rem, 3vw, 2.25rem);
+    line-height: 1.08;
+    letter-spacing: -0.04em;
+}
+
+.emptyMessage {
+    max-width: 36rem;
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 1rem;
+    line-height: 1.7;
+}
+
+@keyframes welcome-card-enter {
+    from {
+        opacity: 0;
+        transform: translateY(0.5rem);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 47.999rem) {
+    .card {
+        padding: var(--space-5);
+    }
+
+    .headerRow {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .loading {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .primaryAction {
+        width: 100%;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .card {
+        animation: none;
+    }
+}

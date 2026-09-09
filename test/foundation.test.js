@@ -61,9 +61,7 @@ test("Firebase environment validation reports every required missing value", () 
 });
 
 test("frontend Firebase modules use the npm SDK without committed values", () => {
-    const javascript = [...filesIn("js", ".js"), ...filesIn("src", ".js")]
-        .map(read)
-        .join("\n");
+    const javascript = [...filesIn("src", ".js")].map(read).join("\n");
     const appModule = read("src/firebase/app.js");
     const environmentExample = read(".env.example");
 
@@ -144,37 +142,16 @@ test("React presentation modules never import Firebase directly", () => {
     }
 });
 
-test("React and legacy HTML entries load their Vite bootstraps", () => {
-    const htmlFiles = [
-        ...filesIn("pages", ".html"),
-        ...filesIn("Admin", ".html"),
-        "index.html",
-        "dashboard.html"
-    ];
+test("the React SPA has one canonical HTML and JavaScript entry", () => {
+    const source = read("index.html");
+    const vite = read("vite.config.js");
 
-    for (const path of htmlFiles) {
-        const source = read(path);
-        const expectedEntry =
-            path === "index.html"
-                ? /<script type="module" src="\/src\/main\.jsx"><\/script>/
-                : /<script type="module" src="\/src\/main\.js"><\/script>/;
-
-        assert.match(
-            source,
-            expectedEntry,
-            `${path} must load the correct Vite entry`
-        );
-        assert.doesNotMatch(
-            source,
-            /js\/theme\.js/,
-            `${path} must not load the legacy theme entry`
-        );
-        assert.doesNotMatch(
-            source,
-            /<link[^>]+href="[^"]*css\/[^"]+\.css/,
-            `${path} must load CSS through Vite`
-        );
-    }
+    assert.match(
+        source,
+        /<script type="module" src="\/src\/main\.jsx"><\/script>/
+    );
+    assert.doesNotMatch(source, /src\/main\.js["']|<link[^>]+href="[^"]*css\//);
+    assert.doesNotMatch(vite, /findHtmlEntries|rollupOptions:\s*\{\s*input:/);
 });
 
 test("foundation tooling exposes deterministic quality commands", () => {

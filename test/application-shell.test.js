@@ -23,7 +23,9 @@ test("sidebar provides every requested route and keyboard interaction", () => {
         "Home",
         "Communities",
         "Messages",
-        "Files",
+        "Resources",
+        "Flashcards",
+        "Quizzes",
         "Notifications",
         "Settings"
     ]) {
@@ -54,4 +56,65 @@ test("responsive breakpoints and theme choices are centralized", () => {
     assert.match(breakpoints, /TABLET: 1024/);
     assert.match(topbar, /\["system", "light", "dark"\]/);
     assert.match(topbar, /setTheme\(nextTheme\)/);
+});
+
+test("legacy application URLs resolve to canonical React routes", () => {
+    const router = read("src/routes/AppRouter.jsx");
+    const routes = read("src/config/routes.js");
+    const userMenu = read("src/components/layout/UserMenu/UserMenu.jsx");
+
+    assert.match(router, /path=\{ROUTES\.FILES\}/);
+    assert.match(router, /path=\{ROUTES\.RESOURCES_SHORT\}/);
+    assert.match(router, /CanonicalRedirect to=\{ROUTES\.RESOURCES\}/);
+    assert.match(router, /CommunityRedirect/);
+    assert.match(router, /channel\/general/);
+    assert.match(router, /const \{ search \} = useLocation\(\)/);
+    assert.match(router, /LEGACY_APP_REDIRECTS\.map/);
+    assert.match(routes, /\/pages\/resources\.html/);
+    assert.match(routes, /\/pages\/chat\.html/);
+    assert.match(routes, /\/dashboard\.html/);
+    assert.doesNotMatch(userMenu, /pages\/profile\.html|LEGACY_ROUTES/);
+    assert.match(userMenu, /to=\{ROUTES\.SETTINGS\}/);
+});
+
+test("mobile-critical application pages define compact layouts", () => {
+    for (const stylesheet of [
+        "src/components/layout/AppLayout/AppLayout.module.css",
+        "src/pages/community/CommunityPage.module.css",
+        "src/features/resourceLibrary/ResourceLibraryPage.module.css",
+        "src/features/studyPlanner/StudyPlanner.module.css",
+        "src/features/flashcards/FlashcardsPage.module.css",
+        "src/features/quizzes/QuizPage.module.css",
+        "src/features/friends/FriendsPage.module.css"
+    ]) {
+        const css = read(stylesheet);
+        assert.match(css, /@media \(max-width:/, `${stylesheet} is responsive`);
+        assert.match(
+            css,
+            /minmax\(0, 1fr\)|width:\s*(?:min\([^;]+,\s*100%\)|100%)|flex-wrap:\s*wrap/,
+            `${stylesheet} constrains or wraps content`
+        );
+    }
+});
+
+test("shared controls preserve focus visibility and mobile touch geometry", () => {
+    const iconButton = read(
+        "src/components/ui/IconButton/IconButton.module.css"
+    );
+    const modal = read("src/components/ui/Modal/Modal.module.css");
+    const taskCard = read(
+        "src/features/studyPlanner/components/TaskCard/TaskCard.module.css"
+    );
+    const messageActions = read(
+        "src/components/chat/MessageActions/MessageActions.module.css"
+    );
+
+    assert.match(iconButton, /\.button:focus-visible/);
+    assert.match(iconButton, /@media \(pointer: coarse\)/);
+    assert.match(iconButton, /var\(--control-height-md\)/);
+    assert.match(modal, /100dvh/);
+    assert.match(modal, /88dvh/);
+    assert.match(taskCard, /flex-wrap:\s*wrap/);
+    assert.match(messageActions, /@media \(hover: none\)/);
+    assert.match(messageActions, /min-height:\s*var\(--control-height-md\)/);
 });

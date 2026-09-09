@@ -1,0 +1,218 @@
+.card {
+    display: grid;
+    gap: var(--space-5);
+}
+
+.header h2,
+.header p,
+.goal span,
+.breakdowns h3,
+.muted,
+.error {
+    margin: 0;
+}
+
+.header p,
+.muted {
+    margin-top: var(--space-1);
+    color: var(--text-secondary);
+    font-size: 0.88rem;
+}
+
+.goal {
+    display: grid;
+    gap: var(--space-3);
+    border: 1px solid color-mix(in srgb, var(--primary) 24%, var(--border));
+    border-radius: var(--radius-lg);
+    padding: var(--space-4);
+    background: color-mix(in srgb, var(--primary) 6%, var(--surface));
+}
+
+.goalHeading {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--space-3);
+}
+
+.goalHeading > div {
+    display: grid;
+    gap: var(--space-1);
+}
+
+.goalHeading span,
+.goalSetting span {
+    color: var(--text-secondary);
+    font-size: 0.84rem;
+    font-weight: 750;
+}
+
+.goalSetting {
+    display: grid;
+    gap: var(--space-1);
+}
+
+.goalSetting select {
+    min-width: 7rem;
+    min-height: 2.75rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding-inline: var(--space-3);
+    background: var(--surface);
+    color: var(--text);
+    font: inherit;
+    font-weight: 750;
+}
+
+.goalSetting select:focus-visible {
+    border-color: var(--primary);
+    outline: 2px solid color-mix(in srgb, var(--primary) 24%, transparent);
+    outline-offset: 1px;
+}
+
+.goalHeading strong {
+    color: var(--text);
+    font-size: 1.35rem;
+}
+
+.goalProgress {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+.progressTrack,
+.barTrack {
+    overflow: hidden;
+    border-radius: var(--radius-pill);
+    background: color-mix(in srgb, var(--border) 80%, transparent);
+}
+
+.progressTrack {
+    height: 0.8rem;
+}
+
+.progressFill,
+.dayBar,
+.subjectBar {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--primary);
+}
+
+.breakdowns {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-6);
+}
+
+.breakdowns section {
+    display: grid;
+    align-content: start;
+    gap: var(--space-3);
+}
+
+.breakdowns h3 {
+    color: var(--text);
+    font-size: 1rem;
+}
+
+.dailyList,
+.subjectList {
+    display: grid;
+    gap: var(--space-3);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.dailyList li {
+    display: grid;
+    grid-template-columns: 2.5rem minmax(4rem, 1fr) 4rem;
+    align-items: center;
+    gap: var(--space-2);
+    color: var(--text-secondary);
+    font-size: 0.86rem;
+}
+
+.dailyList strong,
+.subjectList strong {
+    color: var(--text);
+    text-align: right;
+}
+
+.barTrack {
+    height: 0.5rem;
+}
+
+.subjectList li {
+    display: grid;
+    gap: var(--space-2);
+}
+
+.subjectList li > div:first-child {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-3);
+    color: var(--text-secondary);
+    font-size: 0.86rem;
+}
+
+.subjectBar {
+    background: var(--secondary, #0f766e);
+}
+
+.metrics {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-3);
+    margin: 0;
+}
+
+.metrics > div {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: var(--space-4);
+    background: var(--surface-subtle, var(--surface));
+}
+
+.metrics dt {
+    color: var(--text-secondary);
+    font-size: 0.78rem;
+    font-weight: 750;
+}
+
+.metrics dd {
+    margin: var(--space-2) 0 0;
+    color: var(--text);
+    font-size: 1.2rem;
+    font-weight: 850;
+}
+
+.error {
+    color: var(--danger, #dc2626);
+}
+
+@media (max-width: 47.999rem) {
+    .breakdowns,
+    .metrics {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 30rem) {
+    .goalHeading {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .goalSetting select {
+        width: 100%;
+    }
+
+    .dailyList li {
+        grid-template-columns: 2.25rem minmax(3rem, 1fr) 3.5rem;
+    }
+}

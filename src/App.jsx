@@ -14,6 +14,7 @@ import { ToastProvider } from "./context/ToastContext.jsx";
 import { useSearch } from "./hooks/useSearch.js";
 import { AppRouter } from "./routes/AppRouter.jsx";
 import { captureError } from "./services/observability-service.js";
+import { StudySessionProvider } from "./features/studySessions/context/StudySessionProvider.jsx";
 
 const SearchModal = lazy(
     () => import("./components/Search/SearchModal/SearchModal.jsx")
@@ -46,14 +47,16 @@ export default function App() {
                         <NetworkProvider>
                             <ToastProvider>
                                 <AuthProvider>
-                                    <SearchProvider>
-                                        <NotificationProvider>
-                                            <AppRouter />
-                                            <DeferredSearchModal />
-                                            <NetworkStatus />
-                                            <ToastContainer />
-                                        </NotificationProvider>
-                                    </SearchProvider>
+                                    <StudySessionProvider>
+                                        <SearchProvider>
+                                            <NotificationProvider>
+                                                <AppRouter />
+                                                <DeferredSearchModal />
+                                                <NetworkStatus />
+                                                <ToastContainer />
+                                            </NotificationProvider>
+                                        </SearchProvider>
+                                    </StudySessionProvider>
                                 </AuthProvider>
                             </ToastProvider>
                         </NetworkProvider>

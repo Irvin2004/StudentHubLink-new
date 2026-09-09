@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useAuth } from "./useAuth.js";
 import {
     createCommunity as createCommunityRecord,
-    getCommunities,
+    getCommunitiesPage,
     getCommunityMembershipIds,
     joinCommunity as joinCommunityRecord,
     leaveCommunity as leaveCommunityRecord
@@ -28,8 +28,12 @@ export function useCommunities(options = {}) {
         () => new Set()
     );
     const [loading, setLoading] = useState(enabled);
+    const [loadingMore, setLoadingMore] = useState(false);
+    const [hasMore, setHasMore] = useState(false);
     const [error, setError] = useState(null);
     const pendingMembershipsRef = useRef(new Set());
+    const cursorRef = useRef(null);
+    const loadingMoreRef = useRef(false);
 
     const adjustMemberCount = useCallback((communityId, amount) => {
         setCommunities((current) =>
@@ -54,18 +58,20 @@ export function useCommunities(options = {}) {
         setError(null);
 
         try {
-            const [nextCommunities, membershipIds] = await Promise.all([
-                getCommunities({
+            const [page, membershipIds] = await Promise.all([
+                getCommunitiesPage({
                     visibility,
                     category,
-                    maxResults
+                    pageSize: maxResults
                 }),
                 userId ? getCommunityMembershipIds(userId) : []
             ]);
 
-            setCommunities(nextCommunities);
+            cursorRef.current = page.cursor;
+            setHasMore(page.hasMore);
+            setCommunities(page.communities);
             setJoinedCommunityIds(new Set(membershipIds));
-            return nextCommunities;
+            return page.communities;
         } catch (nextError) {
             setError(nextError);
             throw nextError;
@@ -87,13 +93,19 @@ export function useCommunities(options = {}) {
                 }
 
                 return Promise.all([
-                    getCommunities({ visibility, category, maxResults }),
+                    getCommunitiesPage({
+                        visibility,
+                        category,
+                        pageSize: maxResults
+                    }),
                     userId ? getCommunityMembershipIds(userId) : []
                 ]);
             })
-            .then(([nextCommunities, membershipIds]) => {
+            .then(([page, membershipIds]) => {
                 if (!active) return;
-                setCommunities(nextCommunities);
+                cursorRef.current = page.cursor;
+                setHasMore(page.hasMore);
+                setCommunities(page.communities);
                 setJoinedCommunityIds(new Set(membershipIds));
             })
             .catch((nextError) => {
@@ -107,6 +119,39 @@ export function useCommunities(options = {}) {
             active = false;
         };
     }, [category, enabled, maxResults, userId, visibility]);
+
+    const loadMore = useCallback(async () => {
+        if (!enabled || !hasMore || loadingMoreRef.current) return [];
+
+        loadingMoreRef.current = true;
+        setLoadingMore(true);
+        try {
+            const page = await getCommunitiesPage({
+                visibility,
+                category,
+                cursor: cursorRef.current,
+                pageSize: maxResults
+            });
+            cursorRef.current = page.cursor;
+            setHasMore(page.hasMore);
+            setCommunities((current) => {
+                const known = new Set(current.map((community) => community.id));
+                return [
+                    ...current,
+                    ...page.communities.filter(
+                        (community) => !known.has(community.id)
+                    )
+                ];
+            });
+            return page.communities;
+        } catch (nextError) {
+            setError(nextError);
+            throw nextError;
+        } finally {
+            loadingMoreRef.current = false;
+            setLoadingMore(false);
+        }
+    }, [category, enabled, hasMore, maxResults, visibility]);
 
     const createCommunity = useCallback(
         async (input) => {
@@ -208,12 +253,15 @@ export function useCommunities(options = {}) {
 
     return {
         communities,
+        hasMore,
         loading,
+        loadingMore,
         error,
         joinedCommunityIds,
         createCommunity,
         joinCommunity,
         leaveCommunity,
+        loadMore,
         refreshCommunities
     };
 }

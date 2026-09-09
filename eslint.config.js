@@ -17,8 +17,10 @@ const sharedRules = {
 export default [
     {
         ignores: [
+            "js/**",
             "dist/**",
             "node_modules/**",
+            ".cache/**",
             "functions/node_modules/**",
             "coverage/**",
             "playwright-report/**",
@@ -27,7 +29,7 @@ export default [
     },
     eslint.configs.recommended,
     {
-        files: ["js/**/*.js", "src/**/*.{js,jsx}"],
+        files: ["src/**/*.{js,jsx}"],
         languageOptions: {
             ecmaVersion: "latest",
             sourceType: "module",

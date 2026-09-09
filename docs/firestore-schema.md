@@ -161,6 +161,136 @@ Path: groups/{groupId}
 | createdAt   | timestamp | Group creation time.                  |
 | updatedAt   | timestamp | Last group update time.               |
 
+## Community Questions & Answers
+
+Question path: `communities/{communityId}/questions/{questionId}`
+
+| Field              | Type        | Notes                                                    |
+| ------------------ | ----------- | -------------------------------------------------------- |
+| `title`            | string      | Focused question title, limited to 160 characters.       |
+| `description`      | string      | Detailed question body, limited to 5,000 characters.     |
+| `tags`             | array       | One to five normalized subject/topic tags.               |
+| `linkedResource`   | map/null    | Optional `{ id, title }` snapshot of community material. |
+| `authorId`         | string      | Firebase Auth UID of the question author.                |
+| `authorName`       | string      | Display-name snapshot.                                   |
+| `acceptedAnswerId` | string/null | Answer selected by the question author.                  |
+| `answerCount`      | number      | Maintained transactionally when answers change.          |
+| `status`           | string      | `unanswered`, `answered`, or `solved`.                   |
+| `createdAt`        | timestamp   | Creation time.                                           |
+| `updatedAt`        | timestamp   | Last question or answer-state change.                    |
+
+Answer path:
+`communities/{communityId}/questions/{questionId}/answers/{answerId}`. Answers
+store `authorId`, `authorName`, `content`, `accepted`, `upvoteCount`, and
+timestamps. Upvotes use one idempotent document per member at
+`answers/{answerId}/upvotes/{userId}`.
+
+Comment path: `answers/{answerId}/comments/{commentId}`. Comments store the
+author snapshot, content, and timestamps. Community membership gates all reads
+and writes. Authors manage their own content; community owners, admins, and
+moderators can remove questions, answers, or comments. Only a question author
+can select its accepted answer.
+
+### Community reputation
+
+Reputation event path: `communities/{communityId}/reputationEvents/{eventId}`
+
+Every score change is an immutable, server-created event with `userId`,
+`actorId`, `type`, signed `points`, `reason`, `sourceType`, `sourceId`,
+`displayName`, `metadata`, and `occurredAt`. Reversals append a negative event;
+they never edit or erase the original award. Cloud Functions use trigger event
+IDs or daily contribution keys as deterministic document IDs, making retries
+idempotent. Private, server-only `reputationSignals` documents retain the latest
+active state and trigger time for reversible awards, so duplicate or
+out-of-order trigger delivery cannot double-count an upvote or accepted answer.
+
+Current scoring policy:
+
+| Contribution signal                        | Points |
+| ------------------------------------------ | -----: |
+| Answer accepted by its question author     |    +15 |
+| Answer upvoted by another community member |     +3 |
+| Question marked helpful by another member  |     +2 |
+| First constructive answer on a study day   |     +1 |
+
+Self-votes and self-accepted answers do not award reputation. Removing an upvote
+or deleting its source creates a corresponding negative event where an award
+existed. This includes moderator removals. Posting more answers on the same day
+does not create more participation points.
+
+Derived summary path: `communities/{communityId}/reputation/{userId}`
+
+The summary stores `points`, `level`, `eventCount`, `displayName`, membership
+state, contribution counters, badge progress, trust level, bounded capabilities,
+and timestamps for efficient community profiles and leaderboards. It is
+server-owned and can be rebuilt by summing the event ledger through the
+`recalculateCommunityReputation` callable function. Run that recalculation once
+after deploying badges and trust to backfill existing community histories.
+Reputation levels remain Newcomer (0), Contributor (25), Helper (75), and Expert
+(200).
+
+Badge criteria are derived from active ledger events, so moderator removals and
+vote reversals also reduce progress. The initial badges are First Helpful Answer
+(one answer upvote), 10 Accepted Answers, 50 Upvotes, Resource Contributor (one
+active community resource), and Consistent Helper (constructive answers on seven
+study days).
+
+Trust sits above the reputation labels and requires both points and contribution
+evidence:
+
+| Trust level         | Requirements                                                | Non-destructive capabilities           |
+| ------------------- | ----------------------------------------------------------- | -------------------------------------- |
+| Community Member    | Default                                                     | Standard community participation       |
+| Trusted Contributor | 50 points and 1 accepted answer                             | Create canonical community topic tags  |
+| Community Guide     | 125 points, 5 accepted answers, 10 upvotes                  | Also flag possible duplicate questions |
+| Community Curator   | 250 points, 10 accepted answers, 25 upvotes, and a resource | Also view the community curation queue |
+
+Trust never grants delete, role-management, or final moderation privileges.
+Community moderators, admins, and owners retain final authority.
+
+Canonical tag path: `communities/{communityId}/topicTags/{tagId}`. Trusted
+contributors and community moderators can create tags; moderators retain
+deletion authority.
+
+Curation flag path: `communities/{communityId}/curationFlags/{flagId}`.
+Community Guides can append an immutable possible-duplicate flag. Curators can
+read the queue, while moderators/admins decide whether any action is warranted.
+
+### Community knowledge collections
+
+Collection path: `communities/{communityId}/knowledgeCollections/{collectionId}`
+
+Collections are community-private and contain a bounded ordered `items` array.
+Each item is a reference plus a study snapshot with `sourceType`, `sourceId`,
+`title`, optional text context, resource metadata, and the contributor snapshot.
+Supported source types are community resources, solved questions, useful
+answers, explicitly shared personal quizzes, and explicitly shared personal
+flashcard sets. Quiz and flashcard snapshots make the selected study content
+available to the community without granting access to the contributor's private
+user collections.
+
+Collection fields include `title`, `description`, subject/topic `tags`, ordered
+`items`, `itemCount`, contributor snapshots, creator fields, updater fields, and
+timestamps. Collections are limited to 20 items. Trusted Contributors and
+community moderators can create and update collections; only moderators, admins,
+and owners can delete them.
+
+Bookmark path:
+`communities/{communityId}/knowledgeCollections/{collectionId}/saves/{userId}`.
+Saves are private, user-owned bookmark records.
+
+Suggestion path:
+`communities/{communityId}/knowledgeCollections/{collectionId}/suggestions/{suggestionId}`.
+Any community member can append a pending suggestion. Trusted Contributors and
+moderators can approve or reject it. Approval transactionally appends a unique
+item, contributor attribution, and the collection's updated timestamp.
+
+“Study this collection with Thuto” converts every ordered item into the existing
+multi-resource study context. Larger collections are deterministically grouped
+into no more than five active context bundles, preserving all item content while
+respecting the current Thuto material and prompt limits. Conversations remain
+tied to the community collection and active material set.
+
 Member path: groups/{groupId}/members/{userId}
 
 | Field       | Type      | Notes                               |

@@ -9,6 +9,7 @@ const FOCUSABLE_SELECTOR = [
     "button:not([disabled])",
     "input:not([disabled])",
     "select:not([disabled])",
+    "textarea:not([disabled])",
     '[tabindex]:not([tabindex="-1"])'
 ].join(",");
 export function MobileDrawer({ children, onClose, open, returnFocusRef }) {
@@ -63,7 +64,10 @@ export function MobileDrawer({ children, onClose, open, returnFocusRef }) {
             const first = focusable[0];
             const last = focusable.at(-1);
 
-            if (event.shiftKey && document.activeElement === first) {
+            if (!drawer.contains(document.activeElement)) {
+                event.preventDefault();
+                (event.shiftKey ? last : first).focus();
+            } else if (event.shiftKey && document.activeElement === first) {
                 event.preventDefault();
                 last.focus();
             } else if (!event.shiftKey && document.activeElement === last) {

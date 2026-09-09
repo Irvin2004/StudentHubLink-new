@@ -12,8 +12,10 @@ import CommunitySearch from "../../components/communities/CommunitySearch/index.
 import CreateCommunityModal from "../../components/communities/CreateCommunityModal/index.js";
 import JoinCommunityButton from "../../components/communities/JoinCommunityButton/index.js";
 import LeaveCommunityButton from "../../components/communities/LeaveCommunityButton/index.js";
+import { ANALYTICS_EVENTS } from "../../config/analytics-events.js";
 import { isCommunityOwner } from "../../config/community-permissions.js";
 import { COMMUNITY_ROLES } from "../../config/community-roles.js";
+import { useAnalytics } from "../../hooks/useAnalytics.js";
 import { useAuth } from "../../hooks/useAuth.js";
 import { useCommunities } from "../../hooks/useCommunities.js";
 import { useDocumentTitle } from "../../hooks/useDocumentTitle.js";
@@ -46,6 +48,7 @@ export default function CommunitiesPage() {
     useDocumentTitle("StudentHub - Communities", "react-app");
 
     const navigate = useNavigate();
+    const { track } = useAnalytics();
     const { user } = useAuth();
     const { isOnline } = useNetwork();
     const { showToast } = useToast();
@@ -54,12 +57,15 @@ export default function CommunitiesPage() {
         communities,
         createCommunity,
         error,
+        hasMore,
         joinedCommunityIds,
         joinCommunity,
         leaveCommunity,
         loading,
+        loadingMore,
+        loadMore,
         refreshCommunities
-    } = useCommunities();
+    } = useCommunities({ visibility: "public" });
     const [searchTerm, setSearchTerm] = useState("");
     const [category, setCategory] = useState("");
     const [createOpen, setCreateOpen] = useState(false);
@@ -132,6 +138,10 @@ export default function CommunitiesPage() {
 
         try {
             const membership = await joinCommunity(community.id);
+            track(ANALYTICS_EVENTS.COMMUNITY_JOINED, {
+                communityId: community.id,
+                role: membership?.role || COMMUNITY_ROLES.MEMBER
+            });
             showToast({
                 title: "Community joined",
                 message: `You joined ${community.name}.`,
@@ -271,7 +281,11 @@ export default function CommunitiesPage() {
             />
 
             {loading ? (
-                <CommunityCardSkeleton />
+                <div aria-busy="true" className={styles.loadingGrid}>
+                    {Array.from({ length: 6 }, (_, index) => (
+                        <CommunityCardSkeleton key={index} />
+                    ))}
+                </div>
             ) : error && !communities.length ? (
                 <LoadErrorState
                     description="We could not load the community list."
@@ -279,17 +293,33 @@ export default function CommunitiesPage() {
                     title="Communities unavailable"
                 />
             ) : (
-                <CommunityGrid
-                    communities={filteredCommunities}
-                    createAction={{
-                        label: "Create community",
-                        onClick: () => setCreateOpen(true)
-                    }}
-                    getAction={renderMembershipAction}
-                    onOpenCommunity={(community) =>
-                        navigate(`/community/${community.id}/channel/general`)
-                    }
-                />
+                <>
+                    <CommunityGrid
+                        communities={filteredCommunities}
+                        createAction={{
+                            label: "Create community",
+                            onClick: () => setCreateOpen(true)
+                        }}
+                        getAction={renderMembershipAction}
+                        onOpenCommunity={(community) =>
+                            navigate(
+                                `/community/${community.id}/channel/general`
+                            )
+                        }
+                    />
+                    {hasMore ? (
+                        <div className={styles.loadMore}>
+                            <Button
+                                loading={loadingMore}
+                                loadingLabel="Loading communities"
+                                onClick={() => void loadMore()}
+                                variant="outline"
+                            >
+                                Load more communities
+                            </Button>
+                        </div>
+                    ) : null}
+                </>
             )}
 
             {!loading && error && communities.length ? (

@@ -64,6 +64,12 @@
     color: var(--color-white);
 }
 
+.brand:focus-visible,
+.navigationLink:focus-visible {
+    outline: 3px solid rgb(147 197 253 / 0.85);
+    outline-offset: 2px;
+}
+
 .navigationLink:active {
     transform: translateY(1px);
 }

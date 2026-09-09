@@ -49,7 +49,7 @@
     line-height: 1.45;
 }
 .zone button {
-    min-height: 2.65rem;
+    min-height: var(--control-height-md);
     padding: 0 var(--space-4);
     border: 1px solid var(--channel-accent);
     border-radius: var(--radius-md);

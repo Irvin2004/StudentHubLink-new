@@ -81,6 +81,33 @@ export function canManageMembers(role) {
     );
 }
 
+export function canChangeCommunityMemberRole(actorRole, targetRole, nextRole) {
+    if (
+        targetRole === COMMUNITY_ROLES.OWNER ||
+        nextRole === COMMUNITY_ROLES.OWNER
+    ) {
+        return false;
+    }
+
+    if (actorRole === COMMUNITY_ROLES.OWNER) return true;
+
+    return (
+        actorRole === COMMUNITY_ROLES.ADMIN &&
+        targetRole !== COMMUNITY_ROLES.ADMIN &&
+        nextRole !== COMMUNITY_ROLES.ADMIN
+    );
+}
+
+export function canRemoveCommunityMember(actorRole, targetRole) {
+    if (targetRole === COMMUNITY_ROLES.OWNER) return false;
+    if (actorRole === COMMUNITY_ROLES.OWNER) return true;
+
+    return (
+        actorRole === COMMUNITY_ROLES.ADMIN &&
+        targetRole !== COMMUNITY_ROLES.ADMIN
+    );
+}
+
 export function canModerateContent(role) {
     return hasCommunityPermission(
         role,

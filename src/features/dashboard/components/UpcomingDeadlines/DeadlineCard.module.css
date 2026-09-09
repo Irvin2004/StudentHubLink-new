@@ -1,0 +1,50 @@
+.card {
+    min-width: 0;
+}
+
+.content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    padding: var(--space-5);
+}
+
+.copy {
+    display: grid;
+    gap: var(--space-1);
+}
+
+.title {
+    margin: 0;
+    color: var(--text);
+    font-size: 1rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+}
+
+.subject {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.due {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    color: var(--text);
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+
+.button {
+    width: 100%;
+}
+
+.loading {
+    display: grid;
+    gap: var(--space-3);
+    padding: var(--space-5);
+}

@@ -12,7 +12,6 @@ function javascriptFiles(directory) {
 }
 
 const files = [
-    ...javascriptFiles("js"),
     ...javascriptFiles("src"),
     ...javascriptFiles("functions"),
     "eslint.config.js",

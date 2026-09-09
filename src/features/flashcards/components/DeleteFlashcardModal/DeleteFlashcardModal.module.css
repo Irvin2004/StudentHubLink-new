@@ -1,0 +1,25 @@
+.form {
+    display: grid;
+    gap: var(--space-4);
+}
+
+.form p {
+    margin: 0;
+    color: var(--text-secondary);
+}
+
+.actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-3);
+}
+
+.error {
+    color: var(--danger) !important;
+}
+
+@media (max-width: 30rem) {
+    .actions {
+        display: grid;
+    }
+}

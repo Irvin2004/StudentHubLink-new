@@ -1,0 +1,62 @@
+.session {
+    display: grid;
+    justify-items: center;
+    gap: var(--space-5);
+    padding-block: var(--space-4);
+    text-align: center;
+}
+
+.copy h3,
+.copy p,
+.timer,
+.status {
+    margin: 0;
+}
+
+.copy h3 {
+    color: var(--text);
+    font-size: 1.35rem;
+}
+
+.copy p,
+.status {
+    margin-top: var(--space-1);
+    color: var(--text-secondary);
+}
+
+.timer {
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+    font-size: clamp(2.6rem, 10vw, 4.5rem);
+    font-weight: 850;
+    letter-spacing: 0.04em;
+}
+
+.status {
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+
+.minimum {
+    margin: calc(var(--space-3) * -1) 0 0;
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+}
+
+.actions {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-3);
+}
+
+@media (max-width: 40rem) {
+    .actions {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .actions button {
+        min-height: 3rem;
+    }
+}

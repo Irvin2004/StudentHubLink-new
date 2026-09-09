@@ -26,6 +26,7 @@
 
 .items button {
     max-width: 18rem;
+    min-height: var(--control-height-sm);
     padding: 0.35rem 0.55rem;
     overflow: hidden;
     border: 1px solid var(--border);
@@ -58,5 +59,11 @@
 
     .items {
         width: 100%;
+    }
+}
+
+@media (pointer: coarse) {
+    .items button {
+        min-height: var(--control-height-md);
     }
 }

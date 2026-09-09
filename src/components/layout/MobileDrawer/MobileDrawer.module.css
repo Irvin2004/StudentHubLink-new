@@ -39,6 +39,8 @@
     .drawer.open {
         visibility: visible;
         transform: translateX(0);
+        /* Focus must be possible immediately, before the slide animation. */
+        transition: transform var(--transition);
     }
 
     .closeButton {
@@ -54,6 +56,20 @@
         border-radius: var(--radius-md);
         background: rgb(255 255 255 / 0.08);
         color: var(--color-white);
+        cursor: pointer;
+        transition:
+            background var(--transition-fast),
+            border-color var(--transition-fast);
+    }
+
+    .closeButton:hover {
+        border-color: rgb(255 255 255 / 0.65);
+        background: rgb(255 255 255 / 0.16);
+    }
+
+    .closeButton:focus-visible {
+        outline: 3px solid rgb(147 197 253 / 0.85);
+        outline-offset: 2px;
     }
 
     .backdrop {
@@ -77,6 +93,7 @@
 
 @media (prefers-reduced-motion: reduce) {
     .drawer,
+    .drawer.open,
     .backdrop {
         transition: none;
     }

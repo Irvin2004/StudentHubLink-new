@@ -79,5 +79,15 @@ export async function getUserProfile(userId) {
 
     const snapshot = await getDoc(doc(db, "users", userId));
 
-    return snapshot.exists() ? { id: snapshot.id, ...snapshot.data() } : null;
+    if (!snapshot.exists()) return null;
+    const profile = { id: snapshot.id, ...snapshot.data() };
+    if (!profile.profileVisibility) {
+        profile.profileVisibility = "public";
+        await setDoc(
+            doc(db, "users", userId),
+            { profileVisibility: "public", updatedAt: serverTimestamp() },
+            { merge: true }
+        );
+    }
+    return profile;
 }

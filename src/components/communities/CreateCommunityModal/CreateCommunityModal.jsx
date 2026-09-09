@@ -100,6 +100,7 @@ export default function CreateCommunityModal({
                     </Button>
                 </>
             }
+            initialFocusRef={nameRef}
             onClose={handleClose}
             open={open}
             size="wide"

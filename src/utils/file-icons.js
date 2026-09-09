@@ -29,3 +29,7 @@ export function isImageFile(file) {
 export function isPdfFile(file) {
     return String(file?.extension || "").toLowerCase() === "pdf";
 }
+
+export function isPreviewableFile(file) {
+    return isImageFile(file) || isPdfFile(file);
+}

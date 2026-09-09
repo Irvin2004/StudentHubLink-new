@@ -28,3 +28,9 @@
 .invalid {
     border-color: var(--danger);
 }
+
+@media (max-width: 47.999rem) {
+    .textarea {
+        font-size: 1rem;
+    }
+}

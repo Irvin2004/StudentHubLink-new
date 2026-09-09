@@ -1,0 +1,100 @@
+.card,
+.loading {
+    display: grid;
+    gap: var(--space-4);
+}
+
+.header h2,
+.header p,
+.item h3,
+.item p,
+.error {
+    margin: 0;
+}
+
+.filters {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: var(--space-3);
+    border-top: 1px solid var(--border);
+    padding-top: var(--space-4);
+}
+
+.filters label {
+    display: grid;
+    flex: 1 1 12rem;
+    gap: var(--space-2);
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    font-weight: 750;
+}
+
+.filters select,
+.filters input {
+    width: 100%;
+    min-height: 2.75rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 0 var(--space-3);
+    background: var(--surface);
+    color: var(--text);
+    font: inherit;
+}
+
+.filters select:focus-visible,
+.filters input:focus-visible {
+    border-color: var(--primary);
+    outline: 2px solid color-mix(in srgb, var(--primary) 24%, transparent);
+    outline-offset: 1px;
+}
+
+.header p,
+.item p {
+    margin-top: var(--space-1);
+    color: var(--text-secondary);
+    font-size: 0.86rem;
+}
+
+.list {
+    margin: 0;
+    padding: 0;
+    display: grid;
+    list-style: none;
+}
+
+.item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    border-top: 1px solid var(--border);
+    padding-block: var(--space-3);
+}
+
+.item h3 {
+    color: var(--text);
+    font-size: 0.98rem;
+}
+
+.item strong {
+    flex: 0 0 auto;
+    color: var(--primary);
+}
+
+.error {
+    color: var(--danger, #dc2626);
+}
+
+@media (max-width: 34rem) {
+    .filters,
+    .filters > button {
+        width: 100%;
+    }
+
+    .item {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: var(--space-2);
+    }
+}

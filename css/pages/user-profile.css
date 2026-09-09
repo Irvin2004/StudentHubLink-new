@@ -1,7 +1,7 @@
 /* Page-owned styles; isolated from other StudentHub screens. */
 @scope (body[data-page="user-profile"]) {
     .profile-page {
-        padding: 32px;
+        padding: var(--space-8);
         background: var(--bg);
         min-height: 100vh;
     }
@@ -10,16 +10,16 @@
         background: var(--white);
         border-radius: var(--radius-lg);
         box-shadow: var(--shadow);
-        padding: 32px;
+        padding: var(--space-8);
         display: flex;
-        gap: 24px;
+        gap: var(--space-6);
         align-items: center;
-        margin-bottom: 24px;
+        margin-bottom: var(--space-6);
     }
 
     .profile-actions {
         display: flex;
-        gap: 12px;
+        gap: var(--space-3);
         margin-top: 18px;
         flex-wrap: wrap;
     }
@@ -44,6 +44,6 @@
         display: grid;
         grid-template-columns: repeat(3, 1fr);
         gap: 18px;
-        margin-bottom: 32px;
+        margin-bottom: var(--space-8);
     }
 }

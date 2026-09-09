@@ -28,3 +28,9 @@
     margin-left: auto;
     color: var(--danger);
 }
+
+@media (pointer: coarse) {
+    .actions button {
+        min-height: var(--control-height-md);
+    }
+}

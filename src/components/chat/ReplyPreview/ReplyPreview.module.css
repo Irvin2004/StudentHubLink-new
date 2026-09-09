@@ -48,8 +48,8 @@
 }
 
 .close {
-    width: 2rem;
-    height: 2rem;
+    width: var(--control-height-md);
+    height: var(--control-height-md);
     display: grid;
     place-items: center;
     border: 0;
