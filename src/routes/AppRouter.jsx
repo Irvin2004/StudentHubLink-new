@@ -20,6 +20,9 @@ const RegisterPage = lazy(() => import("../pages/auth/RegisterPage.jsx"));
 const DashboardPage = lazy(
     () => import("../features/dashboard/DashboardPage.jsx")
 );
+const DiscoverPage = lazy(
+    () => import("../features/discovery/DiscoverPage.jsx")
+);
 const CommunitiesPage = lazy(
     () => import("../pages/communities/CommunitiesPage.jsx")
 );
@@ -108,6 +111,14 @@ export function AppRouter() {
                             element={
                                 <ProfiledRoute id="CommunitiesPage">
                                     <CommunitiesPage />
+                                </ProfiledRoute>
+                            }
+                        />
+                        <Route
+                            path={ROUTES.DISCOVER}
+                            element={
+                                <ProfiledRoute id="DiscoverPage">
+                                    <DiscoverPage />
                                 </ProfiledRoute>
                             }
                         />

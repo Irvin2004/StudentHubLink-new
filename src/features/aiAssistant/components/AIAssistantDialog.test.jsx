@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { expect, test, vi } from "vitest";
 
 import { AI_ACTIONS } from "../config/ai-action-types.js";
@@ -123,6 +123,67 @@ test("offers persistence for generated material", () => {
 
     expect(screen.getByText("Robotics Review")).toBeVisible();
     expect(screen.getByRole("button", { name: "Save Deck" })).toBeVisible();
+});
+
+test("reviews and edits a generated plan before adding selected tasks", async () => {
+    const onSave = vi.fn().mockResolvedValue({ count: 1, kind: "study-plan" });
+    render(
+        <AIAssistantDialog
+            {...baseProps}
+            onSave={onSave}
+            result={{
+                kind: "study-plan",
+                persistable: true,
+                sourceTitle: "Calculus Exam Prep",
+                subject: "Calculus",
+                tasks: [
+                    {
+                        dueDate: "2026-09-06",
+                        estimatedMinutes: 30,
+                        notes: "Review limits",
+                        priority: "High",
+                        subject: "Calculus",
+                        title: "Learn limits"
+                    },
+                    {
+                        dueDate: "2026-09-07",
+                        estimatedMinutes: 30,
+                        notes: "Practise limits",
+                        priority: "Medium",
+                        subject: "Calculus",
+                        title: "Practise"
+                    }
+                ],
+                title: "Calculus study plan"
+            }}
+        />
+    );
+
+    expect(
+        screen.getByRole("button", { name: "Review study plan" })
+    ).toBeVisible();
+    fireEvent.click(screen.getByRole("button", { name: "Review study plan" }));
+
+    expect(
+        screen.getByLabelText("Review generated study plan")
+    ).toHaveTextContent("Nothing is added until you confirm");
+    fireEvent.change(screen.getByRole("textbox", { name: /Task 1 title/ }), {
+        target: { value: "Master limits" }
+    });
+    fireEvent.click(screen.getByLabelText("Include task 2"));
+    fireEvent.click(
+        screen.getByRole("button", {
+            name: "Add 1 task to Study Planner"
+        })
+    );
+
+    await waitFor(() => expect(onSave).toHaveBeenCalledOnce());
+    expect(onSave).toHaveBeenCalledWith(
+        expect.objectContaining({
+            kind: "study-plan",
+            tasks: [expect.objectContaining({ title: "Master limits" })]
+        })
+    );
 });
 
 test("restores the resource conversation and starts a new thread", () => {

@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 
+import { ANALYTICS_EVENTS } from "../../../config/analytics-events.js";
 import { useAuth } from "../../../hooks/useAuth.js";
+import { useAnalytics } from "../../../hooks/useAnalytics.js";
 import { recordFlashcardLearningMemory } from "../../learningMemory/services/learning-memory-service.js";
 import {
     createQuizFromFlashcardDeck,
@@ -31,6 +33,7 @@ function deckStatsFields(cards) {
 }
 
 export function useFlashcards() {
+    const { track } = useAnalytics();
     const { user } = useAuth();
     const userId = user?.uid;
     const [decks, setDecks] = useState([]);
@@ -47,6 +50,11 @@ export function useFlashcards() {
         () => setRefreshIndex((current) => current + 1),
         []
     );
+
+    useEffect(() => {
+        window.addEventListener("flashcards-updated", reload);
+        return () => window.removeEventListener("flashcards-updated", reload);
+    }, [reload]);
 
     useEffect(() => {
         if (!userId) return undefined;
@@ -254,7 +262,8 @@ export function useFlashcards() {
                         userId,
                         selectedDeck,
                         currentCard,
-                        rating
+                        rating,
+                        `flashcard:${selectedDeckId}:${cardId}:${reviewCount}`
                     );
                 } catch {
                     // The card review remains authoritative if memory sync fails.
@@ -297,12 +306,16 @@ export function useFlashcards() {
                 )
             );
             window.dispatchEvent(new Event("flashcards-updated"));
+            track(ANALYTICS_EVENTS.FLASHCARD_STUDY_COMPLETED, {
+                cardCount: cards.length,
+                dueCount: Math.max(0, Number(selectedDeck?.dueCount) || 0)
+            });
             return true;
         } catch (nextError) {
             setMutationError(nextError);
             return false;
         }
-    }, [selectedDeckId, userId]);
+    }, [cards.length, selectedDeck, selectedDeckId, track, userId]);
 
     const createQuizFromDeck = useCallback(async () => {
         if (!selectedDeck) throw new TypeError("Select a deck first.");

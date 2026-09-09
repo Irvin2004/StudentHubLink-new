@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 
+import { ANALYTICS_EVENTS } from "../../../config/analytics-events.js";
 import { useAuth } from "../../../hooks/useAuth.js";
+import { useAnalytics } from "../../../hooks/useAnalytics.js";
 import { recordQuizLearningMemory } from "../../learningMemory/services/learning-memory-service.js";
 import { completeStudySession } from "../../studySessions/services/study-session-service.js";
 import {
@@ -20,6 +22,7 @@ import {
 import { selectRecentlyTakenQuizzes } from "../utils/quiz-selectors.js";
 
 export function useQuizzes() {
+    const { track } = useAnalytics();
     const { user } = useAuth();
     const userId = user?.uid;
     const [quizzes, setQuizzes] = useState([]);
@@ -55,6 +58,11 @@ export function useQuizzes() {
             active = false;
         };
     }, [refreshIndex, userId]);
+
+    useEffect(() => {
+        window.addEventListener("quizzes-updated", reload);
+        return () => window.removeEventListener("quizzes-updated", reload);
+    }, [reload]);
 
     useEffect(() => {
         if (!userId || !selectedQuizId) return undefined;
@@ -265,9 +273,16 @@ export function useQuizzes() {
                 )
             );
             window.dispatchEvent(new Event("quiz-attempt-completed"));
+            track(ANALYTICS_EVENTS.QUIZ_ATTEMPT_COMPLETED, {
+                durationSeconds: Number(attempt.durationSeconds) || 0,
+                percentage: Number(saved.percentage) || 0,
+                questionCount: Array.isArray(saved.answers)
+                    ? saved.answers.length
+                    : 0
+            });
             return saved;
         },
-        [selectedQuiz, selectedQuizId, userId]
+        [selectedQuiz, selectedQuizId, track, userId]
     );
 
     return {

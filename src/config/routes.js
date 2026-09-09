@@ -3,6 +3,7 @@ export const ROUTES = Object.freeze({
     LOGIN: "/login",
     REGISTER: "/register",
     DASHBOARD: "/app",
+    DISCOVER: "/app/discover",
     COMMUNITIES: "/app/communities",
     COMMUNITY: "/community/:communityId",
     COMMUNITY_CHANNEL: "/community/:communityId/channel/:channelId",

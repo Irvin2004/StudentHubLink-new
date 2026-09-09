@@ -30,6 +30,7 @@ export async function runAIAssistant(input, provider = runLocalAI) {
         const result = await provider({
             action,
             content,
+            learningMemory: clean(input?.learningMemory).slice(0, 1800),
             question,
             source: input?.source || null,
             subject

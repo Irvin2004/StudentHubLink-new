@@ -1,6 +1,8 @@
 import { useState } from "react";
+import { ANALYTICS_EVENTS } from "../../config/analytics-events.js";
 import { useDocumentTitle } from "../../hooks/useDocumentTitle.js";
 import { useAuth } from "../../hooks/useAuth.js";
+import { useAnalytics } from "../../hooks/useAnalytics.js";
 import { useNavigate } from "react-router-dom";
 import styles from "./Dashboard.module.css";
 import { AIAssistantCard } from "./components/AIAssistantCard/index.js";
@@ -65,6 +67,7 @@ export default function DashboardPage() {
     const { startSession } = useStudySession();
     const { dashboard, error, loading, reload } = useDashboard();
     const { profile, user } = useAuth();
+    const { track } = useAnalytics();
     const navigate = useNavigate();
     const aiAssistant = useAIAssistant(user?.uid);
     const welcomeUser = profile || user;
@@ -160,6 +163,11 @@ export default function DashboardPage() {
             throw new Error("Sign in to add this task to your study plan.");
         }
         await addStudyTask(user.uid, taskInput);
+        track(ANALYTICS_EVENTS.THUTO_RECOMMENDATION_SCHEDULED, {
+            priority: taskInput.priority,
+            recommendationType: scheduledRecommendation?.type || "unknown",
+            taskType: taskInput.taskType || "study"
+        });
         setScheduledRecommendation(null);
         window.dispatchEvent(new Event("study-plan-updated"));
     };

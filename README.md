@@ -52,6 +52,8 @@ preferences without moving between disconnected platforms.
 ### Academic resources
 
 - Upload and discover study material
+- Search resources, solved questions, knowledge collections, quizzes, flashcard
+  sets, and communities from the unified Discover experience
 - Search, filter, and sort resources
 - Preview and download shared files
 - Save favorites to a personal library
@@ -67,6 +69,8 @@ preferences without moving between disconnected platforms.
 - Reduced-motion and high-contrast modes
 - Responsive desktop, tablet, and mobile layouts
 - Keyboard and screen-reader support
+- Review and edit Thuto-generated study plans before adding them to the Study
+  Planner
 
 ## Technology
 
@@ -314,12 +318,15 @@ should be tested with a keyboard and, where practical, a screen reader.
 - [Firebase](docs/firebase.md)
 - [Service API](docs/API.md)
 - [Firestore schema](docs/firestore-schema.md)
+- [V2 integration review](docs/v2-integration-review.md)
 - [Deployment](docs/DEPLOYMENT.md)
 - [Security](SECURITY.md)
 - [Code of conduct](CODE_OF_CONDUCT.md)
 - [Roadmap](docs/roadmap.md)
 - [Contributing](CONTRIBUTING.md)
 - [Changelog](CHANGELOG.md)
+- [2.0.0 release notes](docs/releases/2.0.0.md)
+- [Release checklist](docs/RELEASE_CHECKLIST.md)
 
 ## Roadmap
 

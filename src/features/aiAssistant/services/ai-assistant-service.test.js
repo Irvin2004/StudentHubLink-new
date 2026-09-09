@@ -88,3 +88,23 @@ describe("local AI assistant", () => {
         });
     });
 });
+
+test.each(Object.values(AI_ACTIONS))(
+    "keeps memory metadata out of %s study material",
+    async (action) => {
+        const input = {
+            action,
+            content: notes,
+            subject: "Computing",
+            question: "What does RAM store?"
+        };
+        const baseline = await runAIAssistant(input);
+        const result = await runAIAssistant({
+            ...input,
+            learningMemory:
+                "INTERNAL_MEMORY_ONLY: studied 3 times; correct signals: 3; struggle signals: 0."
+        });
+        expect(result).toEqual(baseline);
+        expect(JSON.stringify(result)).not.toContain("INTERNAL_MEMORY_ONLY");
+    }
+);

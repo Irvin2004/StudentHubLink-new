@@ -28,6 +28,14 @@ export async function getCommunityReputation(communityId, userId) {
     );
 }
 
+export async function getCommunityReputations(communityId, userIds = []) {
+    const identifiers = [...new Set(userIds.filter(Boolean))];
+    const records = await Promise.all(
+        identifiers.map((userId) => getCommunityReputation(communityId, userId))
+    );
+    return new Map(records.map((record) => [record.userId, record]));
+}
+
 export function subscribeCommunityReputation(
     communityId,
     userId,

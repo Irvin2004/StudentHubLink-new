@@ -36,6 +36,7 @@ vi.mock("firebase/firestore", () => firestore);
 vi.mock("../../../firebase/index.js", () => ({ db: "db" }));
 
 import {
+    createFlashcardDeckWithCards,
     createFlashcard,
     createFlashcardDeck,
     deleteFlashcard,
@@ -197,4 +198,32 @@ test("deletes a deck's cards before deleting the deck", async () => {
     expect(firestore.batches[1].delete).toHaveBeenCalledWith(
         expect.objectContaining({ id: "deck-1" })
     );
+});
+
+test("generated material commits its parent and all children atomically and retries after rejection", async () => {
+    const input = {
+        title: "Biology",
+        subject: "Biology",
+        cards: [
+            { front: "First?", back: "A" },
+            { front: "Second?", back: "B" }
+        ]
+    };
+    const failedBatch = {
+        set: vi.fn(),
+        commit: vi.fn().mockRejectedValueOnce(new Error("write rejected"))
+    };
+    firestore.writeBatch.mockReturnValueOnce(failedBatch);
+    await expect(createFlashcardDeckWithCards("user-1", input)).rejects.toThrow(
+        "write rejected"
+    );
+    expect(failedBatch.set).toHaveBeenCalledTimes(3);
+    expect(failedBatch.commit).toHaveBeenCalledOnce();
+    expect(firestore.setDoc).not.toHaveBeenCalled();
+    await expect(
+        createFlashcardDeckWithCards("user-1", input)
+    ).resolves.toMatchObject({ title: "Biology" });
+    const batch = firestore.batches.at(-1);
+    expect(batch.set).toHaveBeenCalledTimes(3);
+    expect(batch.commit).toHaveBeenCalledOnce();
 });

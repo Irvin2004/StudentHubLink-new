@@ -146,10 +146,10 @@ service firebase.storage {
     }
 
     match /resources/{userId}/{fileName} {
-      allow read: if true;
-      allow create, update: if signedIn()
-        && request.auth.uid == userId
-        && isAllowedUpload();
+      // Retired marketplace namespace: the V2 library uses community files.
+      // Legacy objects remain available only to their owner for recovery.
+      allow read: if signedIn() && request.auth.uid == userId;
+      allow create, update: if false;
       allow delete: if signedIn()
         && request.auth.uid == userId;
     }

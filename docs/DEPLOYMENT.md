@@ -1,6 +1,6 @@
 # Deployment
 
-StudentHub uses Vite to create a multi-page production bundle and Firebase
+StudentHub uses Vite to create a React SPA production bundle and Firebase
 Hosting to publish the generated `dist/` directory.
 
 ## Prerequisites
@@ -33,6 +33,24 @@ npm --prefix functions run lint
 
 `npm run check` runs ESLint, Prettier verification, syntax validation, tests,
 and the Vite production build.
+
+Run Firebase authorization regressions with Java 21 and Firebase CLI 15.23.0:
+
+```bash
+npm run test:rules
+```
+
+This uses `firebase.emulators.json` and the isolated `demo-studenthub-v2`
+project. CI runs the emulator suite separately from the frontend gate; require
+both jobs before release.
+
+V2 retires the legacy marketplace Storage path `resources/{userId}/{fileName}`.
+Only owner recovery reads/deletes remain; public reads and new writes are
+denied. The current library uses `communities/.../files/...` and remains
+membership-scoped. During rollout, revoke existing Firebase download tokens on
+legacy marketplace objects and verify old download URLs fail. Deploying rules
+alone does not revoke previously issued token URLs. Preserve objects for owner
+recovery unless a separate retention decision authorizes deletion.
 
 Preview the generated application:
 

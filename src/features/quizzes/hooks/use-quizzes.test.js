@@ -50,6 +50,18 @@ beforeEach(() => {
     memory.recordQuizLearningMemory.mockResolvedValue(true);
 });
 
+test("reloads the quiz library after Thuto saves a generated quiz", async () => {
+    const { result } = renderHook(() => useQuizzes());
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    expect(quizService.getQuizLibraryData).toHaveBeenCalledTimes(1);
+
+    window.dispatchEvent(new Event("quizzes-updated"));
+
+    await waitFor(() =>
+        expect(quizService.getQuizLibraryData).toHaveBeenCalledTimes(2)
+    );
+});
+
 test("records one stable study activity for a planner-linked quiz attempt", async () => {
     const { result } = renderHook(() => useQuizzes());
     await waitFor(() => expect(result.current.loading).toBe(false));

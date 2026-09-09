@@ -45,6 +45,12 @@ export function RecommendedByThuto({
                             <div>
                                 <strong>{recommendation.title}</strong>
                                 <p>{recommendation.reason}</p>
+                                {recommendation.evidence ? (
+                                    <small>
+                                        Learning evidence:{" "}
+                                        {recommendation.evidence}
+                                    </small>
+                                ) : null}
                             </div>
                             <div className={styles.actions}>
                                 <Button

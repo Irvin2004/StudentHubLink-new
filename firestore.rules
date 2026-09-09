@@ -815,6 +815,12 @@ service cloud.firestore {
         && resource.data.userId == request.auth.uid;
     }
 
+    // File writes below validate communityId against the authoritative path.
+    // Other file namespaces remain unwritable through the default-deny rule.
+    match /{path=**}/files/{fileId} {
+      allow read: if isCommunityMember(resource.data.communityId);
+    }
+
     match /friendRequests/{requestId} {
       allow read: if signedIn()
         && (

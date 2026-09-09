@@ -114,7 +114,15 @@ export function suggestThutoStudySchedule(
         advisoryReason,
         dueDate,
         estimatedMinutes,
-        notes: `Recommended by Thuto: ${recommendation.reason}`.slice(0, 500),
+        notes: [
+            `Recommended by Thuto: ${recommendation.reason}`,
+            recommendation.evidence
+                ? `Learning evidence: ${recommendation.evidence}`
+                : ""
+        ]
+            .filter(Boolean)
+            .join("\n")
+            .slice(0, 500),
         priority,
         subject: recommendation.subject || "General",
         taskType: recommendation.taskType || "study",

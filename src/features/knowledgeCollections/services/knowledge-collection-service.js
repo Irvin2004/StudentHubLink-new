@@ -92,6 +92,17 @@ export function subscribeKnowledgeCollections(communityId, onData, onError) {
     );
 }
 
+export async function getKnowledgeCollections(communityId) {
+    const snapshot = await getDocs(
+        query(
+            collectionsReference(communityId),
+            orderBy("updatedAt", "desc"),
+            limit(PAGE_LIMIT)
+        )
+    );
+    return snapshot.docs.map(collectionFromSnapshot);
+}
+
 export async function createKnowledgeCollection(communityId, actor, input) {
     const validated = validateKnowledgeCollection(input, actor);
     const reference = doc(collectionsReference(communityId));

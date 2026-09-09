@@ -318,3 +318,17 @@ test("refreshes quiz insights after an attempt completes", async () => {
         expect(result.current.dashboard.stats.recentQuizScore).toBe(90)
     );
 });
+
+test("refreshes recommendations after Thuto saves a generated quiz", async () => {
+    const { result } = renderHook(() => useDashboard());
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    const initialCalls = services.getQuizLibraryData.mock.calls.length;
+
+    window.dispatchEvent(new Event("quizzes-updated"));
+
+    await waitFor(() =>
+        expect(services.getQuizLibraryData).toHaveBeenCalledTimes(
+            initialCalls + 1
+        )
+    );
+});

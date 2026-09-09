@@ -10,6 +10,7 @@ import {
     AI_ACTION_OPTIONS,
     getAIActionLabel
 } from "../config/ai-action-types.js";
+import GeneratedStudyPlanReview from "./GeneratedStudyPlanReview.jsx";
 import styles from "./AIAssistantDialog.module.css";
 
 function ResultContent({ result }) {
@@ -124,6 +125,7 @@ export default function AIAssistantDialog({
     const [showStudyMaterialPicker, setShowStudyMaterialPicker] =
         useState(false);
     const [studyMaterialKey, setStudyMaterialKey] = useState("");
+    const [reviewingPlan, setReviewingPlan] = useState(false);
     const inputRef = useRef(null);
     const askingQuestion = selectedAction === AI_ACTIONS.ASK_QUESTION;
     const activeResources = context?.resources || (context ? [context] : []);
@@ -143,6 +145,12 @@ export default function AIAssistantDialog({
             ? conversationMessages.slice(0, -1)
             : conversationMessages;
 
+    async function saveReviewedPlan(reviewedResult) {
+        const savedResult = await onSave(reviewedResult);
+        if (savedResult) setReviewingPlan(false);
+        return savedResult;
+    }
+
     return (
         <Modal
             description={
@@ -153,309 +161,343 @@ export default function AIAssistantDialog({
                     : "Paste notes or context. Thuto will turn them into study material."
             }
             initialFocusRef={inputRef}
-            onClose={onClose}
+            onClose={saving ? undefined : onClose}
             open={open}
             size="wide"
             title="Thuto — Your Learning Companion"
             footer={
                 <div className={styles.footer}>
-                    <Button onClick={onClose} variant="secondary">
+                    <Button
+                        disabled={saving}
+                        onClick={onClose}
+                        variant="secondary"
+                    >
                         Close
                     </Button>
-                    {result?.persistable && !saved ? (
+                    {result?.persistable &&
+                    !saved &&
+                    result.kind === "study-plan" &&
+                    !reviewingPlan ? (
+                        <Button onClick={() => setReviewingPlan(true)}>
+                            Review study plan
+                        </Button>
+                    ) : null}
+                    {result?.persistable &&
+                    !saved &&
+                    result.kind !== "study-plan" ? (
                         <Button
                             loading={saving}
                             loadingLabel="Saving"
                             onClick={onSave}
                         >
-                            Save{" "}
-                            {result.kind === "study-plan"
-                                ? "to Planner"
-                                : result.kind === "quiz"
-                                  ? "Quiz"
-                                  : "Deck"}
+                            Save {result.kind === "quiz" ? "Quiz" : "Deck"}
                         </Button>
                     ) : null}
                 </div>
             }
         >
-            <form
-                className={styles.form}
-                onSubmit={(event) => {
-                    event.preventDefault();
-                    void onRun({
-                        action: selectedAction,
-                        content,
-                        question,
-                        source: context,
-                        subject
-                    });
-                }}
-            >
-                {context ? (
-                    <section
-                        aria-label="Active Thuto study materials"
-                        className={styles.source}
-                    >
-                        <div className={styles.sourceHeading}>
-                            <div>
-                                <span>Active study materials</span>
-                                <strong>
-                                    {activeResources.length} of{" "}
-                                    {maxStudyMaterials}
-                                </strong>
-                            </div>
-                            {onNewConversation ? (
-                                <Button
-                                    disabled={loading || conversationLoading}
-                                    loading={newConversationLoading}
-                                    loadingLabel="Starting"
-                                    onClick={onNewConversation}
-                                    size="small"
-                                    type="button"
-                                    variant="secondary"
-                                >
-                                    New conversation
-                                </Button>
-                            ) : null}
-                        </div>
-                        <ul className={styles.resourceChips}>
-                            {activeResources.map((resource) => (
-                                <li key={resource.id}>
-                                    <span>{resource.title}</span>
-                                    {onRemoveStudyMaterial ? (
-                                        <button
-                                            aria-label={`Remove ${resource.title}`}
-                                            disabled={
-                                                activeResources.length === 1 ||
-                                                loading ||
-                                                conversationLoading
-                                            }
-                                            onClick={() =>
-                                                onRemoveStudyMaterial(
-                                                    resource.id
-                                                )
-                                            }
-                                            title={
-                                                activeResources.length === 1
-                                                    ? "Keep at least one study material active"
-                                                    : `Remove ${resource.title}`
-                                            }
-                                            type="button"
-                                        >
-                                            <span aria-hidden="true">×</span>
-                                        </button>
-                                    ) : null}
-                                </li>
-                            ))}
-                        </ul>
-                        <p>
-                            {multipleResources
-                                ? "Thuto will use all active materials for each new response. Removing one switches to that resource set’s conversation."
-                                : context.contextKind === "metadata"
-                                  ? "File text is not available yet, so Thuto is using this resource’s saved details."
-                                  : "Thuto will use this resource’s content for every action below."}
-                        </p>
-                        {onAddStudyMaterial ? (
-                            <div className={styles.materialActions}>
-                                <Button
-                                    disabled={
-                                        materialLimitReached ||
-                                        !availableStudyMaterials.length ||
-                                        loading ||
-                                        conversationLoading
-                                    }
-                                    onClick={() =>
-                                        setShowStudyMaterialPicker(
-                                            (current) => !current
-                                        )
-                                    }
-                                    size="small"
-                                    type="button"
-                                    variant="secondary"
-                                >
-                                    Add study material
-                                </Button>
-                                {materialLimitReached ? (
-                                    <span role="status">
-                                        {maxStudyMaterials} material limit
-                                        reached
-                                    </span>
+            {!reviewingPlan ? (
+                <form
+                    className={styles.form}
+                    onSubmit={(event) => {
+                        event.preventDefault();
+                        setReviewingPlan(false);
+                        void onRun({
+                            action: selectedAction,
+                            content,
+                            question,
+                            source: context,
+                            subject
+                        });
+                    }}
+                >
+                    {context ? (
+                        <section
+                            aria-label="Active Thuto study materials"
+                            className={styles.source}
+                        >
+                            <div className={styles.sourceHeading}>
+                                <div>
+                                    <span>Active study materials</span>
+                                    <strong>
+                                        {activeResources.length} of{" "}
+                                        {maxStudyMaterials}
+                                    </strong>
+                                </div>
+                                {onNewConversation ? (
+                                    <Button
+                                        disabled={
+                                            loading || conversationLoading
+                                        }
+                                        loading={newConversationLoading}
+                                        loadingLabel="Starting"
+                                        onClick={onNewConversation}
+                                        size="small"
+                                        type="button"
+                                        variant="secondary"
+                                    >
+                                        New conversation
+                                    </Button>
                                 ) : null}
                             </div>
-                        ) : null}
-                        {showStudyMaterialPicker && !materialLimitReached ? (
-                            <div className={styles.materialPicker}>
-                                <Select
-                                    label="Study material to add"
-                                    onChange={(event) =>
-                                        setStudyMaterialKey(event.target.value)
-                                    }
-                                    value={selectedStudyMaterialKey}
-                                >
-                                    {availableStudyMaterials.map((resource) => {
-                                        const key =
-                                            resource.resourceKey || resource.id;
-                                        return (
-                                            <option key={key} value={key}>
-                                                {resource.title ||
-                                                    resource.originalName}
-                                            </option>
-                                        );
-                                    })}
-                                </Select>
-                                <Button
-                                    disabled={!selectedStudyMaterial}
-                                    loading={
-                                        studyMaterialLoadingKey ===
-                                        selectedStudyMaterialKey
-                                    }
-                                    loadingLabel="Adding material"
-                                    onClick={() => {
-                                        if (selectedStudyMaterial) {
-                                            void onAddStudyMaterial(
-                                                selectedStudyMaterial
-                                            );
-                                        }
-                                    }}
-                                    size="small"
-                                    type="button"
-                                >
-                                    Add selected material
-                                </Button>
-                            </div>
-                        ) : null}
-                    </section>
-                ) : null}
-                {conversationLoading ? (
-                    <p aria-live="polite" className={styles.conversationStatus}>
-                        Restoring this study set’s conversation…
-                    </p>
-                ) : visibleConversationMessages.length ? (
-                    <section
-                        aria-label={`Conversation about ${context?.title || subject}`}
-                        className={styles.conversation}
-                    >
-                        <h3>Conversation</h3>
-                        <ol>
-                            {visibleConversationMessages.map((message) => (
-                                <li data-role={message.role} key={message.id}>
-                                    <div>
-                                        <strong>
-                                            {message.role === "assistant"
-                                                ? "Thuto"
-                                                : "You"}
-                                        </strong>
-                                        {formatMessageTime(
-                                            message.createdAt
-                                        ) ? (
-                                            <time>
-                                                {formatMessageTime(
-                                                    message.createdAt
-                                                )}
-                                            </time>
+                            <ul className={styles.resourceChips}>
+                                {activeResources.map((resource) => (
+                                    <li key={resource.id}>
+                                        <span>{resource.title}</span>
+                                        {onRemoveStudyMaterial ? (
+                                            <button
+                                                aria-label={`Remove ${resource.title}`}
+                                                disabled={
+                                                    activeResources.length ===
+                                                        1 ||
+                                                    loading ||
+                                                    conversationLoading
+                                                }
+                                                onClick={() =>
+                                                    onRemoveStudyMaterial(
+                                                        resource.id
+                                                    )
+                                                }
+                                                title={
+                                                    activeResources.length === 1
+                                                        ? "Keep at least one study material active"
+                                                        : `Remove ${resource.title}`
+                                                }
+                                                type="button"
+                                            >
+                                                <span aria-hidden="true">
+                                                    ×
+                                                </span>
+                                            </button>
                                         ) : null}
-                                    </div>
-                                    <p>{message.content}</p>
-                                </li>
+                                    </li>
+                                ))}
+                            </ul>
+                            <p>
+                                {multipleResources
+                                    ? "Thuto will use all active materials for each new response. Removing one switches to that resource set’s conversation."
+                                    : context.contextKind === "metadata"
+                                      ? "File text is not available yet, so Thuto is using this resource’s saved details."
+                                      : "Thuto will use this resource’s content for every action below."}
+                            </p>
+                            {onAddStudyMaterial ? (
+                                <div className={styles.materialActions}>
+                                    <Button
+                                        disabled={
+                                            materialLimitReached ||
+                                            !availableStudyMaterials.length ||
+                                            loading ||
+                                            conversationLoading
+                                        }
+                                        onClick={() =>
+                                            setShowStudyMaterialPicker(
+                                                (current) => !current
+                                            )
+                                        }
+                                        size="small"
+                                        type="button"
+                                        variant="secondary"
+                                    >
+                                        Add study material
+                                    </Button>
+                                    {materialLimitReached ? (
+                                        <span role="status">
+                                            {maxStudyMaterials} material limit
+                                            reached
+                                        </span>
+                                    ) : null}
+                                </div>
+                            ) : null}
+                            {showStudyMaterialPicker &&
+                            !materialLimitReached ? (
+                                <div className={styles.materialPicker}>
+                                    <Select
+                                        label="Study material to add"
+                                        onChange={(event) =>
+                                            setStudyMaterialKey(
+                                                event.target.value
+                                            )
+                                        }
+                                        value={selectedStudyMaterialKey}
+                                    >
+                                        {availableStudyMaterials.map(
+                                            (resource) => {
+                                                const key =
+                                                    resource.resourceKey ||
+                                                    resource.id;
+                                                return (
+                                                    <option
+                                                        key={key}
+                                                        value={key}
+                                                    >
+                                                        {resource.title ||
+                                                            resource.originalName}
+                                                    </option>
+                                                );
+                                            }
+                                        )}
+                                    </Select>
+                                    <Button
+                                        disabled={!selectedStudyMaterial}
+                                        loading={
+                                            studyMaterialLoadingKey ===
+                                            selectedStudyMaterialKey
+                                        }
+                                        loadingLabel="Adding material"
+                                        onClick={() => {
+                                            if (selectedStudyMaterial) {
+                                                void onAddStudyMaterial(
+                                                    selectedStudyMaterial
+                                                );
+                                            }
+                                        }}
+                                        size="small"
+                                        type="button"
+                                    >
+                                        Add selected material
+                                    </Button>
+                                </div>
+                            ) : null}
+                        </section>
+                    ) : null}
+                    {conversationLoading ? (
+                        <p
+                            aria-live="polite"
+                            className={styles.conversationStatus}
+                        >
+                            Restoring this study set’s conversation…
+                        </p>
+                    ) : visibleConversationMessages.length ? (
+                        <section
+                            aria-label={`Conversation about ${context?.title || subject}`}
+                            className={styles.conversation}
+                        >
+                            <h3>Conversation</h3>
+                            <ol>
+                                {visibleConversationMessages.map((message) => (
+                                    <li
+                                        data-role={message.role}
+                                        key={message.id}
+                                    >
+                                        <div>
+                                            <strong>
+                                                {message.role === "assistant"
+                                                    ? "Thuto"
+                                                    : "You"}
+                                            </strong>
+                                            {formatMessageTime(
+                                                message.createdAt
+                                            ) ? (
+                                                <time>
+                                                    {formatMessageTime(
+                                                        message.createdAt
+                                                    )}
+                                                </time>
+                                            ) : null}
+                                        </div>
+                                        <p>{message.content}</p>
+                                    </li>
+                                ))}
+                            </ol>
+                        </section>
+                    ) : null}
+                    {learningMemoryLoading ? (
+                        <p aria-live="polite" className={styles.memoryStatus}>
+                            Loading what Thuto remembers about your learning…
+                        </p>
+                    ) : learningMemory?.notices?.length ? (
+                        <section
+                            aria-label="Thuto learning memory"
+                            className={styles.memory}
+                        >
+                            <div>
+                                <span>Learning memory</span>
+                                <h3>What Thuto remembers</h3>
+                            </div>
+                            <ul>
+                                {learningMemory.notices.map((notice) => (
+                                    <li key={notice}>{notice}</li>
+                                ))}
+                            </ul>
+                        </section>
+                    ) : null}
+                    <div className={styles.fields}>
+                        <Select
+                            label="Thuto action"
+                            onChange={(event) =>
+                                setSelectedAction(event.target.value)
+                            }
+                            value={selectedAction}
+                        >
+                            {AI_ACTION_OPTIONS.map((option) => (
+                                <option key={option.id} value={option.id}>
+                                    {option.label}
+                                </option>
                             ))}
-                        </ol>
-                    </section>
-                ) : null}
-                {learningMemoryLoading ? (
-                    <p aria-live="polite" className={styles.memoryStatus}>
-                        Loading what Thuto remembers about your learning…
-                    </p>
-                ) : learningMemory?.notices?.length ? (
-                    <section
-                        aria-label="Thuto learning memory"
-                        className={styles.memory}
-                    >
-                        <div>
-                            <span>Learning memory</span>
-                            <h3>What Thuto remembers</h3>
-                        </div>
-                        <ul>
-                            {learningMemory.notices.map((notice) => (
-                                <li key={notice}>{notice}</li>
-                            ))}
-                        </ul>
-                    </section>
-                ) : null}
-                <div className={styles.fields}>
-                    <Select
-                        label="Thuto action"
-                        onChange={(event) =>
-                            setSelectedAction(event.target.value)
-                        }
-                        value={selectedAction}
-                    >
-                        {AI_ACTION_OPTIONS.map((option) => (
-                            <option key={option.id} value={option.id}>
-                                {option.label}
-                            </option>
-                        ))}
-                    </Select>
-                    <Input
-                        label={
+                        </Select>
+                        <Input
+                            label={
+                                context
+                                    ? multipleResources
+                                        ? "Study set"
+                                        : "Resource title"
+                                    : "Subject or topic"
+                            }
+                            onChange={(event) => setSubject(event.target.value)}
+                            placeholder="e.g. Robotics"
+                            readOnly={Boolean(context)}
+                            ref={inputRef}
+                            required
+                            value={subject}
+                        />
+                    </div>
+                    {askingQuestion ? (
+                        <Input
+                            label={
+                                context
+                                    ? multipleResources
+                                        ? "Question about these resources"
+                                        : "Question about this resource"
+                                    : "Question"
+                            }
+                            onChange={(event) =>
+                                setQuestion(event.target.value)
+                            }
+                            placeholder="e.g. How does acceleration relate to velocity?"
+                            ref={context ? inputRef : undefined}
+                            required
+                            value={question}
+                        />
+                    ) : null}
+                    <Textarea
+                        helperText={
                             context
-                                ? multipleResources
-                                    ? "Study set"
-                                    : "Resource title"
-                                : "Subject or topic"
+                                ? `${content.length.toLocaleString()} characters from ${activeResources.length} ${activeResources.length === 1 ? "resource" : "resources"}`
+                                : `${content.length.toLocaleString()} / 12,000 characters`
                         }
-                        onChange={(event) => setSubject(event.target.value)}
-                        placeholder="e.g. Robotics"
+                        label={context ? "Study context" : "Notes or context"}
+                        maxLength={12000}
+                        onChange={(event) => setContent(event.target.value)}
+                        placeholder="Paste your notes, key concepts, or the topic you want explained..."
                         readOnly={Boolean(context)}
-                        ref={inputRef}
                         required
-                        value={subject}
+                        rows={8}
+                        value={content}
                     />
-                </div>
-                {askingQuestion ? (
-                    <Input
-                        label={
-                            context
-                                ? multipleResources
-                                    ? "Question about these resources"
-                                    : "Question about this resource"
-                                : "Question"
+                    <Button
+                        disabled={
+                            conversationLoading ||
+                            learningMemoryLoading ||
+                            newConversationLoading
                         }
-                        onChange={(event) => setQuestion(event.target.value)}
-                        placeholder="e.g. How does acceleration relate to velocity?"
-                        ref={context ? inputRef : undefined}
-                        required
-                        value={question}
-                    />
-                ) : null}
-                <Textarea
-                    helperText={
-                        context
-                            ? `${content.length.toLocaleString()} characters from ${activeResources.length} ${activeResources.length === 1 ? "resource" : "resources"}`
-                            : `${content.length.toLocaleString()} / 12,000 characters`
-                    }
-                    label={context ? "Study context" : "Notes or context"}
-                    maxLength={12000}
-                    onChange={(event) => setContent(event.target.value)}
-                    placeholder="Paste your notes, key concepts, or the topic you want explained..."
-                    readOnly={Boolean(context)}
-                    required
-                    rows={8}
-                    value={content}
-                />
-                <Button
-                    disabled={
-                        conversationLoading ||
-                        learningMemoryLoading ||
-                        newConversationLoading
-                    }
-                    loading={loading}
-                    loadingLabel="Thinking"
-                    type="submit"
-                >
-                    {getAIActionLabel(selectedAction)}
-                </Button>
-            </form>
+                        loading={loading}
+                        loadingLabel="Thinking"
+                        type="submit"
+                    >
+                        {getAIActionLabel(selectedAction)}
+                    </Button>
+                </form>
+            ) : null}
 
             {conversationError ? (
                 <p className={styles.conversationError} role="alert">
@@ -483,7 +525,7 @@ export default function AIAssistantDialog({
                         Try again
                     </Button>
                 </div>
-            ) : result ? (
+            ) : result && !reviewingPlan ? (
                 <section aria-live="polite" className={styles.result}>
                     <div className={styles.resultHeading}>
                         <div>
@@ -496,20 +538,26 @@ export default function AIAssistantDialog({
                 </section>
             ) : null}
 
-            {saveError ? (
+            {reviewingPlan && result?.kind === "study-plan" ? (
+                <GeneratedStudyPlanReview
+                    onBack={() => setReviewingPlan(false)}
+                    onConfirm={saveReviewedPlan}
+                    result={result}
+                    saveError={saveError}
+                    saving={saving}
+                />
+            ) : null}
+
+            {saveError && !reviewingPlan ? (
                 <p className={styles.saveError} role="alert">
                     {saveError.message}
                 </p>
             ) : null}
             {saved ? (
                 <p className={styles.saved} role="status">
-                    Saved {saved.count}{" "}
-                    {saved.kind === "flashcards"
-                        ? "cards"
-                        : saved.kind === "quiz"
-                          ? "questions"
-                          : "tasks"}
-                    .
+                    {saved.kind === "study-plan"
+                        ? `Added ${saved.count} ${saved.count === 1 ? "task" : "tasks"} to Study Planner.`
+                        : `Saved ${saved.count} ${saved.kind === "flashcards" ? "cards" : "questions"}.`}
                 </p>
             ) : null}
         </Modal>

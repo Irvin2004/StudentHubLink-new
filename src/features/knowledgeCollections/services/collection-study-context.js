@@ -7,7 +7,7 @@ import { formatCollectionItemContext } from "../models/knowledge-collection.js";
 
 async function itemContext(item) {
     if (item.sourceType === "resource") {
-        return loadResourceContext({
+        const context = await loadResourceContext({
             content: item.content,
             extension: item.extension,
             id: item.sourceId,
@@ -16,11 +16,16 @@ async function itemContext(item) {
             title: item.title,
             url: item.url
         });
+        return {
+            ...context,
+            memoryLabels: [...new Set([item.title, context.subject])]
+        };
     }
     return {
         content: formatCollectionItemContext(item),
         contextKind: item.sourceType,
         id: `${item.sourceType}:${item.sourceId}`,
+        memoryLabels: [item.title],
         subject: item.title,
         title: item.title
     };
@@ -45,6 +50,9 @@ function groupContexts(contexts, collectionId) {
         id: `collection:${collectionId}:group:${index}:${group
             .map((context) => context.id)
             .join("+")}`,
+        memoryLabels: [
+            ...new Set(group.flatMap((context) => context.memoryLabels || []))
+        ],
         subject: group.map((context) => context.title).join(" + "),
         title: `${group[0].title}${group.length > 1 ? ` + ${group.length - 1} more` : ""}`
     }));

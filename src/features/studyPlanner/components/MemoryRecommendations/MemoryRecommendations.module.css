@@ -1,0 +1,98 @@
+.section {
+    background: linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--color-primary) 9%, var(--color-surface)),
+        var(--color-surface)
+    );
+    border: 1px solid
+        color-mix(in srgb, var(--color-primary) 24%, var(--color-border));
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-sm);
+    padding: var(--space-5);
+}
+.section > header {
+    align-items: flex-end;
+    display: flex;
+    gap: var(--space-4);
+    justify-content: space-between;
+    margin-bottom: var(--space-4);
+}
+.section > header span {
+    color: var(--color-primary);
+    font-size: var(--font-size-xs);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+.section h2 {
+    margin: var(--space-1) 0 0;
+}
+.section > header p {
+    color: var(--color-text-secondary);
+    margin: 0;
+}
+.section ol {
+    display: grid;
+    gap: var(--space-3);
+    grid-template-columns: repeat(3, 1fr);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+.section li {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    justify-content: space-between;
+    padding: var(--space-4);
+}
+.content {
+    display: grid;
+    gap: var(--space-2);
+}
+.content > div {
+    align-items: flex-start;
+    display: flex;
+    gap: var(--space-2);
+    justify-content: space-between;
+}
+.content > div span {
+    background: var(--color-surface-secondary);
+    border-radius: 999px;
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-xs);
+    padding: 0.3rem 0.55rem;
+}
+.content p {
+    color: var(--color-text-secondary);
+    margin: 0;
+}
+.content small {
+    color: var(--color-primary);
+    font-weight: 700;
+}
+.schedule {
+    align-items: flex-start;
+    border-top: 1px solid var(--color-border);
+    display: grid;
+    gap: var(--space-3);
+    padding-top: var(--space-3);
+}
+.schedule > span {
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-xs);
+}
+@media (max-width: 64rem) {
+    .section ol {
+        grid-template-columns: 1fr;
+    }
+}
+@media (max-width: 40rem) {
+    .section > header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}

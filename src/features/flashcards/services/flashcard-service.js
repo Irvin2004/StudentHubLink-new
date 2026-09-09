@@ -128,6 +128,43 @@ export async function recordFlashcardDeckStudied(userId, deckId) {
     return { lastStudiedAt: new Date(), updatedAt: new Date() };
 }
 
+export async function createFlashcardDeckWithCards(userId, input) {
+    if (
+        !Array.isArray(input.cards) ||
+        !input.cards.length ||
+        input.cards.length > 499
+    ) {
+        throw new RangeError(
+            "Generate between 1 and 499 flashcards at a time."
+        );
+    }
+    const reference = doc(deckCollection(userId));
+    const timestamp = serverTimestamp();
+    const deck = {
+        subject: cleanText(input.subject),
+        title: cleanText(input.title),
+        createdAt: timestamp,
+        updatedAt: timestamp,
+        ...(input.resourceId ? { resourceId: cleanText(input.resourceId) } : {})
+    };
+    const batch = writeBatch(db);
+    batch.set(reference, deck);
+    input.cards.forEach((inputCard) => {
+        batch.set(doc(cardCollection(userId, reference.id)), {
+            back: cleanText(inputCard.back),
+            front: cleanText(inputCard.front),
+            createdAt: timestamp,
+            easeRating: null,
+            lastReviewedAt: null,
+            nextReviewAt: timestamp,
+            reviewCount: 0,
+            updatedAt: timestamp
+        });
+    });
+    await batch.commit();
+    return { id: reference.id, ...deck };
+}
+
 export async function deleteFlashcardDeck(userId, deckId) {
     let hasMore = true;
     while (hasMore) {

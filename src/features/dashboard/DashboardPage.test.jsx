@@ -71,6 +71,7 @@ vi.mock("./hooks/useDashboard.js", () => ({
             recommendations: [
                 {
                     actionLabel: "Retake quiz",
+                    evidence: "3 struggle signals · 1 correct",
                     id: "quiz:biology",
                     quizId: "biology-quiz",
                     reason: "Latest score was 55%",
@@ -255,6 +256,9 @@ test("routes Thuto recommendations to features and study sessions", () => {
     const recommendations = screen.getByRole("region", {
         name: "Recommended by Thuto"
     });
+    expect(recommendations).toHaveTextContent(
+        "Learning evidence: 3 struggle signals · 1 correct"
+    );
 
     fireEvent.click(
         within(recommendations).getByRole("button", { name: "Retake quiz" })

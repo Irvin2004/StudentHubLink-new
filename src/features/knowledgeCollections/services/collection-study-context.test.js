@@ -21,6 +21,9 @@ describe("collection study context", () => {
         expect(context.id).toContain("collection:community-1:collection-1");
         expect(context.title).toBe("Calculus Exam Prep");
         expect(context.resources).toHaveLength(5);
+        expect(
+            context.resources.flatMap((resource) => resource.memoryLabels)
+        ).toEqual(expect.arrayContaining(items.map((item) => item.title)));
         for (const item of items) {
             expect(context.content).toContain(item.content);
         }

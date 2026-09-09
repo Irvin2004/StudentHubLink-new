@@ -39,6 +39,8 @@
     .drawer.open {
         visibility: visible;
         transform: translateX(0);
+        /* Focus must be possible immediately, before the slide animation. */
+        transition: transform var(--transition);
     }
 
     .closeButton {
@@ -91,6 +93,7 @@
 
 @media (prefers-reduced-motion: reduce) {
     .drawer,
+    .drawer.open,
     .backdrop {
         transition: none;
     }

@@ -20,6 +20,7 @@ export default [
             "js/**",
             "dist/**",
             "node_modules/**",
+            ".cache/**",
             "functions/node_modules/**",
             "coverage/**",
             "playwright-report/**",

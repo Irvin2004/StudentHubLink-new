@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 
+import { ANALYTICS_EVENTS } from "../../../config/analytics-events.js";
+import { useAnalytics } from "../../../hooks/useAnalytics.js";
 import AIAssistantDialog from "../../aiAssistant/components/AIAssistantDialog.jsx";
 import { AI_ACTIONS } from "../../aiAssistant/config/ai-action-types.js";
 import { useAIAssistant } from "../../aiAssistant/hooks/useAIAssistant.js";
@@ -36,8 +38,11 @@ function formatDate(value) {
 }
 
 export default function CommunityKnowledgeCollections({ actor, role }) {
+    const { track } = useAnalytics();
     const [collections, setCollections] = useState([]);
-    const [selectedId, setSelectedId] = useState(null);
+    const [selectedId, setSelectedId] = useState(() =>
+        new URLSearchParams(window.location.search).get("collection")
+    );
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [reputation, setReputation] = useState(null);
@@ -175,6 +180,10 @@ export default function CommunityKnowledgeCollections({ actor, role }) {
                 selected
             );
             aiAssistant.openAssistant(AI_ACTIONS.EXPLAIN_TOPIC, context);
+            track(ANALYTICS_EVENTS.KNOWLEDGE_COLLECTION_STUDIED, {
+                contextResourceCount: context.resources?.length || 1,
+                itemCount: selected.items?.length || 0
+            });
         } catch (nextError) {
             setStatus(nextError.message);
         } finally {

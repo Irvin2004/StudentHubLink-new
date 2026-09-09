@@ -221,12 +221,14 @@ export function useDashboard() {
         window.addEventListener("study-goal-updated", reload);
         window.addEventListener("flashcards-updated", reload);
         window.addEventListener("quiz-attempt-completed", reload);
+        window.addEventListener("quizzes-updated", reload);
         window.addEventListener("study-plan-updated", reload);
         return () => {
             window.removeEventListener("study-session-completed", reload);
             window.removeEventListener("study-goal-updated", reload);
             window.removeEventListener("flashcards-updated", reload);
             window.removeEventListener("quiz-attempt-completed", reload);
+            window.removeEventListener("quizzes-updated", reload);
             window.removeEventListener("study-plan-updated", reload);
         };
     }, [reload]);

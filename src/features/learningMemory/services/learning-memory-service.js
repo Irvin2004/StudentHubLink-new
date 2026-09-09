@@ -17,6 +17,7 @@ const CONCEPT_LIMIT = 8;
 const ACTIVITY_LIMIT = 5;
 const MEMORY_PROMPT_LIMIT = 1_800;
 const TOPIC_LIMIT = 50;
+const PLANNER_CONCEPT_TOPIC_LIMIT = 12;
 
 function requireText(value, label) {
     const text = String(value || "").trim();
@@ -74,7 +75,7 @@ function activitiesReference(userId, topic) {
 
 function memoryLevel(correctSignals, struggleSignals, latestQuizPercentage) {
     if (
-        latestQuizPercentage < 60 ||
+        (latestQuizPercentage >= 0 && latestQuizPercentage < 60) ||
         (struggleSignals >= 1 && struggleSignals > correctSignals)
     ) {
         return "struggling";
@@ -411,7 +412,11 @@ export async function loadLearningMemory(userId, context) {
     const labels = [
         ...new Set(
             (context.resources || [context])
-                .flatMap((resource) => [resource.title, resource.subject])
+                .flatMap((resource) => [
+                    resource.title,
+                    resource.subject,
+                    ...(resource.memoryLabels || [])
+                ])
                 .map((label) => cleanText(label, 160))
                 .filter(Boolean)
         )
@@ -431,7 +436,7 @@ export async function getLearningMemoryOverview(userId) {
             limit(TOPIC_LIMIT)
         )
     );
-    return snapshot.docs.map((topicDocument) => {
+    const topics = snapshot.docs.map((topicDocument) => {
         const topic = topicDocument.data();
         const latestQuizPercentage = Number.isFinite(topic.latestQuizPercentage)
             ? topic.latestQuizPercentage
@@ -455,4 +460,46 @@ export async function getLearningMemoryOverview(userId) {
             updatedAt: normalizeTimestamp(topic.updatedAt)
         };
     });
+    return Promise.all(
+        topics.map(async (topic, index) => {
+            if (index >= PLANNER_CONCEPT_TOPIC_LIMIT) {
+                return { ...topic, concepts: [] };
+            }
+            try {
+                const conceptsSnapshot = await getDocs(
+                    query(
+                        conceptsReference(userId, topic.topic),
+                        orderBy("updatedAt", "desc"),
+                        limit(CONCEPT_LIMIT)
+                    )
+                );
+                const concepts = conceptsSnapshot.docs
+                    .map((conceptDocument) => {
+                        const concept = conceptDocument.data();
+                        const label = cleanText(concept.label, 160);
+                        if (!label) return null;
+                        const correctSignals =
+                            Number(concept.correctSignals) || 0;
+                        const struggleSignals =
+                            Number(concept.struggleSignals) || 0;
+                        return {
+                            correctSignals,
+                            id: conceptDocument.id,
+                            label,
+                            level: memoryLevel(
+                                correctSignals,
+                                struggleSignals,
+                                -1
+                            ),
+                            struggleSignals,
+                            updatedAt: normalizeTimestamp(concept.updatedAt)
+                        };
+                    })
+                    .filter(Boolean);
+                return { ...topic, concepts };
+            } catch {
+                return { ...topic, concepts: [] };
+            }
+        })
+    );
 }

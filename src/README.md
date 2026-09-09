@@ -13,6 +13,8 @@ src/
 |-- config/
 |-- context/
 |-- firebase/
+|-- features/
+|   `-- discovery/       Permission-aware unified knowledge search
 |-- hooks/
 |-- models/
 |-- pages/

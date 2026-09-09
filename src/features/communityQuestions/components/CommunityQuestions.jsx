@@ -408,7 +408,9 @@ function QuestionDetail({
 
 export default function CommunityQuestions({ actor, role }) {
     const api = useCommunityQuestions(actor.communityId, actor);
-    const [selectedId, setSelectedId] = useState(null);
+    const [selectedId, setSelectedId] = useState(() =>
+        new URLSearchParams(window.location.search).get("question")
+    );
     const [formOpen, setFormOpen] = useState(false);
     const [editingQuestion, setEditingQuestion] = useState(null);
     const [reputation, setReputation] = useState(null);

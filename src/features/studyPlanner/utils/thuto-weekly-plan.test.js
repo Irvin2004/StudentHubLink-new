@@ -125,3 +125,42 @@ test("uses the remaining weekly time as a hard proposal budget", () => {
     expect(plan.summary.existingMinutes).toBe(60);
     expect(plan.summary.proposedMinutes).toBe(30);
 });
+
+test("turns struggling concepts into specific weekly study blocks", () => {
+    const plan = generateThutoWeeklyPlan(
+        {
+            availableMinutes: 120,
+            memoryTopics: [
+                {
+                    concepts: [
+                        {
+                            correctSignals: 1,
+                            id: "limits",
+                            label: "Calculus limits",
+                            level: "struggling",
+                            struggleSignals: 4
+                        }
+                    ],
+                    id: "calculus",
+                    level: "struggling",
+                    topic: "Calculus"
+                }
+            ]
+        },
+        now
+    );
+
+    expect(plan.blocks).toEqual(
+        expect.arrayContaining([
+            expect.objectContaining({
+                id: "concept:calculus:limits",
+                priority: "High",
+                subject: "Calculus",
+                title: "Review Calculus limits"
+            })
+        ])
+    );
+    expect(plan.blocks.some((block) => block.id === "topic:calculus")).toBe(
+        false
+    );
+});

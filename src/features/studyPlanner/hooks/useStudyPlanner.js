@@ -57,6 +57,8 @@ export function useStudyPlanner() {
     const [memoryTopics, setMemoryTopics] = useState([]);
     const [quizzes, setQuizzes] = useState([]);
     const [resources, setResources] = useState([]);
+    const [refreshIndex, setRefreshIndex] = useState(0);
+    const reload = useCallback(() => setRefreshIndex((value) => value + 1), []);
 
     useEffect(() => {
         let active = true;
@@ -115,7 +117,24 @@ export function useStudyPlanner() {
         return () => {
             active = false;
         };
-    }, [userId]);
+    }, [refreshIndex, userId]);
+
+    useEffect(() => {
+        const events = [
+            "flashcards-updated",
+            "quiz-attempt-completed",
+            "quizzes-updated",
+            "study-session-completed",
+            "study-plan-updated"
+        ];
+        events.forEach((eventName) =>
+            window.addEventListener(eventName, reload)
+        );
+        return () =>
+            events.forEach((eventName) =>
+                window.removeEventListener(eventName, reload)
+            );
+    }, [reload]);
 
     const addTask = useCallback(
         async (taskInput) => {

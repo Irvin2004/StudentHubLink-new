@@ -195,3 +195,43 @@ test("labels same-day planner deadlines as due today", () => {
 
     expect(recommendation.reason).toContain("Due today");
 });
+
+test("prioritizes a specific struggling concept and keeps its evidence", () => {
+    const [recommendation] = generateThutoRecommendations(
+        {
+            memoryTopics: [
+                {
+                    concepts: [
+                        {
+                            correctSignals: 1,
+                            id: "limits",
+                            label: "Calculus limits",
+                            level: "struggling",
+                            struggleSignals: 4
+                        }
+                    ],
+                    id: "calculus",
+                    level: "struggling",
+                    topic: "Calculus"
+                }
+            ]
+        },
+        now
+    );
+
+    expect(recommendation).toMatchObject({
+        actionLabel: "Start focused study",
+        evidence: "4 struggle signals · 1 correct",
+        id: "concept:calculus:limits",
+        subject: "Calculus",
+        title: "Review Calculus limits",
+        type: "concept",
+        weakTopic: true
+    });
+    expect(recommendation.studyPlan).toMatchObject({
+        notes: expect.stringContaining(
+            "Learning evidence: 4 struggle signals · 1 correct"
+        ),
+        priority: "High"
+    });
+});

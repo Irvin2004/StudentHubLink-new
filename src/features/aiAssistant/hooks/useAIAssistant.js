@@ -1,5 +1,7 @@
 import { useCallback, useRef, useState } from "react";
 
+import { ANALYTICS_EVENTS } from "../../../config/analytics-events.js";
+import { useAnalytics } from "../../../hooks/useAnalytics.js";
 import {
     loadLearningMemory,
     recordThutoLearningMemory
@@ -34,8 +36,6 @@ const INITIAL_STATE = {
     threadId: null
 };
 
-const MAX_CONTENT_LENGTH = 12_000;
-
 function getUserMessageContent(input) {
     if (input.action === AI_ACTIONS.ASK_QUESTION) {
         return String(input.question || "").trim();
@@ -62,17 +62,8 @@ function getAssistantMessageContent(result) {
     return lines.filter(Boolean).join("\n").slice(0, 20_000);
 }
 
-function addLearningMemory(content, prompt) {
-    const cleanPrompt = String(prompt || "").trim();
-    if (!cleanPrompt) return content;
-    const memorySection = `\n\n${cleanPrompt}`;
-    return `${String(content || "").slice(
-        0,
-        Math.max(0, MAX_CONTENT_LENGTH - memorySection.length)
-    )}${memorySection}`.slice(0, MAX_CONTENT_LENGTH);
-}
-
 export function useAIAssistant(userId) {
+    const { track } = useAnalytics();
     const [state, setState] = useState(INITIAL_STATE);
     const loadVersionRef = useRef(0);
     const stateRef = useRef(state);
@@ -200,10 +191,7 @@ export function useAIAssistant(userId) {
             try {
                 const result = await runAIAssistant({
                     ...input,
-                    content: addLearningMemory(
-                        input.content,
-                        conversation.learningMemory?.prompt
-                    )
+                    learningMemory: conversation.learningMemory?.prompt || ""
                 });
                 if (persistent) {
                     try {
@@ -255,6 +243,14 @@ export function useAIAssistant(userId) {
                         ? { ...current, loading: false, result }
                         : current
                 );
+                track(ANALYTICS_EVENTS.THUTO_REQUEST_COMPLETED, {
+                    action: input.action,
+                    contextResourceCount:
+                        conversation.context?.resources?.length ||
+                        (conversation.context ? 1 : 0),
+                    contextual: Boolean(conversation.context),
+                    resultKind: result.kind
+                });
                 return result;
             } catch (error) {
                 setState((current) =>
@@ -265,7 +261,7 @@ export function useAIAssistant(userId) {
                 return null;
             }
         },
-        [userId]
+        [track, userId]
     );
 
     const run = useCallback((input) => execute(input), [execute]);
@@ -319,22 +315,34 @@ export function useAIAssistant(userId) {
         }
     }, [userId]);
 
-    const save = useCallback(async () => {
-        if (!state.result) return null;
-        setState((current) => ({
-            ...current,
-            saveError: null,
-            saving: true
-        }));
-        try {
-            const saved = await saveAIResult(userId, state.result);
-            setState((current) => ({ ...current, saved, saving: false }));
-            return saved;
-        } catch (saveError) {
-            setState((current) => ({ ...current, saveError, saving: false }));
-            return null;
-        }
-    }, [state.result, userId]);
+    const save = useCallback(
+        async (resultOverride = null) => {
+            const resultToSave = resultOverride || state.result;
+            if (!resultToSave) return null;
+            setState((current) => ({
+                ...current,
+                saveError: null,
+                saving: true
+            }));
+            try {
+                const saved = await saveAIResult(userId, resultToSave);
+                setState((current) => ({ ...current, saved, saving: false }));
+                track(ANALYTICS_EVENTS.THUTO_RESULT_SAVED, {
+                    count: Number(saved?.count) || 0,
+                    resultKind: saved?.kind || resultToSave.kind
+                });
+                return saved;
+            } catch (saveError) {
+                setState((current) => ({
+                    ...current,
+                    saveError,
+                    saving: false
+                }));
+                return null;
+            }
+        },
+        [state.result, track, userId]
+    );
 
     return {
         ...state,

@@ -43,7 +43,8 @@ const LIBRARY_CHANNEL_LIMIT = 50;
 const FAVORITES_LIMIT = 500;
 const RESOURCE_ACTIVITY_LIMIT = 500;
 const RESOURCE_PAGE_SIZE = 12;
-const RESOURCE_COMMUNITY_BATCH_SIZE = 30;
+// Each community requires a membership lookup in the collection-group rule.
+const RESOURCE_COMMUNITY_BATCH_SIZE = 10;
 const metadataCache = new Map();
 
 function requireId(value, label) {

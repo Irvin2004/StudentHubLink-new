@@ -67,6 +67,56 @@ function isWeakTopic(topic) {
     );
 }
 
+function strugglingConcepts(topic) {
+    return (topic.concepts || []).filter(
+        (concept) =>
+            concept.level === "struggling" ||
+            Number(concept.struggleSignals) > Number(concept.correctSignals)
+    );
+}
+
+function conceptCandidates(memoryTopics, sessions, now) {
+    return memoryTopics.flatMap((topic) =>
+        strugglingConcepts(topic).map((concept) => {
+            const struggleSignals = Math.max(
+                0,
+                Number(concept.struggleSignals) || 0
+            );
+            const correctSignals = Math.max(
+                0,
+                Number(concept.correctSignals) || 0
+            );
+            const evidence = `${struggleSignals} struggle signal${struggleSignals === 1 ? "" : "s"} · ${correctSignals} correct`;
+            return {
+                actionLabel: "Start focused study",
+                evidence,
+                focus: concept.label,
+                id: `concept:${topic.id || normalized(topic.topic)}:${concept.id || normalized(concept.label)}`,
+                reason: `${concept.label} is a specific weak area in your ${topic.topic} learning history`,
+                score:
+                    112 +
+                    Math.max(0, struggleSignals - correctSignals) * 7 -
+                    recentActivityPenalty(
+                        topic.topic,
+                        memoryTopics,
+                        sessions,
+                        now
+                    ),
+                subject: topic.topic,
+                taskType: "study",
+                target: {
+                    kind: "start-session",
+                    subject: topic.topic,
+                    title: `Thuto focus: ${concept.label}`
+                },
+                title: `Review ${concept.label}`,
+                type: "concept",
+                weakTopic: true
+            };
+        })
+    );
+}
+
 function recentActivityPenalty(label, memoryTopics, sessions, now) {
     const topic = memoryTopics.find((item) => labelsMatch(item.topic, label));
     const session = sessions
@@ -264,35 +314,46 @@ function resourceCandidates(resources, memoryTopics, sessions, now) {
 }
 
 function topicCandidates(memoryTopics, sessions, now) {
-    return memoryTopics.map((topic) => {
-        const neglectedDays = daysSince(topic.updatedAt, now);
-        const weak = isWeakTopic(topic);
-        return {
-            actionLabel: "Start 30 minutes",
-            id: `topic:${topic.id || normalized(topic.topic)}`,
-            reason: weak
-                ? topic.latestQuizPercentage >= 0 &&
-                  topic.latestQuizPercentage < 70
-                    ? `Latest quiz evidence is ${topic.latestQuizPercentage}%`
-                    : "Saved practice shows this is a weak topic"
-                : `Not studied for ${neglectedDays} days`,
-            score:
-                (weak ? 76 : 38 + Math.min(24, neglectedDays)) -
-                recentActivityPenalty(topic.topic, memoryTopics, sessions, now),
-            subject: topic.topic,
-            taskType: "study",
-            target: {
-                kind: "start-session",
+    return memoryTopics
+        .filter((topic) => !strugglingConcepts(topic).length)
+        .map((topic) => {
+            const neglectedDays = daysSince(topic.updatedAt, now);
+            const weak = isWeakTopic(topic);
+            return {
+                actionLabel: "Start 30 minutes",
+                evidence:
+                    topic.latestQuizPercentage >= 0
+                        ? `Latest quiz: ${topic.latestQuizPercentage}%`
+                        : `${Number(topic.struggleSignals) || 0} struggle signals · ${Number(topic.correctSignals) || 0} correct`,
+                id: `topic:${topic.id || normalized(topic.topic)}`,
+                reason: weak
+                    ? topic.latestQuizPercentage >= 0 &&
+                      topic.latestQuizPercentage < 70
+                        ? `Latest quiz evidence is ${topic.latestQuizPercentage}%`
+                        : "Saved practice shows this is a weak topic"
+                    : `Not studied for ${neglectedDays} days`,
+                score:
+                    (weak ? 76 : 38 + Math.min(24, neglectedDays)) -
+                    recentActivityPenalty(
+                        topic.topic,
+                        memoryTopics,
+                        sessions,
+                        now
+                    ),
                 subject: topic.topic,
-                title: `Thuto focus: ${topic.topic}`
-            },
-            title: weak
-                ? `Review ${topic.topic}`
-                : `Spend 30 minutes on ${topic.topic}`,
-            type: "topic",
-            weakTopic: weak
-        };
-    });
+                taskType: "study",
+                target: {
+                    kind: "start-session",
+                    subject: topic.topic,
+                    title: `Thuto focus: ${topic.topic}`
+                },
+                title: weak
+                    ? `Review ${topic.topic}`
+                    : `Spend 30 minutes on ${topic.topic}`,
+                type: "topic",
+                weakTopic: weak
+            };
+        });
 }
 
 export function generateThutoRecommendations(
@@ -330,6 +391,14 @@ export function generateThutoRecommendations(
         ).filter((candidate) => !plannedDeckIds.has(candidate.flashcardDeckId)),
         ...resourceCandidates(resources, memoryTopics, sessions, now).filter(
             (candidate) => !plannedResourceIds.has(candidate.resourceId)
+        ),
+        ...conceptCandidates(memoryTopics, sessions, now).filter(
+            (candidate) =>
+                !activeTasks.some(
+                    (task) =>
+                        labelsMatch(task.title, candidate.focus) ||
+                        normalized(task.title) === normalized(candidate.title)
+                )
         ),
         ...topicCandidates(memoryTopics, sessions, now).filter(
             (candidate) =>

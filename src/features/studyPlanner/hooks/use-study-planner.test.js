@@ -105,6 +105,17 @@ beforeEach(() => {
     files.getResourceLibraryData.mockResolvedValue({ resources: [] });
 });
 
+test("refreshes planner inputs when connected learning systems change", async () => {
+    const { result } = renderHook(() => useStudyPlanner());
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    expect(quizzes.getQuizzes).toHaveBeenCalledTimes(1);
+
+    window.dispatchEvent(new Event("quizzes-updated"));
+
+    await waitFor(() => expect(quizzes.getQuizzes).toHaveBeenCalledTimes(2));
+    expect(memory.getLearningMemoryOverview).toHaveBeenCalledTimes(2);
+});
+
 test("atomically adds accepted Thuto weekly blocks", async () => {
     const { result } = renderHook(() => useStudyPlanner());
     await waitFor(() => expect(result.current.loading).toBe(false));

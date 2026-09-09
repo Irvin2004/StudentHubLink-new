@@ -185,6 +185,44 @@ export async function createQuizFromFlashcardDeck(userId, deck, questions) {
     return { id: reference.id, ...quiz };
 }
 
+export async function createQuizWithQuestions(userId, input) {
+    if (
+        !Array.isArray(input.questions) ||
+        !input.questions.length ||
+        input.questions.length > QUESTION_LIMIT
+    ) {
+        throw new RangeError(
+            "Generate between 1 and 200 quiz questions at a time."
+        );
+    }
+    const reference = doc(quizzesCollection(userId));
+    const timestamp = serverTimestamp();
+    const quiz = {
+        questionCount: input.questions.length,
+        subject: cleanText(input.subject),
+        title: cleanText(input.title),
+        ...(input.resourceId
+            ? { resourceId: cleanText(input.resourceId) }
+            : {}),
+        createdAt: timestamp,
+        updatedAt: timestamp
+    };
+    const batch = writeBatch(db);
+    batch.set(reference, quiz);
+    input.questions.forEach((question, position) => {
+        batch.set(doc(questionsCollection(userId, reference.id)), {
+            correctOptionIndex: Number(question.correctOptionIndex),
+            options: question.options.map(cleanText),
+            position,
+            prompt: cleanText(question.prompt),
+            createdAt: timestamp,
+            updatedAt: timestamp
+        });
+    });
+    await batch.commit();
+    return { id: reference.id, ...quiz };
+}
+
 export async function deleteQuiz(userId, quizId) {
     await Promise.all([
         deleteCollectionDocuments(questionsCollection(userId, quizId)),

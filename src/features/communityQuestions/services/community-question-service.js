@@ -3,6 +3,7 @@ import {
     collectionGroup,
     deleteDoc,
     doc,
+    getDoc,
     getDocs,
     limit,
     onSnapshot,
@@ -68,6 +69,25 @@ export function subscribeToQuestions(communityId, onData, onError) {
         (snapshot) => onData(snapshot.docs.map(questionFromSnapshot)),
         onError
     );
+}
+
+export async function getCommunityQuestions(communityId) {
+    const snapshot = await getDocs(
+        query(
+            questionCollection(communityId),
+            orderBy("updatedAt", "desc"),
+            limit(PAGE_LIMIT)
+        )
+    );
+    return snapshot.docs.map(questionFromSnapshot);
+}
+
+export async function getQuestionAnswer(communityId, questionId, answerId) {
+    if (!answerId) return null;
+    const snapshot = await getDoc(
+        answerReference(communityId, questionId, answerId)
+    );
+    return snapshot.exists() ? answerFromSnapshot(snapshot) : null;
 }
 
 export async function createQuestion(communityId, actor, input) {

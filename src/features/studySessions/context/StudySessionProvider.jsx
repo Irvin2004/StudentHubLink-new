@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
+import { ANALYTICS_EVENTS } from "../../../config/analytics-events.js";
+import { useAnalytics } from "../../../hooks/useAnalytics.js";
 import { useAuth } from "../../../hooks/useAuth.js";
 import { useToast } from "../../../hooks/useToast.js";
 import { recordStudySessionLearningMemory } from "../../learningMemory/services/learning-memory-service.js";
@@ -17,6 +19,7 @@ import {
 import { StudySessionContext } from "./study-session-context.js";
 
 export function StudySessionProvider({ children }) {
+    const { track } = useAnalytics();
     const { user } = useAuth();
     const userId = user?.uid;
     const { showToast } = useToast();
@@ -217,6 +220,10 @@ export function StudySessionProvider({ children }) {
             window.dispatchEvent(
                 new CustomEvent("study-session-completed", { detail: saved })
             );
+            track(ANALYTICS_EVENTS.STUDY_SESSION_COMPLETED, {
+                actualMinutes: Number(saved.actualMinutes) || 0,
+                sourceType: saved.sourceType || "study"
+            });
             showToast({
                 message: `Study session saved: ${saved.actualMinutes} minute${saved.actualMinutes === 1 ? "" : "s"}.`,
                 type: "success"
@@ -237,7 +244,7 @@ export function StudySessionProvider({ children }) {
                 type: "error"
             });
         }
-    }, [cancelSession, liveElapsed, session, showToast, userId]);
+    }, [cancelSession, liveElapsed, session, showToast, track, userId]);
 
     const value = useMemo(
         () => ({

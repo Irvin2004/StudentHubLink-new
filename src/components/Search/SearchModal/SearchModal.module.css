@@ -42,6 +42,19 @@
     font-size: 0.72rem;
 }
 
+.discoverLink {
+    align-self: center;
+    color: var(--color-primary);
+    font-size: var(--font-size-sm);
+    font-weight: 700;
+    padding: var(--space-2);
+    text-decoration: none;
+}
+
+.discoverLink:hover {
+    text-decoration: underline;
+}
+
 @media (max-width: 35rem) {
     .dialog {
         width: 100%;

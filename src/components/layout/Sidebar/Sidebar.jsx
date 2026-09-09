@@ -6,6 +6,7 @@ import styles from "./Sidebar.module.css";
 
 const NAVIGATION_ITEMS = Object.freeze([
     { icon: "home", label: "Home", to: ROUTES.DASHBOARD, end: true },
+    { icon: "search", label: "Discover", to: ROUTES.DISCOVER },
     { icon: "users", label: "Communities", to: ROUTES.COMMUNITIES },
     { icon: "user", label: "Friends", to: ROUTES.FRIENDS },
     { icon: "messages", label: "Messages", to: ROUTES.CHAT },

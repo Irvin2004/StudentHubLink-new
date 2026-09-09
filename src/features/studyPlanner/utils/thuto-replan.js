@@ -22,7 +22,22 @@ function blockKey(item) {
     if (item.quizId) return `quiz:${item.quizId}`;
     if (item.flashcardDeckId) return `flashcards:${item.flashcardDeckId}`;
     if (item.resourceId) return `resource:${item.resourceId}`;
-    return `topic:${String(item.subject || item.title || "").toLowerCase()}`;
+    const subject = String(item.subject || "")
+        .trim()
+        .toLowerCase();
+    const title = String(item.title || "")
+        .trim()
+        .toLowerCase();
+    const titleFocus = title.replace(/^(review|revise|refresh)\s+/, "");
+    if (
+        subject &&
+        titleFocus &&
+        titleFocus !== subject &&
+        title !== titleFocus
+    ) {
+        return `concept:${title}`;
+    }
+    return `topic:${subject || title}`;
 }
 
 function toTask(block) {

@@ -1,32 +1,28 @@
 import { beforeEach, expect, test, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
-    addStudyTask: vi.fn(),
-    createFlashcard: vi.fn(),
-    createFlashcardDeck: vi.fn(),
-    createQuiz: vi.fn(),
-    createQuizQuestion: vi.fn()
+    addStudyTasks: vi.fn(),
+    createFlashcardDeckWithCards: vi.fn(),
+    createQuizWithQuestions: vi.fn()
 }));
 
 vi.mock("../../flashcards/services/flashcard-service.js", () => ({
-    createFlashcard: mocks.createFlashcard,
-    createFlashcardDeck: mocks.createFlashcardDeck
+    createFlashcardDeckWithCards: mocks.createFlashcardDeckWithCards
 }));
 vi.mock("../../quizzes/services/quiz-service.js", () => ({
-    createQuiz: mocks.createQuiz,
-    createQuizQuestion: mocks.createQuizQuestion
+    createQuizWithQuestions: mocks.createQuizWithQuestions
 }));
 vi.mock("../../studyPlanner/services/study-planner-service.js", () => ({
-    addStudyTask: mocks.addStudyTask
+    addStudyTasks: mocks.addStudyTasks
 }));
 
 import { saveAIResult } from "./ai-assistant-persistence.js";
 
 beforeEach(() => {
     vi.clearAllMocks();
-    mocks.createFlashcardDeck.mockResolvedValue({ id: "deck-1" });
-    mocks.createQuiz.mockResolvedValue({ id: "quiz-1" });
-    mocks.addStudyTask.mockResolvedValue({ id: "task-1" });
+    mocks.createFlashcardDeckWithCards.mockResolvedValue({ id: "deck-1" });
+    mocks.createQuizWithQuestions.mockResolvedValue({ id: "quiz-1" });
+    mocks.addStudyTasks.mockImplementation(async (_userId, tasks) => tasks);
 });
 
 test("saves generated flashcards through the flashcard service", async () => {
@@ -40,8 +36,7 @@ test("saves generated flashcards through the flashcard service", async () => {
         title: "Robotics Review"
     });
 
-    expect(mocks.createFlashcardDeck).toHaveBeenCalledOnce();
-    expect(mocks.createFlashcard).toHaveBeenCalledTimes(2);
+    expect(mocks.createFlashcardDeckWithCards).toHaveBeenCalledOnce();
     expect(result).toEqual({ count: 2, id: "deck-1", kind: "flashcards" });
 });
 
@@ -61,16 +56,18 @@ test("saves generated quiz questions through the quiz service", async () => {
         title: "Robotics Quiz"
     });
 
-    expect(mocks.createQuizQuestion).toHaveBeenCalledWith(
+    expect(mocks.createQuizWithQuestions).toHaveBeenCalledWith(
         "user-1",
-        "quiz-1",
-        expect.objectContaining({ questionCount: 1 })
+        expect.objectContaining({ questions })
     );
     expect(result).toEqual({ count: 1, id: "quiz-1", kind: "quiz" });
 });
 
 test("saves every suggested planner task", async () => {
-    const tasks = [{ title: "Review" }, { title: "Practise" }];
+    const tasks = [
+        { resourceId: "science:general:file-1", title: "Review" },
+        { resourceId: "science:general:file-1", title: "Practise" }
+    ];
     await expect(
         saveAIResult("user-1", {
             kind: "study-plan",
@@ -78,9 +75,33 @@ test("saves every suggested planner task", async () => {
             tasks
         })
     ).resolves.toEqual({ count: 2, kind: "study-plan" });
-    expect(mocks.addStudyTask).toHaveBeenCalledTimes(2);
-    expect(mocks.addStudyTask).toHaveBeenCalledWith(
+    expect(mocks.addStudyTasks).toHaveBeenCalledOnce();
+    expect(mocks.addStudyTasks).toHaveBeenCalledWith(
         "user-1",
-        expect.objectContaining({ resourceId: "science:general:file-1" })
+        expect.arrayContaining([
+            expect.objectContaining({
+                resourceId: "science:general:file-1"
+            })
+        ])
     );
 });
+
+test.each(["quiz", "flashcards"])(
+    "does not announce a failed %s save and allows retry",
+    async (kind) => {
+        const save =
+            kind === "quiz"
+                ? mocks.createQuizWithQuestions
+                : mocks.createFlashcardDeckWithCards;
+        const event = vi.spyOn(window, "dispatchEvent");
+        const input = { kind, questions: [{}], cards: [{}] };
+        save.mockRejectedValueOnce(new Error("write rejected"));
+        await expect(saveAIResult("user-1", input)).rejects.toThrow(
+            "write rejected"
+        );
+        expect(event).not.toHaveBeenCalled();
+        await saveAIResult("user-1", input);
+        expect(event).toHaveBeenCalledOnce();
+        event.mockRestore();
+    }
+);

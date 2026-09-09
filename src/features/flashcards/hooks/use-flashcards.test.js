@@ -87,7 +87,8 @@ test("persists a rating and immediately refreshes the due count", async () => {
         "user-1",
         expect.objectContaining({ id: "deck-1" }),
         expect.objectContaining({ id: "card-1" }),
-        "Good"
+        "Good",
+        "flashcard:deck-1:card-1:1"
     );
     expect(result.current.cards[0].easeRating).toBe("good");
     expect(result.current.selectedDeck.dueCount).toBe(0);

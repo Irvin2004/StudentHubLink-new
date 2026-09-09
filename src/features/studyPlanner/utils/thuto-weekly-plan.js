@@ -68,6 +68,20 @@ function isWeakTopic(topic) {
     );
 }
 
+function weakConcepts(topic) {
+    return (topic.concepts || []).filter(
+        (concept) =>
+            concept.level === "struggling" ||
+            Number(concept.struggleSignals) > Number(concept.correctSignals)
+    );
+}
+
+function conceptEvidence(concept) {
+    const struggles = Math.max(0, Number(concept.struggleSignals) || 0);
+    const correct = Math.max(0, Number(concept.correctSignals) || 0);
+    return `${struggles} struggle signal${struggles === 1 ? "" : "s"} and ${correct} correct response${correct === 1 ? "" : "s"}`;
+}
+
 function linkedFields(item) {
     return {
         ...(item.resourceId ? { resourceId: item.resourceId } : {}),
@@ -111,6 +125,37 @@ function buildCandidates({
     const candidates = [];
 
     memoryTopics.forEach((topic) => {
+        const concepts = weakConcepts(topic);
+        concepts.forEach((concept) => {
+            const title = `Review ${concept.label}`;
+            if (
+                activeTasks.some(
+                    (task) => normalized(task.title) === normalized(title)
+                )
+            ) {
+                return;
+            }
+            const struggleGap =
+                (Number(concept.struggleSignals) || 0) -
+                (Number(concept.correctSignals) || 0);
+            candidates.push({
+                deadline: closestSubjectDeadline(
+                    topic.topic,
+                    activeTasks,
+                    todayKey
+                ),
+                duration: 30,
+                id: `concept:${topic.id || normalized(topic.topic)}:${concept.id || normalized(concept.label)}`,
+                priority: "High",
+                reason: `Your learning memory for ${topic.topic} records ${conceptEvidence(concept)} for this concept.`,
+                score: 125 + Math.max(0, struggleGap) * 5,
+                subject: topic.topic,
+                taskType: "study",
+                title
+            });
+        });
+        if (concepts.length) return;
+
         const weak = isWeakTopic(topic);
         const title = weak ? `Review ${topic.topic}` : `Revise ${topic.topic}`;
         if (

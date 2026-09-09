@@ -14,12 +14,14 @@ import { useStudySessions } from "../studySessions/hooks/useStudySessions.js";
 import { AddTaskModal } from "./components/AddTaskModal/index.js";
 import { ClearCompletedModal } from "./components/ClearCompletedModal/index.js";
 import { DeleteTaskModal } from "./components/DeleteTaskModal/index.js";
+import { MemoryRecommendations } from "./components/MemoryRecommendations/MemoryRecommendations.jsx";
 import ReplanPreviewDialog from "./components/ReplanPreviewDialog/ReplanPreviewDialog.jsx";
 import { TaskList } from "./components/TaskList/index.js";
 import { WeeklyProgress } from "./components/WeeklyProgress/index.js";
 import WeeklyPlanPreviewDialog from "./components/WeeklyPlanPreviewDialog/WeeklyPlanPreviewDialog.jsx";
 import { useStudyPlanner } from "./hooks/useStudyPlanner.js";
 import { generateThutoWeeklyPlan } from "./utils/thuto-weekly-plan.js";
+import { generateMemoryPlannerRecommendations } from "../learningMemory/utils/memory-planner-recommendations.js";
 import {
     detectThutoPlanAttention,
     generateThutoReplan
@@ -213,6 +215,14 @@ export default function StudyPlannerPage() {
             }),
         [availableMinutes, memoryTopics, quizzes, tasks]
     );
+    const memoryRecommendations = useMemo(
+        () =>
+            generateMemoryPlannerRecommendations({
+                memoryTopics,
+                plannerTasks: tasks
+            }),
+        [memoryTopics, tasks]
+    );
 
     function startTaskSession(task) {
         startSession({
@@ -259,6 +269,23 @@ export default function StudyPlannerPage() {
                 resources
             })
         );
+    }
+
+    function scheduleMemoryRecommendation(recommendation) {
+        const proposal = recommendation.studyPlan;
+        setEditingTask(null);
+        setNewTaskDefaults({
+            ...proposal,
+            estimatedTime: proposal.estimatedMinutes,
+            notes: [
+                proposal.notes,
+                `Learning evidence: ${recommendation.evidence}`
+            ]
+                .filter(Boolean)
+                .join("\n")
+                .slice(0, 500)
+        });
+        setAddTaskOpen(true);
     }
 
     async function acceptWeek(blocks) {
@@ -318,6 +345,11 @@ export default function StudyPlannerPage() {
                     </Button>
                 </section>
             ) : null}
+
+            <MemoryRecommendations
+                onSchedule={scheduleMemoryRecommendation}
+                recommendations={memoryRecommendations}
+            />
 
             <div className={styles.controls}>
                 <div className={styles.searchField}>

@@ -174,24 +174,38 @@ test("loads evidence-backed notices and prompt context for Thuto", async () => {
 });
 
 test("loads a bounded overview for recommendation scoring", async () => {
-    firestore.getDocs.mockResolvedValue({
-        docs: [
-            {
-                data: () => ({
-                    correctSignals: 2,
-                    latestQuizPercentage: 50,
-                    quizAttempts: 2,
-                    quizScoreTotal: 120,
-                    struggleSignals: 4,
-                    topic: "Calculus",
-                    updatedAt: {
-                        toDate: () => new Date("2026-08-20")
-                    }
-                }),
-                id: "calculus"
-            }
-        ]
-    });
+    firestore.getDocs
+        .mockResolvedValueOnce({
+            docs: [
+                {
+                    data: () => ({
+                        correctSignals: 2,
+                        latestQuizPercentage: 50,
+                        quizAttempts: 2,
+                        quizScoreTotal: 120,
+                        struggleSignals: 4,
+                        topic: "Calculus",
+                        updatedAt: {
+                            toDate: () => new Date("2026-08-20")
+                        }
+                    }),
+                    id: "calculus"
+                }
+            ]
+        })
+        .mockResolvedValueOnce({
+            docs: [
+                {
+                    data: () => ({
+                        correctSignals: 1,
+                        label: "Limits",
+                        struggleSignals: 3,
+                        updatedAt: null
+                    }),
+                    id: "limits"
+                }
+            ]
+        });
 
     await expect(getLearningMemoryOverview("user-1")).resolves.toEqual([
         expect.objectContaining({
@@ -199,9 +213,54 @@ test("loads a bounded overview for recommendation scoring", async () => {
             id: "calculus",
             latestQuizPercentage: 50,
             level: "struggling",
+            concepts: [
+                expect.objectContaining({
+                    label: "Limits",
+                    level: "struggling",
+                    struggleSignals: 3
+                })
+            ],
             topic: "Calculus",
             updatedAt: new Date("2026-08-20")
         })
     ]);
     expect(firestore.orderBy).toHaveBeenCalledWith("updatedAt", "desc");
 });
+
+test.each([
+    [3, 0, "confident"],
+    [0, 0, "developing"],
+    [0, 2, "struggling"]
+])(
+    "classifies absent quiz evidence with %i correct and %i struggles",
+    async (correctSignals, struggleSignals, level) => {
+        const topic = {
+            topic: "Biology",
+            correctSignals,
+            struggleSignals,
+            studiedCount: 3
+        };
+        const concept = { label: "Cells", correctSignals, struggleSignals };
+        const topicDoc = {
+            id: "biology",
+            exists: () => true,
+            data: () => topic
+        };
+        const conceptPage = { docs: [{ id: "cells", data: () => concept }] };
+        firestore.getDoc.mockResolvedValue(topicDoc);
+        firestore.getDocs
+            .mockResolvedValueOnce(conceptPage)
+            .mockResolvedValueOnce({ docs: [] });
+        const memory = await loadLearningMemory("user-1", { title: "Biology" });
+        expect(memory.topics[0].level).toBe(level);
+        expect(memory.topics[0].concepts[0].level).toBe(level);
+        if (level !== "struggling")
+            expect(memory.notices.join(" ")).not.toContain("struggled");
+        firestore.getDocs
+            .mockResolvedValueOnce({ docs: [topicDoc] })
+            .mockResolvedValueOnce(conceptPage);
+        const overview = await getLearningMemoryOverview("user-1");
+        expect(overview[0].level).toBe(level);
+        expect(overview[0].concepts[0].level).toBe(level);
+    }
+);

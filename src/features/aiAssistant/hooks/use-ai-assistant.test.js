@@ -212,7 +212,8 @@ test("injects saved learning evidence into Thuto without treating chat as confid
 
     expect(assistant.runAIAssistant).toHaveBeenCalledWith(
         expect.objectContaining({
-            content: expect.stringContaining(
+            content: motion.content,
+            learningMemory: expect.stringContaining(
                 "StudentHub learning memory: acceleration has struggle evidence."
             )
         })
