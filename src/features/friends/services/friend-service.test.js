@@ -84,6 +84,25 @@ describe("friend service", () => {
         );
     });
 
+    test("rejects self requests and duplicate pending requests with clear feedback", async () => {
+        await expect(
+            sendFriendRequest({ id: "user-1", displayName: "Alex" }, "user-1")
+        ).rejects.toThrow("You cannot send a friend request to yourself.");
+
+        mocks.getDoc
+            .mockResolvedValueOnce({ exists: () => false })
+            .mockResolvedValueOnce({
+                exists: () => true,
+                data: () => ({ senderId: "user-1", status: "pending" })
+            });
+
+        await expect(
+            sendFriendRequest({ id: "user-1", displayName: "Alex" }, "user-2")
+        ).rejects.toThrow("Friend request already sent.");
+        expect(mocks.setDoc).not.toHaveBeenCalled();
+        expect(mocks.createNotification).not.toHaveBeenCalled();
+    });
+
     test("accepts a request atomically and notifies the sender", async () => {
         await acceptFriendRequest(
             { id: "user-2", displayName: "Sam" },
