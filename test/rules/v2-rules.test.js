@@ -6,6 +6,7 @@ import {
     initializeTestEnvironment
 } from "@firebase/rules-unit-testing";
 import {
+    collection,
     collectionGroup,
     doc,
     getDoc,
@@ -61,12 +62,46 @@ before(async () => {
             doc(db, "communities/private/channels/general/files/private-file"),
             { communityId: "private", uploadedAt: new Date() }
         );
+        await setDoc(doc(db, "friends/student_peer"), {
+            participantIds: ["student", "peer"],
+            requestId: "student_peer",
+            createdAt: new Date()
+        });
+        await setDoc(doc(db, "friendRequests/student_peer"), {
+            senderId: "student",
+            receiverId: "peer",
+            status: "pending",
+            createdAt: new Date(),
+            updatedAt: new Date()
+        });
         await uploadBytes(
             ref(context.storage(), "resources/student/legacy.pdf"),
             new Uint8Array([1]),
             { contentType: "application/pdf" }
         );
     });
+});
+
+test("friend preflight permits only caller-bound missing pair documents", async () => {
+    const student = environment.authenticatedContext("student").firestore();
+    const outsider = environment.authenticatedContext("outsider").firestore();
+
+    for (const collectionName of ["friends", "friendRequests"]) {
+        await assertSucceeds(
+            getDoc(doc(student, `${collectionName}/student_newpeer`))
+        );
+        await assertSucceeds(
+            getDoc(doc(student, `${collectionName}/newpeer_student`))
+        );
+        await assertSucceeds(
+            getDoc(doc(student, `${collectionName}/student_peer`))
+        );
+        await assertFails(getDoc(doc(student, `${collectionName}/other_pair`)));
+        await assertFails(
+            getDoc(doc(outsider, `${collectionName}/student_newpeer`))
+        );
+        await assertFails(getDocs(collection(student, collectionName)));
+    }
 });
 after(async () => {
     await environment?.cleanup();

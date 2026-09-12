@@ -22,6 +22,18 @@ service cloud.firestore {
         );
     }
 
+    // Friend connections use a deterministic pair ID: uidA_uidB. A client
+    // needs to probe that document before creating a first request. Permit a
+    // get of a missing pair only when the pair is visibly bound to the caller;
+    // list queries and every existing document remain participant-scoped.
+    function isPotentialFriendPairId(pairId) {
+      return request.auth.uid.matches('^[A-Za-z0-9]{1,128}$')
+        && (
+          pairId.matches('^' + request.auth.uid + '_[A-Za-z0-9]{1,128}$')
+          || pairId.matches('^[A-Za-z0-9]{1,128}_' + request.auth.uid + '$')
+        );
+    }
+
     function userDoc() {
       return get(/databases/$(database)/documents/users/$(request.auth.uid));
     }
@@ -822,7 +834,21 @@ service cloud.firestore {
     }
 
     match /friendRequests/{requestId} {
-      allow read: if signedIn()
+      allow get: if signedIn()
+        && (
+          (
+            exists(/databases/$(database)/documents/friendRequests/$(requestId))
+            && (
+              resource.data.senderId == request.auth.uid
+              || resource.data.receiverId == request.auth.uid
+            )
+          )
+          || (
+            !exists(/databases/$(database)/documents/friendRequests/$(requestId))
+            && isPotentialFriendPairId(requestId)
+          )
+        );
+      allow list: if signedIn()
         && (
           resource.data.senderId == request.auth.uid
           || resource.data.receiverId == request.auth.uid
@@ -857,7 +883,18 @@ service cloud.firestore {
     }
 
     match /friends/{friendId} {
-      allow read: if signedIn()
+      allow get: if signedIn()
+        && (
+          (
+            exists(/databases/$(database)/documents/friends/$(friendId))
+            && request.auth.uid in resource.data.participantIds
+          )
+          || (
+            !exists(/databases/$(database)/documents/friends/$(friendId))
+            && isPotentialFriendPairId(friendId)
+          )
+        );
+      allow list: if signedIn()
         && request.auth.uid in resource.data.participantIds;
       allow create: if signedIn()
         && request.resource.data.keys().hasOnly([
