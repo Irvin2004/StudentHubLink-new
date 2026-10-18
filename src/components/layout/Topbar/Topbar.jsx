@@ -71,7 +71,10 @@ export function Topbar({ menuButtonRef, onMenuToggle }) {
                 >
                     <AppIcon name="bell" size={21} />
                     {unreadCount ? (
-                        <span className={styles.notificationBadge}>
+                        <span
+                            aria-hidden="true"
+                            className={styles.notificationBadge}
+                        >
                             {unreadCount > 99 ? "99+" : unreadCount}
                         </span>
                     ) : null}

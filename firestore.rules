@@ -119,27 +119,27 @@ service cloud.firestore {
         && request.resource.data.updatedAt == request.time;
     }
 
-    function assignmentNotificationIsValid(userId) {
-      let assignmentPath = /databases/$(database)/documents/groups/$(request.resource.data.groupId)/assignments/$(request.resource.data.referenceId);
-      let memberPath = /databases/$(database)/documents/groups/$(request.resource.data.groupId)/members/$(userId);
-      return request.resource.data.type in ["new_assignment", "assignment_due"]
-        && request.resource.data.senderId == request.auth.uid
+    function assignmentNotificationIsValid(userId, notification) {
+      let assignmentPath = /databases/$(database)/documents/groups/$(notification.groupId)/assignments/$(notification.referenceId);
+      let memberPath = /databases/$(database)/documents/groups/$(notification.groupId)/members/$(userId);
+      return notification.type in ["new_assignment", "assignment_due"]
+        && notification.senderId == request.auth.uid
         && userId != request.auth.uid
         && exists(assignmentPath)
         && get(assignmentPath).data.createdBy == request.auth.uid
         && exists(memberPath);
     }
 
-    function messageNotificationIsValid(userId) {
-      let messagePath = /databases/$(database)/documents/messages/$(request.resource.data.referenceId);
-      let conversationPath = /databases/$(database)/documents/conversations/$(request.resource.data.conversationId);
-      return request.resource.data.type in ["new_message", "mention"]
-        && request.resource.data.senderId == request.auth.uid
+    function messageNotificationIsValid(userId, notification) {
+      let messagePath = /databases/$(database)/documents/messages/$(notification.referenceId);
+      let conversationPath = /databases/$(database)/documents/conversations/$(notification.conversationId);
+      return notification.type in ["new_message", "mention"]
+        && notification.senderId == request.auth.uid
         && userId != request.auth.uid
         && exists(messagePath)
         && exists(conversationPath)
         && get(messagePath).data.senderId == request.auth.uid
-        && get(messagePath).data.conversationId == request.resource.data.conversationId
+        && get(messagePath).data.conversationId == notification.conversationId
         && (
           (
             get(conversationPath).data.get("type", "direct") == "direct"
@@ -147,52 +147,52 @@ service cloud.firestore {
           )
           || (
             get(conversationPath).data.get("type", "direct") == "group"
-            && request.resource.data.groupId == get(conversationPath).data.groupId
-            && exists(/databases/$(database)/documents/groups/$(request.resource.data.groupId)/members/$(userId))
+            && notification.groupId == get(conversationPath).data.groupId
+            && exists(/databases/$(database)/documents/groups/$(notification.groupId)/members/$(userId))
           )
         );
     }
 
-    function communityMessageNotificationIsValid(userId) {
-      let messagePath = /databases/$(database)/documents/communities/$(request.resource.data.communityId)/channels/$(request.resource.data.channelId)/messages/$(request.resource.data.referenceId);
-      return request.resource.data.type in [
+    function communityMessageNotificationIsValid(userId, notification) {
+      let messagePath = /databases/$(database)/documents/communities/$(notification.communityId)/channels/$(notification.channelId)/messages/$(notification.referenceId);
+      return notification.type in [
           "new_message", "mention", "channel_mention"
         ]
-        && request.resource.data.senderId == request.auth.uid
+        && notification.senderId == request.auth.uid
         && userId != request.auth.uid
         && exists(messagePath)
         && get(messagePath).data.senderId == request.auth.uid
-        && isCommunityMember(request.resource.data.communityId)
+        && isCommunityMember(notification.communityId)
         && exists(
-          /databases/$(database)/documents/communities/$(request.resource.data.communityId)/members/$(userId)
+          /databases/$(database)/documents/communities/$(notification.communityId)/members/$(userId)
         );
     }
 
-    function communityFileNotificationIsValid(userId) {
-      let filePath = /databases/$(database)/documents/communities/$(request.resource.data.communityId)/channels/$(request.resource.data.channelId)/files/$(request.resource.data.referenceId);
-      return request.resource.data.type == "new_file"
-        && request.resource.data.senderId == request.auth.uid
+    function communityFileNotificationIsValid(userId, notification) {
+      let filePath = /databases/$(database)/documents/communities/$(notification.communityId)/channels/$(notification.channelId)/files/$(notification.referenceId);
+      return notification.type == "new_file"
+        && notification.senderId == request.auth.uid
         && userId != request.auth.uid
         && exists(filePath)
         && get(filePath).data.uploadedBy == request.auth.uid
-        && isCommunityMember(request.resource.data.communityId)
+        && isCommunityMember(notification.communityId)
         && exists(
-          /databases/$(database)/documents/communities/$(request.resource.data.communityId)/members/$(userId)
+          /databases/$(database)/documents/communities/$(notification.communityId)/members/$(userId)
         );
     }
 
-    function friendNotificationIsValid(userId) {
-      let friendRequestPath = /databases/$(database)/documents/friendRequests/$(request.resource.data.referenceId);
+    function friendNotificationIsValid(userId, notification) {
+      let friendRequestPath = /databases/$(database)/documents/friendRequests/$(notification.referenceId);
       return exists(friendRequestPath)
         && (
           (
-            request.resource.data.type == "friend_request"
+            notification.type == "friend_request"
             && get(friendRequestPath).data.status == "pending"
             && get(friendRequestPath).data.senderId == request.auth.uid
             && get(friendRequestPath).data.receiverId == userId
           )
           || (
-            request.resource.data.type == "friend_accepted"
+            notification.type == "friend_accepted"
             && get(friendRequestPath).data.status == "accepted"
             && get(friendRequestPath).data.receiverId == request.auth.uid
             && get(friendRequestPath).data.senderId == userId
@@ -200,43 +200,43 @@ service cloud.firestore {
         );
     }
 
-    function resourceNotificationIsValid(userId) {
-      let resourcePath = /databases/$(database)/documents/groups/$(request.resource.data.groupId)/resources/$(request.resource.data.referenceId);
-      return request.resource.data.type == "new_resource"
-        && request.resource.data.senderId == request.auth.uid
+    function resourceNotificationIsValid(userId, notification) {
+      let resourcePath = /databases/$(database)/documents/groups/$(notification.groupId)/resources/$(notification.referenceId);
+      return notification.type == "new_resource"
+        && notification.senderId == request.auth.uid
         && userId != request.auth.uid
         && exists(resourcePath)
         && get(resourcePath).data.uploaderId == request.auth.uid
-        && exists(/databases/$(database)/documents/groups/$(request.resource.data.groupId)/members/$(userId));
+        && exists(/databases/$(database)/documents/groups/$(notification.groupId)/members/$(userId));
     }
 
-    function notificationSourceIsValid(userId) {
+    function notificationSourceIsValid(userId, notification) {
       return isAdmin()
         || (
-          request.resource.data.type in ["new_assignment", "assignment_due"]
-          && assignmentNotificationIsValid(userId)
+          notification.type in ["new_assignment", "assignment_due"]
+          && assignmentNotificationIsValid(userId, notification)
         )
         || (
-          request.resource.data.type in ["new_message", "mention"]
-          && messageNotificationIsValid(userId)
+          notification.type in ["new_message", "mention"]
+          && messageNotificationIsValid(userId, notification)
         )
         || (
-          request.resource.data.type in [
+          notification.type in [
             "new_message", "mention", "channel_mention"
           ]
-          && communityMessageNotificationIsValid(userId)
+          && communityMessageNotificationIsValid(userId, notification)
         )
         || (
-          request.resource.data.type == "new_file"
-          && communityFileNotificationIsValid(userId)
+          notification.type == "new_file"
+          && communityFileNotificationIsValid(userId, notification)
         )
         || (
-          request.resource.data.type in ["friend_request", "friend_accepted"]
-          && friendNotificationIsValid(userId)
+          notification.type in ["friend_request", "friend_accepted"]
+          && friendNotificationIsValid(userId, notification)
         )
         || (
-          request.resource.data.type == "new_resource"
-          && resourceNotificationIsValid(userId)
+          notification.type == "new_resource"
+          && resourceNotificationIsValid(userId, notification)
         );
     }
 
@@ -2664,10 +2664,16 @@ service cloud.firestore {
       // The parent path already scopes these documents to their owner. Keeping
       // reads path-based also lets users load legacy notifications created
       // before recipientId became a required field.
-      allow read: if isOwner(userId);
+      // Event creators need a point read for the transaction that makes
+      // deterministic notification delivery idempotent. They still cannot
+      // list a recipient's notification collection.
+      allow get: if isOwner(userId)
+        || (!isAdmin()
+          && notificationSourceIsValid(userId, resource.data));
+      allow list: if isOwner(userId);
       allow create: if signedIn()
         && notificationFieldsAreValid(userId)
-        && notificationSourceIsValid(userId);
+        && notificationSourceIsValid(userId, request.resource.data);
       allow update: if isOwner(userId)
         && resource.data.recipientId == userId
         && request.resource.data.diff(resource.data).affectedKeys()

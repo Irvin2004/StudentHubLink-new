@@ -207,6 +207,7 @@ export async function sendFriendRequest(sender, receiverId) {
     });
     try {
         await createNotification(cleanReceiverId, {
+            eventId: `friend-request-${reference.id}`,
             message: `${sender.displayName || "A student"} sent you a friend request.`,
             referenceId: reference.id,
             route: "/app/friends?tab=requests",
@@ -243,6 +244,7 @@ export async function acceptFriendRequest(user, request) {
     });
     await batch.commit();
     await createNotification(request.senderId, {
+        eventId: `friend-accepted-${request.id}`,
         message: `${user.displayName || "A student"} accepted your friend request.`,
         referenceId: request.id,
         route: "/app/friends",

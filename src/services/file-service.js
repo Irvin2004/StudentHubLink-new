@@ -126,6 +126,7 @@ async function announceFile(file) {
             .filter((item) => item.id !== file.uploadedBy)
             .map((item) =>
                 createNotification(item.id, {
+                    eventId: `new-file-${file.id}`,
                     senderId: file.uploadedBy,
                     senderName: file.uploadedByName,
                     type: "new_file",

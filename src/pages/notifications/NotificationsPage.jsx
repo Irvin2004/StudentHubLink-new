@@ -29,8 +29,18 @@ function destination(item) {
 export default function NotificationsPage() {
     useDocumentTitle("StudentHub - Notifications", "react-app");
     const { track } = useAnalytics();
-    const { error, loading, markAllRead, notifications, setRead, unreadCount } =
-        useNotifications();
+    const {
+        error,
+        hasMoreNotifications,
+        loadOlder,
+        loading,
+        loadingOlderNotifications,
+        markAllRead,
+        notifications,
+        retryNotifications,
+        setRead,
+        unreadCount
+    } = useNotifications();
     const { settings, updateSettings } = useSettings();
     const [filter, setFilter] = useState("all");
     const deferredFilter = useDeferredValue(filter);
@@ -70,6 +80,7 @@ export default function NotificationsPage() {
                     </p>
                 </div>
                 <button
+                    aria-label={`Mark all ${unreadCount} unread notifications as read`}
                     disabled={!unreadCount}
                     onClick={markAllRead}
                     type="button"
@@ -126,58 +137,125 @@ export default function NotificationsPage() {
                 ) : error && !notifications.length ? (
                     <LoadErrorState
                         description="We could not load your notifications."
+                        onRetry={retryNotifications}
                         title="Notifications unavailable"
                     />
                 ) : visible.length ? (
-                    visible.map((item) => (
-                        <article
-                            className={styles.item}
-                            data-unread={!item.read || undefined}
-                            key={item.id}
-                        >
-                            <span aria-hidden="true" className={styles.icon}>
-                                {item.type.includes("mention")
-                                    ? "@"
-                                    : item.type === "new_file"
-                                      ? "↥"
-                                      : "•"}
-                            </span>
-                            <div>
-                                <header>
-                                    <strong>{item.title}</strong>
-                                    <time>
-                                        {toDate(
-                                            item.createdAt
-                                        ).toLocaleString()}
-                                    </time>
-                                </header>
-                                <p>{item.message}</p>
-                                <small>{item.senderName}</small>
-                            </div>
-                            <div className={styles.actions}>
-                                {destination(item) !== "#" ? (
-                                    <Link
-                                        onClick={() => openNotification(item)}
-                                        to={destination(item)}
-                                    >
-                                        Open
-                                    </Link>
-                                ) : null}
+                    <>
+                        {error ? (
+                            <div className={styles.inlineError} role="alert">
+                                <span>
+                                    Some notification updates could not be
+                                    loaded.
+                                </span>
                                 <button
-                                    onClick={() => setRead(item.id, !item.read)}
+                                    onClick={retryNotifications}
                                     type="button"
                                 >
-                                    Mark as {item.read ? "unread" : "read"}
+                                    Retry
                                 </button>
                             </div>
-                        </article>
-                    ))
+                        ) : null}
+                        {visible.map((item) => (
+                            <article
+                                className={styles.item}
+                                data-unread={!item.read || undefined}
+                                key={item.id}
+                            >
+                                <span
+                                    aria-hidden="true"
+                                    className={styles.icon}
+                                >
+                                    {item.type.includes("mention")
+                                        ? "@"
+                                        : item.type === "new_file"
+                                          ? "↥"
+                                          : "•"}
+                                </span>
+                                <button
+                                    aria-label={`${item.read ? "Read" : "Unread"} notification: ${item.title}`}
+                                    className={styles.content}
+                                    onClick={() => openNotification(item)}
+                                    type="button"
+                                >
+                                    {!item.read ? (
+                                        <span className="sr-only">
+                                            Unread.{" "}
+                                        </span>
+                                    ) : null}
+                                    <header>
+                                        <strong>{item.title}</strong>
+                                        <time>
+                                            {toDate(
+                                                item.createdAt
+                                            ).toLocaleString()}
+                                        </time>
+                                    </header>
+                                    <p>{item.message}</p>
+                                    <small>{item.senderName}</small>
+                                </button>
+                                <div className={styles.actions}>
+                                    {destination(item) !== "#" ? (
+                                        <Link
+                                            onClick={() =>
+                                                openNotification(item)
+                                            }
+                                            to={destination(item)}
+                                        >
+                                            Open
+                                        </Link>
+                                    ) : null}
+                                    <button
+                                        aria-label={`Mark ${item.title} as ${item.read ? "unread" : "read"}`}
+                                        onClick={() =>
+                                            setRead(item.id, !item.read)
+                                        }
+                                        type="button"
+                                    >
+                                        Mark as {item.read ? "unread" : "read"}
+                                    </button>
+                                </div>
+                            </article>
+                        ))}
+                        {hasMoreNotifications ? (
+                            <button
+                                aria-busy={loadingOlderNotifications}
+                                className={styles.loadOlder}
+                                disabled={loadingOlderNotifications}
+                                onClick={() => void loadOlder()}
+                                type="button"
+                            >
+                                {loadingOlderNotifications
+                                    ? "Loading older notifications…"
+                                    : "Load older notifications"}
+                            </button>
+                        ) : null}
+                    </>
                 ) : (
-                    <EmptyState
-                        description="You don't have any notifications yet."
-                        illustration="notifications"
-                        title="You're all caught up"
-                    />
+                    <>
+                        <EmptyState
+                            description={
+                                filter === "all"
+                                    ? "You don't have any notifications yet."
+                                    : "No notifications match this filter."
+                            }
+                            illustration="notifications"
+                            title="You're all caught up"
+                        />
+                        {hasMoreNotifications ? (
+                            <button
+                                aria-busy={loadingOlderNotifications}
+                                className={styles.loadOlder}
+                                disabled={loadingOlderNotifications}
+                                onClick={() => void loadOlder()}
+                                type="button"
+                            >
+                                {loadingOlderNotifications
+                                    ? "Loading older notifications…"
+                                    : "Load older notifications"}
+                            </button>
+                        ) : null}
+                    </>
                 )}
             </section>
         </main>

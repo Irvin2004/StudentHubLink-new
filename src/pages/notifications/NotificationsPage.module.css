@@ -27,7 +27,9 @@
 .header button,
 .filters button,
 .actions a,
-.actions button {
+.actions button,
+.loadOlder,
+.inlineError button {
     min-height: 2.4rem;
     padding: 0 var(--space-3);
     border: 1px solid var(--border);
@@ -97,6 +99,26 @@
     border-radius: var(--radius-lg);
     background: var(--surface);
 }
+.content {
+    min-width: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+.content:focus-visible,
+.loadOlder:focus-visible,
+.inlineError button:focus-visible,
+.actions a:focus-visible,
+.actions button:focus-visible,
+.header button:focus-visible,
+.filters button:focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--focus-ring) 35%, transparent);
+    outline-offset: 2px;
+}
 .item[data-unread] {
     border-left: 4px solid var(--primary);
     background: color-mix(in srgb, var(--primary) 5%, var(--surface));
@@ -135,6 +157,25 @@
     display: flex;
     gap: var(--space-2);
 }
+.inlineError {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    border: 1px solid var(--danger);
+    border-radius: var(--radius-md);
+    background: color-mix(in srgb, var(--danger) 6%, var(--surface));
+    color: var(--text);
+    font-size: 0.78rem;
+}
+.inlineError button {
+    flex: 0 0 auto;
+}
+.loadOlder {
+    justify-self: center;
+    margin-top: var(--space-3);
+}
 .actions a {
     display: inline-flex;
     align-items: center;
@@ -152,6 +193,10 @@
     .actions {
         grid-column: 2;
         flex-wrap: wrap;
+    }
+    .inlineError {
+        align-items: flex-start;
+        flex-direction: column;
     }
     .item header {
         flex-direction: column;

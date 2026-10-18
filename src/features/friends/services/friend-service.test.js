@@ -77,6 +77,7 @@ describe("friend service", () => {
         expect(mocks.createNotification).toHaveBeenCalledWith(
             "user-2",
             expect.objectContaining({
+                eventId: "friend-request-user-1_user-2",
                 referenceId: "user-1_user-2",
                 route: "/app/friends?tab=requests",
                 type: "friend_request"
@@ -120,7 +121,10 @@ describe("friend service", () => {
         expect(mocks.batch.commit).toHaveBeenCalledOnce();
         expect(mocks.createNotification).toHaveBeenCalledWith(
             "user-1",
-            expect.objectContaining({ type: "friend_accepted" })
+            expect.objectContaining({
+                eventId: "friend-accepted-request-1",
+                type: "friend_accepted"
+            })
         );
     });
 

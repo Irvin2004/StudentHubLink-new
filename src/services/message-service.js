@@ -98,6 +98,7 @@ async function notifyCommunityMembers(messageId, message) {
             const nickname = String(item.data().nickname || "").toLowerCase();
             const mentioned = mentions.channel || mentionedNames.has(nickname);
             return createNotification(item.id, {
+                eventId: `${mentioned ? "mention" : "new-message"}-${messageId}`,
                 senderId: message.senderId,
                 senderName: message.senderName,
                 type: mentioned
