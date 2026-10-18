@@ -34,6 +34,7 @@ import {
     RESOURCE_ACTIONS,
     selectFavoriteResources
 } from "./utils/resource-library.js";
+import { getActiveStudyResources } from "./utils/active-study-resources.js";
 import styles from "./ResourceLibraryPage.module.css";
 
 export default function ResourceLibraryPage() {
@@ -129,7 +130,7 @@ export default function ResourceLibraryPage() {
     const activeStudyResourceIds = useMemo(
         () =>
             new Set(
-                (aiAssistant.context?.resources || []).map(
+                getActiveStudyResources(aiAssistant.context).map(
                     (resource) => resource.id
                 )
             ),
@@ -227,7 +228,9 @@ export default function ResourceLibraryPage() {
 
     const handleAddStudyMaterial = useCallback(
         async (resource) => {
-            const currentResources = aiAssistant.context?.resources || [];
+            const currentResources = getActiveStudyResources(
+                aiAssistant.context
+            );
             if (currentResources.length >= MAX_STUDY_RESOURCES) return;
 
             setThutoResourceKey(resource.resourceKey);
@@ -248,7 +251,9 @@ export default function ResourceLibraryPage() {
 
     const handleRemoveStudyMaterial = useCallback(
         (resourceId) => {
-            const currentResources = aiAssistant.context?.resources || [];
+            const currentResources = getActiveStudyResources(
+                aiAssistant.context
+            );
             if (currentResources.length <= 1) return;
 
             const context = createStudyContext(

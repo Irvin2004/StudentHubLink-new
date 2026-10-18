@@ -60,6 +60,7 @@ vi.mock("../../components/files/FileUploader/FileUploader.jsx", () => ({
 
 import ResourceLibraryPage from "./ResourceLibraryPage.jsx";
 import { AI_ACTIONS } from "../aiAssistant/config/ai-action-types.js";
+import { getActiveStudyResources } from "./utils/active-study-resources.js";
 
 const resources = [
     {
@@ -125,6 +126,22 @@ beforeEach(() => {
         plannerResources: [],
         resources
     });
+});
+
+test("retains a single active material when building a multi-material context", () => {
+    const motionContext = {
+        content: "Motion context",
+        id: "science:general:file-1",
+        title: "Motion notes"
+    };
+
+    expect(getActiveStudyResources(motionContext)).toEqual([motionContext]);
+    expect(
+        getActiveStudyResources({
+            ...motionContext,
+            resources: [motionContext]
+        })
+    ).toEqual([motionContext]);
 });
 
 test("filters resources and switches between grid and list views", () => {
