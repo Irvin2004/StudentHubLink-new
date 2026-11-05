@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 
 import Button from "../../../components/ui/Button/index.js";
 import Input from "../../../components/ui/Input/index.js";
@@ -128,11 +128,8 @@ export default function AIAssistantDialog({
     const [reviewingPlan, setReviewingPlan] = useState(false);
     const inputRef = useRef(null);
 
-    useEffect(() => {
-        setSelectedAction(action);
-        setSubject(context?.subject || "");
-        setContent(context?.content || "");
-    }, [action, context?.content, context?.subject]);
+    const studySubject = context?.subject || subject;
+    const studyContent = context?.content || content;
     const askingQuestion = selectedAction === AI_ACTIONS.ASK_QUESTION;
     const activeResources = context?.resources || (context ? [context] : []);
     const multipleResources = activeResources.length > 1;
@@ -210,7 +207,7 @@ export default function AIAssistantDialog({
                         setReviewingPlan(false);
                         void onRun({
                             action: selectedAction,
-                            content,
+                            content: studyContent,
                             question,
                             source: context,
                             subject
@@ -454,7 +451,7 @@ export default function AIAssistantDialog({
                             readOnly={Boolean(context)}
                             ref={inputRef}
                             required
-                            value={subject}
+                            value={studySubject}
                         />
                     </div>
                     {askingQuestion ? (
@@ -478,7 +475,7 @@ export default function AIAssistantDialog({
                     <Textarea
                         helperText={
                             context
-                                ? `${content.length.toLocaleString()} characters from ${activeResources.length} ${activeResources.length === 1 ? "resource" : "resources"}`
+                                ? `${studyContent.length.toLocaleString()} characters from ${activeResources.length} ${activeResources.length === 1 ? "resource" : "resources"}`
                                 : `${content.length.toLocaleString()} / 12,000 characters`
                         }
                         label={context ? "Study context" : "Notes or context"}
@@ -488,7 +485,7 @@ export default function AIAssistantDialog({
                         readOnly={Boolean(context)}
                         required
                         rows={8}
-                        value={content}
+                        value={studyContent}
                     />
                     <Button
                         disabled={
