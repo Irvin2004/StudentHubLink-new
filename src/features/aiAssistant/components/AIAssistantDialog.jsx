@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import Button from "../../../components/ui/Button/index.js";
 import Input from "../../../components/ui/Input/index.js";
@@ -127,6 +127,12 @@ export default function AIAssistantDialog({
     const [studyMaterialKey, setStudyMaterialKey] = useState("");
     const [reviewingPlan, setReviewingPlan] = useState(false);
     const inputRef = useRef(null);
+
+    useEffect(() => {
+        setSelectedAction(action);
+        setSubject(context?.subject || "");
+        setContent(context?.content || "");
+    }, [action, context?.content, context?.subject]);
     const askingQuestion = selectedAction === AI_ACTIONS.ASK_QUESTION;
     const activeResources = context?.resources || (context ? [context] : []);
     const multipleResources = activeResources.length > 1;
