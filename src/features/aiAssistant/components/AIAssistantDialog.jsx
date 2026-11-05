@@ -10,6 +10,7 @@ import {
     AI_ACTION_OPTIONS,
     getAIActionLabel
 } from "../config/ai-action-types.js";
+import { createStudyContext } from "../services/resource-context.js";
 import GeneratedStudyPlanReview from "./GeneratedStudyPlanReview.jsx";
 import styles from "./AIAssistantDialog.module.css";
 
@@ -129,7 +130,10 @@ export default function AIAssistantDialog({
     const inputRef = useRef(null);
 
     const studySubject = context?.subject || subject;
-    const studyContent = context?.content || content;
+    const studyContent =
+        context?.resources?.length > 1
+            ? createStudyContext(context.resources).content
+            : context?.content || content;
     const askingQuestion = selectedAction === AI_ACTIONS.ASK_QUESTION;
     const activeResources = context?.resources || (context ? [context] : []);
     const multipleResources = activeResources.length > 1;
@@ -210,7 +214,7 @@ export default function AIAssistantDialog({
                             content: studyContent,
                             question,
                             source: context,
-                            subject
+                            subject: studySubject
                         });
                     }}
                 >
