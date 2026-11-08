@@ -301,19 +301,20 @@ test("adds and removes active Thuto study materials without mixing sets", async 
         expect(within(materials).getByText("Motion notes")).toBeVisible();
         expect(within(materials).getByText("Algebra sheet")).toBeVisible();
     });
-    expect(
-        screen.getByRole("textbox", { name: "Study context" }).value
-    ).toContain("Study material 2: Algebra sheet");
     expect(conversations.loadThutoConversation).toHaveBeenLastCalledWith(
         "user-1",
         expect.objectContaining({
             id: expect.stringContaining("set:"),
+            content: expect.stringContaining("Study material 2: Algebra sheet"),
             resources: expect.arrayContaining([
                 expect.objectContaining({ id: "science:general:file-1" }),
                 expect.objectContaining({ id: "maths:general:file-2" })
             ])
         })
     );
+    expect(
+        screen.getByRole("textbox", { name: "Study context" }).value
+    ).toContain("Study material 2: Algebra sheet");
 
     fireEvent.click(
         screen.getByRole("button", { name: "Remove Motion notes" })
