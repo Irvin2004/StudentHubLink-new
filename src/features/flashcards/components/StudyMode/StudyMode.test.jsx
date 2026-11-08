@@ -91,10 +91,17 @@ test("persists ratings and summarizes a due-card review", async () => {
     fireEvent.click(screen.getByRole("button", { name: /Card front/ }));
     fireEvent.click(screen.getByRole("button", { name: "Good" }));
     await waitFor(() => expect(onRate).toHaveBeenCalled());
+    await waitFor(() =>
+        expect(screen.getByRole("button", { name: "Good" })).not.toBeDisabled()
+    );
     fireEvent.click(screen.getByRole("button", { name: "Next" }));
+    expect(screen.getByText(cards[1].front)).toBeVisible();
     fireEvent.click(screen.getByRole("button", { name: /Card front/ }));
     fireEvent.click(screen.getByRole("button", { name: "Again" }));
     await waitFor(() => expect(onRate).toHaveBeenCalledTimes(2));
+    await waitFor(() =>
+        expect(screen.getByRole("button", { name: "Again" })).not.toBeDisabled()
+    );
     fireEvent.click(screen.getByRole("button", { name: "Finish Session" }));
 
     expect(screen.getByText("Review complete")).toBeVisible();
