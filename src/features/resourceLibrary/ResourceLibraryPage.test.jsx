@@ -285,11 +285,11 @@ test("adds and removes active Thuto study materials without mixing sets", async 
     const activeMaterials = await screen.findByLabelText(
         "Active Thuto study materials"
     );
-    fireEvent.click(
-        within(activeMaterials).getByRole("button", {
-            name: "Add study material"
-        })
-    );
+    const addMaterialButton = within(activeMaterials).getByRole("button", {
+        name: "Add study material"
+    });
+    await waitFor(() => expect(addMaterialButton).toBeEnabled());
+    fireEvent.click(addMaterialButton);
     fireEvent.click(
         within(activeMaterials).getByRole("button", {
             name: "Add selected material"
