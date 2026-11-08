@@ -47,7 +47,7 @@ describe("MessageComposer", () => {
                 })
             )
         );
-        expect(input).toHaveValue("");
+        await waitFor(() => expect(input).toHaveValue(""));
     });
 
     test("keeps a newline on Shift + Enter and disables empty sends", () => {
