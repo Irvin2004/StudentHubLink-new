@@ -86,7 +86,23 @@ export async function getUserDocument(user) {
         updatedAt: serverTimestamp()
     };
 
-    await setDoc(userRef, fallbackProfile);
+    await Promise.all([
+        setDoc(userRef, fallbackProfile),
+        setDoc(doc(db, "publicProfiles", user.uid), {
+            name: fallbackProfile.name,
+            fullName: fallbackProfile.fullName,
+            displayName: fallbackProfile.fullName,
+            photoURL: user.photoURL || "",
+            institution: fallbackProfile.institution,
+            course: fallbackProfile.course,
+            yearOfStudy: fallbackProfile.yearOfStudy,
+            bio: fallbackProfile.bio,
+            profileVisibility: fallbackProfile.profileVisibility,
+            joinedAt: fallbackProfile.joinedAt,
+            createdAt: fallbackProfile.createdAt,
+            updatedAt: fallbackProfile.updatedAt
+        })
+    ]);
 
     return fallbackProfile;
 }
@@ -223,9 +239,18 @@ function bindProfileActions(user, userData) {
 
             try {
                 await updateProfile(user, { displayName: fullName });
-                await setDoc(
-                    doc(db, "users", user.uid),
-                    {
+                const publicProfileUpdates = {
+                    name: fullName,
+                    fullName,
+                    displayName: fullName,
+                    institution,
+                    course,
+                    yearOfStudy,
+                    bio,
+                    updatedAt: serverTimestamp()
+                };
+                await Promise.all([
+                    setDoc(doc(db, "users", user.uid), {
                         name: fullName,
                         fullName,
                         displayName: fullName,
@@ -235,8 +260,11 @@ function bindProfileActions(user, userData) {
                         bio,
                         updatedAt: serverTimestamp()
                     },
-                    { merge: true }
-                );
+                    { merge: true }),
+                    setDoc(doc(db, "publicProfiles", user.uid), publicProfileUpdates, {
+                        merge: true
+                    })
+                ]);
 
                 Object.assign(userData, {
                     name: fullName,
@@ -374,7 +402,7 @@ if (registerForm) {
             }
 
             try {
-                await setDoc(doc(db, "users", userCredential.user.uid), {
+                const newUserProfile = {
                     uid: userCredential.user.uid,
                     name: fullName,
                     fullName: fullName,
@@ -396,7 +424,25 @@ if (registerForm) {
                     createdAt: serverTimestamp(),
                     updatedAt: serverTimestamp(),
                     lastLoginAt: serverTimestamp()
-                });
+                };
+                const newPublicProfile = {
+                    name: fullName,
+                    fullName,
+                    displayName: fullName,
+                    photoURL: "",
+                    institution: "",
+                    course: "",
+                    yearOfStudy: "",
+                    bio: "",
+                    profileVisibility: "public",
+                    joinedAt: newUserProfile.joinedAt,
+                    createdAt: newUserProfile.createdAt,
+                    updatedAt: newUserProfile.updatedAt
+                };
+                await Promise.all([
+                    setDoc(doc(db, "users", userCredential.user.uid), newUserProfile),
+                    setDoc(doc(db, "publicProfiles", userCredential.user.uid), newPublicProfile)
+                ]);
 
                 setMessage(
                     "registerMessage",
