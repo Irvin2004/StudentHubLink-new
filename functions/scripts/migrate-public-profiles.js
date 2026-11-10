@@ -2,6 +2,7 @@
 "use strict";
 
 const admin = require("firebase-admin");
+const { toPublicProfile } = require("./public-profile-migration");
 
 const PAGE_SIZE = 200;
 const APPLY = process.argv.includes("--apply");
@@ -21,40 +22,6 @@ if (!admin.apps.length) {
 
 const db = admin.firestore();
 const { FieldPath, FieldValue } = admin.firestore;
-
-function firstString(...values) {
-    return values.find(
-        (value) => typeof value === "string" && value.trim().length > 0
-    )?.trim() || "";
-}
-
-function toPublicProfile(user) {
-    const displayName = firstString(
-        user.displayName,
-        user.fullName,
-        user.name,
-        "Student"
-    );
-
-    return {
-        displayName,
-        fullName: firstString(user.fullName, displayName),
-        name: firstString(user.name, displayName),
-        photoURL: typeof user.photoURL === "string" ? user.photoURL : "",
-        institution: typeof user.institution === "string" ? user.institution : "",
-        course: typeof user.course === "string" ? user.course : "",
-        yearOfStudy:
-            typeof user.yearOfStudy === "string" ? user.yearOfStudy : "",
-        bio: typeof user.bio === "string" ? user.bio : "",
-        profileVisibility:
-            user.profileVisibility === "private" ? "private" : "public",
-        ...(user.joinedAt || user.createdAt
-            ? { joinedAt: user.joinedAt || user.createdAt }
-            : {}),
-        ...(user.createdAt ? { createdAt: user.createdAt } : {}),
-        updatedAt: FieldValue.serverTimestamp()
-    };
-}
 
 async function migrate() {
     let cursor = null;
@@ -99,7 +66,10 @@ async function migrate() {
 
             missing += 1;
             if (APPLY) {
-                batch.create(publicRefs[index], toPublicProfile(userDoc.data()));
+                batch.create(
+                    publicRefs[index],
+                    toPublicProfile(userDoc.data(), FieldValue.serverTimestamp())
+                );
                 pageWrites += 1;
             }
         }
@@ -117,7 +87,7 @@ async function migrate() {
         if (usersPage.size < PAGE_SIZE) break;
     }
 
-    console.log("\nMigration summary");
+    console.log("\\nMigration summary");
     console.log(`Project: ${projectId}`);
     console.log(`Private user documents scanned: ${scanned}`);
     console.log(`Public profiles already present: ${alreadyPresent}`);
@@ -126,7 +96,7 @@ async function migrate() {
 
     if (!APPLY && missing > 0) {
         console.log(
-            "\nDry run only. Re-run with --apply to create the missing public profiles."
+            "\\nDry run only. Re-run with --apply to create the missing public profiles."
         );
     }
 }
