@@ -68,7 +68,6 @@ async function loadProfiles(userIds) {
                     : {
                           id: userId,
                           displayName: "Student",
-                          email: "",
                           photoURL: null
                       }
             ];
