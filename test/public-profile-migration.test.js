@@ -2,7 +2,9 @@
 
 const test = require("node:test");
 const assert = require("node:assert/strict");
-const { toPublicProfile } = require("../functions/scripts/public-profile-migration");
+const {
+    toPublicProfile
+} = require("../functions/scripts/public-profile-migration");
 
 test("copies only approved presentation fields", () => {
     const timestamp = { sentinel: "server timestamp" };
