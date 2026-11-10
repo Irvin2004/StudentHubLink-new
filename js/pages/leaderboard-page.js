@@ -2,6 +2,7 @@ import {
     collection,
     getDocs,
     limit,
+    orderBy,
     query,
     where
 } from "firebase/firestore";
@@ -61,7 +62,7 @@ function renderTopContributors(users) {
     }
 
     container.innerHTML = users
-        .map((user, index) => {
+        .map((user) => {
             const name =
                 user.fullName || user.name || user.displayName || "Student";
 
