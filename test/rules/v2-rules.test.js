@@ -176,6 +176,7 @@ test(
         await assertSucceeds(getDoc(doc(student, "publicProfiles/student")));
     }
 );
+
 test("friend preflight permits only caller-bound missing pair documents", async () => {
     const student = environment.authenticatedContext("student").firestore();
     const outsider = environment.authenticatedContext("outsider").firestore();
