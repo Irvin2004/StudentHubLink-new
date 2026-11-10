@@ -62,6 +62,16 @@ before(async () => {
             doc(db, "communities/private/channels/general/files/private-file"),
             { communityId: "private", uploadedAt: new Date() }
         );
+        await setDoc(doc(db, "users/student"), {
+            uid: "student",
+            email: "student@example.com",
+            displayName: "Student",
+            role: "student",
+            totalEarnings: 125,
+            totalDownloads: 10,
+            totalUploads: 3,
+            profileVisibility: "public"
+        });
         await setDoc(doc(db, "friends/student_peer"), {
             participantIds: ["student", "peer"],
             requestId: "student_peer",
@@ -80,6 +90,28 @@ before(async () => {
             { contentType: "application/pdf" }
         );
     });
+});
+
+
+test("users cannot change private identity or server-managed account totals", async () => {
+    const db = environment.authenticatedContext("student").firestore();
+    const user = doc(db, "users/student");
+
+    await assertSucceeds(
+        setDoc(user, { displayName: "Updated Student" }, { merge: true })
+    );
+    await assertFails(
+        setDoc(user, { email: "attacker@example.com" }, { merge: true })
+    );
+    await assertFails(
+        setDoc(user, { totalEarnings: 999999 }, { merge: true })
+    );
+    await assertFails(
+        setDoc(user, { totalDownloads: 999999 }, { merge: true })
+    );
+    await assertFails(
+        setDoc(user, { totalUploads: 999999 }, { merge: true })
+    );
 });
 
 test("friend preflight permits only caller-bound missing pair documents", async () => {
