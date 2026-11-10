@@ -128,6 +128,38 @@ After deployment, confirm the Firestore indexes report `READY` before running
 community, resource-library, or dashboard smoke tests. Collection-group indexes
 can remain unavailable briefly while Firestore backfills them.
 
+## Existing-user public profile migration
+
+Before releasing the private `users/{uid}` read restriction, create public
+profile projections for existing accounts. The Admin SDK migration script
+creates only missing `publicProfiles/{uid}` documents. It copies an explicit
+allowlist of presentation fields and never copies email, role, account status,
+or financial totals. Existing public profile documents are left untouched.
+
+Use an operator workstation or trusted deployment environment with Node.js 20,
+the installed Functions dependencies, and Application Default Credentials for
+the intended Firebase project. The identity must have permission to read
+`users` and create `publicProfiles` documents.
+
+First run a dry run (the default; it performs no writes):
+
+```bash
+npm --prefix functions ci
+npm --prefix functions run migrate:public-profiles -- --project=YOUR_FIREBASE_PROJECT_ID
+```
+
+Review the project ID and the missing-profile count. Only after confirming the
+target project and reviewing the dry-run output, run the migration explicitly:
+
+```bash
+npm --prefix functions run migrate:public-profiles -- --project=YOUR_FIREBASE_PROJECT_ID --apply
+```
+
+The script is safe to re-run: it creates missing documents and skips profiles
+that already exist. Do not run it against production until the project owner
+has approved the change and a backup/rollback plan is in place. The migration
+has not been run as part of CI.
+
 Deploy Cloud Functions:
 
 ```bash
