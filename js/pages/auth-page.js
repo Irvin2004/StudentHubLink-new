@@ -61,10 +61,31 @@ export async function getUserDocument(user) {
     const snapshot = await getDoc(userRef);
 
     if (snapshot.exists()) {
-        return {
+        const existingProfile = {
             id: snapshot.id,
             ...snapshot.data()
         };
+        // Backfill this account's safe public projection on its next authenticated
+        // profile load; never copy private fields from /users into /publicProfiles.
+        await setDoc(
+            doc(db, "publicProfiles", user.uid),
+            {
+                name: existingProfile.name || existingProfile.fullName || user.displayName || "Student",
+                fullName: existingProfile.fullName || existingProfile.name || user.displayName || "Student",
+                displayName: existingProfile.displayName || existingProfile.fullName || existingProfile.name || user.displayName || "Student",
+                photoURL: existingProfile.photoURL || user.photoURL || "",
+                institution: existingProfile.institution || "",
+                course: existingProfile.course || "",
+                yearOfStudy: existingProfile.yearOfStudy || "",
+                bio: existingProfile.bio || "",
+                profileVisibility: existingProfile.profileVisibility || "public",
+                ...(existingProfile.joinedAt ? { joinedAt: existingProfile.joinedAt } : {}),
+                ...(existingProfile.createdAt ? { createdAt: existingProfile.createdAt } : {}),
+                updatedAt: serverTimestamp()
+            },
+            { merge: true }
+        );
+        return existingProfile;
     }
 
     const fallbackProfile = {
