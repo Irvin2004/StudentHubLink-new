@@ -98,7 +98,9 @@ before(async () => {
     });
 });
 
-test("users cannot change private identity or server-managed account totals", async () => {
+test(
+    "users cannot change private identity or server-managed account totals",
+    async () => {
     const db = environment.authenticatedContext("student").firestore();
     const user = doc(db, "users/student");
 
@@ -119,7 +121,9 @@ test("users cannot change private identity or server-managed account totals", as
     );
 });
 
-test("private user documents are readable only by their owner or an admin", async () => {
+test(
+    "private user documents are readable only by their owner or an admin",
+    async () => {
     const owner = environment.authenticatedContext("student").firestore();
     const peer = environment.authenticatedContext("peer").firestore();
     const anonymous = environment.unauthenticatedContext().firestore();
@@ -130,7 +134,9 @@ test("private user documents are readable only by their owner or an admin", asyn
     await assertFails(getDocs(collection(peer, "users")));
 });
 
-test("public profiles expose only allowlisted profile fields and respect visibility", async () => {
+test(
+    "public profiles expose only allowlisted profile fields and respect visibility",
+    async () => {
     const student = environment.authenticatedContext("student").firestore();
     const peer = environment.authenticatedContext("peer").firestore();
     const profile = doc(peer, "publicProfiles/student");
