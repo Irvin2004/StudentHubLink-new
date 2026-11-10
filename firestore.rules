@@ -240,6 +240,37 @@ service cloud.firestore {
         );
     }
 
+    // Public-facing profile data is deliberately separated from private
+    // account documents. Never copy email, role, financial totals, or auth state here.
+    match /publicProfiles/{userId} {
+      allow read: if signedIn()
+        && (
+          isOwner(userId)
+          || isAdmin()
+          || resource.data.get("profileVisibility", "public") == "public"
+        );
+      allow create: if isOwner(userId)
+        && request.resource.data.keys().hasOnly([
+          "displayName", "fullName", "name", "photoURL", "institution",
+          "course", "yearOfStudy", "bio", "profileVisibility",
+          "joinedAt", "createdAt", "updatedAt"
+        ])
+        && request.resource.data.profileVisibility in ["public", "private"]
+        && request.resource.data.displayName is string;
+      allow update: if isOwner(userId)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          "displayName", "fullName", "name", "photoURL", "institution",
+          "course", "yearOfStudy", "bio", "profileVisibility", "updatedAt"
+        ])
+        && request.resource.data.keys().hasOnly([
+          "displayName", "fullName", "name", "photoURL", "institution",
+          "course", "yearOfStudy", "bio", "profileVisibility",
+          "joinedAt", "createdAt", "updatedAt"
+        ])
+        && request.resource.data.profileVisibility in ["public", "private"];
+      allow delete: if isOwner(userId);
+    }
+
     match /users/{userId} {
       allow read: if signedIn()
         && (
