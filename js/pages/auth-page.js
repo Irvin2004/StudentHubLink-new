@@ -70,17 +70,34 @@ export async function getUserDocument(user) {
         await setDoc(
             doc(db, "publicProfiles", user.uid),
             {
-                name: existingProfile.name || existingProfile.fullName || user.displayName || "Student",
-                fullName: existingProfile.fullName || existingProfile.name || user.displayName || "Student",
-                displayName: existingProfile.displayName || existingProfile.fullName || existingProfile.name || user.displayName || "Student",
+                name:
+                    existingProfile.name ||
+                    existingProfile.fullName ||
+                    user.displayName ||
+                    "Student",
+                fullName:
+                    existingProfile.fullName ||
+                    existingProfile.name ||
+                    user.displayName ||
+                    "Student",
+                displayName:
+                    existingProfile.displayName ||
+                    existingProfile.fullName ||
+                    existingProfile.name ||
+                    user.displayName ||
+                    "Student",
                 photoURL: existingProfile.photoURL || user.photoURL || "",
                 institution: existingProfile.institution || "",
                 course: existingProfile.course || "",
                 yearOfStudy: existingProfile.yearOfStudy || "",
                 bio: existingProfile.bio || "",
                 profileVisibility: existingProfile.profileVisibility || "public",
-                ...(existingProfile.joinedAt ? { joinedAt: existingProfile.joinedAt } : {}),
-                ...(existingProfile.createdAt ? { createdAt: existingProfile.createdAt } : {}),
+                ...(existingProfile.joinedAt
+                    ? { joinedAt: existingProfile.joinedAt }
+                    : {}),
+                ...(existingProfile.createdAt
+                    ? { createdAt: existingProfile.createdAt }
+                    : {}),
                 updatedAt: serverTimestamp()
             },
             { merge: true }
@@ -271,20 +288,25 @@ function bindProfileActions(user, userData) {
                     updatedAt: serverTimestamp()
                 };
                 await Promise.all([
-                    setDoc(doc(db, "users", user.uid), {
-                        name: fullName,
-                        fullName,
-                        displayName: fullName,
-                        institution,
-                        course,
-                        yearOfStudy,
-                        bio,
-                        updatedAt: serverTimestamp()
-                    },
-                    { merge: true }),
-                    setDoc(doc(db, "publicProfiles", user.uid), publicProfileUpdates, {
-                        merge: true
-                    })
+                    setDoc(
+                        doc(db, "users", user.uid),
+                        {
+                            name: fullName,
+                            fullName,
+                            displayName: fullName,
+                            institution,
+                            course,
+                            yearOfStudy,
+                            bio,
+                            updatedAt: serverTimestamp()
+                        },
+                        { merge: true }
+                    ),
+                    setDoc(
+                        doc(db, "publicProfiles", user.uid),
+                        publicProfileUpdates,
+                        { merge: true }
+                    )
                 ]);
 
                 Object.assign(userData, {
@@ -461,8 +483,14 @@ if (registerForm) {
                     updatedAt: newUserProfile.updatedAt
                 };
                 await Promise.all([
-                    setDoc(doc(db, "users", userCredential.user.uid), newUserProfile),
-                    setDoc(doc(db, "publicProfiles", userCredential.user.uid), newPublicProfile)
+                    setDoc(
+                        doc(db, "users", userCredential.user.uid),
+                        newUserProfile
+                    ),
+                    setDoc(
+                        doc(db, "publicProfiles", userCredential.user.uid),
+                        newPublicProfile
+                    )
                 ]);
 
                 setMessage(
