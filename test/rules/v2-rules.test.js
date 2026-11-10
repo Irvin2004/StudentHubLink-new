@@ -101,81 +101,81 @@ before(async () => {
 test(
     "users cannot change private identity or server-managed account totals",
     async () => {
-    const db = environment.authenticatedContext("student").firestore();
-    const user = doc(db, "users/student");
+        const db = environment.authenticatedContext("student").firestore();
+        const user = doc(db, "users/student");
 
-    await assertSucceeds(
-        setDoc(user, { displayName: "Updated Student" }, { merge: true })
-    );
-    await assertFails(
-        setDoc(user, { email: "attacker@example.com" }, { merge: true })
-    );
-    await assertFails(
-        setDoc(user, { totalEarnings: 999999 }, { merge: true })
-    );
-    await assertFails(
-        setDoc(user, { totalDownloads: 999999 }, { merge: true })
-    );
-    await assertFails(
-        setDoc(user, { totalUploads: 999999 }, { merge: true })
-    );
-});
+        await assertSucceeds(
+            setDoc(user, { displayName: "Updated Student" }, { merge: true })
+        );
+        await assertFails(
+            setDoc(user, { email: "attacker@example.com" }, { merge: true })
+        );
+        await assertFails(
+            setDoc(user, { totalEarnings: 999999 }, { merge: true })
+        );
+        await assertFails(
+            setDoc(user, { totalDownloads: 999999 }, { merge: true })
+        );
+        await assertFails(
+            setDoc(user, { totalUploads: 999999 }, { merge: true })
+        );
+    }
+);
 
 test(
     "private user documents are readable only by their owner or an admin",
     async () => {
-    const owner = environment.authenticatedContext("student").firestore();
-    const peer = environment.authenticatedContext("peer").firestore();
-    const anonymous = environment.unauthenticatedContext().firestore();
+        const owner = environment.authenticatedContext("student").firestore();
+        const peer = environment.authenticatedContext("peer").firestore();
+        const anonymous = environment.unauthenticatedContext().firestore();
 
-    await assertSucceeds(getDoc(doc(owner, "users/student")));
-    await assertFails(getDoc(doc(peer, "users/student")));
-    await assertFails(getDoc(doc(anonymous, "users/student")));
-    await assertFails(getDocs(collection(peer, "users")));
-});
+        await assertSucceeds(getDoc(doc(owner, "users/student")));
+        await assertFails(getDoc(doc(peer, "users/student")));
+        await assertFails(getDoc(doc(anonymous, "users/student")));
+        await assertFails(getDocs(collection(peer, "users")));
+    }
+);
 
 test(
     "public profiles expose only allowlisted profile fields and respect visibility",
     async () => {
-    const student = environment.authenticatedContext("student").firestore();
-    const peer = environment.authenticatedContext("peer").firestore();
-    const profile = doc(peer, "publicProfiles/student");
+        const student = environment.authenticatedContext("student").firestore();
+        const peer = environment.authenticatedContext("peer").firestore();
+        const profile = doc(peer, "publicProfiles/student");
 
-    await assertSucceeds(getDoc(profile));
-    await assertSucceeds(
-        setDoc(
-            doc(student, "publicProfiles/student"),
-            { displayName: "Updated Student" },
-            { merge: true }
-        )
-    );
-    await assertFails(
-        setDoc(
-            doc(student, "publicProfiles/student"),
-            { email: "student@example.com" },
-            { merge: true }
-        )
-    );
-    await assertFails(
-        setDoc(doc(student, "publicProfiles/forged"), {
-            displayName: "Forged",
-            email: "private@example.com",
-            profileVisibility: "public"
-        })
-    );
-    await assertSucceeds(
-        setDoc(
-            doc(student, "publicProfiles/student"),
-            { profileVisibility: "private" },
-            { merge: true }
-        )
-    );
-    await assertFails(getDoc(profile));
-    await assertSucceeds(
-        getDoc(doc(student, "publicProfiles/student"))
-    );
-});
-
+        await assertSucceeds(getDoc(profile));
+        await assertSucceeds(
+            setDoc(
+                doc(student, "publicProfiles/student"),
+                { displayName: "Updated Student" },
+                { merge: true }
+            )
+        );
+        await assertFails(
+            setDoc(
+                doc(student, "publicProfiles/student"),
+                { email: "student@example.com" },
+                { merge: true }
+            )
+        );
+        await assertFails(
+            setDoc(doc(student, "publicProfiles/forged"), {
+                displayName: "Forged",
+                email: "private@example.com",
+                profileVisibility: "public"
+            })
+        );
+        await assertSucceeds(
+            setDoc(
+                doc(student, "publicProfiles/student"),
+                { profileVisibility: "private" },
+                { merge: true }
+            )
+        );
+        await assertFails(getDoc(profile));
+        await assertSucceeds(getDoc(doc(student, "publicProfiles/student")));
+    }
+);
 test("friend preflight permits only caller-bound missing pair documents", async () => {
     const student = environment.authenticatedContext("student").firestore();
     const outsider = environment.authenticatedContext("outsider").firestore();
