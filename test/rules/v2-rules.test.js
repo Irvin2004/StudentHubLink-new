@@ -177,27 +177,30 @@ test(
     }
 );
 
-test("friend preflight permits only caller-bound missing pair documents", async () => {
-    const student = environment.authenticatedContext("student").firestore();
-    const outsider = environment.authenticatedContext("outsider").firestore();
-
-    for (const collectionName of ["friends", "friendRequests"]) {
-        await assertSucceeds(
-            getDoc(doc(student, `${collectionName}/student_newpeer`))
-        );
-        await assertSucceeds(
-            getDoc(doc(student, `${collectionName}/newpeer_student`))
-        );
-        await assertSucceeds(
-            getDoc(doc(student, `${collectionName}/student_peer`))
-        );
-        await assertFails(getDoc(doc(student, `${collectionName}/other_pair`)));
-        await assertFails(
-            getDoc(doc(outsider, `${collectionName}/student_newpeer`))
-        );
-        await assertFails(getDocs(collection(student, collectionName)));
+test(
+    "friend preflight permits only caller-bound missing pair documents",
+    async () => {
+        const student = environment.authenticatedContext("student").firestore();
+        const outsider = environment.authenticatedContext("outsider").firestore();
+    
+        for (const collectionName of ["friends", "friendRequests"]) {
+            await assertSucceeds(
+                getDoc(doc(student, `${collectionName}/student_newpeer`))
+            );
+            await assertSucceeds(
+                getDoc(doc(student, `${collectionName}/newpeer_student`))
+            );
+            await assertSucceeds(
+                getDoc(doc(student, `${collectionName}/student_peer`))
+            );
+            await assertFails(getDoc(doc(student, `${collectionName}/other_pair`)));
+            await assertFails(
+                getDoc(doc(outsider, `${collectionName}/student_newpeer`))
+            );
+            await assertFails(getDocs(collection(student, collectionName)));
+        }
     }
-});
+);
 after(async () => {
     await environment?.cleanup();
 });
@@ -219,12 +222,16 @@ test(
             );
         await assertSucceeds(getDocs(files(communities)));
         await assertFails(getDocs(files(["community-0", "private"])));
-        await assertFails(getDocs(query(collectionGroup(db, "files"), limit(30))));
+        await assertFails(
+            getDocs(query(collectionGroup(db, "files"), limit(30)))
+        );
         await assertFails(
             getDocs(
                 query(
                     collectionGroup(
-                        environment.authenticatedContext("outsider").firestore(),
+                        environment
+                            .authenticatedContext("outsider")
+                            .firestore(),
                         "files"
                     ),
                     where("communityId", "==", "community-0")
@@ -245,47 +252,50 @@ test(
     }
 );
 
-test("file fields cannot forge access to another community or namespace", async () => {
-    const db = environment.authenticatedContext("student").firestore();
-    const data = {
-        name: "notes.pdf",
-        filename: "notes.pdf",
-        normalizedFilename: "notes.pdf",
-        originalName: "notes.pdf",
-        extension: "pdf",
-        size: 1,
-        type: "application/pdf",
-        url: "https://example.invalid/notes.pdf",
-        storagePath:
-            "communities/community-0/channels/general/files/forged/notes.pdf",
-        uploadedByName: "Student",
-        messageId: null,
-        tags: [],
-        communityId: "community-0",
-        channelId: "general",
-        uploadedBy: "student",
-        uploadedAt: serverTimestamp()
-    };
-    await assertSucceeds(
-        setDoc(
-            doc(db, "communities/community-0/channels/general/files/forged"),
-            data
-        )
-    );
-    await assertFails(
-        setDoc(
-            doc(db, "communities/private/channels/general/files/forged"),
-            data
-        )
-    );
-    await assertFails(setDoc(doc(db, "unrelated/root/files/forged"), data));
-    await assertFails(
-        setDoc(
-            doc(db, "communities/community-0/channels/general/files/forged"),
-            { ...data, communityId: "private" }
-        )
-    );
-});
+test(
+    "file fields cannot forge access to another community or namespace",
+    async () => {
+        const db = environment.authenticatedContext("student").firestore();
+        const data = {
+            name: "notes.pdf",
+            filename: "notes.pdf",
+            normalizedFilename: "notes.pdf",
+            originalName: "notes.pdf",
+            extension: "pdf",
+            size: 1,
+            type: "application/pdf",
+            url: "https://example.invalid/notes.pdf",
+            storagePath:
+                "communities/community-0/channels/general/files/forged/notes.pdf",
+            uploadedByName: "Student",
+            messageId: null,
+            tags: [],
+            communityId: "community-0",
+            channelId: "general",
+            uploadedBy: "student",
+            uploadedAt: serverTimestamp()
+        };
+        await assertSucceeds(
+            setDoc(
+                doc(db, "communities/community-0/channels/general/files/forged"),
+                data
+            )
+        );
+        await assertFails(
+            setDoc(
+                doc(db, "communities/private/channels/general/files/forged"),
+                data
+            )
+        );
+        await assertFails(setDoc(doc(db, "unrelated/root/files/forged"), data));
+        await assertFails(
+            setDoc(
+                doc(db, "communities/community-0/channels/general/files/forged"),
+                { ...data, communityId: "private" }
+            )
+        );
+    }
+);
 
 test(
     "retired marketplace objects allow owner recovery but deny public access and new uploads",
@@ -297,11 +307,16 @@ test(
             )
         );
         await assertFails(
-            getMetadata(ref(environment.unauthenticatedContext().storage(), path))
+            getMetadata(
+                ref(environment.unauthenticatedContext().storage(), path)
+            )
         );
         await assertFails(
             getMetadata(
-                ref(environment.authenticatedContext("outsider").storage(), path)
+                ref(
+                    environment.authenticatedContext("outsider").storage(),
+                    path
+                )
             )
         );
         await assertFails(
@@ -317,80 +332,86 @@ test(
     }
 );
 
-test("a rejected generated quiz batch persists no partial parent or questions", async () => {
-    const db = environment.authenticatedContext("student").firestore();
-    const parent = doc(db, "users/student/quizzes/generated");
-    const child = doc(db, "users/student/quizzes/generated/questions/one");
-    const save = (prompt) => {
-        const batch = writeBatch(db);
-        batch.set(parent, {
-            title: "Biology",
-            subject: "Biology",
-            questionCount: 1,
-            createdAt: serverTimestamp(),
-            updatedAt: serverTimestamp()
-        });
-        batch.set(child, {
-            prompt,
-            options: ["A", "B", "C", "D"],
-            correctOptionIndex: 0,
-            position: 0,
-            createdAt: serverTimestamp(),
-            updatedAt: serverTimestamp()
-        });
-        return batch.commit();
-    };
-    await assertFails(save(""));
-    const empty = await getDoc(parent);
-    if (empty.exists()) throw new Error("Rejected batch left a parent behind");
-    await assertSucceeds(save("What is a cell?"));
-    await assertSucceeds(getDoc(child));
-    await assertFails(
-        getDoc(
-            doc(
-                environment.authenticatedContext("outsider").firestore(),
-                parent.path
+test(
+    "a rejected generated quiz batch persists no partial parent or questions",
+    async () => {
+        const db = environment.authenticatedContext("student").firestore();
+        const parent = doc(db, "users/student/quizzes/generated");
+        const child = doc(db, "users/student/quizzes/generated/questions/one");
+        const save = (prompt) => {
+            const batch = writeBatch(db);
+            batch.set(parent, {
+                title: "Biology",
+                subject: "Biology",
+                questionCount: 1,
+                createdAt: serverTimestamp(),
+                updatedAt: serverTimestamp()
+            });
+            batch.set(child, {
+                prompt,
+                options: ["A", "B", "C", "D"],
+                correctOptionIndex: 0,
+                position: 0,
+                createdAt: serverTimestamp(),
+                updatedAt: serverTimestamp()
+            });
+            return batch.commit();
+        };
+        await assertFails(save(""));
+        const empty = await getDoc(parent);
+        if (empty.exists()) throw new Error("Rejected batch left a parent behind");
+        await assertSucceeds(save("What is a cell?"));
+        await assertSucceeds(getDoc(child));
+        await assertFails(
+            getDoc(
+                doc(
+                    environment.authenticatedContext("outsider").firestore(),
+                    parent.path
+                )
             )
-        )
-    );
-});
+        );
+    }
+);
 
-test("a rejected generated flashcard batch leaves no deck and can be retried", async () => {
-    const db = environment.authenticatedContext("student").firestore();
-    const parent = doc(db, "users/student/flashcardDecks/generated");
-    const card = doc(db, parent.path + "/cards/one");
-    const save = (back) => {
-        const batch = writeBatch(db);
-        batch.set(parent, {
-            title: "Biology",
-            subject: "Biology",
-            createdAt: serverTimestamp(),
-            updatedAt: serverTimestamp()
-        });
-        batch.set(card, {
-            front: "What is a cell?",
-            back,
-            reviewCount: 0,
-            easeRating: null,
-            lastReviewedAt: null,
-            nextReviewAt: serverTimestamp(),
-            createdAt: serverTimestamp(),
-            updatedAt: serverTimestamp()
-        });
-        return batch.commit();
-    };
-    await assertFails(save(""));
-    if ((await getDoc(parent)).exists())
-        throw new Error("Rejected batch left a deck behind");
-    await assertSucceeds(save("The basic unit of life."));
-    if (!(await getDoc(card)).exists())
-        throw new Error("Successful batch omitted the card");
-    await assertFails(
-        getDoc(
-            doc(
-                environment.authenticatedContext("outsider").firestore(),
-                card.path
+test(
+    "a rejected generated flashcard batch leaves no deck and can be retried",
+    async () => {
+        const db = environment.authenticatedContext("student").firestore();
+        const parent = doc(db, "users/student/flashcardDecks/generated");
+        const card = doc(db, parent.path + "/cards/one");
+        const save = (back) => {
+            const batch = writeBatch(db);
+            batch.set(parent, {
+                title: "Biology",
+                subject: "Biology",
+                createdAt: serverTimestamp(),
+                updatedAt: serverTimestamp()
+            });
+            batch.set(card, {
+                front: "What is a cell?",
+                back,
+                reviewCount: 0,
+                easeRating: null,
+                lastReviewedAt: null,
+                nextReviewAt: serverTimestamp(),
+                createdAt: serverTimestamp(),
+                updatedAt: serverTimestamp()
+            });
+            return batch.commit();
+        };
+        await assertFails(save(""));
+        if ((await getDoc(parent)).exists())
+            throw new Error("Rejected batch left a deck behind");
+        await assertSucceeds(save("The basic unit of life."));
+        if (!(await getDoc(card)).exists())
+            throw new Error("Successful batch omitted the card");
+        await assertFails(
+            getDoc(
+                doc(
+                    environment.authenticatedContext("outsider").firestore(),
+                    card.path
+                )
             )
-        )
-    );
-});
+        );
+    }
+);
