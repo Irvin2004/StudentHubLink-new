@@ -374,3 +374,4 @@ test("a rejected generated flashcard batch leaves no deck and can be retried", a
             )
         )
     );
+});
