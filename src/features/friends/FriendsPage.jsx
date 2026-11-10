@@ -16,7 +16,7 @@ function PersonCard({ actions, person, subtitle }) {
             <Avatar name={person.displayName} src={person.photoURL} />
             <div className={styles.personCopy}>
                 <h3>{person.displayName}</h3>
-                <p>{subtitle || person.email || "StudentHub student"}</p>
+                <p>{subtitle || "StudentHub student"}</p>
             </div>
             <div className={styles.actions}>{actions}</div>
         </article>
@@ -226,7 +226,7 @@ export default function FriendsPage() {
                 >
                     <div>
                         <h2 id="find-people-title">Find people</h2>
-                        <p>Search by display name or exact email address.</p>
+                        <p>Search for students by display name.</p>
                     </div>
                     <form
                         className={styles.searchForm}
@@ -236,11 +236,11 @@ export default function FriendsPage() {
                         }}
                     >
                         <Input
-                            label="Student name or email"
+                            label="Student name"
                             onChange={(event) =>
                                 setSearchTerm(event.target.value)
                             }
-                            placeholder="e.g. Alex or alex@example.com"
+                            placeholder="e.g. Alex"
                             type="search"
                             value={searchTerm}
                         />
