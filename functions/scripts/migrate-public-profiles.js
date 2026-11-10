@@ -68,7 +68,10 @@ async function migrate() {
             if (APPLY) {
                 batch.create(
                     publicRefs[index],
-                    toPublicProfile(userDoc.data(), FieldValue.serverTimestamp())
+                    toPublicProfile(
+                        userDoc.data(),
+                        FieldValue.serverTimestamp()
+                    )
                 );
                 pageWrites += 1;
             }
@@ -87,7 +90,7 @@ async function migrate() {
         if (usersPage.size < PAGE_SIZE) break;
     }
 
-    console.log("\\nMigration summary");
+    console.log("\nMigration summary");
     console.log(`Project: ${projectId}`);
     console.log(`Private user documents scanned: ${scanned}`);
     console.log(`Public profiles already present: ${alreadyPresent}`);
@@ -96,7 +99,7 @@ async function migrate() {
 
     if (!APPLY && missing > 0) {
         console.log(
-            "\\nDry run only. Re-run with --apply to create the missing public profiles."
+            "\nDry run only. Re-run with --apply to create the missing public profiles."
         );
     }
 }
