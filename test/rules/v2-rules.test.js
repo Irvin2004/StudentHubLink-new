@@ -98,7 +98,6 @@ before(async () => {
     });
 });
 
-
 test("users cannot change private identity or server-managed account totals", async () => {
     const db = environment.authenticatedContext("student").firestore();
     const user = doc(db, "users/student");
@@ -119,8 +118,6 @@ test("users cannot change private identity or server-managed account totals", as
         setDoc(user, { totalUploads: 999999 }, { merge: true })
     );
 });
-
-
 
 test("private user documents are readable only by their owner or an admin", async () => {
     const owner = environment.authenticatedContext("student").firestore();
