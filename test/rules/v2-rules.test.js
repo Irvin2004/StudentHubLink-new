@@ -202,7 +202,9 @@ after(async () => {
     await environment?.cleanup();
 });
 
-test("member can query ten communities but cannot include a forbidden community", async () => {
+test(
+    "member can query ten communities but cannot include a forbidden community",
+    async () => {
     const db = environment.authenticatedContext("student").firestore();
     const communities = Array.from(
         { length: 10 },
@@ -284,7 +286,9 @@ test("file fields cannot forge access to another community or namespace", async 
     );
 });
 
-test("retired marketplace objects allow owner recovery but deny public access and new uploads", async () => {
+test(
+    "retired marketplace objects allow owner recovery but deny public access and new uploads",
+    async () => {
     const path = "resources/student/legacy.pdf";
     await assertSucceeds(
         getMetadata(
