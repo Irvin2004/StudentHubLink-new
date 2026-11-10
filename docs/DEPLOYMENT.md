@@ -130,8 +130,8 @@ can remain unavailable briefly while Firestore backfills them.
 
 ## Existing-user public profile migration
 
-Before releasing the private `users/{uid}` read restriction, create public profile
-projections for existing accounts. The Admin SDK migration script creates only
+Before releasing the private `users/{uid}` read restriction, create public
+profile projections for existing accounts. The Admin SDK migration script creates only
 missing `publicProfiles/{uid}` documents. It copies an explicit allowlist of
 presentation fields and never copies email, role, account status, or financial
 totals. Existing public profile documents are left untouched.
