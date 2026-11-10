@@ -1,6 +1,5 @@
 import { collection, getDocs, limit, query, where } from "firebase/firestore";
 
-import { COLLECTIONS } from "../config/firestore.js";
 import { db } from "../../src/firebase/firestore.js";
 
 export async function getUsers() {
