@@ -57,5 +57,10 @@ jobs:
             - name: Install dependencies
               run: npm ci
 
+            - name: Temporary Prettier diagnostic
+              run: |
+                  npx prettier test/rules/v2-rules.test.js --write
+                  cat test/rules/v2-rules.test.js
+
             - name: Run complete quality gate
               run: npm run check
