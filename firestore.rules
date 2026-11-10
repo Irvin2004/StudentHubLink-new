@@ -272,13 +272,10 @@ service cloud.firestore {
     }
 
     match /users/{userId} {
-      allow read: if signedIn()
-        && (
-          isOwner(userId)
-          || isAdmin()
-          || isFriend(userId)
-          || resource.data.get("profileVisibility", "public") == "public"
-        );
+      // Private account documents contain email, role, settings, and
+      // financial/account activity. Public profile consumers must use
+      // /publicProfiles instead.
+      allow read: if isOwner(userId) || isAdmin();
       allow create: if isOwner(userId)
         && request.resource.data.uid == userId
         && request.resource.data.role == "student";
