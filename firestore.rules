@@ -251,9 +251,20 @@ service cloud.firestore {
       allow create: if isOwner(userId)
         && request.resource.data.uid == userId
         && request.resource.data.role == "student";
+      // Clients may edit profile preferences, but never account identity,
+      // authentication, financial totals, or server-maintained activity data.
       allow update: if isOwner(userId)
         && request.resource.data.role == resource.data.role
-        && request.resource.data.uid == resource.data.uid;
+        && request.resource.data.uid == resource.data.uid
+        && !request.resource.data.diff(resource.data).affectedKeys().hasAny([
+          "email",
+          "totalEarnings",
+          "totalDownloads",
+          "totalUploads",
+          "lastLoginAt",
+          "accountStatus",
+          "isVerified"
+        ]);
       allow delete: if isOwner(userId);
     }
 
