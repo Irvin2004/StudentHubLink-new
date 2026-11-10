@@ -205,44 +205,45 @@ after(async () => {
 test(
     "member can query ten communities but cannot include a forbidden community",
     async () => {
-    const db = environment.authenticatedContext("student").firestore();
-    const communities = Array.from(
-        { length: 10 },
-        (_, index) => `community-${index}`
-    );
-    const files = (ids) =>
-        query(
-            collectionGroup(db, "files"),
-            where("communityId", "in", ids),
-            orderBy("uploadedAt", "desc"),
-            limit(30)
+        const db = environment.authenticatedContext("student").firestore();
+        const communities = Array.from(
+            { length: 10 },
+            (_, index) => `community-${index}`
         );
-    await assertSucceeds(getDocs(files(communities)));
-    await assertFails(getDocs(files(["community-0", "private"])));
-    await assertFails(getDocs(query(collectionGroup(db, "files"), limit(30))));
-    await assertFails(
-        getDocs(
+        const files = (ids) =>
             query(
-                collectionGroup(
-                    environment.authenticatedContext("outsider").firestore(),
-                    "files"
-                ),
-                where("communityId", "==", "community-0")
+                collectionGroup(db, "files"),
+                where("communityId", "in", ids),
+                orderBy("uploadedAt", "desc"),
+                limit(30)
+            );
+        await assertSucceeds(getDocs(files(communities)));
+        await assertFails(getDocs(files(["community-0", "private"])));
+        await assertFails(getDocs(query(collectionGroup(db, "files"), limit(30))));
+        await assertFails(
+            getDocs(
+                query(
+                    collectionGroup(
+                        environment.authenticatedContext("outsider").firestore(),
+                        "files"
+                    ),
+                    where("communityId", "==", "community-0")
+                )
             )
-        )
-    );
-    await assertFails(
-        getDocs(
-            query(
-                collectionGroup(
-                    environment.unauthenticatedContext().firestore(),
-                    "files"
-                ),
-                where("communityId", "==", "community-0")
+        );
+        await assertFails(
+            getDocs(
+                query(
+                    collectionGroup(
+                        environment.unauthenticatedContext().firestore(),
+                        "files"
+                    ),
+                    where("communityId", "==", "community-0")
+                )
             )
-        )
-    );
-});
+        );
+    }
+);
 
 test("file fields cannot forge access to another community or namespace", async () => {
     const db = environment.authenticatedContext("student").firestore();
@@ -289,31 +290,32 @@ test("file fields cannot forge access to another community or namespace", async 
 test(
     "retired marketplace objects allow owner recovery but deny public access and new uploads",
     async () => {
-    const path = "resources/student/legacy.pdf";
-    await assertSucceeds(
-        getMetadata(
-            ref(environment.authenticatedContext("student").storage(), path)
-        )
-    );
-    await assertFails(
-        getMetadata(ref(environment.unauthenticatedContext().storage(), path))
-    );
-    await assertFails(
-        getMetadata(
-            ref(environment.authenticatedContext("outsider").storage(), path)
-        )
-    );
-    await assertFails(
-        uploadBytes(
-            ref(
-                environment.authenticatedContext("student").storage(),
-                "resources/student/new.pdf"
-            ),
-            new Uint8Array([1]),
-            { contentType: "application/pdf" }
-        )
-    );
-});
+        const path = "resources/student/legacy.pdf";
+        await assertSucceeds(
+            getMetadata(
+                ref(environment.authenticatedContext("student").storage(), path)
+            )
+        );
+        await assertFails(
+            getMetadata(ref(environment.unauthenticatedContext().storage(), path))
+        );
+        await assertFails(
+            getMetadata(
+                ref(environment.authenticatedContext("outsider").storage(), path)
+            )
+        );
+        await assertFails(
+            uploadBytes(
+                ref(
+                    environment.authenticatedContext("student").storage(),
+                    "resources/student/new.pdf"
+                ),
+                new Uint8Array([1]),
+                { contentType: "application/pdf" }
+            )
+        );
+    }
+);
 
 test("a rejected generated quiz batch persists no partial parent or questions", async () => {
     const db = environment.authenticatedContext("student").firestore();
