@@ -121,6 +121,18 @@ test("users cannot change private identity or server-managed account totals", as
 });
 
 
+
+test("private user documents are readable only by their owner or an admin", async () => {
+    const owner = environment.authenticatedContext("student").firestore();
+    const peer = environment.authenticatedContext("peer").firestore();
+    const anonymous = environment.unauthenticatedContext().firestore();
+
+    await assertSucceeds(getDoc(doc(owner, "users/student")));
+    await assertFails(getDoc(doc(peer, "users/student")));
+    await assertFails(getDoc(doc(anonymous, "users/student")));
+    await assertFails(getDocs(collection(peer, "users")));
+});
+
 test("public profiles expose only allowlisted profile fields and respect visibility", async () => {
     const student = environment.authenticatedContext("student").firestore();
     const peer = environment.authenticatedContext("peer").firestore();
