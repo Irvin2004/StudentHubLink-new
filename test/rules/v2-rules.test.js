@@ -181,7 +181,9 @@ test(
     "friend preflight permits only caller-bound missing pair documents",
     async () => {
         const student = environment.authenticatedContext("student").firestore();
-        const outsider = environment.authenticatedContext("outsider").firestore();
+        const outsider = environment
+            .authenticatedContext("outsider")
+            .firestore();
     
         for (const collectionName of ["friends", "friendRequests"]) {
             await assertSucceeds(
@@ -193,7 +195,9 @@ test(
             await assertSucceeds(
                 getDoc(doc(student, `${collectionName}/student_peer`))
             );
-            await assertFails(getDoc(doc(student, `${collectionName}/other_pair`)));
+            await assertFails(
+                getDoc(doc(student, `${collectionName}/other_pair`))
+            );
             await assertFails(
                 getDoc(doc(outsider, `${collectionName}/student_newpeer`))
             );
@@ -277,7 +281,10 @@ test(
         };
         await assertSucceeds(
             setDoc(
-                doc(db, "communities/community-0/channels/general/files/forged"),
+                doc(
+                    db,
+                    "communities/community-0/channels/general/files/forged"
+                ),
                 data
             )
         );
@@ -290,7 +297,10 @@ test(
         await assertFails(setDoc(doc(db, "unrelated/root/files/forged"), data));
         await assertFails(
             setDoc(
-                doc(db, "communities/community-0/channels/general/files/forged"),
+                doc(
+                    db,
+                    "communities/community-0/channels/general/files/forged"
+                ),
                 { ...data, communityId: "private" }
             )
         );
@@ -359,7 +369,8 @@ test(
         };
         await assertFails(save(""));
         const empty = await getDoc(parent);
-        if (empty.exists()) throw new Error("Rejected batch left a parent behind");
+        if (empty.exists())
+            throw new Error("Rejected batch left a parent behind");
         await assertSucceeds(save("What is a cell?"));
         await assertSucceeds(getDoc(child));
         await assertFails(
