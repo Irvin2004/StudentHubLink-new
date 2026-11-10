@@ -5,7 +5,7 @@ import { db } from "../../src/firebase/firestore.js";
 
 export async function getUsers() {
     const publicUsersQuery = query(
-        collection(db, COLLECTIONS.USERS),
+        collection(db, "publicProfiles"),
         where("profileVisibility", "==", "public"),
         limit(100)
     );
