@@ -106,5 +106,30 @@ export async function getUserProfile(userId) {
             { merge: true }
         );
     }
+
+    // Existing accounts are migrated when their owner next signs in. Only
+    // allowlisted presentation fields are projected; private account fields
+    // (email, role, settings, and financial totals) never leave /users.
+    const displayName = String(
+        profile.displayName || profile.fullName || profile.name || "Student"
+    );
+    await setDoc(
+        doc(db, "publicProfiles", userId),
+        {
+            displayName,
+            fullName: profile.fullName || displayName,
+            name: profile.name || displayName,
+            photoURL: profile.photoURL || null,
+            institution: profile.institution || "",
+            course: profile.course || "",
+            yearOfStudy: profile.yearOfStudy || "",
+            bio: profile.bio || "",
+            profileVisibility: profile.profileVisibility,
+            ...(profile.joinedAt ? { joinedAt: profile.joinedAt } : {}),
+            ...(profile.createdAt ? { createdAt: profile.createdAt } : {}),
+            updatedAt: serverTimestamp()
+        },
+        { merge: true }
+    );
     return profile;
 }
