@@ -91,7 +91,8 @@ export async function getUserDocument(user) {
                 course: existingProfile.course || "",
                 yearOfStudy: existingProfile.yearOfStudy || "",
                 bio: existingProfile.bio || "",
-                profileVisibility: existingProfile.profileVisibility || "public",
+                profileVisibility:
+                    existingProfile.profileVisibility || "public",
                 ...(existingProfile.joinedAt
                     ? { joinedAt: existingProfile.joinedAt }
                     : {}),
