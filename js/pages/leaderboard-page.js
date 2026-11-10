@@ -2,7 +2,6 @@ import {
     collection,
     getDocs,
     limit,
-    orderBy,
     query,
     where
 } from "firebase/firestore";
@@ -16,8 +15,8 @@ import { SKELETON_TYPES } from "../config/skeleton-types.js";
 
 async function getTopContributors() {
     const contributorsQuery = query(
-        collection(db, "users"),
-        orderBy("totalUploads", "desc"),
+        collection(db, "publicProfiles"),
+        where("profileVisibility", "==", "public"),
         limit(10)
     );
 
@@ -69,8 +68,7 @@ function renderTopContributors(users) {
             return createLeaderboardItem({
                 href: `user-profile.html?id=${encodeURIComponent(user.id)}`,
                 label: name,
-                meta: `${Number(user.totalUploads || 0)} uploads`,
-                rank: index + 1
+                meta: "Community contributor"
             });
         })
         .join("");
