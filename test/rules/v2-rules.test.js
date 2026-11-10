@@ -72,6 +72,12 @@ before(async () => {
             totalUploads: 3,
             profileVisibility: "public"
         });
+        await setDoc(doc(db, "publicProfiles/student"), {
+            displayName: "Student",
+            fullName: "Student",
+            photoURL: "",
+            profileVisibility: "public"
+        });
         await setDoc(doc(db, "friends/student_peer"), {
             participantIds: ["student", "peer"],
             requestId: "student_peer",
@@ -111,6 +117,47 @@ test("users cannot change private identity or server-managed account totals", as
     );
     await assertFails(
         setDoc(user, { totalUploads: 999999 }, { merge: true })
+    );
+});
+
+
+test("public profiles expose only allowlisted profile fields and respect visibility", async () => {
+    const student = environment.authenticatedContext("student").firestore();
+    const peer = environment.authenticatedContext("peer").firestore();
+    const profile = doc(peer, "publicProfiles/student");
+
+    await assertSucceeds(getDoc(profile));
+    await assertSucceeds(
+        setDoc(
+            doc(student, "publicProfiles/student"),
+            { displayName: "Updated Student" },
+            { merge: true }
+        )
+    );
+    await assertFails(
+        setDoc(
+            doc(student, "publicProfiles/student"),
+            { email: "student@example.com" },
+            { merge: true }
+        )
+    );
+    await assertFails(
+        setDoc(doc(student, "publicProfiles/forged"), {
+            displayName: "Forged",
+            email: "private@example.com",
+            profileVisibility: "public"
+        })
+    );
+    await assertSucceeds(
+        setDoc(
+            doc(student, "publicProfiles/student"),
+            { profileVisibility: "private" },
+            { merge: true }
+        )
+    );
+    await assertFails(getDoc(profile));
+    await assertSucceeds(
+        getDoc(doc(student, "publicProfiles/student"))
     );
 });
 
