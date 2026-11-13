@@ -2,9 +2,11 @@
 
 function firstString(...values) {
     return (
-        values.find(
-            (value) => typeof value === "string" && value.trim().length > 0
-        )?.trim() || ""
+        values
+            .find(
+                (value) => typeof value === "string" && value.trim().length > 0
+            )
+            ?.trim() || ""
     );
 }
 
