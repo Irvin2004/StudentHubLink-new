@@ -3,7 +3,9 @@ import assert from "node:assert/strict";
 import { createRequire } from "node:module";
 
 const require = createRequire(import.meta.url);
-const { toPublicProfile } = require("../functions/scripts/public-profile-migration.js");
+const {
+    toPublicProfile
+} = require("../functions/scripts/public-profile-migration.js");
 
 test("copies only approved presentation fields", () => {
     const timestamp = { sentinel: "server timestamp" };
