@@ -1,10 +1,9 @@
-"use strict";
+import test from "node:test";
+import assert from "node:assert/strict";
+import { createRequire } from "node:module";
 
-const test = require("node:test");
-const assert = require("node:assert/strict");
-const {
-    toPublicProfile
-} = require("../functions/scripts/public-profile-migration");
+const require = createRequire(import.meta.url);
+const { toPublicProfile } = require("../functions/scripts/public-profile-migration.js");
 
 test("copies only approved presentation fields", () => {
     const timestamp = { sentinel: "server timestamp" };
