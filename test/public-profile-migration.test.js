@@ -63,6 +63,38 @@ test("defaults missing names and visibility safely", () => {
     assert.equal("role" in profile, false);
 });
 
+test("sanitizes existing public documents while preserving safe user edits", () => {
+    const profile = toPublicProfile(
+        {
+            displayName: "Private source name",
+            institution: "Source University",
+            profileVisibility: "public",
+            email: "private@example.test",
+            role: "student",
+            totalUploads: 12
+        },
+        "server-time",
+        {
+            displayName: "Edited public name",
+            bio: "Public biography",
+            profileVisibility: "private",
+            email: "leaked@example.test",
+            role: "admin",
+            totalEarnings: 500
+        }
+    );
+
+    assert.equal(profile.displayName, "Edited public name");
+    assert.equal(profile.institution, "Source University");
+    assert.equal(profile.bio, "Public biography");
+    assert.equal(profile.profileVisibility, "private");
+    assert.equal(profile.updatedAt, "server-time");
+    assert.equal("email" in profile, false);
+    assert.equal("role" in profile, false);
+    assert.equal("totalUploads" in profile, false);
+    assert.equal("totalEarnings" in profile, false);
+});
+
 test("does not copy non-string presentation values", () => {
     const profile = toPublicProfile(
         {
