@@ -130,16 +130,28 @@ can remain unavailable briefly while Firestore backfills them.
 
 ## Existing-user public profile migration
 
-Before releasing the private `users/{uid}` read restriction, create public
-profile projections for existing accounts. The Admin SDK migration script
-creates only missing `publicProfiles/{uid}` documents. It copies an explicit
-allowlist of presentation fields and never copies email, role, account status,
-or financial totals. Existing public profile documents are left untouched.
+**Complete and verify this migration before deploying the Firestore rules that
+restrict reads of `users/{uid}`.** The rules deployment must not precede the
+migration, or existing users without a `publicProfiles/{uid}` projection may
+disappear from public profile, friend-search, and contributor views.
+
+The Admin SDK migration processes every existing `users/{uid}` document. It
+creates missing public projections and sanitizes existing `publicProfiles/{uid}`
+documents by replacing them with an explicit allowlist of presentation fields.
+Existing user-edited public values and private visibility settings are retained
+when valid. Fields such as email, role, account status, and financial totals are
+never copied into the public projection. The script does not delete orphan
+public-profile documents that have no corresponding private user document.
 
 Use an operator workstation or trusted deployment environment with Node.js 20,
 the installed Functions dependencies, and Application Default Credentials for
 the intended Firebase project. The identity must have permission to read `users`
-and create `publicProfiles` documents.
+and create/update `publicProfiles` documents.
+
+During the migration, pause profile-editing traffic or run in a controlled
+maintenance window so the operator can review a stable result. The migration
+uses transactions to re-read each private and public profile before writing,
+which protects against ordinary concurrent profile edits.
 
 First run a dry run (the default; it performs no writes):
 
@@ -148,17 +160,20 @@ npm --prefix functions ci
 npm --prefix functions run migrate:public-profiles -- --project=YOUR_FIREBASE_PROJECT_ID
 ```
 
-Review the project ID and the missing-profile count. Only after confirming the
-target project and reviewing the dry-run output, run the migration explicitly:
+Review the exact project ID and the counts of existing and missing profiles.
+The dry run does not inspect or change production data. Then, only after the
+project owner approves the target, backup, and maintenance window, run:
 
 ```bash
 npm --prefix functions run migrate:public-profiles -- --project=YOUR_FIREBASE_PROJECT_ID --apply
 ```
 
-The script is safe to re-run: it creates missing documents and skips profiles
-that already exist. Do not run it against production until the project owner has
-approved the change and a backup/rollback plan is in place. The migration has
-not been run as part of CI.
+After applying, rerun the dry run and independently verify that every user has
+a public profile, profile visibility is correct, and no public profile contains
+private keys. Only then deploy the Firestore rules and release the matching
+frontend. Do not run this against production until the project owner has
+approved the change and a backup/rollback plan is in place. CI never runs the
+migration, and it has not been run against production.
 
 Deploy Cloud Functions:
 
