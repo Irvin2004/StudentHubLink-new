@@ -10,31 +10,35 @@ function firstString(...values) {
     );
 }
 
-function toPublicProfile(user, serverTimestamp) {
+function toPublicProfile(user, serverTimestamp, existingProfile = {}) {
+    // Prefer fields users have already edited in their public projection, but
+    // copy only the explicit allowlist below. This also strips legacy/private
+    // keys if an existing publicProfiles document contains them.
+    const source = { ...user, ...existingProfile };
     const displayName = firstString(
-        user.displayName,
-        user.fullName,
-        user.name,
+        source.displayName,
+        source.fullName,
+        source.name,
         "Student"
     );
 
     return {
         displayName,
-        fullName: firstString(user.fullName, displayName),
-        name: firstString(user.name, displayName),
-        photoURL: typeof user.photoURL === "string" ? user.photoURL : "",
+        fullName: firstString(source.fullName, displayName),
+        name: firstString(source.name, displayName),
+        photoURL: typeof source.photoURL === "string" ? source.photoURL : "",
         institution:
-            typeof user.institution === "string" ? user.institution : "",
-        course: typeof user.course === "string" ? user.course : "",
+            typeof source.institution === "string" ? source.institution : "",
+        course: typeof source.course === "string" ? source.course : "",
         yearOfStudy:
-            typeof user.yearOfStudy === "string" ? user.yearOfStudy : "",
-        bio: typeof user.bio === "string" ? user.bio : "",
+            typeof source.yearOfStudy === "string" ? source.yearOfStudy : "",
+        bio: typeof source.bio === "string" ? source.bio : "",
         profileVisibility:
-            user.profileVisibility === "private" ? "private" : "public",
-        ...(user.joinedAt || user.createdAt
-            ? { joinedAt: user.joinedAt || user.createdAt }
+            source.profileVisibility === "private" ? "private" : "public",
+        ...(source.joinedAt || source.createdAt
+            ? { joinedAt: source.joinedAt || source.createdAt }
             : {}),
-        ...(user.createdAt ? { createdAt: user.createdAt } : {}),
+        ...(source.createdAt ? { createdAt: source.createdAt } : {}),
         updatedAt: serverTimestamp
     };
 }
