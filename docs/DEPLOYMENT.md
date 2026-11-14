@@ -131,7 +131,8 @@ can remain unavailable briefly while Firestore backfills them.
 ## Existing-user public profile migration
 
 **Important:** Complete and verify this migration before deploying the Firestore
-rules that restrict reads of `users/{uid}`. The rules deployment must not precede
+rules that restrict reads of `users/{uid}`. The rules deployment must not
+precede
 the migration, or existing users without a `publicProfiles/{uid}` projection may
 disappear from public profile, friend-search, and contributor views.
 
