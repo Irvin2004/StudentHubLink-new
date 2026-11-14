@@ -58,6 +58,7 @@ beforeEach(() => {
 test("shows friends and removes with confirmation", () => {
     render(<FriendsPage />);
     expect(screen.getByRole("heading", { name: "Sam Friend" })).toBeVisible();
+    expect(screen.queryByText("sam@test.dev")).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Remove" }));
     expect(window.confirm).toHaveBeenCalled();
     expect(friends.remove).toHaveBeenCalledWith(friends.friends[0]);
@@ -78,7 +79,7 @@ test("accepts, declines, and cancels friend requests", () => {
 test("searches for people from the Find People tab", () => {
     render(<FriendsPage />);
     fireEvent.click(screen.getByRole("button", { name: "Find People" }));
-    fireEvent.change(screen.getByLabelText("Student name or email"), {
+    fireEvent.change(screen.getByLabelText("Student name"), {
         target: { value: "Alex" }
     });
     fireEvent.click(screen.getByRole("button", { name: "Search" }));

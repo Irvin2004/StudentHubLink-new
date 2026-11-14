@@ -312,9 +312,11 @@ test("adds and removes active Thuto study materials without mixing sets", async 
             ])
         })
     );
-    expect(
-        screen.getByRole("textbox", { name: "Study context" }).value
-    ).toContain("Study material 2: Algebra sheet");
+    await waitFor(() =>
+        expect(
+            screen.getByRole("textbox", { name: "Study context" }).value
+        ).toContain("Study material 2: Algebra sheet")
+    );
 
     fireEvent.click(
         screen.getByRole("button", { name: "Remove Motion notes" })

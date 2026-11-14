@@ -240,20 +240,59 @@ service cloud.firestore {
         );
     }
 
-    match /users/{userId} {
+    // Public-facing profile data is deliberately separated from private
+    // account documents. Never copy email, role, financial totals, or auth state here.
+    match /publicProfiles/{userId} {
       allow read: if signedIn()
         && (
           isOwner(userId)
           || isAdmin()
-          || isFriend(userId)
           || resource.data.get("profileVisibility", "public") == "public"
         );
       allow create: if isOwner(userId)
+        && request.resource.data.keys().hasOnly([
+          "displayName", "fullName", "name", "photoURL", "institution",
+          "course", "yearOfStudy", "bio", "profileVisibility",
+          "joinedAt", "createdAt", "updatedAt"
+        ])
+        && request.resource.data.profileVisibility in ["public", "private"]
+        && request.resource.data.displayName is string;
+      allow update: if isOwner(userId)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          "displayName", "fullName", "name", "photoURL", "institution",
+          "course", "yearOfStudy", "bio", "profileVisibility", "updatedAt"
+        ])
+        && request.resource.data.keys().hasOnly([
+          "displayName", "fullName", "name", "photoURL", "institution",
+          "course", "yearOfStudy", "bio", "profileVisibility",
+          "joinedAt", "createdAt", "updatedAt"
+        ])
+        && request.resource.data.profileVisibility in ["public", "private"];
+      allow delete: if isOwner(userId);
+    }
+
+    match /users/{userId} {
+      // Private account documents contain email, role, settings, and
+      // financial/account activity. Public profile consumers must use
+      // /publicProfiles instead.
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId)
         && request.resource.data.uid == userId
         && request.resource.data.role == "student";
+      // Clients may edit profile preferences, but never account identity,
+      // authentication, financial totals, or server-maintained activity data.
       allow update: if isOwner(userId)
         && request.resource.data.role == resource.data.role
-        && request.resource.data.uid == resource.data.uid;
+        && request.resource.data.uid == resource.data.uid
+        && !request.resource.data.diff(resource.data).affectedKeys().hasAny([
+          "email",
+          "totalEarnings",
+          "totalDownloads",
+          "totalUploads",
+          "lastLoginAt",
+          "accountStatus",
+          "isVerified"
+        ]);
       allow delete: if isOwner(userId);
     }
 
