@@ -5,12 +5,12 @@ Hosting to publish the generated `dist/` directory.
 
 ## Prerequisites
 
-- Node.js 20 or newer
-- npm
-- Firebase CLI
-- access to the target Firebase project
-- production `VITE_FIREBASE_*` values
-- a billing-enabled project when deploying Cloud Functions that require it
+  Node.js 20 or newer
+  npm
+  Firebase CLI
+  access to the target Firebase project
+  production `VITE_FIREBASE_*` values
+  a billing-enabled project when deploying Cloud Functions that require it
 
 ## Validate a release
 
@@ -62,12 +62,12 @@ Open [http://127.0.0.1:4173](http://127.0.0.1:4173).
 
 Smoke-test these canonical routes at desktop and mobile widths before release:
 
-- `/app`
-- `/app/communities` and `/community/{id}/channel/{channelId}`
-- `/app/chat` and `/app/friends`
-- `/app/resources`
-- `/app/study-planner`, `/app/flashcards`, and `/app/quizzes`
-- `/app/notifications` and `/app/settings`
+  `/app`
+  `/app/communities` and `/community/{id}/channel/{channelId}`
+  `/app/chat` and `/app/friends`
+  `/app/resources`
+  `/app/study-planner`, `/app/flashcards`, and `/app/quizzes`
+  `/app/notifications` and `/app/settings`
 
 Verify `/app/files`, `/resources`, and `/community/{id}` redirect without
 dropping query parameters. Firebase Hosting's catch-all rewrite must continue to
@@ -78,14 +78,14 @@ send direct client-route requests to `/index.html`.
 `.github/workflows/deploy.yml` provides a manually dispatched production
 workflow. Configure a protected GitHub environment named `production` with:
 
-- `FIREBASE_SERVICE_ACCOUNT`
-- `VITE_FIREBASE_API_KEY`
-- `VITE_FIREBASE_AUTH_DOMAIN`
-- `VITE_FIREBASE_PROJECT_ID`
-- `VITE_FIREBASE_STORAGE_BUCKET`
-- `VITE_FIREBASE_MESSAGING_SENDER_ID`
-- `VITE_FIREBASE_APP_ID`
-- `VITE_FIREBASE_MEASUREMENT_ID`
+  `FIREBASE_SERVICE_ACCOUNT`
+  `VITE_FIREBASE_API_KEY`
+  `VITE_FIREBASE_AUTH_DOMAIN`
+  `VITE_FIREBASE_PROJECT_ID`
+  `VITE_FIREBASE_STORAGE_BUCKET`
+  `VITE_FIREBASE_MESSAGING_SENDER_ID`
+  `VITE_FIREBASE_APP_ID`
+  `VITE_FIREBASE_MEASUREMENT_ID`
 
 `FIREBASE_SERVICE_ACCOUNT` contains the complete service-account JSON used by
 the official Firebase Hosting action. Limit repository and environment access,
@@ -132,9 +132,9 @@ can remain unavailable briefly while Firestore backfills them.
 
 **Important:** Complete and verify this migration before deploying the Firestore
 rules that restrict reads of `users/{uid}`. The rules deployment must not
-precede the migration, or existing users without a
-`publicProfiles/{uid}` projection may
-disappear from public profile, friend-search, and contributor views.
+precede the migration, or existing users without a `publicProfiles/{uid}`
+projection may disappear from public profile, friend-search, and contributor
+views.
 
 The Admin SDK migration processes every existing `users/{uid}` document. It
 creates missing public projections and sanitizes existing `publicProfiles/{uid}`
@@ -169,8 +169,8 @@ project owner approves the target, backup, and maintenance window, run:
 npm --prefix functions run migrate:public-profiles -- --project=YOUR_FIREBASE_PROJECT_ID --apply
 ```
 
-After applying, rerun the dry run and independently verify that every user has
-a public profile, profile visibility is correct, and no public profile contains
+After applying, rerun the dry run and independently verify that every user has a
+public profile, profile visibility is correct, and no public profile contains
 private keys. Only then deploy the Firestore rules and release the matching
 frontend. Do not run this against production until the project owner has
 approved the change and a backup/rollback plan is in place. CI never runs the
