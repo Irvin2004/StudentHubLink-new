@@ -75,9 +75,7 @@ export async function getUserDocument(user) {
                 ...existingProfile,
                 photoURL: existingProfile.photoURL || user.photoURL || ""
             },
-            publicProfileSnapshot.exists()
-                ? publicProfileSnapshot.data()
-                : {},
+            publicProfileSnapshot.exists() ? publicProfileSnapshot.data() : {},
             serverTimestamp()
         );
         // Replace the document so pre-existing private/unknown fields cannot
