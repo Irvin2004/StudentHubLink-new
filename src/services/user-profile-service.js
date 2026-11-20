@@ -2,6 +2,7 @@ import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
 
 import { db } from "../firebase/index.js";
 import { createUserProfile } from "../models/user-profile.js";
+import { toPublicProfile } from "../utils/public-profile-projection.js";
 
 /**
  * Creates the Firestore profile for a newly authenticated user.
@@ -110,26 +111,14 @@ export async function getUserProfile(userId) {
     // Existing accounts are migrated when their owner next signs in. Only
     // allowlisted presentation fields are projected; private account fields
     // (email, role, settings, and financial totals) never leave /users.
-    const displayName = String(
-        profile.displayName || profile.fullName || profile.name || "Student"
+    const publicProfileRef = doc(db, "publicProfiles", userId);
+    const publicProfileSnapshot = await getDoc(publicProfileRef);
+    const cleanPublicProfile = toPublicProfile(
+        profile,
+        publicProfileSnapshot.exists() ? publicProfileSnapshot.data() : {},
+        serverTimestamp()
     );
-    await setDoc(
-        doc(db, "publicProfiles", userId),
-        {
-            displayName,
-            fullName: profile.fullName || displayName,
-            name: profile.name || displayName,
-            photoURL: profile.photoURL || null,
-            institution: profile.institution || "",
-            course: profile.course || "",
-            yearOfStudy: profile.yearOfStudy || "",
-            bio: profile.bio || "",
-            profileVisibility: profile.profileVisibility,
-            ...(profile.joinedAt ? { joinedAt: profile.joinedAt } : {}),
-            ...(profile.createdAt ? { createdAt: profile.createdAt } : {}),
-            updatedAt: serverTimestamp()
-        },
-        { merge: true }
-    );
+    // Replace the whole document so legacy private/unknown fields are removed.
+    await setDoc(publicProfileRef, cleanPublicProfile);
     return profile;
 }
