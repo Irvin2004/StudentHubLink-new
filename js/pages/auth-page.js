@@ -9,6 +9,7 @@ import { error as logError, warn } from "../utils/logger.js";
 import { showToast } from "../services/user-feedback-service.js";
 import { hideSkeleton, showSkeleton } from "../renderers/skeleton-renderer.js";
 import { SKELETON_TYPES } from "../config/skeleton-types.js";
+import { toPublicProfile } from "../../src/utils/public-profile-projection.js";
 
 import {
     createUserWithEmailAndPassword,
@@ -67,42 +68,21 @@ export async function getUserDocument(user) {
         };
         // Backfill this account's safe public projection on its next authenticated
         // profile load; never copy private fields from /users into /publicProfiles.
-        await setDoc(
-            doc(db, "publicProfiles", user.uid),
+        const publicProfileRef = doc(db, "publicProfiles", user.uid);
+        const publicProfileSnapshot = await getDoc(publicProfileRef);
+        const cleanPublicProfile = toPublicProfile(
             {
-                name:
-                    existingProfile.name ||
-                    existingProfile.fullName ||
-                    user.displayName ||
-                    "Student",
-                fullName:
-                    existingProfile.fullName ||
-                    existingProfile.name ||
-                    user.displayName ||
-                    "Student",
-                displayName:
-                    existingProfile.displayName ||
-                    existingProfile.fullName ||
-                    existingProfile.name ||
-                    user.displayName ||
-                    "Student",
-                photoURL: existingProfile.photoURL || user.photoURL || "",
-                institution: existingProfile.institution || "",
-                course: existingProfile.course || "",
-                yearOfStudy: existingProfile.yearOfStudy || "",
-                bio: existingProfile.bio || "",
-                profileVisibility:
-                    existingProfile.profileVisibility || "public",
-                ...(existingProfile.joinedAt
-                    ? { joinedAt: existingProfile.joinedAt }
-                    : {}),
-                ...(existingProfile.createdAt
-                    ? { createdAt: existingProfile.createdAt }
-                    : {}),
-                updatedAt: serverTimestamp()
+                ...existingProfile,
+                photoURL: existingProfile.photoURL || user.photoURL || ""
             },
-            { merge: true }
+            publicProfileSnapshot.exists()
+                ? publicProfileSnapshot.data()
+                : {},
+            serverTimestamp()
         );
+        // Replace the document so pre-existing private/unknown fields cannot
+        // remain exposed through the public profile collection.
+        await setDoc(publicProfileRef, cleanPublicProfile);
         return existingProfile;
     }
 
