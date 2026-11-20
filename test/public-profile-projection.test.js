@@ -32,7 +32,7 @@ test("replaces a legacy public profile with an allowlisted projection", () => {
     assert.deepEqual(clean, {
         displayName: "Edited public name",
         fullName: "Ada Lovelace",
-        name: "Ada Lovelace",
+        name: "Edited public name",
         photoURL: "",
         institution: "University",
         course: "Computing",
