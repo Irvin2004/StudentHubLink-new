@@ -72,6 +72,12 @@ before(async () => {
             totalUploads: 3,
             profileVisibility: "public"
         });
+
+        await setDoc(doc(db, "users/admin"), {
+            uid: "admin",
+            email: "admin@example.com",
+            role: "admin"
+        });
         await setDoc(doc(db, "publicProfiles/student"), {
             displayName: "Student",
             fullName: "Student",
@@ -118,9 +124,12 @@ test("users cannot change private identity or server-managed account totals", as
 test("private user documents are readable only by their owner or an admin", async () => {
     const owner = environment.authenticatedContext("student").firestore();
     const peer = environment.authenticatedContext("peer").firestore();
+    const admin = environment.authenticatedContext("admin").firestore();
     const anonymous = environment.unauthenticatedContext().firestore();
 
     await assertSucceeds(getDoc(doc(owner, "users/student")));
+    await assertSucceeds(getDoc(doc(admin, "users/student")));
+    await assertSucceeds(getDocs(collection(admin, "users")));
     await assertFails(getDoc(doc(peer, "users/student")));
     await assertFails(getDoc(doc(anonymous, "users/student")));
     await assertFails(getDocs(collection(peer, "users")));
