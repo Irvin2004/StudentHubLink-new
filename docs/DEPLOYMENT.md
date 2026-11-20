@@ -5,12 +5,9 @@ Hosting to publish the generated `dist/` directory.
 
 ## Prerequisites
 
-  Node.js 20 or newer
-  npm
-  Firebase CLI
-  access to the target Firebase project
-  production `VITE_FIREBASE_*` values
-  a billing-enabled project when deploying Cloud Functions that require it
+Node.js 20 or newer npm Firebase CLI access to the target Firebase project
+production `VITE_FIREBASE_*` values a billing-enabled project when deploying
+Cloud Functions that require it
 
 ## Validate a release
 
@@ -62,12 +59,9 @@ Open [http://127.0.0.1:4173](http://127.0.0.1:4173).
 
 Smoke-test these canonical routes at desktop and mobile widths before release:
 
-  `/app`
-  `/app/communities` and `/community/{id}/channel/{channelId}`
-  `/app/chat` and `/app/friends`
-  `/app/resources`
-  `/app/study-planner`, `/app/flashcards`, and `/app/quizzes`
-  `/app/notifications` and `/app/settings`
+`/app` `/app/communities` and `/community/{id}/channel/{channelId}` `/app/chat`
+and `/app/friends` `/app/resources` `/app/study-planner`, `/app/flashcards`, and
+`/app/quizzes` `/app/notifications` and `/app/settings`
 
 Verify `/app/files`, `/resources`, and `/community/{id}` redirect without
 dropping query parameters. Firebase Hosting's catch-all rewrite must continue to
@@ -78,14 +72,10 @@ send direct client-route requests to `/index.html`.
 `.github/workflows/deploy.yml` provides a manually dispatched production
 workflow. Configure a protected GitHub environment named `production` with:
 
-  `FIREBASE_SERVICE_ACCOUNT`
-  `VITE_FIREBASE_API_KEY`
-  `VITE_FIREBASE_AUTH_DOMAIN`
-  `VITE_FIREBASE_PROJECT_ID`
-  `VITE_FIREBASE_STORAGE_BUCKET`
-  `VITE_FIREBASE_MESSAGING_SENDER_ID`
-  `VITE_FIREBASE_APP_ID`
-  `VITE_FIREBASE_MEASUREMENT_ID`
+`FIREBASE_SERVICE_ACCOUNT` `VITE_FIREBASE_API_KEY` `VITE_FIREBASE_AUTH_DOMAIN`
+`VITE_FIREBASE_PROJECT_ID` `VITE_FIREBASE_STORAGE_BUCKET`
+`VITE_FIREBASE_MESSAGING_SENDER_ID` `VITE_FIREBASE_APP_ID`
+`VITE_FIREBASE_MEASUREMENT_ID`
 
 `FIREBASE_SERVICE_ACCOUNT` contains the complete service-account JSON used by
 the official Firebase Hosting action. Limit repository and environment access,
@@ -161,9 +151,9 @@ npm --prefix functions ci
 npm --prefix functions run migrate:public-profiles -- --project=YOUR_FIREBASE_PROJECT_ID
 ```
 
-Review the exact project ID and the counts of existing and missing profiles.
-The dry run does not inspect or change production data. Then, only after the
-project owner approves the target, backup, and maintenance window, run:
+Review the exact project ID and the counts of existing and missing profiles. The
+dry run does not inspect or change production data. Then, only after the project
+owner approves the target, backup, and maintenance window, run:
 
 ```bash
 npm --prefix functions run migrate:public-profiles -- --project=YOUR_FIREBASE_PROJECT_ID --apply
