@@ -305,7 +305,7 @@ export default function FriendsPage() {
                     ) : (
                         <p className={styles.inlineEmpty}>
                             {searchTerm
-                                ? "No students found yet. Try another name or email."
+                                ? "No students found yet. Try another name."
                                 : "Search results will appear here."}
                         </p>
                     )}
