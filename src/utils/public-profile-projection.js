@@ -65,8 +65,9 @@ export function toPublicProfile(source = {}, existing = {}, updatedAt = null) {
     }
 
     return Object.fromEntries(
-        Object.entries(result).filter(([key]) =>
-            PUBLIC_PROFILE_FIELDS.includes(key) || key === "updatedAt"
+        Object.entries(result).filter(
+            ([key]) =>
+                PUBLIC_PROFILE_FIELDS.includes(key) || key === "updatedAt"
         )
     );
 }
