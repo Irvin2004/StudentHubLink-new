@@ -118,7 +118,7 @@ function normalizeConversation(conversationId, data = {}) {
 export async function getUserProfile(userId) {
     if (!userId) return null;
 
-    const snapshot = await getDoc(doc(db, COLLECTIONS.USERS, userId));
+    const snapshot = await getDoc(doc(db, "publicProfiles", userId));
 
     if (!snapshot.exists()) return null;
 

@@ -9,6 +9,7 @@ import { error as logError, warn } from "../utils/logger.js";
 import { showToast } from "../services/user-feedback-service.js";
 import { hideSkeleton, showSkeleton } from "../renderers/skeleton-renderer.js";
 import { SKELETON_TYPES } from "../config/skeleton-types.js";
+import { toPublicProfile } from "../../src/utils/public-profile-projection.js";
 
 import {
     createUserWithEmailAndPassword,
@@ -61,10 +62,26 @@ export async function getUserDocument(user) {
     const snapshot = await getDoc(userRef);
 
     if (snapshot.exists()) {
-        return {
+        const existingProfile = {
             id: snapshot.id,
             ...snapshot.data()
         };
+        // Backfill this account's safe public projection on its next authenticated
+        // profile load; never copy private fields from /users into /publicProfiles.
+        const publicProfileRef = doc(db, "publicProfiles", user.uid);
+        const publicProfileSnapshot = await getDoc(publicProfileRef);
+        const cleanPublicProfile = toPublicProfile(
+            {
+                ...existingProfile,
+                photoURL: existingProfile.photoURL || user.photoURL || ""
+            },
+            publicProfileSnapshot.exists() ? publicProfileSnapshot.data() : {},
+            serverTimestamp()
+        );
+        // Replace the document so pre-existing private/unknown fields cannot
+        // remain exposed through the public profile collection.
+        await setDoc(publicProfileRef, cleanPublicProfile);
+        return existingProfile;
     }
 
     const fallbackProfile = {
@@ -86,7 +103,23 @@ export async function getUserDocument(user) {
         updatedAt: serverTimestamp()
     };
 
-    await setDoc(userRef, fallbackProfile);
+    await Promise.all([
+        setDoc(userRef, fallbackProfile),
+        setDoc(doc(db, "publicProfiles", user.uid), {
+            name: fallbackProfile.name,
+            fullName: fallbackProfile.fullName,
+            displayName: fallbackProfile.fullName,
+            photoURL: user.photoURL || "",
+            institution: fallbackProfile.institution,
+            course: fallbackProfile.course,
+            yearOfStudy: fallbackProfile.yearOfStudy,
+            bio: fallbackProfile.bio,
+            profileVisibility: fallbackProfile.profileVisibility,
+            joinedAt: fallbackProfile.joinedAt,
+            createdAt: fallbackProfile.createdAt,
+            updatedAt: fallbackProfile.updatedAt
+        })
+    ]);
 
     return fallbackProfile;
 }
@@ -223,20 +256,37 @@ function bindProfileActions(user, userData) {
 
             try {
                 await updateProfile(user, { displayName: fullName });
-                await setDoc(
-                    doc(db, "users", user.uid),
-                    {
-                        name: fullName,
-                        fullName,
-                        displayName: fullName,
-                        institution,
-                        course,
-                        yearOfStudy,
-                        bio,
-                        updatedAt: serverTimestamp()
-                    },
-                    { merge: true }
-                );
+                const publicProfileUpdates = {
+                    name: fullName,
+                    fullName,
+                    displayName: fullName,
+                    institution,
+                    course,
+                    yearOfStudy,
+                    bio,
+                    updatedAt: serverTimestamp()
+                };
+                await Promise.all([
+                    setDoc(
+                        doc(db, "users", user.uid),
+                        {
+                            name: fullName,
+                            fullName,
+                            displayName: fullName,
+                            institution,
+                            course,
+                            yearOfStudy,
+                            bio,
+                            updatedAt: serverTimestamp()
+                        },
+                        { merge: true }
+                    ),
+                    setDoc(
+                        doc(db, "publicProfiles", user.uid),
+                        publicProfileUpdates,
+                        { merge: true }
+                    )
+                ]);
 
                 Object.assign(userData, {
                     name: fullName,
@@ -374,7 +424,7 @@ if (registerForm) {
             }
 
             try {
-                await setDoc(doc(db, "users", userCredential.user.uid), {
+                const newUserProfile = {
                     uid: userCredential.user.uid,
                     name: fullName,
                     fullName: fullName,
@@ -396,7 +446,31 @@ if (registerForm) {
                     createdAt: serverTimestamp(),
                     updatedAt: serverTimestamp(),
                     lastLoginAt: serverTimestamp()
-                });
+                };
+                const newPublicProfile = {
+                    name: fullName,
+                    fullName,
+                    displayName: fullName,
+                    photoURL: "",
+                    institution: "",
+                    course: "",
+                    yearOfStudy: "",
+                    bio: "",
+                    profileVisibility: "public",
+                    joinedAt: newUserProfile.joinedAt,
+                    createdAt: newUserProfile.createdAt,
+                    updatedAt: newUserProfile.updatedAt
+                };
+                await Promise.all([
+                    setDoc(
+                        doc(db, "users", userCredential.user.uid),
+                        newUserProfile
+                    ),
+                    setDoc(
+                        doc(db, "publicProfiles", userCredential.user.uid),
+                        newPublicProfile
+                    )
+                ]);
 
                 setMessage(
                     "registerMessage",

@@ -11,7 +11,6 @@ import { createOrGetConversation } from "../services/conversation-service.js";
 import { RESOURCE_STATUS } from "../utils/constants.js";
 import { setText } from "../utils/dom.js";
 import { handleError } from "../services/user-feedback-service.js";
-import { formatPrice } from "../utils/format-price.js";
 import { showToast } from "../services/user-feedback-service.js";
 
 import {
@@ -35,7 +34,7 @@ async function loadUserProfile() {
         return;
     }
 
-    const userSnap = await getDoc(doc(db, "users", userId));
+    const userSnap = await getDoc(doc(db, "publicProfiles", userId));
 
     if (!userSnap.exists()) {
         document.body.innerHTML = "<p>User does not exist.</p>";
@@ -56,8 +55,6 @@ function renderProfile(userData) {
     setText("profileBio", userData.bio || "No bio yet.");
     setText("profileMeta", userData.course || "StudentHub Member");
     setText("profileAvatar", name.charAt(0).toUpperCase());
-    setText("profileDownloadCount", userData.totalDownloads || 0);
-    setText("profileEarnings", formatPrice(userData.totalEarnings || 0));
 }
 
 async function loadUserResources(profileUserId) {

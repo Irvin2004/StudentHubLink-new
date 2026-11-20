@@ -52,7 +52,6 @@ function profileFromSnapshot(snapshot) {
     return {
         id: snapshot.id,
         displayName: String(data.displayName || "Student"),
-        email: String(data.email || ""),
         photoURL: data.photoURL || null
     };
 }
@@ -61,7 +60,7 @@ async function loadProfiles(userIds) {
     const uniqueIds = [...new Set(userIds.filter(Boolean))];
     const entries = await Promise.all(
         uniqueIds.map(async (userId) => {
-            const snapshot = await getDoc(doc(db, "users", userId));
+            const snapshot = await getDoc(doc(db, "publicProfiles", userId));
             return [
                 userId,
                 snapshot.exists()
@@ -69,7 +68,6 @@ async function loadProfiles(userIds) {
                     : {
                           id: userId,
                           displayName: "Student",
-                          email: "",
                           photoURL: null
                       }
             ];
@@ -151,22 +149,16 @@ export async function searchPeople(userId, searchTerm) {
     const term = String(searchTerm || "").trim();
     if (term.length < 2) return [];
 
-    const users = collection(db, "users");
-    const peopleQuery = term.includes("@")
-        ? query(
-              users,
-              where("email", "==", term.toLowerCase()),
-              where("profileVisibility", "==", "public"),
-              limit(SEARCH_LIMIT)
-          )
-        : query(
-              users,
-              where("profileVisibility", "==", "public"),
-              orderBy("displayName"),
-              startAt(term),
-              endAt(`${term}\uf8ff`),
-              limit(SEARCH_LIMIT)
-          );
+    const users = collection(db, "publicProfiles");
+    if (term.includes("@")) return [];
+    const peopleQuery = query(
+        users,
+        where("profileVisibility", "==", "public"),
+        orderBy("displayName"),
+        startAt(term),
+        endAt(`${term}\uf8ff`),
+        limit(SEARCH_LIMIT)
+    );
     const snapshot = await getDocs(peopleQuery);
     return snapshot.docs
         .filter((item) => item.id !== cleanUserId)
