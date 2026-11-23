@@ -2,6 +2,7 @@ import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
 
 import { db } from "../firebase/index.js";
 import { createUserProfile } from "../models/user-profile.js";
+import { toPublicProfile } from "../utils/public-profile-projection.js";
 
 /**
  * Creates the Firestore profile for a newly authenticated user.
@@ -13,11 +14,26 @@ import { createUserProfile } from "../models/user-profile.js";
 export async function createUserProfileDocument(user, data = {}) {
     const profile = createUserProfile(user, data);
 
-    await setDoc(doc(db, "users", user.uid), {
-        ...profile,
+    const timestamps = {
         updatedAt: serverTimestamp(),
         createdAt: serverTimestamp()
-    });
+    };
+    const publicProfile = {
+        displayName: profile.displayName,
+        fullName: profile.displayName,
+        photoURL: profile.photoURL,
+        profileVisibility: profile.profileVisibility
+    };
+    await Promise.all([
+        setDoc(doc(db, "users", user.uid), {
+            ...profile,
+            ...timestamps
+        }),
+        setDoc(doc(db, "publicProfiles", user.uid), {
+            ...publicProfile,
+            ...timestamps
+        })
+    ]);
 
     return profile;
 }
@@ -54,14 +70,16 @@ export async function updateUserProfileDocument(userId, data = {}) {
         throw new TypeError("At least one profile field is required.");
     }
 
-    await setDoc(
-        doc(db, "users", userId),
-        {
-            ...updates,
-            updatedAt: serverTimestamp()
-        },
-        { merge: true }
-    );
+    const publicUpdates = {
+        ...updates,
+        updatedAt: serverTimestamp()
+    };
+    await Promise.all([
+        setDoc(doc(db, "users", userId), publicUpdates, { merge: true }),
+        setDoc(doc(db, "publicProfiles", userId), publicUpdates, {
+            merge: true
+        })
+    ]);
 
     return updates;
 }
@@ -89,5 +107,18 @@ export async function getUserProfile(userId) {
             { merge: true }
         );
     }
+
+    // Existing accounts are migrated when their owner next signs in. Only
+    // allowlisted presentation fields are projected; private account fields
+    // (email, role, settings, and financial totals) never leave /users.
+    const publicProfileRef = doc(db, "publicProfiles", userId);
+    const publicProfileSnapshot = await getDoc(publicProfileRef);
+    const cleanPublicProfile = toPublicProfile(
+        profile,
+        publicProfileSnapshot.exists() ? publicProfileSnapshot.data() : {},
+        serverTimestamp()
+    );
+    // Replace the whole document so legacy private/unknown fields are removed.
+    await setDoc(publicProfileRef, cleanPublicProfile);
     return profile;
 }
